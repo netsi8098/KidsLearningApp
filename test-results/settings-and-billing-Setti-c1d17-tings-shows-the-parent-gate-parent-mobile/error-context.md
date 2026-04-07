@@ -1,0 +1,206 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - button "🦊 SettingsKid Hi, SettingsKid!" [ref=e6] [cursor=pointer]:
+      - generic [ref=e7]: 🦊
+      - generic [ref=e8]:
+        - generic [ref=e9]: SettingsKid
+        - generic [ref=e10]: Hi, SettingsKid!
+    - generic [ref=e11]:
+      - button "🔍" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 🔍
+      - generic:
+        - generic: 🔥
+        - generic: "1"
+      - generic [ref=e14]:
+        - generic [ref=e15]: ⭐
+        - generic [ref=e16]: "0"
+  - generic [ref=e17]:
+    - generic [ref=e18]:
+      - generic: 🌸
+      - generic: 🌸
+      - generic [ref=e19]:
+        - generic [ref=e22]:
+          - generic [ref=e24]: 🦁
+          - paragraph [ref=e28]: Hi! I missed you! What shall we learn?
+        - generic [ref=e29]:
+          - generic [ref=e30]: 🌸
+          - paragraph [ref=e31]: Spring is here! Explore nature and growth!
+        - button "✨ Today's Pick →" [ref=e32] [cursor=pointer]:
+          - generic [ref=e33]: ✨
+          - generic [ref=e34]: Today's Pick
+          - generic [ref=e35]: →
+    - generic [ref=e37]:
+      - generic [ref=e39]: ✨
+      - paragraph [ref=e41]: New activities just landed! Check them out.
+      - generic [ref=e42]:
+        - button "See what's new" [ref=e43] [cursor=pointer]
+        - button "✕" [ref=e44] [cursor=pointer]
+    - generic [ref=e46]:
+      - heading "Featured This Week ⭐" [level=3] [ref=e47]:
+        - text: Featured This Week
+        - generic [ref=e48]: ⭐
+      - generic [ref=e49]:
+        - button "📖 Story" [ref=e50] [cursor=pointer]:
+          - generic [ref=e53]: 📖
+          - generic [ref=e54]: Story
+        - button "🎨 Colors" [ref=e55] [cursor=pointer]:
+          - generic [ref=e58]: 🎨
+          - generic [ref=e59]: Colors
+        - button "🐾 Animals" [ref=e60] [cursor=pointer]:
+          - generic [ref=e63]: 🐾
+          - generic [ref=e64]: Animals
+    - button "🧠 Getting Started Take a quick assessment to personalize your learning! →" [ref=e65] [cursor=pointer]:
+      - generic [ref=e66]:
+        - generic [ref=e68]: 🧠
+        - generic [ref=e69]:
+          - paragraph [ref=e70]: Getting Started
+          - paragraph [ref=e71]: Take a quick assessment to personalize your learning!
+        - generic [ref=e72]: →
+    - paragraph [ref=e100]: 🕒 Check back tomorrow for new quests!
+    - generic [ref=e101]:
+      - generic [ref=e102]:
+        - heading "Collections" [level=2] [ref=e103]
+        - button "See all →" [ref=e104] [cursor=pointer]
+      - generic [ref=e105]:
+        - button "🚀 Space Week 6 activities · ~45 min" [ref=e106] [cursor=pointer]:
+          - generic [ref=e107]:
+            - generic [ref=e108]: 🚀
+            - paragraph [ref=e109]: Space Week
+            - paragraph [ref=e110]: 6 activities · ~45 min
+        - button "🦁 Animal Adventure 14 activities · ~40 min" [ref=e111] [cursor=pointer]:
+          - generic [ref=e112]:
+            - generic [ref=e113]: 🦁
+            - paragraph [ref=e114]: Animal Adventure
+            - paragraph [ref=e115]: 14 activities · ~40 min
+        - button "👑 Princess & Castles 6 activities · ~35 min" [ref=e116] [cursor=pointer]:
+          - generic [ref=e117]:
+            - generic [ref=e118]: 👑
+            - paragraph [ref=e119]: Princess & Castles
+            - paragraph [ref=e120]: 6 activities · ~35 min
+        - button "🦕 Dino Discovery 5 activities · ~30 min" [ref=e121] [cursor=pointer]:
+          - generic [ref=e122]:
+            - generic [ref=e123]: 🦕
+            - paragraph [ref=e124]: Dino Discovery
+            - paragraph [ref=e125]: 5 activities · ~30 min
+    - generic [ref=e127]:
+      - button "📚 Learn" [ref=e128] [cursor=pointer]:
+        - generic [ref=e130]: 📚
+        - generic [ref=e131]: Learn
+      - button "🎮 Play" [ref=e132] [cursor=pointer]:
+        - generic [ref=e133]: 🎮
+        - generic [ref=e134]: Play
+      - button "🎨 Create" [ref=e135] [cursor=pointer]:
+        - generic [ref=e136]: 🎨
+        - generic [ref=e137]: Create
+      - button "🎧 Listen" [ref=e138] [cursor=pointer]:
+        - generic [ref=e139]: 🎧
+        - generic [ref=e140]: Listen
+      - button "💚 Wellbeing" [ref=e141] [cursor=pointer]:
+        - generic [ref=e142]: 💚
+        - generic [ref=e143]: Wellbeing
+      - button "🌍 Explore" [ref=e144] [cursor=pointer]:
+        - generic [ref=e145]: 🌍
+        - generic [ref=e146]: Explore
+    - generic [ref=e148]:
+      - button "🔤 ABCs" [ref=e149] [cursor=pointer]:
+        - generic [ref=e150]: 🔤
+        - generic [ref=e151]: ABCs
+      - button "🔢 Numbers" [ref=e152] [cursor=pointer]:
+        - generic [ref=e153]: 🔢
+        - generic [ref=e154]: Numbers
+      - button "🎨 Colors" [ref=e155] [cursor=pointer]:
+        - generic [ref=e156]: 🎨
+        - generic [ref=e157]: Colors
+      - button "🔷 Shapes":
+        - generic: 🔷
+        - generic: Shapes
+      - button "🐾 Animals":
+        - generic: 🐾
+        - generic: Animals
+      - button "🧍 Body":
+        - generic: 🧍
+        - generic: Body
+      - button "📚 Lessons":
+        - generic: 📚
+        - generic: Lessons
+      - button "🌍 World":
+        - generic: 🌍
+        - generic: World
+    - generic [ref=e159]:
+      - generic [ref=e160]:
+        - generic [ref=e161]:
+          - img [ref=e162]
+          - generic [ref=e165]: 0%
+        - generic [ref=e166]:
+          - paragraph [ref=e167]: Your Progress
+          - paragraph [ref=e168]: 0 of 104 items learned
+      - generic [ref=e169]:
+        - generic [ref=e170]:
+          - generic [ref=e171]:
+            - img [ref=e172]
+            - generic [ref=e175]: 0%
+          - generic [ref=e176]: Letters
+          - generic [ref=e177]: 0/26
+        - generic [ref=e178]:
+          - generic [ref=e179]:
+            - img [ref=e180]
+            - generic [ref=e183]: 0%
+          - generic [ref=e184]: Numbers
+          - generic [ref=e185]: 0/20
+        - generic [ref=e186]:
+          - generic [ref=e187]:
+            - img [ref=e188]
+            - generic [ref=e191]: 0%
+          - generic [ref=e192]: Colors
+          - generic [ref=e193]: 0/10
+        - generic [ref=e194]:
+          - generic [ref=e195]:
+            - img [ref=e196]
+            - generic [ref=e199]: 0%
+          - generic [ref=e200]: Shapes
+          - generic [ref=e201]: 0/8
+        - generic [ref=e202]:
+          - generic [ref=e203]:
+            - img [ref=e204]
+            - generic [ref=e207]: 0%
+          - generic [ref=e208]: Animals
+          - generic [ref=e209]: 0/12
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - generic [ref=e215]: 0%
+          - generic [ref=e216]: Body
+          - generic [ref=e217]: 0/10
+        - generic [ref=e218]:
+          - generic [ref=e219]:
+            - img [ref=e220]
+            - generic [ref=e223]: 0%
+          - generic [ref=e224]: Quiz
+          - generic [ref=e225]: 0/10
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - img [ref=e228]
+            - generic [ref=e231]: 0%
+          - generic [ref=e232]: Match
+          - generic [ref=e233]: 0/8
+  - generic [ref=e236]:
+    - button "🏆 Rewards" [ref=e237] [cursor=pointer]:
+      - generic [ref=e238]: 🏆
+      - generic [ref=e239]: Rewards
+    - button "📔 Scrapbook" [ref=e240] [cursor=pointer]:
+      - generic [ref=e241]: 📔
+      - generic [ref=e242]: Scrapbook
+    - button "⚙️ Settings" [ref=e243] [cursor=pointer]:
+      - generic [ref=e244]: ⚙️
+      - generic [ref=e245]: Settings
+    - button "📊 Parents" [ref=e246] [cursor=pointer]:
+      - generic [ref=e247]: 📊
+      - generic [ref=e248]: Parents
+  - button "🧠":
+    - generic: 🧠
+  - generic:
+    - generic: Brain Break!
+```

@@ -1,0 +1,179 @@
+# ============================================================
+# Kids Learning App - Docker Compose
+# ============================================================
+# Usage:
+#   Infrastructure only:  docker compose up postgres redis
+#   Full dev stack:       docker compose up
+#   With DB migration:    docker compose --profile setup up
+#   Production build:     docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+# ============================================================
+
+services:
+
+  # ── PostgreSQL Database ────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: kidslearn-postgres
+    environment:
+      POSTGRES_DB: kids_learning
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis Cache & Queue Broker ─────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: kidslearn-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Backend API ────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: build
+    container_name: kidslearn-api
+    command: npx tsx watch src/index.ts
+    volumes:
+      - ./backend/src:/app/src:cached
+      - ./backend/prisma:/app/prisma:cached
+      - api_uploads:/app/uploads
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/kids_learning
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+      PORT: "4000"
+      JWT_SECRET: local-dev-secret-change-in-production
+      CORS_ORIGIN: http://localhost:5173
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_PATH: /app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+
+  # ── BullMQ Workers ────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: build
+    container_name: kidslearn-worker
+    command: npx tsx watch src/worker.ts
+    volumes:
+      - ./backend/src:/app/src:cached
+      - ./backend/prisma:/app/prisma:cached
+      - api_uploads:/app/uploads
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/kids_learning
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_PATH: /app/uploads
+      WORKER_MEDIA_CONCURRENCY: "2"
+      WORKER_AI_CONCURRENCY: "1"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Database Migration (on-demand) ─────────────────────────
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: build
+    container_name: kidslearn-migrate
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/kids_learning
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - setup
+
+  # ── Frontend PWA (development) ─────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    container_name: kidslearn-frontend
+    command: npx vite --host 0.0.0.0
+    volumes:
+      - ./src:/app/src:cached
+      - ./public:/app/public:cached
+      - ./index.html:/app/index.html:cached
+      - ./vite.config.ts:/app/vite.config.ts:cached
+      - ./tsconfig.json:/app/tsconfig.json:cached
+      - ./tsconfig.app.json:/app/tsconfig.app.json:cached
+      - ./tsconfig.node.json:/app/tsconfig.node.json:cached
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:4000
+    depends_on:
+      api:
+        condition: service_healthy
+    profiles:
+      - frontend
+
+  # ── Admin Dashboard (development) ──────────────────────────
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      target: build
+    container_name: kidslearn-admin
+    command: npx vite --host 0.0.0.0 --port 5174
+    volumes:
+      - ./admin/src:/app/src:cached
+      - ./admin/index.html:/app/index.html:cached
+      - ./admin/vite.config.ts:/app/vite.config.ts:cached
+      - ./admin/tsconfig.json:/app/tsconfig.json:cached
+    ports:
+      - "5174:5174"
+    environment:
+      VITE_API_URL: http://localhost:4000
+    depends_on:
+      api:
+        condition: service_healthy
+    profiles:
+      - frontend
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_uploads:
+    driver: local

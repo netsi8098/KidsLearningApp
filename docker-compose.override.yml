@@ -1,0 +1,33 @@
+# ============================================================
+# Development Overrides
+# ============================================================
+# This file is automatically merged with docker-compose.yml
+# when running `docker compose up` (no -f flags needed).
+#
+# It enables hot-reload, debug ports, and verbose logging
+# for local development.
+# ============================================================
+
+services:
+
+  api:
+    environment:
+      # More verbose logging in dev
+      LOG_LEVEL: debug
+      # Disable rate limiting in dev
+      RATE_LIMIT_ENABLED: "false"
+
+  worker:
+    environment:
+      LOG_LEVEL: debug
+
+  postgres:
+    # Expose logs for debugging
+    command: >
+      postgres
+        -c log_statement=all
+        -c log_min_duration_statement=200
+
+  redis:
+    # Enable keyspace notifications for debugging
+    command: redis-server --notify-keyspace-events KEA

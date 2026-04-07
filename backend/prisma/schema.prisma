@@ -1,0 +1,1365 @@
+// ── Prisma Schema for Kids Learning Backend ──────────────
+// Covers all 18 backend systems: Auth, Content CMS, Tags,
+// Assets, Curriculum, Collections, Releases, QA, Reviews,
+// AI Briefs, Story Pipeline, Illustration, Prompts, Voice,
+// Localization, Dedup, Experiments, Analytics, Offline Packs,
+// Licensed Content Governance
+// + v7: Audit, Permissions, Skills, Household, System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Auth ──────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(viewer)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contents       Content[]
+  reviews        Review[]
+  reviewComments ReviewComment[]
+  briefs         Brief[]
+  releases       Release[]
+  experiments    Experiment[]
+}
+
+enum Role {
+  admin
+  editor
+  reviewer
+  viewer
+}
+
+// ── Core Content ──────────────────────────────────────────
+
+model Content {
+  id                String        @id @default(uuid())
+  slug              String        @unique
+  type              ContentType
+  title             String
+  emoji             String        @default("")
+  description       String        @default("")
+  body              Json          @default("{}")
+  status            ContentStatus @default(draft)
+  accessTier        AccessTier    @default(free)
+  ageGroup          AgeGroup      @default(all)
+  difficulty        Difficulty?
+  energyLevel       EnergyLevel?
+  durationMinutes   Int?
+  route             String?
+  authorId          String?
+  author            User?         @relation(fields: [authorId], references: [id])
+  publishedAt       DateTime?
+  scheduledAt       DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  version           Int           @default(1)
+  // v7 additions
+  deletedAt         DateTime?
+  updatedBy         String?
+  featured          Boolean       @default(false)
+  archivedAt        DateTime?
+  mood              String?
+  bedtimeFriendly   Boolean       @default(false)
+  language          String        @default("en")
+  publishedSnapshot Json?
+
+  tags               ContentTag[]
+  assets             Asset[]
+  reviews            Review[]
+  releases           Release[]
+  qaResults          QAResult[]
+  analytics          ContentAnalytics[]
+  translations       Translation[]
+  storySteps         StoryStep[]
+  illustrationJobs   IllustrationJob[]
+  voiceJobs          VoiceJob[]
+  curriculumItems    CurriculumItem[]
+  collectionItems    CollectionItem[]
+  similarA           SimilarContent[]    @relation("SimilarA")
+  similarB           SimilarContent[]    @relation("SimilarB")
+  licensedRights     LicensedRight[]
+  experimentVariants ExperimentVariant[]
+  offlinePackItems   OfflinePackItem[]
+  skills             ContentSkill[]
+  // v8: Content Lifecycle (Feature 9)
+  freshnessScore     Float?
+  evergreenScore     Float?
+  seasonalRelevance  Json?
+  needsRefresh       Boolean       @default(false)
+  lastRefreshDate    DateTime?
+  nextReviewDate     DateTime?
+  pipelineEvents     ContentPipelineEvent[]
+  policyResults      PolicyResult[]
+
+  @@index([type, status])
+  @@index([ageGroup])
+  @@index([status, publishedAt])
+  @@index([authorId, deletedAt])
+}
+
+enum ContentType {
+  alphabet
+  number
+  color
+  shape
+  animal
+  bodypart
+  lesson
+  story
+  video
+  game
+  audio
+  cooking
+  movement
+  homeactivity
+  explorer
+  lifeskill
+  coloring
+  emotion
+  quiz
+  collection
+  playlist
+}
+
+enum ContentStatus {
+  draft
+  review
+  approved
+  scheduled
+  published
+  archived
+}
+
+enum AccessTier {
+  free
+  premium
+}
+
+enum AgeGroup {
+  age_2_3
+  age_3_4
+  age_4_5
+  age_5_6
+  all
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+enum EnergyLevel {
+  calm
+  moderate
+  active
+}
+
+// ── Tags ──────────────────────────────────────────────────
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  dimension String    // age, level, duration, energy, skill, mood, theme, subject
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  contents ContentTag[]
+}
+
+model ContentTag {
+  contentId String
+  tagId     String
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, tagId])
+}
+
+// ── Assets / Media ────────────────────────────────────────
+
+model Asset {
+  id         String    @id @default(uuid())
+  contentId  String?
+  content    Content?  @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  filename   String
+  storageKey String    @unique
+  mimeType   String
+  sizeBytes  Int
+  width      Int?
+  height     Int?
+  alt        String?
+  metadata   Json      @default("{}")
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+  updatedBy  String?
+
+  variants AssetVariant[]
+
+  @@index([contentId, mimeType])
+}
+
+model AssetVariant {
+  id         String @id @default(uuid())
+  assetId    String
+  asset      Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  variantKey String // thumbnail, 2x, webp, etc.
+  storageKey String @unique
+  mimeType   String
+  sizeBytes  Int
+  width      Int?
+  height     Int?
+
+  @@unique([assetId, variantKey])
+}
+
+// ── Curriculum ────────────────────────────────────────────
+
+model Curriculum {
+  id          String    @id @default(uuid())
+  title       String
+  description String    @default("")
+  ageGroup    AgeGroup
+  version     Int       @default(1)
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  updatedBy   String?
+
+  units CurriculumUnit[]
+}
+
+model CurriculumUnit {
+  id           String     @id @default(uuid())
+  curriculumId String
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  title        String
+  description  String     @default("")
+  orderIndex   Int
+  createdAt    DateTime   @default(now())
+
+  items CurriculumItem[]
+}
+
+model CurriculumItem {
+  id         String         @id @default(uuid())
+  unitId     String
+  unit       CurriculumUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  contentId  String
+  content    Content        @relation(fields: [contentId], references: [id])
+  orderIndex Int
+  required   Boolean        @default(true)
+
+  @@unique([unitId, contentId])
+}
+
+// ── Collections ───────────────────────────────────────────
+
+model Collection {
+  id               String    @id @default(uuid())
+  title            String
+  slug             String    @unique
+  emoji            String    @default("")
+  description      String    @default("")
+  coverColor       String    @default("#FFD93D")
+  ageGroup         AgeGroup  @default(all)
+  estimatedMinutes Int       @default(0)
+  sequential       Boolean   @default(false)
+  published        Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  updatedBy        String?
+
+  items CollectionItem[]
+}
+
+model CollectionItem {
+  id           String     @id @default(uuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  contentId    String
+  content      Content    @relation(fields: [contentId], references: [id])
+  orderIndex   Int
+
+  @@unique([collectionId, contentId])
+}
+
+// ── Releases ──────────────────────────────────────────────
+
+model Release {
+  id          String        @id @default(uuid())
+  contentId   String
+  content     Content       @relation(fields: [contentId], references: [id])
+  action      ReleaseAction
+  status      ReleaseStatus @default(pending)
+  scheduledAt DateTime?
+  executedAt  DateTime?
+  createdBy   String
+  creator     User          @relation(fields: [createdBy], references: [id])
+  notes       String?
+  createdAt   DateTime      @default(now())
+
+  @@index([status, scheduledAt])
+  @@index([createdBy])
+}
+
+enum ReleaseAction {
+  publish
+  unpublish
+  archive
+  feature
+  unfeature
+}
+
+enum ReleaseStatus {
+  pending
+  scheduled
+  executing
+  completed
+  failed
+  cancelled
+}
+
+// ── QA ────────────────────────────────────────────────────
+
+model QAResult {
+  id        String   @id @default(uuid())
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id])
+  checkName String
+  category  String
+  passed    Boolean
+  severity  String   // error, warning, info
+  message   String?
+  autoFix   Boolean  @default(false)
+  runAt     DateTime @default(now())
+
+  @@index([contentId, runAt])
+}
+
+// ── Reviews ───────────────────────────────────────────────
+
+model Review {
+  id         String       @id @default(uuid())
+  contentId  String
+  content    Content      @relation(fields: [contentId], references: [id])
+  reviewerId String
+  reviewer   User         @relation(fields: [reviewerId], references: [id])
+  status     ReviewStatus @default(pending)
+  summary    String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  comments ReviewComment[]
+
+  @@index([contentId, status])
+  @@index([reviewerId])
+}
+
+enum ReviewStatus {
+  pending
+  in_progress
+  approved
+  changes_requested
+  rejected
+}
+
+model ReviewComment {
+  id        String   @id @default(uuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  field     String?  // which content field the comment targets
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ── AI Brief ──────────────────────────────────────────────
+
+model Brief {
+  id               String      @id @default(uuid())
+  title            String
+  type             ContentType
+  ageGroup         AgeGroup
+  description      String
+  objectives       Json        @default("[]")
+  constraints      Json        @default("{}")
+  generatedContent Json?
+  status           BriefStatus @default(draft)
+  createdBy        String
+  creator          User        @relation(fields: [createdBy], references: [id])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  deletedAt        DateTime?
+}
+
+enum BriefStatus {
+  draft
+  generating
+  generated
+  accepted
+  rejected
+}
+
+// ── Story Pipeline ────────────────────────────────────────
+
+model StoryStep {
+  id         String   @id @default(uuid())
+  contentId  String
+  content    Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  step       String   // outline, draft, review, illustration, voiceover, assembly
+  status     String   @default("pending")
+  data       Json     @default("{}")
+  orderIndex Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ── Illustration ──────────────────────────────────────────
+
+model IllustrationJob {
+  id        String   @id @default(uuid())
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id])
+  prompt    String
+  style     String   @default("flat-vector")
+  status    String   @default("pending") // pending, generating, review, approved, rejected
+  resultUrl String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── Prompt Registry ───────────────────────────────────────
+
+model Prompt {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  category    String    // story, illustration, brief, voice, qa
+  template    String
+  variables   Json      @default("[]")
+  version     Int       @default(1)
+  isActive    Boolean   @default(true)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  usageLog PromptUsage[]
+}
+
+model PromptUsage {
+  id         String   @id @default(uuid())
+  promptId   String
+  prompt     Prompt   @relation(fields: [promptId], references: [id])
+  input      Json
+  output     Json
+  tokensUsed Int?
+  latencyMs  Int?
+  createdAt  DateTime @default(now())
+}
+
+// ── Voice Pipeline ────────────────────────────────────────
+
+model VoiceJob {
+  id           String   @id @default(uuid())
+  contentId    String
+  content      Content  @relation(fields: [contentId], references: [id])
+  script       String
+  voiceProfile String   @default("narrator")
+  status       String   @default("pending") // pending, rendering, review, approved
+  audioUrl     String?
+  durationMs   Int?
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ── Localization ──────────────────────────────────────────
+
+model Translation {
+  id         String   @id @default(uuid())
+  contentId  String
+  content    Content  @relation(fields: [contentId], references: [id])
+  locale     String   // en, es, fr, am
+  field      String   // title, description, body
+  value      String
+  status     String   @default("draft") // draft, translated, reviewed, published
+  translator String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([contentId, locale, field])
+  @@index([locale, status])
+}
+
+// ── Dedup / Similarity ────────────────────────────────────
+
+model SimilarContent {
+  id         String  @id @default(uuid())
+  contentAId String
+  contentBId String
+  contentA   Content @relation("SimilarA", fields: [contentAId], references: [id])
+  contentB   Content @relation("SimilarB", fields: [contentBId], references: [id])
+  score      Float
+  method     String  // title-similarity, tag-overlap, content-hash
+
+  @@unique([contentAId, contentBId])
+  @@index([score])
+}
+
+// ── Experiments / A-B Testing ─────────────────────────────
+
+model Experiment {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  status      ExperimentStatus @default(draft)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdBy   String
+  creator     User             @relation(fields: [createdBy], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  variants ExperimentVariant[]
+  results  ExperimentResult[]
+}
+
+enum ExperimentStatus {
+  draft
+  running
+  paused
+  completed
+  cancelled
+}
+
+model ExperimentVariant {
+  id           String     @id @default(uuid())
+  experimentId String
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  name         String
+  contentId    String?
+  content      Content?   @relation(fields: [contentId], references: [id])
+  weight       Float      @default(0.5)
+  config       Json       @default("{}")
+
+  results ExperimentResult[]
+}
+
+model ExperimentResult {
+  id           String            @id @default(uuid())
+  experimentId String
+  experiment   Experiment        @relation(fields: [experimentId], references: [id])
+  variantId    String
+  variant      ExperimentVariant @relation(fields: [variantId], references: [id])
+  metric       String
+  value        Float
+  sampleSize   Int
+  recordedAt   DateTime          @default(now())
+}
+
+// ── Analytics ─────────────────────────────────────────────
+
+model ContentAnalytics {
+  id          String   @id @default(uuid())
+  contentId   String
+  content     Content  @relation(fields: [contentId], references: [id])
+  period      String   // daily, weekly, monthly
+  periodKey   String   // 2026-03-26, 2026-W13, 2026-03
+  views       Int      @default(0)
+  completions Int      @default(0)
+  avgTimeMs   Int      @default(0)
+  stars       Int      @default(0)
+  favorites   Int      @default(0)
+  shares      Int      @default(0)
+
+  @@unique([contentId, period, periodKey])
+  @@index([periodKey])
+  @@index([contentId, periodKey])
+}
+
+// ── Offline Packs ─────────────────────────────────────────
+
+model OfflinePack {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  emoji          String    @default("")
+  description    String?
+  ageGroup       AgeGroup  @default(all)
+  sizeEstimateMB Float     @default(0)
+  version        Int       @default(1)
+  published      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  items OfflinePackItem[]
+}
+
+model OfflinePackItem {
+  id            String      @id @default(uuid())
+  packId        String
+  pack          OfflinePack @relation(fields: [packId], references: [id], onDelete: Cascade)
+  contentId     String
+  content       Content     @relation(fields: [contentId], references: [id])
+  includeAssets Boolean     @default(true)
+
+  @@unique([packId, contentId])
+}
+
+// ── Licensed Content Governance ───────────────────────────
+
+model LicensedRight {
+  id           String    @id @default(uuid())
+  contentId    String
+  content      Content   @relation(fields: [contentId], references: [id])
+  licensor     String
+  licenseType  String    // exclusive, non-exclusive, creative-commons, original
+  territories  Json      @default("[\"worldwide\"]")
+  startDate    DateTime
+  endDate      DateTime?
+  terms        String?
+  contactEmail String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([endDate])
+}
+
+// ══════════════════════════════════════════════════════════
+// v7: New Models — Audit, Permissions, Skills, Household
+// ══════════════════════════════════════════════════════════
+
+// ── Audit Log ─────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // create, update, delete, publish, approve, reject, login, etc.
+  entity    String   // Content, Asset, Collection, User, etc.
+  entityId  String
+  changes   Json     @default("{}")
+  userId    String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ── Permissions ───────────────────────────────────────────
+
+model Permission {
+  id         String  @id @default(uuid())
+  role       String  // admin, editor, reviewer, viewer, parent
+  resource   String  // content, asset, collection, household, etc.
+  action     String  // create, read, update, delete, publish, approve
+  allowed    Boolean @default(true)
+  conditions Json    @default("{}")
+
+  @@unique([role, resource, action])
+  @@index([role])
+}
+
+// ── Skills ────────────────────────────────────────────────
+
+model Skill {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String   // cognitive, motor, social, language, creative, emotional
+  description String   @default("")
+  ageGroup    AgeGroup @default(all)
+  createdAt   DateTime @default(now())
+
+  contents ContentSkill[]
+}
+
+model ContentSkill {
+  contentId String
+  skillId   String
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  relevance Float   @default(1.0)
+
+  @@id([contentId, skillId])
+}
+
+// ── Household ─────────────────────────────────────────────
+
+model Household {
+  id        String    @id @default(uuid())
+  name      String
+  timezone  String    @default("UTC")
+  locale    String    @default("en")
+  plan      String    @default("free") // free, premium, family
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  parents        ParentAccount[]
+  children       ChildProfile[]
+  invites        CaregiverInvite[]
+  // v8 relations
+  subscriptions  Subscription[]
+  paymentMethods PaymentMethod[]
+  entitlements   Entitlement[]
+}
+
+model ParentAccount {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  email       String    @unique
+  password    String
+  name        String
+  role        String    @default("primary") // primary, caregiver
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  settings ParentalSettings[]
+
+  @@index([householdId])
+}
+
+model ChildProfile {
+  id              String    @id @default(uuid())
+  householdId     String
+  household       Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name            String
+  avatarEmoji     String    @default("")
+  totalStars      Int       @default(0)
+  streakDays      Int       @default(0)
+  ageGroup        AgeGroup  @default(age_2_3)
+  interests       Json      @default("[]")
+  bedtimeMode     Boolean   @default(false)
+  reducedMotion   Boolean   @default(false)
+  largerText      Boolean   @default(false)
+  highContrast    Boolean   @default(false)
+  soundEnabled    Boolean   @default(true)
+  musicEnabled    Boolean   @default(true)
+  autoplayEnabled Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  preferences ProfilePreference[]
+
+  @@index([householdId])
+}
+
+model CaregiverInvite {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  email       String
+  token       String    @unique
+  role        String    @default("caregiver")
+  childScope  Json      @default("[]")
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+  @@index([email])
+}
+
+model ProfilePreference {
+  id        String   @id @default(uuid())
+  profileId String
+  profile   ChildProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  key       String
+  value     Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([profileId, key])
+}
+
+model ParentalSettings {
+  id        String   @id @default(uuid())
+  parentId  String
+  parent    ParentAccount @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  key       String
+  value     Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([parentId, key])
+}
+
+// ══════════════════════════════════════════════════════════
+// v8: 20 Feature Systems — New Models
+// ══════════════════════════════════════════════════════════
+
+// ── Subscription & Entitlement (Feature 1) ───────────────
+
+enum SubscriptionPlan {
+  free
+  trial
+  premium_monthly
+  premium_annual
+  family_monthly
+  family_annual
+  promo
+}
+
+enum SubStatus {
+  active
+  trialing
+  past_due
+  cancelled
+  expired
+  paused
+}
+
+enum InvoiceStatus {
+  draft
+  open
+  paid
+  void_status
+  uncollectible
+}
+
+model Subscription {
+  id                 String           @id @default(uuid())
+  householdId        String
+  household          Household        @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  plan               SubscriptionPlan @default(free)
+  status             SubStatus        @default(active)
+  currentPeriodStart DateTime         @default(now())
+  currentPeriodEnd   DateTime
+  trialEndsAt        DateTime?
+  cancelledAt        DateTime?
+  pausedAt           DateTime?
+  externalId         String?
+  provider           String           @default("manual")
+  metadata           Json             @default("{}")
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  invoices Invoice[]
+
+  @@index([householdId])
+  @@index([status, currentPeriodEnd])
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amount         Int
+  currency       String        @default("usd")
+  status         InvoiceStatus @default(draft)
+  periodStart    DateTime
+  periodEnd      DateTime
+  paidAt         DateTime?
+  externalId     String?
+  lineItems      Json          @default("[]")
+  createdAt      DateTime      @default(now())
+
+  @@index([subscriptionId, createdAt])
+}
+
+model PaymentMethod {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  type        String
+  last4       String?
+  brand       String?
+  expiresAt   DateTime?
+  isDefault   Boolean   @default(false)
+  externalId  String?
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+}
+
+model Entitlement {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  feature     String
+  granted     Boolean   @default(true)
+  source      String
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([householdId, feature])
+}
+
+model PromoCode {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  description     String?
+  discountType    String
+  discountValue   Int
+  maxRedemptions  Int?
+  timesRedeemed   Int       @default(0)
+  validFrom       DateTime
+  validUntil      DateTime?
+  planFilter      Json?
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+
+  @@index([code])
+}
+
+// ── Feature Flags (Feature 4) ────────────────────────────
+
+model FeatureFlag {
+  id           String    @id @default(uuid())
+  key          String    @unique
+  name         String
+  description  String?
+  enabled      Boolean   @default(false)
+  targeting    Json      @default("{}")
+  defaultValue Json      @default("false")
+  createdBy    String?
+  updatedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  overrides FeatureFlagOverride[]
+
+  @@index([key, enabled])
+}
+
+model FeatureFlagOverride {
+  id         String      @id @default(uuid())
+  flagId     String
+  flag       FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  entityType String
+  entityId   String
+  value      Json
+  createdAt  DateTime    @default(now())
+
+  @@unique([flagId, entityType, entityId])
+}
+
+// ── Cross-Device Sync (Feature 3) ────────────────────────
+
+model SyncCheckpoint {
+  id            String   @id @default(uuid())
+  profileId     String
+  entityType    String
+  serverVersion BigInt
+  lastSyncedAt  DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([profileId, entityType])
+}
+
+model SyncEvent {
+  id              String   @id @default(uuid())
+  profileId       String
+  entityType      String
+  entityId        String
+  action          String
+  payload         Json
+  clientTimestamp  DateTime
+  serverTimestamp  DateTime @default(now())
+  version         BigInt   @default(autoincrement())
+
+  @@index([profileId, entityType, version])
+  @@index([serverTimestamp])
+}
+
+// ── Deep Linking (Feature 15) ────────────────────────────
+
+model DeepLink {
+  id         String    @id @default(uuid())
+  shortCode  String    @unique
+  targetType String
+  targetId   String?
+  targetPath String?
+  campaign   String?
+  expiresAt  DateTime?
+  clicks     Int       @default(0)
+  metadata   Json      @default("{}")
+  createdBy  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([shortCode])
+}
+
+// ── Parent Tips (Feature 5) ──────────────────────────────
+
+model ParentTip {
+  id          String    @id @default(uuid())
+  title       String
+  slug        String    @unique
+  body        String
+  category    String
+  format      String
+  ageGroup    AgeGroup
+  tags        Json      @default("[]")
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  authorId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([category, ageGroup, published])
+}
+
+// ── Help Center (Feature 6) ─────────────────────────────
+
+model HelpArticle {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  body           String
+  category       String
+  searchKeywords Json      @default("[]")
+  relatedFeature String?
+  orderIndex     Int       @default(0)
+  published      Boolean   @default(false)
+  helpfulYes     Int       @default(0)
+  helpfulNo      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([category, published])
+}
+
+model SupportTicket {
+  id          String    @id @default(uuid())
+  householdId String?
+  parentEmail String
+  subject     String
+  body        String
+  category    String
+  status      String    @default("open")
+  priority    String    @default("normal")
+  assignee    String?
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, priority])
+  @@index([householdId])
+}
+
+// ── Privacy & Consent (Feature 7) ────────────────────────
+
+model ConsentRecord {
+  id          String    @id @default(uuid())
+  parentId    String
+  consentType String
+  granted     Boolean
+  version     String
+  ipAddress   String?
+  grantedAt   DateTime  @default(now())
+  revokedAt   DateTime?
+
+  @@index([parentId, consentType])
+}
+
+model DataRequest {
+  id          String    @id @default(uuid())
+  parentId    String
+  householdId String
+  type        String
+  status      String    @default("pending")
+  fileUrl     String?
+  completedAt DateTime?
+  requestedAt DateTime  @default(now())
+
+  @@index([parentId, status])
+}
+
+// ── Parent Communication (Feature 11) ────────────────────
+
+model Message {
+  id          String    @id @default(uuid())
+  householdId String
+  profileId   String?
+  type        String
+  title       String
+  body        String
+  actionUrl   String?
+  actionLabel String?
+  read        Boolean   @default(false)
+  readAt      DateTime?
+  expiresAt   DateTime?
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId, read, createdAt])
+}
+
+model MessagePreference {
+  id          String  @id @default(uuid())
+  parentId    String
+  channel     String
+  messageType String
+  enabled     Boolean @default(true)
+
+  @@unique([parentId, channel, messageType])
+}
+
+// ── Lifecycle Messaging (Feature 16) ─────────────────────
+
+model Journey {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  description   String?
+  triggerType   String
+  enabled       Boolean   @default(false)
+  cooldownHours Int       @default(24)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  steps       JourneyStep[]
+  enrollments JourneyEnrollment[]
+}
+
+model JourneyStep {
+  id              String  @id @default(uuid())
+  journeyId       String
+  journey         Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  orderIndex      Int
+  delayHours      Int     @default(0)
+  messageTemplate Json
+  conditions      Json    @default("{}")
+  createdAt       DateTime @default(now())
+
+  @@index([journeyId, orderIndex])
+}
+
+model JourneyEnrollment {
+  id               String    @id @default(uuid())
+  journeyId        String
+  journey          Journey   @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  householdId      String
+  profileId        String?
+  currentStepIndex Int       @default(0)
+  status           String    @default("active")
+  enrolledAt       DateTime  @default(now())
+  lastStepAt       DateTime?
+  completedAt      DateTime?
+
+  @@unique([journeyId, householdId])
+  @@index([status, lastStepAt])
+}
+
+// ── Caregiver Collaboration (Feature 14) ─────────────────
+
+model CaregiverAccess {
+  id             String    @id @default(uuid())
+  caregiverId    String
+  childProfileId String
+  accessLevel    String
+  grantedBy      String
+  grantedAt      DateTime  @default(now())
+  revokedAt      DateTime?
+
+  @@unique([caregiverId, childProfileId])
+}
+
+// ── Family Routines (Feature 20) ─────────────────────────
+
+model Routine {
+  id               String    @id @default(uuid())
+  householdId      String
+  profileId        String?
+  name             String
+  type             String
+  items            Json
+  isTemplate       Boolean   @default(false)
+  scheduleDays     Json      @default("[]")
+  scheduledTime    String?
+  estimatedMinutes Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  @@index([householdId, type])
+}
+
+// ── Recommendation Tuning (Feature 8) ────────────────────
+
+model RecommendationConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       Json
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+}
+
+// ── Merchandising (Feature 10) ───────────────────────────
+
+model MerchandisingAsset {
+  id           String    @id @default(uuid())
+  type         String
+  title        String
+  filename     String
+  storageKey   String    @unique
+  locale       String    @default("en")
+  platform     String
+  aspectRatio  String?
+  campaign     String?
+  releaseId    String?
+  collectionId String?
+  status       String    @default("draft")
+  expiresAt    DateTime?
+  version      Int       @default(1)
+  metadata     Json      @default("{}")
+  createdBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([campaign, status])
+}
+
+// ── Performance (Feature 12) ─────────────────────────────
+
+model PerformanceMetric {
+  id          String   @id @default(uuid())
+  metricType  String
+  value       Float
+  deviceInfo  Json
+  browser     String?
+  locale      String?
+  networkType String?
+  profileId   String?
+  sessionId   String?
+  appVersion  String?
+  createdAt   DateTime @default(now())
+
+  @@index([metricType, createdAt])
+}
+
+model PerformanceBaseline {
+  id         String   @id @default(uuid())
+  metricType String   @unique
+  p50        Float
+  p75        Float
+  p95        Float
+  threshold  Float
+  updatedAt  DateTime @updatedAt
+}
+
+// ── Error Triage (Feature 13) ────────────────────────────
+
+model ErrorReport {
+  id         String   @id @default(uuid())
+  groupId    String?
+  category   String
+  message    String
+  stack      String?
+  metadata   Json     @default("{}")
+  deviceInfo Json?
+  appVersion String?
+  releaseId  String?
+  profileId  String?
+  createdAt  DateTime @default(now())
+
+  @@index([groupId, createdAt])
+}
+
+model ErrorGroup {
+  id          String    @id @default(uuid())
+  fingerprint String    @unique
+  category    String
+  message     String
+  firstSeen   DateTime
+  lastSeen    DateTime
+  count       Int       @default(1)
+  status      String    @default("new")
+  assignee    String?
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, lastSeen])
+}
+
+// ── Reporting/BI (Feature 17) ────────────────────────────
+
+model ExportJob {
+  id          String    @id @default(uuid())
+  type        String
+  filters     Json      @default("{}")
+  format      String
+  status      String    @default("pending")
+  fileUrl     String?
+  rowCount    Int?
+  requestedBy String
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([requestedBy, createdAt])
+}
+
+// ── Content Ops SLA (Feature 18) ─────────────────────────
+
+model ContentPipelineEvent {
+  id        String   @id @default(uuid())
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id])
+  stage     String
+  action    String
+  userId    String?
+  timestamp DateTime @default(now())
+
+  @@index([contentId, stage, timestamp])
+}
+
+// ── Content Policy (Feature 19) ──────────────────────────
+
+model ContentPolicy {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String
+  description String?
+  severity    String
+  enabled     Boolean  @default(true)
+  rules       Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  results PolicyResult[]
+}
+
+model PolicyResult {
+  id        String        @id @default(uuid())
+  contentId String
+  content   Content       @relation(fields: [contentId], references: [id])
+  policyId  String
+  policy    ContentPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  status    String
+  message   String?
+  checkedAt DateTime      @default(now())
+
+  @@index([contentId, checkedAt])
+}

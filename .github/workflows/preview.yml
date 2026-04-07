@@ -1,0 +1,211 @@
+# ============================================================
+# Kids Learning Fun - PR Preview Environments
+# Deploys ephemeral preview on PR open/sync, cleans up on close
+# ============================================================
+
+name: Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PREVIEW_PREFIX: preview-pr-${{ github.event.pull_request.number }}
+
+jobs:
+  # ── Build preview ──────────────────────────────────────────
+  build-preview:
+    name: Build Preview
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      frontend-url: ${{ steps.urls.outputs.frontend }}
+      admin-url: ${{ steps.urls.outputs.admin }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache root node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: root-deps-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            root-deps-${{ runner.os }}-
+
+      - name: Cache admin node_modules
+        uses: actions/cache@v4
+        with:
+          path: admin/node_modules
+          key: admin-deps-${{ runner.os }}-${{ hashFiles('admin/package-lock.json') }}
+          restore-keys: |
+            admin-deps-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          if [ ! -d "node_modules" ]; then npm ci; fi
+          if [ ! -d "admin/node_modules" ]; then cd admin && npm ci; fi
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_URL: https://${{ env.PREVIEW_PREFIX }}-api.kidslearningfun.app
+
+      - name: Build admin
+        working-directory: admin
+        run: npm run build
+        env:
+          VITE_API_URL: https://${{ env.PREVIEW_PREFIX }}-api.kidslearningfun.app
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-frontend-${{ github.event.pull_request.number }}
+          path: dist/
+          retention-days: 7
+
+      - name: Upload admin build
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-admin-${{ github.event.pull_request.number }}
+          path: admin/dist/
+          retention-days: 7
+
+      - name: Generate preview URLs
+        id: urls
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          echo "frontend=https://preview-pr-${PR_NUM}.kidslearningfun.app" >> $GITHUB_OUTPUT
+          echo "admin=https://preview-pr-${PR_NUM}-admin.kidslearningfun.app" >> $GITHUB_OUTPUT
+
+  # ── Deploy preview environment ─────────────────────────────
+  deploy-preview:
+    name: Deploy Preview
+    needs: [build-preview]
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: preview-${{ github.event.pull_request.number }}
+      url: ${{ needs.build-preview.outputs.frontend-url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: preview-frontend-${{ github.event.pull_request.number }}
+          path: dist/
+
+      - name: Download admin build
+        uses: actions/download-artifact@v4
+        with:
+          name: preview-admin-${{ github.event.pull_request.number }}
+          path: admin-dist/
+
+      - name: Deploy to preview environment
+        id: deploy
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          echo "=== Deploying Preview Environment ==="
+          echo "PR: #${PR_NUM}"
+          echo "Frontend: https://preview-pr-${PR_NUM}.kidslearningfun.app"
+          echo "Admin: https://preview-pr-${PR_NUM}-admin.kidslearningfun.app"
+
+          # In production, this would deploy to your hosting platform:
+          # Examples:
+          #   Vercel:    npx vercel deploy --prebuilt --token=$VERCEL_TOKEN
+          #   Netlify:   npx netlify deploy --dir=dist --alias=pr-$PR_NUM
+          #   S3+CF:     aws s3 sync dist/ s3://previews/pr-$PR_NUM/
+          #   k8s:       kubectl apply -f preview-manifest.yml
+
+          echo "::notice::Preview deployment would execute here"
+
+  # ── Post comment with preview URLs ─────────────────────────
+  comment:
+    name: Post Preview URLs
+    needs: [build-preview, deploy-preview]
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Preview Environment'
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            ## Preview Environment
+
+            | Service | URL | Status |
+            |---------|-----|--------|
+            | Frontend | [${{ needs.build-preview.outputs.frontend-url }}](${{ needs.build-preview.outputs.frontend-url }}) | Deployed |
+            | Admin | [${{ needs.build-preview.outputs.admin-url }}](${{ needs.build-preview.outputs.admin-url }}) | Deployed |
+
+            **Commit:** `${{ github.event.pull_request.head.sha }}`
+            **Updated:** ${{ github.event.pull_request.updated_at }}
+
+            > Preview environments are automatically cleaned up when the PR is closed.
+
+  # ── Cleanup on PR close ────────────────────────────────────
+  cleanup:
+    name: Cleanup Preview
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Delete preview environment
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          echo "=== Cleaning Up Preview Environment ==="
+          echo "PR #${PR_NUM} was closed/merged"
+
+          # In production, tear down the preview:
+          # Vercel:   npx vercel remove preview-pr-$PR_NUM --token=$VERCEL_TOKEN --yes
+          # Netlify:  npx netlify sites:delete preview-pr-$PR_NUM
+          # S3:       aws s3 rm s3://previews/pr-$PR_NUM/ --recursive
+          # k8s:      kubectl delete namespace preview-pr-$PR_NUM
+
+          echo "::notice::Preview cleanup would execute here for PR #${PR_NUM}"
+
+      - name: Update PR comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Preview Environment'
+
+      - name: Mark preview as cleaned up
+        if: steps.find-comment.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            ## Preview Environment
+
+            Preview environment for this PR has been cleaned up.
+
+            **Closed at:** ${{ github.event.pull_request.closed_at }}

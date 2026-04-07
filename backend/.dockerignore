@@ -1,0 +1,43 @@
+# ── Dependencies ─────────────────────────────────────────────
+node_modules/
+
+# ── Build output ─────────────────────────────────────────────
+dist/
+
+# ── Environment files ────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Testing ──────────────────────────────────────────────────
+tests/
+coverage/
+*.test.ts
+*.spec.ts
+vitest.config.ts
+
+# ── IDE and editor files ─────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Docker files ─────────────────────────────────────────────
+Dockerfile
+Dockerfile.*
+.dockerignore
+
+# ── Documentation ────────────────────────────────────────────
+docs/
+*.md
+
+# ── OS files ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+
+# ── Local uploads ────────────────────────────────────────────
+uploads/

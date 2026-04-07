@@ -1,0 +1,406 @@
+# ============================================================
+# Kids Learning Fun - Security Scan
+# Dependency audit, lockfile integrity, secret scanning,
+# and license compliance checks
+# ============================================================
+
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    # Weekly Monday scan at 06:00 UTC
+    - cron: '0 6 * * 1'
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Dependency Audit ───────────────────────────────────────
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        package:
+          - { name: root, path: '.', lockfile: 'package-lock.json' }
+          - { name: backend, path: 'backend', lockfile: 'backend/package-lock.json' }
+          - { name: admin, path: 'admin', lockfile: 'admin/package-lock.json' }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run npm audit (${{ matrix.package.name }})
+        working-directory: ${{ matrix.package.path }}
+        run: |
+          echo "=== Auditing ${{ matrix.package.name }} dependencies ==="
+
+          # Run audit and capture output
+          AUDIT_OUTPUT=$(npm audit --json 2>/dev/null || true)
+
+          # Parse vulnerability counts
+          CRITICAL=$(echo "$AUDIT_OUTPUT" | node -e "
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
+            console.log(data.metadata?.vulnerabilities?.critical || 0);
+          " 2>/dev/null || echo "0")
+
+          HIGH=$(echo "$AUDIT_OUTPUT" | node -e "
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
+            console.log(data.metadata?.vulnerabilities?.high || 0);
+          " 2>/dev/null || echo "0")
+
+          MODERATE=$(echo "$AUDIT_OUTPUT" | node -e "
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
+            console.log(data.metadata?.vulnerabilities?.moderate || 0);
+          " 2>/dev/null || echo "0")
+
+          echo "Critical: $CRITICAL"
+          echo "High: $HIGH"
+          echo "Moderate: $MODERATE"
+
+          # Fail on critical or high vulnerabilities
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "::error::${{ matrix.package.name }} has $CRITICAL critical vulnerability(ies)"
+            npm audit --audit-level=critical 2>/dev/null || true
+            exit 1
+          fi
+
+          if [ "$HIGH" -gt 0 ]; then
+            echo "::warning::${{ matrix.package.name }} has $HIGH high vulnerability(ies)"
+            npm audit --audit-level=high 2>/dev/null || true
+            # Warn but don't fail on high (fail only on critical)
+          fi
+
+          echo "${{ matrix.package.name }} audit passed"
+
+  # ── Lockfile Integrity ─────────────────────────────────────
+  lockfile-integrity:
+    name: Lockfile Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify root lockfile
+        run: |
+          echo "=== Verifying root lockfile integrity ==="
+          npm ci --ignore-scripts
+          # Check that package-lock.json is in sync with package.json
+          git diff --exit-code package-lock.json || {
+            echo "::error::package-lock.json is out of sync with package.json. Run 'npm install' and commit the lockfile."
+            exit 1
+          }
+          echo "Root lockfile is in sync"
+
+      - name: Verify backend lockfile
+        working-directory: backend
+        run: |
+          echo "=== Verifying backend lockfile integrity ==="
+          npm ci --ignore-scripts
+          git diff --exit-code package-lock.json || {
+            echo "::error::backend/package-lock.json is out of sync. Run 'cd backend && npm install' and commit."
+            exit 1
+          }
+          echo "Backend lockfile is in sync"
+
+      - name: Verify admin lockfile
+        working-directory: admin
+        run: |
+          echo "=== Verifying admin lockfile integrity ==="
+          npm ci --ignore-scripts
+          git diff --exit-code package-lock.json || {
+            echo "::error::admin/package-lock.json is out of sync. Run 'cd admin && npm install' and commit."
+            exit 1
+          }
+          echo "Admin lockfile is in sync"
+
+      - name: Check for registry tampering
+        run: |
+          echo "=== Checking package registries ==="
+          # Ensure all packages come from the official npm registry
+          for lockfile in package-lock.json backend/package-lock.json admin/package-lock.json; do
+            if [ -f "$lockfile" ]; then
+              # Check for non-npm registries (excluding GitHub packages which are legitimate)
+              SUSPICIOUS=$(node -e "
+                const lock = JSON.parse(require('fs').readFileSync('$lockfile', 'utf8'));
+                const packages = lock.packages || {};
+                const suspicious = Object.entries(packages)
+                  .filter(([key, val]) => val.resolved && !val.resolved.startsWith('https://registry.npmjs.org/') && !val.resolved.startsWith('https://npm.pkg.github.com/') && key !== '')
+                  .map(([key, val]) => key + ' -> ' + val.resolved);
+                if (suspicious.length > 0) {
+                  console.log(suspicious.join('\n'));
+                }
+              " 2>/dev/null || echo "")
+
+              if [ -n "$SUSPICIOUS" ]; then
+                echo "::warning::Suspicious package registries found in $lockfile:"
+                echo "$SUSPICIOUS"
+              else
+                echo "$lockfile: all packages from official registry"
+              fi
+            fi
+          done
+
+  # ── Secret Scanning ────────────────────────────────────────
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "=== Scanning for hardcoded secrets ==="
+          FOUND_SECRETS=false
+
+          # Define patterns to search for
+          declare -a PATTERNS=(
+            'AKIA[0-9A-Z]{16}'                          # AWS Access Key
+            'AIza[0-9A-Za-z\-_]{35}'                    # Google API Key
+            'sk-[0-9a-zA-Z]{48}'                        # OpenAI API Key
+            'ghp_[0-9a-zA-Z]{36}'                       # GitHub Personal Access Token
+            'gho_[0-9a-zA-Z]{36}'                       # GitHub OAuth Token
+            'github_pat_[0-9a-zA-Z_]{82}'               # GitHub Fine-grained PAT
+            'xoxb-[0-9]{10,}-[0-9]{10,}-[a-zA-Z0-9]+'  # Slack Bot Token
+            'sk_live_[0-9a-zA-Z]{24,}'                  # Stripe Secret Key
+            'sq0atp-[0-9A-Za-z\-_]{22}'                 # Square Access Token
+            'SG\.[0-9A-Za-z\-_]{22}\.[0-9A-Za-z\-_]{43}' # SendGrid API Key
+          )
+
+          # Files/dirs to exclude
+          EXCLUDES="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=coverage --exclude-dir=.next --exclude=*.lock --exclude=package-lock.json"
+
+          for PATTERN in "${PATTERNS[@]}"; do
+            MATCHES=$(grep -rEn $EXCLUDES "$PATTERN" . 2>/dev/null || true)
+            if [ -n "$MATCHES" ]; then
+              echo "::error::Potential secret found matching pattern: $PATTERN"
+              echo "$MATCHES" | head -5
+              FOUND_SECRETS=true
+            fi
+          done
+
+          # Check for private key files
+          PRIVATE_KEYS=$(find . -name "*.pem" -o -name "*.key" -o -name "*.p12" -o -name "*.pfx" 2>/dev/null | grep -v node_modules || true)
+          if [ -n "$PRIVATE_KEYS" ]; then
+            echo "::warning::Private key files found in repository:"
+            echo "$PRIVATE_KEYS"
+            FOUND_SECRETS=true
+          fi
+
+          # Check for .env files that should not be committed
+          ENV_FILES=$(find . -name ".env" -o -name ".env.local" -o -name ".env.production" 2>/dev/null | grep -v node_modules | grep -v '.env.example' || true)
+          if [ -n "$ENV_FILES" ]; then
+            echo "::error::Environment files found in repository (should be in .gitignore):"
+            echo "$ENV_FILES"
+            FOUND_SECRETS=true
+          fi
+
+          if [ "$FOUND_SECRETS" = true ]; then
+            echo ""
+            echo "::error::Potential secrets detected. Review the findings above."
+            echo "If these are false positives, add them to .secretsignore or update the scan patterns."
+            exit 1
+          fi
+
+          echo "No hardcoded secrets detected"
+
+  # ── License Compliance ─────────────────────────────────────
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check licenses
+        run: |
+          echo "=== License Compliance Check ==="
+
+          # Disallowed licenses for a kids' app
+          DISALLOWED="GPL-3.0|AGPL|SSPL|EUPL|CC-BY-NC|CC-BY-ND"
+
+          # Check root package licenses
+          echo "--- Root Package Licenses ---"
+          npx license-checker --production --json 2>/dev/null | node -e "
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
+            const disallowed = new RegExp('$DISALLOWED', 'i');
+            const violations = [];
+
+            for (const [pkg, info] of Object.entries(data)) {
+              const license = info.licenses || 'UNKNOWN';
+              if (disallowed.test(license)) {
+                violations.push({ package: pkg, license });
+              }
+            }
+
+            if (violations.length > 0) {
+              console.log('License violations found:');
+              violations.forEach(v => console.log('  ' + v.package + ': ' + v.license));
+              process.exit(1);
+            } else {
+              console.log('All production licenses are compliant');
+            }
+          " 2>/dev/null || {
+            # license-checker not available, do a basic check
+            echo "::notice::license-checker not installed, performing basic license check"
+
+            # Basic check: look for GPL in top-level dependencies
+            FOUND_GPL=false
+            for dir in node_modules/*/; do
+              if [ -f "${dir}package.json" ]; then
+                LICENSE=$(node -e "try { console.log(JSON.parse(require('fs').readFileSync('${dir}package.json','utf8')).license || '') } catch(e) {}" 2>/dev/null)
+                if echo "$LICENSE" | grep -qiE "$DISALLOWED"; then
+                  PKG=$(basename "$dir")
+                  echo "::warning::$PKG has license: $LICENSE"
+                  FOUND_GPL=true
+                fi
+              fi
+            done
+
+            if [ "$FOUND_GPL" = true ]; then
+              echo "::warning::Some packages have potentially incompatible licenses. Review above."
+            else
+              echo "Basic license check passed"
+            fi
+          }
+
+  # ── Supply Chain Security ──────────────────────────────────
+  supply-chain:
+    name: Supply Chain Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for suspicious dependency changes
+        run: |
+          echo "=== Checking for suspicious dependency changes ==="
+
+          # Get list of changed package.json files
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep "package\.json$" || true)
+
+          if [ -z "$CHANGED" ]; then
+            echo "No package.json changes detected."
+            exit 0
+          fi
+
+          echo "Changed package files: $CHANGED"
+
+          for pkg in $CHANGED; do
+            echo ""
+            echo "=== Analyzing changes in $pkg ==="
+
+            # Show dependency diff summary
+            git diff HEAD~1 HEAD -- "$pkg" | grep -E '^\+.*":' | head -20 || true
+
+            # Check for added install scripts (common supply chain vector)
+            DIR=$(dirname "$pkg")
+            if [ -f "$DIR/package.json" ]; then
+              SCRIPTS=$(node -e "
+                const pkg = JSON.parse(require('fs').readFileSync('$DIR/package.json', 'utf8'));
+                const lifecycle = ['preinstall', 'install', 'postinstall', 'preuninstall', 'postuninstall'];
+                const found = lifecycle.filter(s => pkg.scripts && pkg.scripts[s]);
+                if (found.length > 0) console.log(found.join(', '));
+              " 2>/dev/null || echo "")
+
+              if [ -n "$SCRIPTS" ]; then
+                echo "::warning::$pkg has lifecycle scripts: $SCRIPTS. Verify these are legitimate."
+              fi
+            fi
+          done
+
+      - name: Verify critical package integrity
+        run: |
+          echo "=== Verifying critical package provenance ==="
+          # Ensure critical security packages come from expected registries
+          CRITICAL_PACKAGES=("express" "jsonwebtoken" "helmet" "cors" "@prisma/client" "bcryptjs" "zod")
+
+          for pkg in "${CRITICAL_PACKAGES[@]}"; do
+            for lockfile in package-lock.json backend/package-lock.json admin/package-lock.json; do
+              if [ -f "$lockfile" ] && grep -q "\"$pkg\"" "$lockfile" 2>/dev/null; then
+                echo "  $pkg: present in $(dirname $lockfile || echo 'root') lockfile"
+              fi
+            done
+          done
+
+          echo "Supply chain check complete."
+
+  # ── Security Summary ───────────────────────────────────────
+  security-status:
+    name: Security Status
+    if: always()
+    needs: [dependency-audit, lockfile-integrity, secret-scan, license-check, supply-chain]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate security posture
+        run: |
+          echo "=== Security Scan Summary ==="
+          echo "Dependency Audit:   ${{ needs.dependency-audit.result }}"
+          echo "Lockfile Integrity: ${{ needs.lockfile-integrity.result }}"
+          echo "Secret Scanning:    ${{ needs.secret-scan.result }}"
+          echo "License Compliance: ${{ needs.license-check.result }}"
+          echo "Supply Chain:       ${{ needs.supply-chain.result }}"
+          echo "============================="
+
+          FAILED=false
+
+          if [[ "${{ needs.dependency-audit.result }}" == "failure" ]]; then
+            echo "::error::Dependency audit found critical vulnerabilities"
+            FAILED=true
+          fi
+
+          if [[ "${{ needs.lockfile-integrity.result }}" == "failure" ]]; then
+            echo "::error::Lockfile integrity check failed"
+            FAILED=true
+          fi
+
+          if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
+            echo "::error::Secret scanning found potential secrets"
+            FAILED=true
+          fi
+
+          if [[ "${{ needs.license-check.result }}" == "failure" ]]; then
+            echo "::warning::License compliance check found issues"
+            # License issues are warnings, not blockers
+          fi
+
+          if [[ "${{ needs.supply-chain.result }}" == "failure" ]]; then
+            echo "::warning::Supply chain check found suspicious changes"
+          fi
+
+          if [ "$FAILED" = true ]; then
+            echo ""
+            echo "Security scan failed. Address the issues above before merging."
+            exit 1
+          fi
+
+          echo ""
+          echo "All security checks passed."

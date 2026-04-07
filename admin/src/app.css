@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  /* Admin design tokens — calmer brand palette */
+  --color-bg: #FAFBFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E1E4E8;
+  --color-text: #24292E;
+  --color-text-secondary: #586069;
+  --color-text-muted: #959DA5;
+
+  --color-primary: #3B82F6;
+  --color-primary-hover: #2563EB;
+  --color-primary-light: #EFF6FF;
+
+  --color-success: #22C55E;
+  --color-success-light: #F0FDF4;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FFFBEB;
+  --color-danger: #EF4444;
+  --color-danger-light: #FEF2F2;
+  --color-info: #8B5CF6;
+  --color-info-light: #F5F3FF;
+
+  --color-sidebar: #1F2937;
+  --color-sidebar-hover: #374151;
+  --color-sidebar-active: #4B5563;
+  --color-sidebar-text: #D1D5DB;
+  --color-sidebar-text-active: #FFFFFF;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-bg: #0D1117;
+    --color-surface: #161B22;
+    --color-border: #30363D;
+    --color-text: #C9D1D9;
+    --color-text-secondary: #8B949E;
+    --color-text-muted: #484F58;
+
+    --color-primary-light: #1E3A5F;
+    --color-success-light: #0D2818;
+    --color-warning-light: #2D1F05;
+    --color-danger-light: #2D0F0F;
+    --color-info-light: #1E1533;
+
+    --color-sidebar: #010409;
+    --color-sidebar-hover: #161B22;
+    --color-sidebar-active: #21262D;
+  }
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}

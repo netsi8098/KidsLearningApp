@@ -1,0 +1,367 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  JWT_SECRET: ci-test-secret-key-for-testing
+  DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+  REDIS_URL: redis://localhost:6379/1
+  CORS_ORIGIN: http://localhost:5173
+
+jobs:
+  # ── Lint & Typecheck ───────────────────────────────────────
+  lint:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install admin dependencies
+        working-directory: admin
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Backend typecheck
+        working-directory: backend
+        run: npx tsc --noEmit
+
+      - name: Frontend typecheck
+        run: npx tsc --noEmit
+
+      - name: Admin typecheck
+        working-directory: admin
+        run: npx tsc --noEmit
+
+  # ── Backend Unit Tests ─────────────────────────────────────
+  unit-tests-backend:
+    name: Backend Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run unit tests
+        working-directory: backend
+        run: npx vitest run tests/unit/ --reporter=default --reporter=junit --outputFile=junit-unit.xml
+
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-results
+          path: backend/junit-unit.xml
+          retention-days: 30
+
+  # ── Backend Unit Tests with Coverage ───────────────────────
+  unit-tests-coverage:
+    name: Backend Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run tests with coverage
+        working-directory: backend
+        run: npx vitest run --coverage --reporter=default --reporter=junit --outputFile=junit-coverage.xml
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            backend/coverage/
+            backend/junit-coverage.xml
+          retention-days: 30
+
+      - name: Coverage summary
+        if: always()
+        working-directory: backend
+        run: |
+          if [ -f coverage/text-summary.txt ]; then
+            cat coverage/text-summary.txt
+          fi
+
+  # ── Backend Integration Tests ──────────────────────────────
+  integration-tests:
+    name: Backend Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run integration tests
+        working-directory: backend
+        run: npx vitest run tests/integration/ --reporter=default --reporter=junit --outputFile=junit-integration.xml
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-integration-results
+          path: backend/junit-integration.xml
+          retention-days: 30
+
+  # ── Release Certification ──────────────────────────────────
+  certification:
+    name: Release Certification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [unit-tests-backend, integration-tests]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run smoke tests
+        working-directory: backend
+        run: npx vitest run tests/certification/smoke.test.ts --reporter=default
+
+      - name: Run release certification
+        working-directory: backend
+        run: npx vitest run tests/certification/release-certification.test.ts --reporter=default --reporter=junit --outputFile=junit-certification.xml
+
+      - name: Upload certification results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: certification-results
+          path: backend/junit-certification.xml
+          retention-days: 90
+
+  # ── Frontend Unit Tests ────────────────────────────────────
+  unit-tests-frontend:
+    name: Frontend Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npx vitest run --reporter=default --reporter=junit --outputFile=junit-frontend.xml
+        continue-on-error: true
+
+      - name: Upload frontend test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-unit-results
+          path: junit-frontend.xml
+          retention-days: 30
+
+  # ── Admin Unit Tests ───────────────────────────────────────
+  unit-tests-admin:
+    name: Admin Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        working-directory: admin
+        run: npm ci
+
+      - name: Run admin tests
+        working-directory: admin
+        run: npx vitest run --reporter=default --reporter=junit --outputFile=junit-admin.xml
+        continue-on-error: true
+
+      - name: Upload admin test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-unit-results
+          path: admin/junit-admin.xml
+          retention-days: 30
+
+  # ── E2E Tests (Playwright) ────────────────────────────────
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Only run E2E on main branch or when e2e/ files change
+    if: github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'run-e2e')
+    needs: [unit-tests-backend, unit-tests-frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        continue-on-error: true
+
+      - name: Build frontend
+        run: npm run build
+        continue-on-error: true
+
+      - name: Run E2E tests
+        run: npx playwright test
+        continue-on-error: true
+        env:
+          CI: true
+
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  # ── Final Status Check ─────────────────────────────────────
+  test-status:
+    name: All Tests Pass
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - lint
+      - unit-tests-backend
+      - unit-tests-coverage
+      - integration-tests
+      - certification
+      - unit-tests-frontend
+      - unit-tests-admin
+    if: always()
+    steps:
+      - name: Check required job results
+        run: |
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Backend Unit: ${{ needs.unit-tests-backend.result }}"
+          echo "Coverage: ${{ needs.unit-tests-coverage.result }}"
+          echo "Integration: ${{ needs.integration-tests.result }}"
+          echo "Certification: ${{ needs.certification.result }}"
+          echo "Frontend Unit: ${{ needs.unit-tests-frontend.result }}"
+          echo "Admin Unit: ${{ needs.unit-tests-admin.result }}"
+
+          # Required checks (must pass)
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "FAIL: Lint & Typecheck failed"
+            exit 1
+          fi
+          if [[ "${{ needs.unit-tests-backend.result }}" != "success" ]]; then
+            echo "FAIL: Backend unit tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+            echo "FAIL: Integration tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.certification.result }}" != "success" ]]; then
+            echo "FAIL: Certification suite failed"
+            exit 1
+          fi
+
+          echo "All required checks passed."

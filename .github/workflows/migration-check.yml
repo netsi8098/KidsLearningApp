@@ -1,0 +1,218 @@
+# ============================================================
+# Kids Learning Fun - Database Migration Safety Check
+# Runs when Prisma schema or migration files change
+# Detects destructive operations and estimates lock duration
+# ============================================================
+
+name: Migration Safety Check
+
+on:
+  pull_request:
+    paths:
+      - 'backend/prisma/**'
+
+jobs:
+  migration-safety:
+    name: Analyze Migration Safety
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Analyze schema diff
+        id: schema-diff
+        run: |
+          echo "=== Schema Diff Analysis ==="
+
+          # Get the diff of Prisma schema files
+          SCHEMA_DIFF=$(git diff origin/main -- backend/prisma/schema.prisma 2>/dev/null || echo "")
+          MIGRATION_DIFF=$(git diff origin/main -- backend/prisma/migrations/ 2>/dev/null || echo "")
+
+          # Initialize report
+          REPORT=""
+          SEVERITY="safe"
+          WARNINGS=0
+          ERRORS=0
+
+          # ── Check for destructive schema changes ──
+          if echo "$SCHEMA_DIFF" | grep -qE '^\-\s+\w+\s+(String|Int|Float|Boolean|DateTime|Json|Bytes|BigInt|Decimal)'; then
+            REPORT="${REPORT}\n- :warning: **Field removal detected** - Existing columns may be dropped"
+            SEVERITY="warning"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+
+          if echo "$SCHEMA_DIFF" | grep -qE '^\-model\s+'; then
+            REPORT="${REPORT}\n- :x: **Model removal detected** - An entire table may be dropped"
+            SEVERITY="danger"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          if echo "$SCHEMA_DIFF" | grep -qE '^\-\s+@@'; then
+            REPORT="${REPORT}\n- :warning: **Index removal detected** - Query performance may be affected"
+            SEVERITY="warning"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+
+          # ── Check migration SQL for destructive operations ──
+          if echo "$MIGRATION_DIFF" | grep -qiE 'DROP TABLE'; then
+            REPORT="${REPORT}\n- :x: **DROP TABLE found in migration** - Data loss will occur"
+            SEVERITY="danger"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          if echo "$MIGRATION_DIFF" | grep -qiE 'DROP COLUMN'; then
+            REPORT="${REPORT}\n- :x: **DROP COLUMN found in migration** - Column data will be lost"
+            SEVERITY="danger"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          if echo "$MIGRATION_DIFF" | grep -qiE 'ALTER TABLE.*RENAME'; then
+            REPORT="${REPORT}\n- :warning: **RENAME operation detected** - Ensure application code is updated"
+            SEVERITY="warning"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+
+          if echo "$MIGRATION_DIFF" | grep -qiE 'TRUNCATE'; then
+            REPORT="${REPORT}\n- :x: **TRUNCATE found** - All data in the table will be deleted"
+            SEVERITY="danger"
+            ERRORS=$((ERRORS + 1))
+          fi
+
+          # ── Check for NOT NULL additions without defaults ──
+          if echo "$SCHEMA_DIFF" | grep -qE '^\+\s+\w+\s+\w+\s+.*$' | grep -v '@default' | grep -v '?'; then
+            REPORT="${REPORT}\n- :warning: **Required field added** - Verify a default value or migration script handles existing rows"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+
+          # ── Estimate lock duration ──
+          LOCK_ESTIMATE="minimal"
+          if echo "$MIGRATION_DIFF" | grep -qiE 'ALTER TABLE.*ADD COLUMN.*NOT NULL'; then
+            LOCK_ESTIMATE="moderate (table rewrite required for NOT NULL without default)"
+            REPORT="${REPORT}\n- :hourglass: **Lock estimate: Moderate** - NOT NULL column addition may require table rewrite"
+          fi
+
+          if echo "$MIGRATION_DIFF" | grep -qiE 'CREATE INDEX(?!.*CONCURRENTLY)'; then
+            LOCK_ESTIMATE="moderate (non-concurrent index creation)"
+            REPORT="${REPORT}\n- :hourglass: **Lock estimate: Moderate** - Consider using CREATE INDEX CONCURRENTLY"
+          fi
+
+          if echo "$MIGRATION_DIFF" | grep -qiE 'ALTER TABLE.*ALTER COLUMN.*TYPE'; then
+            LOCK_ESTIMATE="high (column type change requires table rewrite)"
+            REPORT="${REPORT}\n- :hourglass: **Lock estimate: High** - Column type change will lock the table"
+          fi
+
+          # ── Check for rollback notes ──
+          HAS_ROLLBACK=false
+          if echo "$MIGRATION_DIFF" | grep -qiE 'rollback|revert|undo|down'; then
+            HAS_ROLLBACK=true
+          fi
+
+          if [ "$HAS_ROLLBACK" = false ] && [ "$SEVERITY" != "safe" ]; then
+            REPORT="${REPORT}\n- :clipboard: **No rollback notes found** - Consider documenting how to revert this migration"
+          fi
+
+          # ── Safe changes ──
+          if [ -z "$REPORT" ]; then
+            REPORT="\n- :white_check_mark: No destructive changes detected"
+            SEVERITY="safe"
+          fi
+
+          # Output results
+          echo "severity=$SEVERITY" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "lock-estimate=$LOCK_ESTIMATE" >> $GITHUB_OUTPUT
+
+          # Write report to file for the comment step
+          {
+            echo "REPORT<<REPORT_EOF"
+            echo -e "$REPORT"
+            echo "REPORT_EOF"
+          } >> $GITHUB_OUTPUT
+
+          echo "=== Analysis Complete ==="
+          echo "Severity: $SEVERITY"
+          echo "Warnings: $WARNINGS"
+          echo "Errors: $ERRORS"
+
+      - name: Validate Prisma schema
+        id: validate
+        working-directory: backend
+        run: |
+          echo "=== Validating Prisma Schema ==="
+          if npx prisma validate 2>&1; then
+            echo "schema-valid=true" >> $GITHUB_OUTPUT
+            echo "Schema is valid"
+          else
+            echo "schema-valid=false" >> $GITHUB_OUTPUT
+            echo "::error::Prisma schema validation failed"
+          fi
+
+      - name: Check migration drift
+        id: drift
+        working-directory: backend
+        run: |
+          echo "=== Checking Migration Drift ==="
+          # This checks if the schema and migrations are in sync
+          # In a real setup with a test database, you would run:
+          # npx prisma migrate diff --from-migrations ./prisma/migrations --to-schema-datamodel ./prisma/schema.prisma
+          echo "drift-check=skipped" >> $GITHUB_OUTPUT
+          echo "::notice::Migration drift check requires a live database connection (skipped in CI)"
+
+      - name: Post migration report
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Migration Safety Report'
+
+      - name: Create or update report comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            ## Migration Safety Report
+
+            **Severity:** `${{ steps.schema-diff.outputs.severity }}`
+            **Schema Valid:** `${{ steps.validate.outputs.schema-valid }}`
+            **Lock Duration Estimate:** `${{ steps.schema-diff.outputs.lock-estimate }}`
+
+            ### Findings
+            ${{ steps.schema-diff.outputs.REPORT }}
+
+            ### Checklist
+            - [ ] Migration has been tested locally with `npx prisma migrate dev`
+            - [ ] Rollback procedure is documented (if destructive)
+            - [ ] Application code handles both old and new schema during rollout
+            - [ ] Large table migrations use batched operations where applicable
+
+            ---
+            *Automated migration safety analysis. Review carefully before merging.*
+
+      - name: Fail on dangerous migrations
+        if: steps.schema-diff.outputs.severity == 'danger'
+        run: |
+          echo "::error::Dangerous migration detected with ${{ steps.schema-diff.outputs.errors }} error(s)."
+          echo "Review the migration safety report on the PR for details."
+          echo "If this is intentional, add the 'migration-approved' label to the PR."
+          exit 1
