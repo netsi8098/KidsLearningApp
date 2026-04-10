@@ -241,7 +241,7 @@ export function useVoiceLine(characterId?: string): UseVoiceLineReturn {
     (lineId: string, options?: SpeakOptions) => {
       const line = getVoiceLineById(lineId);
       if (!line) {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.warn(`[useVoiceLine] Line not found: ${lineId}`);
         }
         return;

@@ -195,7 +195,7 @@ function TypewriterTitle({
           transition={{
             delay: delay + i * 0.06,
             duration: 0.15,
-            ease: easings.decelerate as unknown as number[],
+            ease: easings.decelerate as [number, number, number, number],
           }}
           style={{ display: 'inline-block', color, whiteSpace: 'pre' }}
         >
@@ -248,7 +248,7 @@ function FirstLaunchSequence({ onSkip, canSkip }: { onSkip: () => void; canSkip:
         className="mt-4 text-6xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: timing.slow, ease: easings.decelerate as unknown as number[] }}
+        transition={{ delay: 0.5, duration: timing.slow, ease: easings.decelerate as [number, number, number, number] }}
       >
         <motion.span
           style={{ display: 'inline-block' }}
@@ -312,7 +312,7 @@ function RegularSequence({ onSkip, canSkip }: { onSkip: () => void; canSkip: boo
       <motion.div
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: [0.6, 1.1, 1], opacity: 1 }}
-        transition={{ duration: 0.4, ease: easings.bounce as unknown as number[] }}
+        transition={{ duration: 0.4, ease: easings.bounce as [number, number, number, number] }}
       >
         <BookIcon size={72} color={COLORS.coral} />
       </motion.div>
@@ -395,7 +395,7 @@ function BedtimeSequence({ onSkip, canSkip }: { onSkip: () => void; canSkip: boo
         transition={{
           delay: 0.3,
           duration: timing.gentle * BEDTIME_TIMING_MULTIPLIER,
-          ease: easings.decelerate as unknown as number[],
+          ease: easings.decelerate as [number, number, number, number],
         }}
       >
         <MoonIcon size={56} />
@@ -409,7 +409,7 @@ function BedtimeSequence({ onSkip, canSkip }: { onSkip: () => void; canSkip: boo
         transition={{
           delay: 0.7,
           duration: timing.gentle,
-          ease: easings.decelerate as unknown as number[],
+          ease: easings.decelerate as [number, number, number, number],
         }}
       >
         <motion.span
@@ -431,7 +431,7 @@ function BedtimeSequence({ onSkip, canSkip }: { onSkip: () => void; canSkip: boo
         transition={{
           delay: 1.2,
           duration: timing.gentle,
-          ease: easings.decelerate as unknown as number[],
+          ease: easings.decelerate as [number, number, number, number],
         }}
       >
         Sweet Dreams...

@@ -140,10 +140,10 @@ export default function StoryTransition({
         initial="initial"
         animate="animate"
         exit="exit"
-        variants={variants}
+        variants={variants as import('framer-motion').Variants}
         transition={{
           duration: transitionDuration,
-          ease: config.ease as string | number[],
+          ease: config.ease as import('framer-motion').Easing,
         }}
       >
         {children}

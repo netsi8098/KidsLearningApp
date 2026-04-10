@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -12,7 +12,7 @@ import { db } from '../db/database';
 import NavButton from '../components/NavButton';
 import IdentitySummaryCard from '../components/IdentitySummaryCard';
 import { getAvailableVoices, setPreferredVoice, getActiveVoiceName } from '../hooks/useAudio';
-import { aiSpeak, checkTTSServer, getSelectedAIVoice, setSelectedAIVoice, type VoicePreset } from '../services/ttsService';
+import { aiSpeak, checkTTSServer, resetTTSStatus, getSelectedAIVoice, setSelectedAIVoice, type VoicePreset } from '../services/ttsService';
 
 const statusConfig: Record<PackStatus, { label: string; color: string; bg: string; icon: string }> = {
   available: { label: 'Download', color: 'text-teal', bg: 'bg-teal-soft', icon: '\u2B07\uFE0F' },
@@ -71,9 +71,19 @@ function VoicePicker() {
   const [selected, setSelected] = useState<VoicePreset>(getSelectedAIVoice());
   const [serverUp, setServerUp] = useState<boolean | null>(null);
 
-  useEffect(() => {
+  const recheckServer = useCallback(() => {
+    resetTTSStatus();
     checkTTSServer().then(setServerUp);
   }, []);
+
+  useEffect(() => {
+    recheckServer();
+    // Re-check every 10s while offline
+    const interval = setInterval(() => {
+      if (serverUp !== true) recheckServer();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [serverUp, recheckServer]);
 
   function handleSelect(voiceId: VoicePreset) {
     setSelected(voiceId);
@@ -128,6 +138,12 @@ function VoicePicker() {
           <p className="text-xs text-amber-700 leading-relaxed">
             Ask a grown-up to run <strong>python3 tts-server.py</strong> in the KidsLearningApp folder to enable natural AI voices.
           </p>
+          <button
+            onClick={recheckServer}
+            className="mt-2 text-xs font-bold text-amber-800 bg-amber-200 hover:bg-amber-300 rounded-lg px-3 py-1 transition-colors"
+          >
+            Retry Connection
+          </button>
         </div>
       )}
     </div>

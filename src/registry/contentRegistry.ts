@@ -88,8 +88,8 @@ function normalizeAnimals(): ContentItem[] {
 
 function normalizeBodyParts(): ContentItem[] {
   return bodyPartsData.map((b) => ({
-    id: `bodypart:${b.id}`,
-    sourceId: b.id,
+    id: `bodypart:${b.name.toLowerCase()}`,
+    sourceId: b.name.toLowerCase(),
     type: 'bodypart' as ContentType,
     title: b.name,
     emoji: b.emoji,
@@ -108,7 +108,6 @@ function normalizeLessons(): ContentItem[] {
     route: '/lessons',
     ageGroup: l.ageGroup as AgeGroup,
     category: l.topic,
-    durationMinutes: l.durationMinutes,
   }));
 }
 
@@ -134,7 +133,7 @@ function normalizeVideos(): ContentItem[] {
     emoji: getCategoryEmoji(v.category),
     route: '/videos',
     category: v.category,
-    durationMinutes: v.durationMinutes,
+    durationMinutes: v.duration ? parseInt(v.duration, 10) || undefined : undefined,
   }));
 }
 
@@ -149,7 +148,7 @@ function normalizeGames(): ContentItem[] {
     ageGroup: (g as any).ageGroup as AgeGroup | undefined,
     category: (g as any).category,
     durationMinutes: (g as any).durationMinutes,
-    difficulty: g.difficulty?.[0] as any,
+    difficulty: g.difficulties?.[0]?.level as any,
   }));
 }
 
@@ -177,7 +176,7 @@ function normalizeCooking(): ContentItem[] {
     route: '/cooking',
     ageGroup: c.ageGroup as AgeGroup,
     category: c.category,
-    durationMinutes: c.durationMinutes,
+    durationMinutes: c.prepTime ? parseInt(c.prepTime, 10) || undefined : undefined,
     difficulty: c.difficulty as any,
   }));
 }
@@ -239,10 +238,10 @@ function normalizeLifeSkills(): ContentItem[] {
 
 function normalizeEmotions(): ContentItem[] {
   return emotionsData.map((e) => ({
-    id: `emotion:${e.id}`,
-    sourceId: e.id,
+    id: `emotion:${e.key}`,
+    sourceId: e.key,
     type: 'emotion' as ContentType,
-    title: e.name,
+    title: e.label,
     emoji: e.emoji,
     route: '/emotions',
     category: 'emotions',
