@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { avatarEmojis } from '../data/avatarData';
+import CameraCapture from './CameraCapture';
 
 export type AvatarMode = 'sticker' | 'photo';
 
@@ -46,8 +47,8 @@ function resizeImage(file: Blob): Promise<string> {
 
 export default function AvatarPicker({ selected, onSelect, photo, onPhotoChange }: AvatarPickerProps) {
   const [mode, setMode] = useState<AvatarMode>(photo ? 'photo' : 'sticker');
+  const [showCamera, setShowCamera] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File | undefined) => {
     if (!file || !onPhotoChange) return;
@@ -60,7 +61,20 @@ export default function AvatarPicker({ selected, onSelect, photo, onPhotoChange 
   }, [onPhotoChange]);
 
   const handleUpload = () => fileRef.current?.click();
-  const handleCamera = () => cameraRef.current?.click();
+
+  const handleCameraCapture = useCallback((base64: string) => {
+    // CameraCapture returns raw base64 without data URL prefix
+    const dataUrl = base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
+    // Resize the captured image to match avatar specs
+    fetch(dataUrl)
+      .then(res => res.blob())
+      .then(blob => resizeImage(blob))
+      .then(resized => {
+        onPhotoChange?.(resized);
+        setShowCamera(false);
+      })
+      .catch(() => setShowCamera(false));
+  }, [onPhotoChange]);
 
   const removePhoto = () => {
     onPhotoChange?.(undefined);
@@ -170,7 +184,7 @@ export default function AvatarPicker({ selected, onSelect, photo, onPhotoChange 
             <div className="flex gap-3">
               <motion.button
                 className="flex items-center gap-2 px-5 py-3 rounded-[14px] bg-white shadow-md border border-[#F0EAE0] font-bold text-sm text-[#2D2D3A] cursor-pointer"
-                onClick={handleCamera}
+                onClick={() => setShowCamera(true)}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -190,7 +204,7 @@ export default function AvatarPicker({ selected, onSelect, photo, onPhotoChange 
               Take a selfie or upload a photo from your gallery
             </p>
 
-            {/* Hidden file inputs */}
+            {/* Hidden file input for gallery upload */}
             <input
               ref={fileRef}
               type="file"
@@ -198,14 +212,18 @@ export default function AvatarPicker({ selected, onSelect, photo, onPhotoChange 
               className="hidden"
               onChange={(e) => handleFile(e.target.files?.[0])}
             />
-            <input
-              ref={cameraRef}
-              type="file"
-              accept="image/*"
-              capture="user"
-              className="hidden"
-              onChange={(e) => handleFile(e.target.files?.[0])}
-            />
+
+            {/* Full-screen camera capture overlay */}
+            <AnimatePresence>
+              {showCamera && (
+                <CameraCapture
+                  onCapture={handleCameraCapture}
+                  onClose={() => setShowCamera(false)}
+                  color="#4ECDC4"
+                  title="Take a Selfie!"
+                />
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

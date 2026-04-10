@@ -182,6 +182,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('welcome');
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('🦁');
+  const [avatarPhoto, setAvatarPhoto] = useState<string | undefined>();
   const [age, setAge] = useState<number | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [goals, setGoals] = useState<string[]>([]);
@@ -253,7 +254,7 @@ export default function OnboardingPage() {
     await new Promise((r) => setTimeout(r, 1800));
 
     const ageGroup = age ? getAgeGroup(age) : undefined;
-    const profile = await createProfile(name.trim(), avatar, age ?? undefined, ageGroup, interests.length > 0 ? interests : undefined);
+    const profile = await createProfile(name.trim(), avatar, age ?? undefined, ageGroup, interests.length > 0 ? interests : undefined, avatarPhoto);
 
     // Save onboarding state
     if (profile.id) {
@@ -553,7 +554,7 @@ export default function OnboardingPage() {
 
               <h2 className="text-2xl font-extrabold text-center text-[#2D2D3A]">Who's playing?</h2>
 
-              <AvatarPicker selected={avatar} onSelect={setAvatar} />
+              <AvatarPicker selected={avatar} onSelect={setAvatar} photo={avatarPhoto} onPhotoChange={setAvatarPhoto} />
 
               <input
                 type="text"

@@ -1,6 +1,13 @@
 /**
- * TTS Service — connects to the local AI voice server (tts-server.py)
- * Falls back to browser SpeechSynthesis if server is unavailable.
+ * TTS Service — Enhanced speech synthesis for Kids Learning Fun
+ *
+ * Priority order:
+ * 1. Local AI voice server (tts-server.py with Edge TTS) — best quality
+ * 2. Web Speech API with natural speech engine — phrase splitting,
+ *    pitch/rate variation, premium voice selection
+ *
+ * The natural speech engine makes browser TTS sound significantly better
+ * by splitting text into phrases and adding prosody variation.
  */
 
 const TTS_BASE = 'http://localhost:5555';
@@ -21,14 +28,19 @@ export function setSelectedAIVoice(voice: VoicePreset): void {
 
 let _serverAvailable: boolean | null = null;
 let _currentAudio: HTMLAudioElement | null = null;
+let _lastCheck: number | null = null;
+let _speakingPromiseReject: (() => void) | null = null;
 
-/** Check if the TTS server is running (re-checks every 30s) */
+/** Check if the TTS server is running (caches for 30s) */
 export async function checkTTSServer(): Promise<boolean> {
   if (_serverAvailable !== null && _lastCheck && Date.now() - _lastCheck < 30000) {
     return _serverAvailable;
   }
   try {
-    const res = await fetch(`${TTS_BASE}/health`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`${TTS_BASE}/health`, { signal: controller.signal });
+    clearTimeout(timeout);
     _serverAvailable = res.ok;
   } catch {
     _serverAvailable = false;
@@ -37,11 +49,10 @@ export async function checkTTSServer(): Promise<boolean> {
   return _serverAvailable;
 }
 
-let _lastCheck: number | null = null;
-
 /** Reset server status (call if you start the server after app load) */
 export function resetTTSStatus() {
   _serverAvailable = null;
+  _lastCheck = null;
 }
 
 /** Stop any currently playing speech */
@@ -50,10 +61,130 @@ export function stopSpeaking() {
     _currentAudio.pause();
     _currentAudio = null;
   }
+  if (_speakingPromiseReject) {
+    _speakingPromiseReject();
+    _speakingPromiseReject = null;
+  }
   window.speechSynthesis?.cancel();
 }
 
-/** Speak text using the AI voice server, with browser fallback */
+// ── Voice Preset → Speech Parameters mapping ───────────────────────────
+// Maps AI voice presets to Web Speech API parameters for consistent
+// personality across both server and browser modes.
+
+interface BrowserVoiceParams {
+  rate: number;
+  pitch: number;
+  /** Preferred voice name fragments (tried in order) */
+  preferredVoices: string[];
+}
+
+const VOICE_PARAMS: Record<VoicePreset, BrowserVoiceParams> = {
+  kids: {
+    rate: 0.88,
+    pitch: 1.2,
+    preferredVoices: ['Samantha', 'Zoe', 'Karen', 'Google US English', 'Microsoft Jenny'],
+  },
+  girl: {
+    rate: 0.9,
+    pitch: 1.15,
+    preferredVoices: ['Samantha', 'Ava', 'Zoe', 'Google US English', 'Microsoft Jenny'],
+  },
+  boy: {
+    rate: 0.92,
+    pitch: 1.0,
+    preferredVoices: ['Daniel', 'Alex', 'Tom', 'Google US English', 'Microsoft David'],
+  },
+  teacher: {
+    rate: 0.85,
+    pitch: 1.05,
+    preferredVoices: ['Karen', 'Samantha', 'Ava', 'Google UK English Female', 'Microsoft Zira'],
+  },
+  storyteller: {
+    rate: 0.82,
+    pitch: 1.1,
+    preferredVoices: ['Samantha (Enhanced)', 'Samantha (Premium)', 'Karen', 'Ava', 'Google US English'],
+  },
+  fun: {
+    rate: 0.95,
+    pitch: 1.25,
+    preferredVoices: ['Samantha', 'Zoe', 'Google US English', 'Microsoft Jenny'],
+  },
+};
+
+// ── Premium Voice Selection ─────────────────────────────────────────────
+
+let _cachedVoices: Map<string, SpeechSynthesisVoice> = new Map();
+let _voicesLoaded = false;
+
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return;
+  _cachedVoices.clear();
+  for (const v of voices) {
+    if (v.lang.startsWith('en')) {
+      _cachedVoices.set(v.name, v);
+    }
+  }
+  _voicesLoaded = true;
+}
+
+// Load voices (some browsers fire this async)
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  loadVoices();
+  window.speechSynthesis.addEventListener?.('voiceschanged', loadVoices);
+}
+
+function selectVoiceForPreset(preset: VoicePreset): SpeechSynthesisVoice | null {
+  if (!_voicesLoaded) loadVoices();
+  const params = VOICE_PARAMS[preset];
+
+  // Try enhanced/premium variants first
+  for (const name of params.preferredVoices) {
+    for (const suffix of [' (Premium)', ' (Enhanced)', '']) {
+      const match = _cachedVoices.get(name + suffix);
+      if (match) return match;
+    }
+    // Partial match
+    for (const [vName, voice] of _cachedVoices) {
+      if (vName.includes(name)) return voice;
+    }
+  }
+
+  // Fallback: any English voice
+  const first = _cachedVoices.values().next();
+  return first.done ? null : first.value;
+}
+
+// ── Natural Phrase Splitting ────────────────────────────────────────────
+
+function splitIntoPhrases(text: string): string[] {
+  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [text];
+  const phrases: string[] = [];
+
+  for (const sentence of sentences) {
+    const trimmed = sentence.trim();
+    if (!trimmed) continue;
+
+    if (trimmed.split(/\s+/).length < 8) {
+      phrases.push(trimmed);
+      continue;
+    }
+
+    const subPhrases = trimmed.split(/(?<=[,;:–—])\s+|(?:\s+(?:and|but|or|then|so|because)\s+)/i);
+    for (const sp of subPhrases) {
+      const t = sp.trim();
+      if (t) phrases.push(t);
+    }
+  }
+
+  return phrases.length > 0 ? phrases : [text];
+}
+
+// ── Core Speaking Functions ─────────────────────────────────────────────
+
+/** Speak text using the AI voice server, with enhanced browser fallback */
 export async function aiSpeak(
   text: string,
   voice: VoicePreset = 'kids',
@@ -61,7 +192,6 @@ export async function aiSpeak(
   pitch: string = '+0Hz'
 ): Promise<void> {
   stopSpeaking();
-
   if (!text.trim()) return;
 
   const serverUp = await checkTTSServer();
@@ -69,11 +199,11 @@ export async function aiSpeak(
   if (serverUp) {
     return speakWithServer(text, voice, rate, pitch);
   } else {
-    return speakWithBrowser(text);
+    return speakNatural(text, voice);
   }
 }
 
-/** Use the local TTS server (high quality AI voice) */
+/** Use the local TTS server (highest quality AI voice) */
 function speakWithServer(
   text: string,
   voice: VoicePreset,
@@ -93,28 +223,98 @@ function speakWithServer(
     };
     audio.onerror = () => {
       _currentAudio = null;
-      // Fall back to browser TTS
-      speakWithBrowser(text).then(resolve).catch(reject);
+      // Fall back to natural browser speech
+      speakNatural(text, voice).then(resolve).catch(reject);
     };
     audio.play().catch(() => {
-      // Autoplay blocked — fall back
-      speakWithBrowser(text).then(resolve).catch(reject);
+      speakNatural(text, voice).then(resolve).catch(reject);
     });
   });
 }
 
-/** Fallback: browser SpeechSynthesis */
-function speakWithBrowser(text: string): Promise<void> {
-  return new Promise((resolve) => {
-    if (!window.speechSynthesis) {
+/**
+ * Enhanced browser SpeechSynthesis with natural prosody.
+ * Splits text into phrases and speaks them with pitch/rate variation,
+ * question intonation, and sentence-ending pitch drops.
+ */
+function speakNatural(text: string, preset: VoicePreset): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!('speechSynthesis' in window)) {
       resolve();
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.1;
-    utterance.onend = () => resolve();
-    utterance.onerror = () => resolve();
-    window.speechSynthesis.speak(utterance);
+
+    // Allow cancellation
+    _speakingPromiseReject = () => reject(new Error('cancelled'));
+
+    const params = VOICE_PARAMS[preset];
+    const voice = selectVoiceForPreset(preset);
+    const phrases = splitIntoPhrases(text);
+
+    // For single short phrase, speak directly
+    if (phrases.length === 1 && phrases[0].split(/\s+/).length < 5) {
+      const utter = new SpeechSynthesisUtterance(phrases[0]);
+      utter.rate = params.rate;
+      utter.pitch = params.pitch;
+      utter.volume = 1.0;
+      utter.lang = 'en-US';
+      if (voice) utter.voice = voice;
+      utter.onend = () => {
+        _speakingPromiseReject = null;
+        resolve();
+      };
+      utter.onerror = () => {
+        _speakingPromiseReject = null;
+        resolve();
+      };
+      window.speechSynthesis.speak(utter);
+      return;
+    }
+
+    // Speak phrases sequentially with natural variation
+    phrases.forEach((phrase, i) => {
+      const utter = new SpeechSynthesisUtterance(phrase);
+
+      // Natural variation: slight wobble per phrase
+      const rateWobble = 1 + (Math.random() * 0.10 - 0.05);
+      const pitchWobble = Math.random() * 0.06 - 0.03;
+
+      utter.rate = Math.max(0.5, Math.min(2.0, params.rate * rateWobble));
+      utter.pitch = Math.max(0, Math.min(2.0, params.pitch + pitchWobble));
+      utter.volume = 1.0;
+      utter.lang = 'en-US';
+      if (voice) utter.voice = voice;
+
+      // Last phrase: natural sentence-ending pitch drop
+      if (i === phrases.length - 1 && phrases.length > 1) {
+        utter.pitch = Math.max(0, params.pitch - 0.08);
+        utter.rate = Math.max(0.5, params.rate * 0.95);
+      }
+
+      // Questions: raise pitch
+      if (phrase.trim().endsWith('?')) {
+        utter.pitch = Math.min(2.0, params.pitch + 0.12);
+      }
+
+      // Exclamations: slightly faster, brighter
+      if (phrase.trim().endsWith('!')) {
+        utter.pitch = Math.min(2.0, params.pitch + 0.06);
+        utter.rate = Math.min(2.0, params.rate * 1.04);
+      }
+
+      // Resolve when last phrase finishes
+      if (i === phrases.length - 1) {
+        utter.onend = () => {
+          _speakingPromiseReject = null;
+          resolve();
+        };
+        utter.onerror = () => {
+          _speakingPromiseReject = null;
+          resolve();
+        };
+      }
+
+      window.speechSynthesis.speak(utter);
+    });
   });
 }
