@@ -11,6 +11,7 @@ import NavButton from '../components/NavButton';
 import ProgressDots from '../components/ProgressDots';
 import StarCounter from '../components/StarCounter';
 import SectionComplete from '../components/SectionComplete';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 
 export default function AbcPage() {
   const navigate = useNavigate();
@@ -69,16 +70,19 @@ export default function AbcPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8 md:px-8 md:pt-6 flex flex-col">
-      <div className="flex items-center justify-between mb-5 md:max-w-xl md:mx-auto md:w-full">
+    <div className="min-h-dvh px-4 pt-4 pb-8 md:px-8 md:pt-6 flex flex-col relative">
+      <AnimatedBackground theme="abc" />
+      <div className="flex items-center justify-between mb-5 md:max-w-xl md:mx-auto md:w-full relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
-        <h2 className="text-xl font-extrabold tracking-tight text-[#FF6B6B] md:text-2xl">ABCs</h2>
+        <h2 className="font-display text-2xl text-[#FF6B6B] md:text-3xl text-bubbly">ABCs</h2>
         <StarCounter />
       </div>
 
-      <ProgressDots total={alphabetData.length} current={index} color="#FF6B6B" />
+      <div className="relative z-10">
+        <ProgressDots total={alphabetData.length} current={index} color="#FF6B6B" />
+      </div>
 
-      <div className="flex-1 flex items-center justify-center" {...swipeHandlers}>
+      <div className="flex-1 flex items-center justify-center relative z-10" {...swipeHandlers}>
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
@@ -88,39 +92,62 @@ export default function AbcPage() {
             exit={{ x: -100, opacity: 0 }}
             transition={{ type: 'spring', damping: 20 }}
           >
+            {/* Letter card — chunky 3D block letter */}
             <motion.div
-              className="w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56 rounded-[28px] mx-auto mb-5 flex items-center justify-center bg-[#FFF0F0] shadow-[0_4px_20px_rgba(255,107,107,0.2)] border border-[#F0EAE0]"
-              animate={{ scale: [1, 1.03, 1] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
+              className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-3xl mx-auto mb-5 flex items-center justify-center"
+              style={{
+                background: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 8px 32px rgba(255,107,107,0.2), 0 0 0 2px rgba(255,107,107,0.1)',
+              }}
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
             >
-              <span className="text-7xl sm:text-8xl font-extrabold text-[#FF6B6B]">
+              <span
+                className="font-display"
+                style={{
+                  fontSize: 'clamp(5rem, 15vw, 7rem)',
+                  color: '#FF6B6B',
+                  textShadow: '3px 3px 0 rgba(255,107,107,0.2), 6px 6px 0 rgba(255,107,107,0.1)',
+                }}
+              >
                 {item.upper}{item.lower}
               </span>
             </motion.div>
+
+            {/* Word illustration */}
             <motion.div
-              className="text-7xl sm:text-8xl mb-5"
+              className="text-7xl sm:text-8xl mb-4"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', delay: 0.2 }}
             >
               {item.emoji}
             </motion.div>
-            <p className="text-2xl font-bold text-[#2D2D3A]">
+
+            <p className="font-display text-2xl text-[#2D2D3A] mb-4">
               {item.letter} is for {item.word}
             </p>
+
+            {/* Hear it button with speaker SVG */}
             <motion.button
-              className="mt-5 text-white rounded-[14px] px-7 py-2.5 font-bold cursor-pointer bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] shadow-[0_4px_20px_rgba(255,107,107,0.25)]"
+              className="text-white rounded-2xl px-8 py-3 font-display text-lg cursor-pointer bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] shadow-lg tap-bounce flex items-center gap-2 mx-auto"
               onClick={() => speak(`${item.letter}. ${item.letter} is for ${item.word}`)}
               whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.93 }}
             >
-              🔊 Hear it!
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M3 8.5V13.5H6.5L11 17.5V4.5L6.5 8.5H3Z" fill="white"/>
+                <path d="M14 8C15 9 15 13 14 14" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M16.5 6C18.5 8 18.5 14 16.5 16" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Hear it!
             </motion.button>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="flex justify-between items-center mt-5 pb-2 md:max-w-xl md:mx-auto md:w-full md:gap-8">
+      <div className="flex justify-between items-center mt-5 pb-2 md:max-w-xl md:mx-auto md:w-full md:gap-8 relative z-10">
         <NavButton onClick={() => handleNavigate(index - 1)} direction="prev" disabled={index === 0} />
         <NavButton onClick={() => handleNavigate(index + 1)} direction="next" disabled={false} />
       </div>
