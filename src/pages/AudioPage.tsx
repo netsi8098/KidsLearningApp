@@ -10,6 +10,7 @@ import { useMediaQueue } from '../hooks/useMediaQueue';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import EpisodeCard from '../components/EpisodeCard';
 import AudioPlayerBar from '../components/AudioPlayerBar';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 import NavButton from '../components/NavButton';
 
 type TabKey = 'browse' | 'favorites' | 'recent';
@@ -271,7 +272,8 @@ export default function AudioPage() {
   const isSingAlong = (cat: string) => cat === 'sing-along';
 
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] flex flex-col relative">
+    <div className="min-h-dvh flex flex-col relative">
+      <AnimatedBackground theme="stories" />
       {/* Global floating musical notes */}
       <FloatingNotes />
 

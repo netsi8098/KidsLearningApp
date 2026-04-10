@@ -9,6 +9,8 @@ import { useBadges } from '../hooks/useBadges';
 import ChoiceButton from '../components/ChoiceButton';
 import NavButton from '../components/NavButton';
 import StarCounter from '../components/StarCounter';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
+import MascotLion from '../components/svg/MascotLion';
 
 const categories = [
   { key: 'mixed', label: 'Mixed', emoji: '🎲', color: '#FF8C42' },
@@ -97,10 +99,11 @@ export default function QuizPage() {
   // Category picker screen
   if (!selectedCategory) {
     return (
-      <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8 flex flex-col">
+      <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative">
+        <AnimatedBackground theme="quiz" />
         <div className="flex items-center justify-between mb-5">
           <NavButton onClick={() => navigate('/menu')} direction="back" />
-          <h2 className="text-xl font-extrabold tracking-tight" style={{ color: '#FF8C42' }}>Quiz Time!</h2>
+          <h2 className="font-display text-xl text-bubbly" style={{ color: '#FF8C42' }}>Quiz Time!</h2>
           <StarCounter />
         </div>
 

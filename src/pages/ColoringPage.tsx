@@ -8,6 +8,7 @@ import CategoryFilterBar from '../components/CategoryFilterBar';
 import DrawingCanvas from '../components/DrawingCanvas';
 import ArtworkGallery from '../components/ArtworkGallery';
 import NavButton from '../components/NavButton';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -101,7 +102,8 @@ export default function ColoringPage() {
 
   // ===== MAIN PAGE =====
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8">
+    <div className="min-h-dvh px-4 pt-4 pb-8 relative">
+      <AnimatedBackground theme="create" />
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <NavButton onClick={() => navigate('/menu')} direction="back" />

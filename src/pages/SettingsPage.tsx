@@ -10,6 +10,7 @@ import { languages } from '../i18n/i18nConfig';
 import { timeModes } from '../registry/timeOfDayConfig';
 import { db } from '../db/database';
 import NavButton from '../components/NavButton';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 import IdentitySummaryCard from '../components/IdentitySummaryCard';
 import { getAvailableVoices, setPreferredVoice, getActiveVoiceName } from '../hooks/useAudio';
 import { aiSpeak, checkTTSServer, resetTTSStatus, getSelectedAIVoice, setSelectedAIVoice, type VoicePreset } from '../services/ttsService';
@@ -319,10 +320,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-24 md:px-8 md:pt-6 md:pb-8">
-      <div className="flex items-center justify-between mb-6 md:max-w-2xl md:mx-auto">
+    <div className="min-h-dvh px-4 pt-4 pb-24 md:px-8 md:pt-6 md:pb-8 relative">
+      <AnimatedBackground theme="home" />
+      <div className="flex items-center justify-between mb-6 md:max-w-2xl md:mx-auto relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
-        <h2 className="text-lg font-extrabold text-[#2D2D3A] md:text-xl">Settings</h2>
+        <h2 className="font-display text-xl text-[#2D2D3A] text-bubbly">Settings</h2>
         <div className="w-14" />
       </div>
 

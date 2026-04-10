@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useAudio } from '../hooks/useAudio';
 import { db } from '../db/database';
 import NavButton from '../components/NavButton';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 import { gamesConfig, wordBuilderWords, numberPopEmojis, type GameDifficulty, type GameConfig } from '../data/gamesConfig';
 import { animalsData } from '../data/animalsData';
 import { shapesData } from '../data/shapesData';
@@ -1156,9 +1157,10 @@ export default function GamesPage() {
 
   if (screen === 'hub') {
     return (
-      <div className="min-h-dvh bg-[#FFF8F0] pb-24 md:pb-8">
+      <div className="min-h-dvh pb-24 md:pb-8 relative">
+        <AnimatedBackground theme="play" />
         {/* Header */}
-        <div className="px-4 pt-4 md:px-8 md:pt-6">
+        <div className="px-4 pt-4 md:px-8 md:pt-6 relative z-10">
           <div className="flex items-center justify-between mb-4">
             <NavButton onClick={() => navigate('/menu')} direction="back" />
             <h2 className="text-lg font-extrabold text-[#2D2D3A]">Mini Games</h2>

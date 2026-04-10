@@ -7,6 +7,7 @@ import { useAudio } from '../hooks/useAudio';
 import { db } from '../db/database';
 import NavButton from '../components/NavButton';
 import StarCounter from '../components/StarCounter';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 import StoryIllustration from '../components/StoryIllustration';
 import { stopSpeaking as stopAIVoice } from '../services/ttsService';
 import {
@@ -400,7 +401,8 @@ export default function StoriesPage() {
   // ===== LIBRARY VIEW =====
   if (viewMode === 'library') {
     return (
-      <div className="min-h-dvh bg-[#FFF8F0] pb-24 md:pb-8">
+      <div className="min-h-dvh pb-24 md:pb-8 relative">
+        <AnimatedBackground theme="stories" />
         {/* Premium Hero Banner */}
         <div
           className="relative overflow-hidden px-4 pt-4 pb-6 md:px-8 md:pb-8"

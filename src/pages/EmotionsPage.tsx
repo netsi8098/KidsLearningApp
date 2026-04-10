@@ -10,6 +10,7 @@ import NavButton from '../components/NavButton';
 import EmotionPicker from '../components/EmotionPicker';
 import ContentCard from '../components/ContentCard';
 import CategoryFilterBar from '../components/CategoryFilterBar';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 
 type SectionView = 'checkin' | 'explorer' | 'skills';
 
@@ -88,7 +89,8 @@ export default function EmotionsPage() {
   if (activeSkill) {
     const quiz = activeSkill.quiz?.[quizIndex];
     return (
-      <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8">
+      <div className="min-h-dvh px-4 pt-4 pb-8 relative">
+      <AnimatedBackground theme="wellbeing" />
         <div className="flex items-center gap-3 mb-6">
           <NavButton
             onClick={() => {
@@ -202,7 +204,8 @@ export default function EmotionsPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8">
+    <div className="min-h-dvh px-4 pt-4 pb-8 relative">
+      <AnimatedBackground theme="wellbeing" />
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
