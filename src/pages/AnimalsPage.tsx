@@ -12,6 +12,7 @@ import ProgressDots from '../components/ProgressDots';
 import StarCounter from '../components/StarCounter';
 import SectionComplete from '../components/SectionComplete';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import AnimalCharacter from '../components/svg/AnimalCharacters';
 
 export default function AnimalsPage() {
   const navigate = useNavigate();
@@ -104,9 +105,7 @@ export default function AnimalsPage() {
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 2.5, repeat: Infinity }}
             >
-              <span className="text-[80px] sm:text-[100px] leading-none">
-                {item.emoji}
-              </span>
+              <AnimalCharacter animal={item.name.toLowerCase()} size={160} />
             </motion.div>
 
             <motion.p
