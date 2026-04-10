@@ -21,6 +21,9 @@ import StarCounter from '../components/StarCounter';
 import NudgeBanner from '../components/NudgeBanner';
 import { useNudges } from '../hooks/useNudges';
 import { collections } from '../registry/collectionsConfig';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
+import MascotLion from '../components/svg/MascotLion';
+import { HomeIcon, LearnIcon, PlayIcon, CreateIcon, ListenIcon, WellbeingIcon, ExploreIcon } from '../components/svg/NavIcons';
 
 /* ─── Tab definitions ──────────────────────────────────── */
 
@@ -806,7 +809,10 @@ export default function MainMenu() {
   const missionsTotal = missions.length;
 
   return (
-    <div className="h-dvh bg-surface flex flex-col overflow-hidden">
+    <div className="h-dvh flex flex-col overflow-hidden relative">
+      {/* Immersive animated background per tab */}
+      <AnimatedBackground theme={activeTab === 'home' ? 'home' : activeTab as any} />
+
       {/* ══════════════════════════════════════════════════════
           1. COMPACT HEADER
          ══════════════════════════════════════════════════════ */}
@@ -840,7 +846,7 @@ export default function MainMenu() {
                 className="flex items-center gap-1 rounded-full px-2.5 py-1.5"
                 style={{ background: 'linear-gradient(135deg, #FFE0B2, #FFCC80)' }}
               >
-                <span className="text-sm">🔥</span>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1C8 1 12 5 12 9C12 11.8 10.2 14 8 14C5.8 14 4 11.8 4 9C4 7 5 5 6 4C6 6 7 7 8 6C8 4 8 1 8 1Z" fill="#FF6B6B" stroke="#EF4444" strokeWidth="0.8"/><path d="M8 8C8 8 10 10 10 11.5C10 12.6 9.1 13.5 8 13.5C6.9 13.5 6 12.6 6 11.5C6 10 8 8 8 8Z" fill="#FFE66D"/></svg>
                 <span className="text-xs font-extrabold text-orange-700">{streakDays}</span>
               </div>
             )}
@@ -850,7 +856,7 @@ export default function MainMenu() {
               onClick={() => navigate('/settings')}
               whileTap={{ scale: 0.9 }}
             >
-              <span className="text-base">⚙️</span>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="#6B6B7B" strokeWidth="1.5"/><path d="M9 1.5V3M9 15V16.5M1.5 9H3M15 9H16.5M3.4 3.4L4.5 4.5M13.5 13.5L14.6 14.6M3.4 14.6L4.5 13.5M13.5 4.5L14.6 3.4" stroke="#6B6B7B" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </motion.button>
           </div>
         </div>
@@ -872,25 +878,38 @@ export default function MainMenu() {
             {activeTab === 'home' ? (
               /* ── HOME TAB ── */
               <div className="flex-1 overflow-y-auto pb-4 scrollbar-hide">
-                {/* Hero greeting */}
+                {/* Hero greeting with mascot */}
                 <motion.div
-                  className="rounded-2xl overflow-hidden relative mb-4"
+                  className="rounded-3xl overflow-hidden relative mb-4"
                   style={{
-                    background: `linear-gradient(135deg, ${activeTheme.color}18, ${activeTheme.color}30, ${character.color}15)`,
-                    border: '1px solid var(--color-border-subtle)',
+                    background: 'rgba(255,255,255,0.75)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 4px 20px rgba(45,45,58,0.08)',
                   }}
                 >
-                  <span className="absolute -top-4 -right-4 text-7xl opacity-10 pointer-events-none select-none" aria-hidden="true">{activeTheme.emoji}</span>
-                  <div className="relative z-10 p-4">
-                    <MascotBubble message={getContextMessage('greeting').replace('{name}', currentPlayer.name)} />
-                    <motion.button
-                      className="mt-2 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold cursor-pointer"
-                      style={{ background: `${activeTheme.color}CC`, color: 'white' }}
-                      onClick={() => { const r = ['/lessons', '/stories', '/discover']; navigate(r[Math.floor(Math.random() * r.length)]); }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <span>✨</span><span>Today's Pick</span><span>→</span>
-                    </motion.button>
+                  <div className="relative z-10 p-4 flex items-center gap-3">
+                    <MascotLion size={80} expression="happy" animated />
+                    <div className="flex-1 min-w-0">
+                      <div
+                        className="rounded-2xl rounded-bl-sm px-4 py-2.5 mb-2"
+                        style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(45,45,58,0.04)' }}
+                      >
+                        <p className="font-display text-sm text-[#2D2D3A]">
+                          Hi {currentPlayer.name}! Ready to learn something amazing?
+                        </p>
+                      </div>
+                      <motion.button
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold cursor-pointer text-white tap-bounce"
+                        style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8C42)', boxShadow: '0 4px 12px rgba(255,107,107,0.3)' }}
+                        onClick={() => { const r = ['/lessons', '/stories', '/discover']; navigate(r[Math.floor(Math.random() * r.length)]); }}
+                        whileTap={{ scale: 0.93 }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L9 5L13 5.5L10 8.5L11 13L7 10.5L3 13L4 8.5L1 5.5L5 5Z" fill="#FFE66D"/></svg>
+                        Today&apos;s Pick
+                        <span>&#8594;</span>
+                      </motion.button>
+                    </div>
                   </div>
                 </motion.div>
 
@@ -984,19 +1003,19 @@ export default function MainMenu() {
                 {/* Quick links row */}
                 <div className="grid grid-cols-4 gap-2 mb-4">
                   {[
-                    { emoji: '🏆', label: 'Rewards', route: '/rewards' },
-                    { emoji: '📔', label: 'Scrapbook', route: '/scrapbook' },
-                    { emoji: '📊', label: 'Parents', route: '/parent-dashboard' },
-                    { emoji: '🧠', label: 'Assessment', route: '/assessment' },
+                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 9H21L16 13.5L18 21L12 17L6 21L8 13.5L3 9H9Z" fill="#FFD93D" stroke="#F59E0B" strokeWidth="1.5"/></svg>, label: 'Rewards', route: '/rewards', bg: '#FFF8E1' },
+                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#A78BFA" strokeWidth="1.8" fill="#F3EFFE"/><path d="M8 8H16M8 12H14" stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round"/></svg>, label: 'Scrapbook', route: '/scrapbook', bg: '#F3EFFE' },
+                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 4V8L12 10L9 8V4Z" stroke="#4ECDC4" strokeWidth="1.8" fill="#EDFAF8"/><circle cx="12" cy="16" r="5" stroke="#4ECDC4" strokeWidth="1.8" fill="#EDFAF8"/></svg>, label: 'Parents', route: '/parent-dashboard', bg: '#EDFAF8' },
+                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="12" rx="8" ry="7" fill="#FFF0F6" stroke="#FF8FAB" strokeWidth="1.8"/><path d="M9 10C9 10 12 8 15 10" stroke="#FF8FAB" strokeWidth="1.5" strokeLinecap="round"/><path d="M12 10V15" stroke="#FF8FAB" strokeWidth="1.5" strokeLinecap="round"/></svg>, label: 'Assessment', route: '/assessment', bg: '#FFF0F6' },
                   ].map((item) => (
                     <motion.button
                       key={item.route}
-                      className="flex flex-col items-center gap-1 py-3 rounded-2xl cursor-pointer"
-                      style={{ background: 'var(--color-surface-card)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-subtle)' }}
+                      className="flex flex-col items-center gap-1.5 py-3 rounded-2xl cursor-pointer tap-bounce"
+                      style={{ background: item.bg, boxShadow: '0 2px 8px rgba(45,45,58,0.06)', border: '1px solid rgba(45,45,58,0.04)' }}
                       onClick={() => navigate(item.route)}
-                      whileTap={{ scale: 0.95 }}
+                      whileTap={{ scale: 0.93 }}
                     >
-                      <span className="text-2xl">{item.emoji}</span>
+                      {item.icon}
                       <span className="text-[10px] font-bold text-text-secondary">{item.label}</span>
                     </motion.button>
                   ))}
@@ -1007,11 +1026,10 @@ export default function MainMenu() {
               <div className="flex-1 flex flex-col pt-2">
                 {/* Tab title */}
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-black text-text-primary">
-                    {menuTabs.find((t) => t.key === activeTab)?.emoji}{' '}
+                  <h2 className="font-display text-xl text-[#2D2D3A]">
                     {menuTabs.find((t) => t.key === activeTab)?.label}
                   </h2>
-                  <span className="text-xs text-text-tertiary font-semibold">
+                  <span className="text-xs text-white/70 font-bold bg-[#2D2D3A]/20 px-2.5 py-1 rounded-full">
                     {activeTiles.length} activities
                   </span>
                 </div>
@@ -1029,43 +1047,55 @@ export default function MainMenu() {
       </div>
 
       {/* ══════════════════════════════════════════════════════
-          3. BOTTOM TAB BAR — Modern Full-Width
+          3. BOTTOM TAB BAR — Floating pill with SVG icons
          ══════════════════════════════════════════════════════ */}
-      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)]">
-        <div className="border-t border-[var(--color-border-subtle)]" style={{ background: 'var(--color-surface-card)' }}>
-          <div className="max-w-md mx-auto md:max-w-2xl flex items-center justify-around px-1 py-1">
-            {menuTabs.map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <motion.button
-                  key={tab.key}
-                  className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl cursor-pointer relative"
-                  onClick={() => setActiveTab(tab.key)}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="bottomTabBg"
-                      className="absolute inset-0 rounded-xl"
-                      style={{ background: 'linear-gradient(135deg, #FF6B6B15, #FF8C4215)' }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className={`text-lg relative z-10 transition-transform ${isActive ? 'scale-110' : 'scale-100'}`}>{tab.emoji}</span>
-                  <span className={`text-[9px] font-bold relative z-10 transition-colors ${isActive ? 'text-coral' : 'text-text-tertiary'}`}>
+      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-4 mb-2">
+        <div
+          className="max-w-md mx-auto md:max-w-2xl flex items-center justify-around px-2 py-1.5 rounded-full"
+          style={{
+            background: 'rgba(255,255,255,0.88)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            boxShadow: '0 8px 32px rgba(45,45,58,0.12), 0 0 0 1px rgba(255,255,255,0.2)',
+          }}
+        >
+          {menuTabs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            const NavIcon = {
+              home: HomeIcon, learn: LearnIcon, play: PlayIcon,
+              create: CreateIcon, listen: ListenIcon, wellbeing: WellbeingIcon, explore: ExploreIcon,
+            }[tab.key] ?? HomeIcon;
+            return (
+              <motion.button
+                key={tab.key}
+                className="flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-2xl cursor-pointer relative tap-bounce"
+                onClick={() => setActiveTab(tab.key)}
+                whileTap={{ scale: 0.85 }}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="bottomTabBg"
+                    className="absolute inset-0 rounded-2xl"
+                    style={{ background: 'linear-gradient(135deg, #FF6B6B18, #FF8C4218)' }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <div className="relative z-10">
+                  <NavIcon size={isActive ? 26 : 22} active={isActive} />
+                </div>
+                {isActive && (
+                  <motion.span
+                    className="text-[9px] font-bold relative z-10 text-coral"
+                    initial={{ opacity: 0, y: 2 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     {tab.label}
-                  </span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="bottomTabDot"
-                      className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-coral"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
+                  </motion.span>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
     </div>
