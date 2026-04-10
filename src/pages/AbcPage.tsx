@@ -12,6 +12,7 @@ import ProgressDots from '../components/ProgressDots';
 import StarCounter from '../components/StarCounter';
 import SectionComplete from '../components/SectionComplete';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import AlphabetIllustration from '../components/svg/AlphabetIllustrations';
 
 export default function AbcPage() {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ export default function AbcPage() {
               animate={{ scale: 1 }}
               transition={{ type: 'spring', delay: 0.2 }}
             >
-              {item.emoji}
+              <AlphabetIllustration letter={item.letter} size={120} className="animate-float-gentle" />
             </motion.div>
 
             <p className="font-display text-2xl text-[#2D2D3A] mb-4">
