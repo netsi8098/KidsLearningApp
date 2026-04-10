@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -1094,6 +1094,12 @@ export default function RewardsPage() {
    ══════════════════════════════════════════════════════════ */
 
 /** Small stat card used in the summary row */
+const STAT_ICONS: Record<string, React.ReactNode> = {
+  star: <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 9H22L16.5 13.5L18.5 21L12 17L5.5 21L7.5 13.5L2 9H9Z" fill="#FFD93D" stroke="#F59E0B" strokeWidth="1.2"/></svg>,
+  medal: <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="14" r="7" fill="#FFD93D" stroke="#F59E0B" strokeWidth="1.5"/><path d="M9 2L7 8H17L15 2" fill="#FF6B6B" stroke="#EF4444" strokeWidth="1"/><text x="10" y="17" fontSize="8" fontWeight="bold" fill="#F59E0B">1</text></svg>,
+  calendar: <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" fill="#4ECDC4" fillOpacity="0.2" stroke="#4ECDC4" strokeWidth="1.5"/><path d="M8 2V6M16 2V6" stroke="#4ECDC4" strokeWidth="1.5" strokeLinecap="round"/><path d="M3 10H21" stroke="#4ECDC4" strokeWidth="1"/><path d="M8 14L11 17L16 12" stroke="#4ECDC4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+};
+
 function StatCard({
   emoji,
   value,
@@ -1105,23 +1111,30 @@ function StatCard({
   label: string;
   delay: number;
 }) {
+  const iconKey = emoji === '⭐' ? 'star' : emoji === '🏅' ? 'medal' : 'calendar';
   return (
     <motion.div
-      className="bg-white rounded-[20px] p-4 text-center shadow-[0_2px_12px_rgba(45,45,58,0.06)] border border-[#F0EAE0]"
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
+      className="rounded-3xl p-4 text-center relative overflow-hidden"
+      style={{
+        background: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.3)',
+        borderBottom: '4px solid rgba(0,0,0,0.08)',
+      }}
+      initial={{ scale: 0, y: 20 }}
+      animate={{ scale: 1, y: 0 }}
       transition={{ type: 'spring', delay }}
     >
-      <div className="text-3xl mb-1.5 drop-shadow-sm">{emoji}</div>
+      <div className="mb-1.5 flex justify-center">{STAT_ICONS[iconKey]}</div>
       <motion.p
-        className="text-2xl font-extrabold text-amber-700"
+        className="font-display text-2xl text-[#2D2D3A]"
         key={value}
         animate={{ scale: [1, 1.15, 1] }}
         transition={{ duration: 0.3 }}
       >
         {value}
       </motion.p>
-      <p className="text-[11px] text-[#6B6B7B] font-medium leading-tight">{label}</p>
+      <p className="text-[11px] text-[#6B6B7B] font-bold leading-tight">{label}</p>
     </motion.div>
   );
 }
