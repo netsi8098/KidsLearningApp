@@ -843,130 +843,84 @@ export default function StoriesPage() {
     const progressPercent = ((currentPage + 1) / totalPages) * 100;
     const isFavorite = activeProgress?.favorite ?? false;
 
+    /* Cover page (page -1 equivalent — show before page 0) */
+    const showCover = currentPage === 0 && !isSpeaking && !autoRead;
+
     return (
-      <div
-        className="h-dvh flex flex-col overflow-hidden"
-        style={{ background: 'linear-gradient(180deg, #F5F0E8 0%, #E8DFD0 100%)' }}
-      >
-        {/* Compact header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">
+      <div className="h-dvh flex flex-col overflow-hidden relative page-with-bg">
+        {/* Immersive animated background */}
+        <AnimatedBackground theme="stories" />
+
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2 relative z-10">
           <motion.button
-            className="w-9 h-9 rounded-[12px] flex items-center justify-center cursor-pointer text-gray-500"
-            style={{
-              background: 'rgba(255,255,255,0.7)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            }}
+            className="w-11 h-11 rounded-full flex items-center justify-center cursor-pointer text-white"
+            style={{ background: 'rgba(78,205,196,0.9)', boxShadow: '0 2px 10px rgba(78,205,196,0.3)' }}
             onClick={backToLibrary}
             whileTap={{ scale: 0.9 }}
           >
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-              <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <path d="M12.5 15L7.5 10L12.5 5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.button>
 
           <div className="flex-1 mx-3 text-center">
-            <p className="text-[11px] font-bold text-[#8B7355] truncate">{activeStory.title}</p>
-            <p className="text-[10px] text-[#A89880]">Page {currentPage + 1} of {totalPages}</p>
+            <p className="font-display text-sm text-white truncate" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>{activeStory.title}</p>
+            <p className="text-[10px] text-white/70">Page {currentPage + 1} of {totalPages}</p>
           </div>
 
           <motion.button
-            className="w-9 h-9 rounded-[12px] flex items-center justify-center cursor-pointer"
-            style={{
-              background: 'rgba(255,255,255,0.7)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            }}
+            className="w-11 h-11 rounded-full flex items-center justify-center cursor-pointer"
+            style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }}
             onClick={() => toggleFavorite(activeStory.id)}
             whileTap={{ scale: 0.8 }}
           >
-            <span className="text-sm">{isFavorite ? '❤️' : '🤍'}</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill={isFavorite ? '#FF6B6B' : 'none'} stroke={isFavorite ? '#FF6B6B' : 'white'} strokeWidth="1.5">
+              <path d="M10 17S2 12 2 7.5C2 4.5 4.5 2.5 7 2.5C8.5 2.5 9.5 3.5 10 4.5C10.5 3.5 11.5 2.5 13 2.5C15.5 2.5 18 4.5 18 7.5C18 12 10 17 10 17Z" />
+            </svg>
           </motion.button>
         </div>
 
         {/* Book container */}
-        <div className="flex-1 flex items-center justify-center px-4 pb-2 overflow-hidden">
-          <div
-            className="relative w-full max-w-md"
-            style={{ perspective: '1200px' }}
-          >
-            {/* Book shadow */}
-            <div
-              className="absolute inset-x-4 bottom-[-6px] h-4 rounded-[50%]"
-              style={{ background: 'radial-gradient(ellipse, rgba(0,0,0,0.12), transparent 70%)' }}
-            />
-
-            {/* Book spine edge */}
-            <div
-              className="absolute left-0 top-2 bottom-2 w-3 rounded-l-[4px] z-10"
-              style={{
-                background: 'linear-gradient(90deg, #C4A87C, #D4B88C, #C4A87C)',
-                boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-              }}
-            />
-
-            {/* Page content — the "book page" */}
+        <div className="flex-1 flex items-center justify-center px-4 pb-2 overflow-hidden relative z-10">
+          <div className="relative w-full max-w-lg" style={{ perspective: '1200px' }}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={currentPage}
-                className="relative ml-3 rounded-r-[12px] rounded-l-[4px] overflow-hidden"
+                className="relative rounded-3xl overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #FFFEF8 0%, #FFF9EE 40%, #FFFBF2 100%)',
-                  boxShadow: '4px 4px 20px rgba(0,0,0,0.08), 1px 0 3px rgba(0,0,0,0.04), inset -2px 0 8px rgba(0,0,0,0.02)',
-                  minHeight: '420px',
+                  background: '#FDF6E3',
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08)',
+                  minHeight: '480px',
                 }}
-                initial={{
-                  x: turnDirection === 'next' ? 80 : -80,
-                  opacity: 0,
-                  scale: 0.96,
-                }}
-                animate={{
-                  x: 0,
-                  opacity: 1,
-                  scale: 1,
-                }}
-                exit={{
-                  x: turnDirection === 'next' ? -80 : 80,
-                  opacity: 0,
-                  scale: 0.96,
-                }}
-                transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                initial={{ x: turnDirection === 'next' ? 120 : -120, opacity: 0, rotateY: turnDirection === 'next' ? 8 : -8 }}
+                animate={{ x: 0, opacity: 1, rotateY: 0 }}
+                exit={{ x: turnDirection === 'next' ? -120 : 120, opacity: 0, rotateY: turnDirection === 'next' ? -8 : 8 }}
+                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {/* Page texture lines */}
-                <div className="absolute top-0 right-0 w-[1px] h-full" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.03), transparent)' }} />
-                <div className="absolute top-0 right-3 w-[1px] h-full opacity-30" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.02), transparent)' }} />
-
-                {/* Page fold corner */}
-                <div
-                  className="absolute top-0 right-0 w-8 h-8 z-20"
-                  style={{
-                    background: 'linear-gradient(225deg, #E8DFD0 0%, #E8DFD0 50%, transparent 50%)',
-                  }}
-                />
+                {/* Warm parchment texture overlay */}
+                <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(255,230,180,0.4), transparent 70%)' }} />
 
                 {/* Content */}
-                <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-8" style={{ minHeight: '420px' }}>
+                <div className="relative z-10 flex flex-col items-center justify-center text-center px-8 py-10" style={{ minHeight: '480px' }}>
                   {/* Storybook illustration */}
                   <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
 
                   {/* Story text */}
                   <motion.div
-                    className="max-w-sm"
-                    initial={{ y: 12, opacity: 0 }}
+                    className="max-w-md mt-4"
+                    initial={{ y: 15, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.4 }}
                   >
-                    <p
-                      className={`${readerTextClass} leading-[1.8] text-[#3D3425] font-medium`}
-                      style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-                    >
+                    <p className={`${readerTextClass} leading-[1.9] text-[#3D3425] font-medium`} style={{ fontFamily: "'Nunito', Georgia, serif" }}>
                       {renderPageText(pageData, spokenWordIndex)}
                     </p>
                   </motion.div>
 
                   {/* Page number */}
-                  <p className="absolute bottom-4 text-[11px] font-medium text-[#BBA88A]">
-                    — {currentPage + 1} —
+                  <p className="absolute bottom-5 font-display text-sm text-[#BBA88A]">
+                    {currentPage + 1}
                   </p>
                 </div>
               </motion.div>
@@ -975,35 +929,33 @@ export default function StoriesPage() {
         </div>
 
         {/* Bottom controls */}
-        <div className="flex-shrink-0 px-4 pb-4 pt-1">
-          {/* Progress bar */}
+        <div className="flex-shrink-0 px-4 pb-4 pt-1 relative z-10">
+          {/* Smooth progress bar */}
           <div className="flex items-center gap-2 mb-3 px-1">
-            <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
-              <motion.div
+            <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.2)' }}>
+              <div
                 className="h-full rounded-full"
-                style={{ background: 'linear-gradient(90deg, #A78BFA, #8B5CF6)' }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.4 }}
+                style={{
+                  background: 'linear-gradient(90deg, #FFE66D, #FF8C42, #FF6B6B)',
+                  width: `${progressPercent}%`,
+                  transition: 'width 0.5s ease',
+                }}
               />
             </div>
           </div>
 
           {/* Controls row */}
           <div className="flex items-center justify-between gap-3">
-            {/* Prev */}
+            {/* Prev — large round blue button */}
             <motion.button
-              className="w-12 h-12 rounded-[14px] flex items-center justify-center cursor-pointer disabled:opacity-25 text-[#8B7355]"
-              style={{
-                background: 'rgba(255,255,255,0.75)',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              }}
+              className="w-[60px] h-[60px] rounded-full flex items-center justify-center cursor-pointer disabled:opacity-25 text-white"
+              style={{ background: 'linear-gradient(135deg, #45B7D1, #38A3C0)', boxShadow: '0 4px 16px rgba(69,183,209,0.3)' }}
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 0}
               whileTap={{ scale: 0.9 }}
             >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </motion.button>
 
@@ -1011,15 +963,11 @@ export default function StoriesPage() {
             <div className="flex items-center gap-2">
               {/* Read aloud */}
               <motion.button
-                className={`flex items-center gap-1.5 px-5 py-2.5 rounded-[12px] font-bold text-sm cursor-pointer ${
-                  isSpeaking
-                    ? 'text-white'
-                    : 'text-[#6B6B7B]'
-                }`}
+                className={`flex items-center gap-1.5 px-5 py-3 rounded-full font-display text-sm cursor-pointer ${isSpeaking ? 'text-white' : 'text-white/80'}`}
                 style={
                   isSpeaking
-                    ? { background: 'linear-gradient(135deg, #A78BFA, #8B5CF6)', boxShadow: '0 4px 14px rgba(167,139,250,0.3)' }
-                    : { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }
+                    ? { background: 'linear-gradient(135deg, #A78BFA, #8B5CF6)', boxShadow: '0 4px 14px rgba(167,139,250,0.4)' }
+                    : { background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }
                 }
                 onClick={isSpeaking ? stopReading : handleReadAloud}
                 whileTap={{ scale: 0.95 }}
@@ -1029,20 +977,18 @@ export default function StoriesPage() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
                   </motion.span>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 22 22" fill="none"><path d="M3 8V14H6L10 17V5L6 8H3Z" fill="white"/><path d="M13 8C14 9.5 14 12.5 13 14" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
                 )}
                 <span>{isSpeaking ? 'Pause' : 'Read'}</span>
               </motion.button>
 
               {/* Auto toggle */}
               <motion.button
-                className={`px-3 py-2.5 rounded-[12px] font-bold text-xs cursor-pointer ${
-                  autoRead ? 'text-white' : 'text-[#9B9BAB]'
-                }`}
+                className={`px-4 py-3 rounded-full font-display text-xs cursor-pointer ${autoRead ? 'text-white' : 'text-white/60'}`}
                 style={
                   autoRead
-                    ? { background: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)', boxShadow: '0 2px 10px rgba(78,205,196,0.2)' }
-                    : { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }
+                    ? { background: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)', boxShadow: '0 2px 10px rgba(78,205,196,0.3)' }
+                    : { background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }
                 }
                 onClick={() => setAutoRead(!autoRead)}
                 whileTap={{ scale: 0.95 }}
@@ -1051,19 +997,15 @@ export default function StoriesPage() {
               </motion.button>
             </div>
 
-            {/* Next */}
+            {/* Next — large round coral button */}
             <motion.button
-              className="w-12 h-12 rounded-[14px] flex items-center justify-center cursor-pointer text-[#8B7355]"
-              style={{
-                background: 'rgba(255,255,255,0.75)',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              }}
+              className="w-[60px] h-[60px] rounded-full flex items-center justify-center cursor-pointer text-white"
+              style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8E8E)', boxShadow: '0 4px 16px rgba(255,107,107,0.3)' }}
               onClick={() => goToPage(currentPage + 1)}
               whileTap={{ scale: 0.9 }}
             >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" style={{ transform: 'rotate(180deg)' }}>
-                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 6L15 12L9 18" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </motion.button>
           </div>

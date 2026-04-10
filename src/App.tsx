@@ -65,10 +65,66 @@ const ColorFinderPage = lazy(() => import('./pages/ColorFinderPage'));
 
 function LoadingScreen() {
   return (
-    <div className="min-h-dvh bg-cream flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-6xl animate-float">📚</div>
-        <p className="text-gray-400 mt-3 font-bold">Loading...</p>
+    <div
+      className="min-h-dvh flex flex-col items-center justify-center relative overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 30%, #FFE66D 60%, #4ECDC4 100%)' }}
+    >
+      {/* Floating decorative circles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[10%] left-[15%] w-20 h-20 rounded-full bg-white/10 animate-float-gentle" />
+        <div className="absolute top-[30%] right-[10%] w-14 h-14 rounded-full bg-white/10 animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-[20%] left-[20%] w-16 h-16 rounded-full bg-white/10 animate-float-gentle" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-[35%] right-[25%] w-10 h-10 rounded-full bg-white/10 animate-float" style={{ animationDelay: '1.5s' }} />
+      </div>
+
+      {/* Mascot with bounce-in */}
+      <div className="animate-bounce-in mb-4">
+        <svg width="120" height="120" viewBox="0 0 200 200" fill="none">
+          {/* Mane */}
+          <circle cx="100" cy="95" r="55" fill="#D2691E" />
+          {/* Face */}
+          <circle cx="100" cy="100" r="40" fill="#F4A460" />
+          {/* Eyes */}
+          <ellipse cx="88" cy="93" rx="6" ry="7" fill="white" />
+          <ellipse cx="112" cy="93" rx="6" ry="7" fill="white" />
+          <circle cx="90" cy="94" r="4" fill="#2D2D3A" />
+          <circle cx="114" cy="94" r="4" fill="#2D2D3A" />
+          <circle cx="91" cy="92" r="1.5" fill="white" />
+          <circle cx="115" cy="92" r="1.5" fill="white" />
+          {/* Nose */}
+          <ellipse cx="100" cy="104" rx="4" ry="3" fill="#8B4513" />
+          {/* Smile */}
+          <path d="M90 110C95 116 105 116 110 110" stroke="#8B4513" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          {/* Cheeks */}
+          <circle cx="78" cy="105" r="5" fill="#FFB6C1" fillOpacity="0.5" />
+          <circle cx="122" cy="105" r="5" fill="#FFB6C1" fillOpacity="0.5" />
+          {/* Ears */}
+          <circle cx="60" cy="60" r="12" fill="#D2691E" />
+          <circle cx="60" cy="60" r="7" fill="#FFB6C1" />
+          <circle cx="140" cy="60" r="12" fill="#D2691E" />
+          <circle cx="140" cy="60" r="7" fill="#FFB6C1" />
+        </svg>
+      </div>
+
+      {/* Animated title */}
+      <h1 className="text-center mb-6" style={{ fontSize: 'clamp(1.8rem, 7vw, 2.8rem)' }}>
+        {'Kids Learning Fun!'.split('').map((char, i) => (
+          <span
+            key={i}
+            className="font-display text-white animate-letter-bounce inline-block"
+            style={{ animationDelay: `${i * 0.05}s`, textShadow: '0 2px 8px rgba(0,0,0,0.2)', display: char === ' ' ? 'inline' : 'inline-block' }}
+          >
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        ))}
+      </h1>
+
+      {/* Loading bar */}
+      <div className="w-48 h-2 rounded-full overflow-hidden bg-white/20">
+        <div
+          className="h-full rounded-full bg-white"
+          style={{ animation: 'shimmer 1.2s ease-in-out infinite', width: '60%' }}
+        />
       </div>
     </div>
   );
