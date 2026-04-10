@@ -35,16 +35,16 @@ let _currentAudio: HTMLAudioElement | null = null;
 let _lastCheck: number | null = null;
 let _speakingPromiseReject: (() => void) | null = null;
 
-/** Check if the TTS server is running (caches for 30s) */
+/** Check if the TTS server is running (caches for 60s to reduce latency) */
 export async function checkTTSServer(): Promise<boolean> {
-  if (_serverAvailable !== null && _lastCheck && Date.now() - _lastCheck < 30000) {
+  if (_serverAvailable !== null && _lastCheck && Date.now() - _lastCheck < 60000) {
     return _serverAvailable;
   }
 
   for (const url of TTS_URLS) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 2000);
+      const timeout = setTimeout(() => controller.abort(), 1200); // faster timeout
       const res = await fetch(`${url}/health`, { signal: controller.signal });
       clearTimeout(timeout);
       if (res.ok) {
@@ -194,6 +194,11 @@ function splitIntoPhrases(text: string): string[] {
   }
 
   return phrases.length > 0 ? phrases : [text];
+}
+
+// Proactive health check on module load — so first speak call is instant
+if (typeof window !== 'undefined') {
+  setTimeout(() => checkTTSServer(), 1000);
 }
 
 // ── Core Speaking Functions ─────────────────────────────────────────────

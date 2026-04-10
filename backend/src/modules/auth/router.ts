@@ -32,9 +32,14 @@ const loginSchema = z.object({
 });
 
 router.post('/login', validate(loginSchema), async (req, res) => {
-  const { email, password } = req.body;
-  const result = await authService.login({ email, password });
-  res.json(result);
+  try {
+    const { email, password } = req.body;
+    const result = await authService.login({ email, password });
+    res.json(result);
+  } catch (err: any) {
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Login failed' });
+  }
 });
 
 // ── GET /api/auth/me ──────────────────────────────────────
