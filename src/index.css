@@ -695,8 +695,17 @@ button:active, [role="button"]:active {
   z-index: 1;
 }
 
-/* Ensure pages with AnimatedBackground don't let bg eat clicks */
+/* Ensure pages with AnimatedBackground don't let bg eat clicks.
+   All direct children (except the fixed background) get z-index:1 */
 .page-with-bg > *:not([style*="position: fixed"]) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Also apply to common content containers inside page-with-bg */
+.page-with-bg > div > div,
+.page-with-bg > div > section,
+.page-with-bg > div > main {
   position: relative;
   z-index: 1;
 }

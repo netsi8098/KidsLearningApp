@@ -359,7 +359,7 @@ export default function WelcomePage() {
                       {/* Profile info */}
                       <div className="text-left flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-display text-lg text-[#2D2D3A]" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{profile.name}</p>
+                          <p className="font-display text-[#2D2D3A]" style={{ whiteSpace: 'nowrap', fontSize: '16px' }}>{profile.name}</p>
                           {profile.age && (
                             <span
                               className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white"

@@ -1067,7 +1067,7 @@ export default function MainMenu() {
                 </div>
 
                 {/* Tiles grid — fills remaining space */}
-                <div className="flex-1 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr pb-2 content-start">
+                <div className="flex-1 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 pb-2 content-start" style={{ gridAutoRows: 'min-content' }}>
                   {activeTiles.map((tile, i) => (
                     <BigTileButton key={tile.to} {...tile} delay={i * 0.04} icon={tileIconMap[tile.to]} />
                   ))}

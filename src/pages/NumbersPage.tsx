@@ -124,8 +124,8 @@ export default function NumbersPage() {
                   onClick={handleTapEmoji}
                   initial={{ scale: 0 }}
                   animate={{
-                    scale: i < tapped ? 1.1 : 0.6,
-                    opacity: i < tapped ? 1 : 0.3,
+                    scale: i < tapped ? 1.2 : 0.85,
+                    opacity: i < tapped ? 1 : 0.6,
                   }}
                   transition={{ type: 'spring', delay: i * 0.03 }}
                   whileTap={{ scale: 1.3 }}

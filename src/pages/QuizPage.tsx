@@ -100,15 +100,15 @@ export default function QuizPage() {
   // Category picker screen
   if (!selectedCategory) {
     return (
-      <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative">
+      <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative page-with-bg">
         <AnimatedBackground theme="quiz" />
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-5 relative z-10">
           <NavButton onClick={() => navigate('/menu')} direction="back" />
           <h2 className="font-display text-xl text-bubbly" style={{ color: '#FF8C42' }}>Quiz Time!</h2>
           <StarCounter />
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="flex-1 flex flex-col items-center justify-center relative z-10">
           <motion.p
             className="text-5xl mb-4"
             animate={{ y: [0, -10, 0] }}
@@ -201,16 +201,17 @@ export default function QuizPage() {
 
   // Quiz question screen
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8 flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+    <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative page-with-bg">
+      <AnimatedBackground theme="quiz" />
+      <div className="flex items-center justify-between mb-4 relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
-        <h2 className="text-xl font-extrabold tracking-tight" style={{ color: '#FF8C42' }}>
+        <h2 className="font-display text-xl text-bubbly" style={{ color: '#FF8C42' }}>
           Quiz {qIndex + 1}/{questions.length}
         </h2>
         <StarCounter />
       </div>
 
-      <div className="w-full rounded-full h-3 mb-2" style={{ backgroundColor: '#F0EAE0' }}>
+      <div className="w-full rounded-full h-3 mb-2 relative z-10" style={{ backgroundColor: 'rgba(255,255,255,0.3)' }}>
         <motion.div
           className="h-3 rounded-full bg-gradient-to-r from-[#FF8C42] to-[#FFB347]"
           animate={{ width: `${((qIndex + 1) / questions.length) * 100}%` }}
@@ -230,7 +231,7 @@ export default function QuizPage() {
         </motion.div>
       )}
 
-      <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={qIndex}

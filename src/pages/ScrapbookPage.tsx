@@ -51,10 +51,19 @@ export default function ScrapbookPage() {
     }
   }, [newMilestones, awardMilestone]);
 
-  // Filtered entries
+  // Filtered + deduplicated entries (prevent duplicate milestones)
   const filteredEntries = useMemo(() => {
-    if (activeFilter === 'all') return entries;
-    return entries.filter((e) => e.entryType === activeFilter);
+    const base = activeFilter === 'all' ? entries : entries.filter((e) => e.entryType === activeFilter);
+    // Deduplicate milestones by title
+    const seen = new Set<string>();
+    return base.filter((e) => {
+      if (e.entryType === 'milestone') {
+        const key = e.title;
+        if (seen.has(key)) return false;
+        seen.add(key);
+      }
+      return true;
+    });
   }, [entries, activeFilter]);
 
   // Parent gate handlers
