@@ -10,7 +10,11 @@
  * by splitting text into phrases and adding prosody variation.
  */
 
-const TTS_BASE = 'http://localhost:5555';
+const TTS_URLS = [
+  'http://localhost:5555',
+  'https://grip-waves-thrown-berkeley.trycloudflare.com',
+];
+let TTS_BASE = TTS_URLS[0];
 
 export type VoicePreset = 'kids' | 'boy' | 'girl' | 'teacher' | 'storyteller' | 'fun';
 
@@ -36,17 +40,27 @@ export async function checkTTSServer(): Promise<boolean> {
   if (_serverAvailable !== null && _lastCheck && Date.now() - _lastCheck < 30000) {
     return _serverAvailable;
   }
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2000);
-    const res = await fetch(`${TTS_BASE}/health`, { signal: controller.signal });
-    clearTimeout(timeout);
-    _serverAvailable = res.ok;
-  } catch {
-    _serverAvailable = false;
+
+  for (const url of TTS_URLS) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(`${url}/health`, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (res.ok) {
+        TTS_BASE = url;
+        _serverAvailable = true;
+        _lastCheck = Date.now();
+        return true;
+      }
+    } catch {
+      // Try next URL
+    }
   }
+
+  _serverAvailable = false;
   _lastCheck = Date.now();
-  return _serverAvailable;
+  return false;
 }
 
 /** Reset server status (call if you start the server after app load) */

@@ -13,7 +13,7 @@ const configSchema = z.object({
   nodeEnv: z
     .enum(['development', 'test', 'staging', 'production'])
     .default('development'),
-  corsOrigin: z.string().default('http://localhost:5173'),
+  corsOrigin: z.string().default('http://localhost:5173').transform(v => v.includes(',') ? v.split(',').map(s => s.trim()) : v),
 
   // ── Database ──────────────────────────────────────────────────────────────
   databaseUrl: z.string().min(1, 'DATABASE_URL is required'),

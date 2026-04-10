@@ -64,7 +64,7 @@ services:
       NODE_ENV: development
       PORT: "4000"
       JWT_SECRET: local-dev-secret-change-in-production
-      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGIN: "http://localhost:5173,https://thankful-tree-0cf247010.2.azurestaticapps.net"
       STORAGE_PROVIDER: local
       STORAGE_LOCAL_PATH: /app/uploads
     depends_on:

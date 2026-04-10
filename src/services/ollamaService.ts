@@ -3,7 +3,11 @@
  * Requires Ollama running on localhost:11434 with gemma4 model pulled.
  */
 
-const OLLAMA_BASE = 'http://localhost:11434';
+const OLLAMA_URLS = [
+  'http://localhost:11434',
+  'https://gabriel-aqua-friday-tiger.trycloudflare.com',
+];
+let OLLAMA_BASE = OLLAMA_URLS[0];
 const DEFAULT_MODEL = 'gemma4:e2b';
 
 export interface OllamaResponse {
@@ -20,18 +24,26 @@ export async function checkOllamaStatus(): Promise<{
   running: boolean;
   modelReady: boolean;
 }> {
-  try {
-    const res = await fetch(`${OLLAMA_BASE}/api/tags`);
-    if (!res.ok) return { running: false, modelReady: false };
-    const data = await res.json();
-    const models: { name: string }[] = data.models ?? [];
-    const hasModel = models.some(
-      (m) => m.name.startsWith('gemma4')
-    );
-    return { running: true, modelReady: hasModel };
-  } catch {
-    return { running: false, modelReady: false };
+  for (const url of OLLAMA_URLS) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch(`${url}/api/tags`, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const models: { name: string }[] = data.models ?? [];
+      const hasModel = models.some((m) => m.name.startsWith('gemma4'));
+      if (hasModel) {
+        OLLAMA_BASE = url;
+        return { running: true, modelReady: true };
+      }
+      return { running: true, modelReady: false };
+    } catch {
+      // Try next URL
+    }
   }
+  return { running: false, modelReady: false };
 }
 
 /** Convert a Blob (image) to base64 string */
