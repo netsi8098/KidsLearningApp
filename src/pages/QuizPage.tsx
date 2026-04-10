@@ -254,7 +254,7 @@ export default function QuizPage() {
               <p className="text-xl font-bold" style={{ color: '#2D2D3A' }}>{q.question}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {q.options.map((opt) => (
+              {q.options.map((opt, optIdx) => (
                 <ChoiceButton
                   key={`${qIndex}-${opt}`}
                   label={opt}
@@ -262,6 +262,7 @@ export default function QuizPage() {
                   onAnswer={handleAnswer}
                   disabled={answered}
                   questionIndex={qIndex}
+                  colorIndex={optIdx}
                 />
               ))}
             </div>

@@ -958,8 +958,9 @@ export default function StoriesPage() {
                 className="relative rounded-3xl overflow-hidden"
                 style={{
                   background: '#FDF6E3',
-                  boxShadow: '0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08)',
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08), inset 0 0 40px rgba(139,90,43,0.08)',
                   minHeight: '480px',
+                  borderRadius: '24px',
                 }}
                 initial={{ x: turnDirection === 'next' ? 120 : -120, opacity: 0, rotateY: turnDirection === 'next' ? 8 : -8 }}
                 animate={{ x: 0, opacity: 1, rotateY: 0 }}
