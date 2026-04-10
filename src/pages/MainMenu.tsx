@@ -39,6 +39,11 @@ const menuTabs: MenuTab[] = [
 ];
 
 /* ─── SVG icon map for activity tiles ─────────────────── */
+/* Inline mini SVG icons for tiles without dedicated SubjectIcon components */
+const MiniSvg = ({ children }: { children: React.ReactNode }) => (
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">{children}</svg>
+);
+
 const tileIconMap: Record<string, React.ReactNode> = {
   '/abc': <AbcIcon size={56} />,
   '/numbers': <NumbersIcon size={56} />,
@@ -52,6 +57,25 @@ const tileIconMap: Record<string, React.ReactNode> = {
   '/matching': <MatchingIcon size={56} />,
   '/games': <GamesIcon size={56} />,
   '/movement': <MovementIcon size={56} />,
+  // Create hub
+  '/coloring': <MiniSvg><path d="M12 36L8 40C7 41 7 42 8 43C9 44 10 44 11 43L15 39" stroke="white" strokeWidth="2.5" strokeLinecap="round"/><path d="M15 39L36 18C38 16 38 13 36 11C34 9 31 9 29 11L8 32" stroke="white" strokeWidth="2.5" fill="none"/><circle cx="38" cy="10" r="3" fill="#FFE66D"/></MiniSvg>,
+  '/printables': <MiniSvg><rect x="10" y="6" width="28" height="36" rx="3" stroke="white" strokeWidth="2.5" fill="none"/><path d="M16 16H32M16 22H28M16 28H30" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.7"/><path d="M24 34L26 38L30 38L27 41L28 45L24 42L20 45L21 41L18 38L22 38Z" fill="#FFE66D"/></MiniSvg>,
+  '/cooking': <MiniSvg><ellipse cx="24" cy="14" rx="12" ry="8" fill="white" fillOpacity="0.3"/><path d="M12 14C12 14 10 8 16 6C20 4 24 3 28 4C32 5 36 8 36 14" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round"/><rect x="8" y="22" width="32" height="18" rx="4" stroke="white" strokeWidth="2.5" fill="none"/><path d="M8 28H40" stroke="white" strokeWidth="1.5" opacity="0.5"/></MiniSvg>,
+  // Listen hub
+  '/videos': <MiniSvg><rect x="6" y="10" width="36" height="24" rx="4" stroke="white" strokeWidth="2.5" fill="none"/><path d="M20 17L30 22L20 27Z" fill="white"/><rect x="16" y="36" width="16" height="3" rx="1.5" fill="white" opacity="0.5"/></MiniSvg>,
+  '/stories': <MiniSvg><path d="M6 10C6 10 12 8 24 8C36 8 42 10 42 10V38C42 38 36 36 24 36C12 36 6 38 6 38V10Z" stroke="white" strokeWidth="2.5" fill="none"/><line x1="24" y1="8" x2="24" y2="36" stroke="white" strokeWidth="1.5" opacity="0.5"/><circle cx="16" cy="18" r="2" fill="#FFE66D" className="animate-sparkle"/><circle cx="32" cy="16" r="1.5" fill="#FFE66D" className="animate-sparkle" style={{animationDelay:'0.5s'}}/></MiniSvg>,
+  '/audio': <MiniSvg><circle cx="24" cy="24" r="14" stroke="white" strokeWidth="2.5" fill="none"/><circle cx="24" cy="24" r="5" fill="white" fillOpacity="0.3"/><circle cx="24" cy="24" r="1.5" fill="white"/><text x="18" y="14" fontSize="10" fill="white" opacity="0.7">&#9835;</text></MiniSvg>,
+  // Wellbeing hub
+  '/emotions': <MiniSvg><circle cx="24" cy="24" r="16" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="2.5"/><circle cx="18" cy="20" r="2.5" fill="white"/><circle cx="30" cy="20" r="2.5" fill="white"/><path d="M16 30C19 34 29 34 32 30" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/></MiniSvg>,
+  '/bedtime': <MiniSvg><path d="M30 10C22 10 16 16 16 24C16 32 22 38 30 38C24 36 20 30 22 24C24 18 28 14 34 14C34 12 32 10 30 10Z" fill="white" fillOpacity="0.9"/><circle cx="36" cy="16" r="1.5" fill="#FFE66D" className="animate-sparkle"/><circle cx="40" cy="24" r="1" fill="#FFE66D" className="animate-sparkle" style={{animationDelay:'0.5s'}}/><circle cx="38" cy="32" r="1.2" fill="#FFE66D" className="animate-sparkle" style={{animationDelay:'1s'}}/></MiniSvg>,
+  // Explore hub
+  '/home-activities': <MiniSvg><path d="M8 22L24 10L40 22V38C40 39.5 38.5 41 37 41H11C9.5 41 8 39.5 8 38V22Z" stroke="white" strokeWidth="2.5" fill="none"/><rect x="18" y="28" width="12" height="13" rx="1" stroke="white" strokeWidth="2" fill="none"/></MiniSvg>,
+  '/discover': <MiniSvg><circle cx="20" cy="20" r="12" stroke="white" strokeWidth="2.5" fill="none"/><line x1="29" y1="29" x2="40" y2="40" stroke="white" strokeWidth="3" strokeLinecap="round"/><circle cx="20" cy="20" r="4" fill="white" fillOpacity="0.2"/></MiniSvg>,
+  '/ai/whats-this': <MiniSvg><circle cx="24" cy="20" r="12" stroke="white" strokeWidth="2.5" fill="none"/><circle cx="24" cy="20" r="5" fill="white" fillOpacity="0.3"/><text x="18" y="40" fontSize="14" fontWeight="bold" fill="white">?</text></MiniSvg>,
+  '/ai/drawing-detective': <MiniSvg><path d="M10 38L14 28L22 34L30 20L38 30" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/><circle cx="36" cy="14" r="4" fill="#FFE66D"/></MiniSvg>,
+  '/ai/letter-reader': <MiniSvg><text x="10" y="32" fontSize="28" fontWeight="bold" fill="white" opacity="0.9">Aa</text><circle cx="38" cy="14" r="3" fill="#FFE66D" className="animate-sparkle"/></MiniSvg>,
+  '/ai/nature-explorer': <MiniSvg><path d="M24 6L30 18H18Z" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/><path d="M24 14L32 30H16Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="2"/><rect x="22" y="30" width="4" height="8" fill="white" opacity="0.5"/><circle cx="12" cy="12" r="6" fill="#FFE66D" opacity="0.7"/></MiniSvg>,
+  '/ai/color-finder': <MiniSvg><path d="M8 36C8 24 14 14 24 14C34 14 40 24 40 36" stroke="#FF6B6B" strokeWidth="3" fill="none"/><path d="M12 36C12 26 16 18 24 18C32 18 36 26 36 36" stroke="#FFE66D" strokeWidth="3" fill="none"/><path d="M16 36C16 28 19 22 24 22C29 22 32 28 32 36" stroke="#4ECDC4" strokeWidth="3" fill="none"/></MiniSvg>,
 };
 
 /* ─── Tile definitions per tab ─────────────────────────── */
