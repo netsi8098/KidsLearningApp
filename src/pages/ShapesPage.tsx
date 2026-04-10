@@ -11,6 +11,7 @@ import NavButton from '../components/NavButton';
 import ProgressDots from '../components/ProgressDots';
 import StarCounter from '../components/StarCounter';
 import SectionComplete from '../components/SectionComplete';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 
 export default function ShapesPage() {
   const navigate = useNavigate();
@@ -69,7 +70,8 @@ export default function ShapesPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8 md:px-8 md:pt-6 flex flex-col">
+    <div className="min-h-dvh px-4 pt-4 pb-8 md:px-8 md:pt-6 flex flex-col relative">
+      <AnimatedBackground theme="shapes" />
       <div className="flex items-center justify-between mb-5 md:max-w-xl md:mx-auto md:w-full">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
         <h2 className="text-xl font-extrabold tracking-tight text-[#A78BFA] md:text-2xl">Shapes</h2>

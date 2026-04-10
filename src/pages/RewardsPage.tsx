@@ -10,6 +10,7 @@ import BadgeCard from '../components/BadgeCard';
 import NavButton from '../components/NavButton';
 import StarCounter from '../components/StarCounter';
 import type { ContentItem, ContentType } from '../registry/types';
+import AnimatedBackground from '../components/svg/AnimatedBackground';
 
 type BadgeTab = 'all' | 'earned' | 'locked';
 type RewardsSection = 'badges' | 'history' | 'favorites';
@@ -214,11 +215,12 @@ export default function RewardsPage() {
   }, [favorites]);
 
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-24">
+    <div className="min-h-dvh px-4 pt-4 pb-24 relative">
+      <AnimatedBackground theme="rewards" />
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
-        <h2 className="text-lg font-extrabold text-[#2D2D3A]">My Rewards</h2>
+        <h2 className="font-display text-xl text-[#2D2D3A] text-bubbly">My Rewards</h2>
         <StarCounter />
       </div>
 
