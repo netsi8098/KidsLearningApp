@@ -94,7 +94,7 @@ export default function AbcPage() {
           >
             {/* Letter card — chunky 3D block letter */}
             <motion.div
-              className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-3xl mx-auto mb-5 flex items-center justify-center"
+              className="w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-3xl mx-auto mb-5 flex items-center justify-center"
               style={{
                 background: 'rgba(255,255,255,0.85)',
                 backdropFilter: 'blur(12px)',
@@ -106,7 +106,7 @@ export default function AbcPage() {
               <span
                 className="font-display"
                 style={{
-                  fontSize: 'clamp(5rem, 15vw, 7rem)',
+                  fontSize: 'clamp(5.5rem, 18vw, 8rem)',
                   color: '#FF6B6B',
                   textShadow: '3px 3px 0 rgba(255,107,107,0.2), 6px 6px 0 rgba(255,107,107,0.1)',
                 }}
@@ -131,7 +131,8 @@ export default function AbcPage() {
 
             {/* Hear it button with speaker SVG */}
             <motion.button
-              className="text-white rounded-2xl px-8 py-3 font-display text-lg cursor-pointer bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] shadow-lg tap-bounce flex items-center gap-2 mx-auto"
+              className="text-white rounded-2xl px-8 py-4 font-display text-lg cursor-pointer flex items-center gap-3 justify-center mx-auto w-full max-w-[300px]"
+              style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8C42)', boxShadow: '0 4px 0 rgba(0,0,0,0.15), 0 8px 20px rgba(255,107,107,0.3)' }}
               onClick={() => speak(`${item.letter}. ${item.letter} is for ${item.word}`)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.93 }}
@@ -148,8 +149,8 @@ export default function AbcPage() {
       </div>
 
       <div className="flex justify-between items-center mt-5 pb-2 md:max-w-xl md:mx-auto md:w-full md:gap-8 relative z-10">
-        <NavButton onClick={() => handleNavigate(index - 1)} direction="prev" disabled={index === 0} />
-        <NavButton onClick={() => handleNavigate(index + 1)} direction="next" disabled={false} />
+        <div style={{ transform: 'scale(1.3)' }}><NavButton onClick={() => handleNavigate(index - 1)} direction="prev" disabled={index === 0} /></div>
+        <div style={{ transform: 'scale(1.3)' }}><NavButton onClick={() => handleNavigate(index + 1)} direction="next" disabled={false} /></div>
       </div>
     </div>
   );

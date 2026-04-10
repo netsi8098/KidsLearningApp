@@ -11,6 +11,7 @@ import NavButton from '../components/NavButton';
 import StarCounter from '../components/StarCounter';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
+import ConfettiCelebration from '../components/ConfettiCelebration';
 
 const categories = [
   { key: 'mixed', label: 'Mixed', emoji: '🎲', color: '#FF8C42' },
@@ -150,67 +151,50 @@ export default function QuizPage() {
 
   // Results screen
   if (finished) {
-    const emoji = score >= 8 ? '🏆' : score >= 6 ? '🌟' : score >= 4 ? '👏' : '💪';
     const message =
       score >= 8 ? 'Outstanding!' : score >= 6 ? 'Great work!' : score >= 4 ? 'Good try!' : 'Keep practicing!';
+    const mascotExpression = score >= 8 ? 'celebrating' as const : score >= 5 ? 'happy' as const : 'thinking' as const;
 
     return (
-      <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8 flex flex-col items-center justify-center">
-        <motion.div
-          className="text-8xl mb-5"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
-          transition={{ type: 'spring' }}
-        >
-          {emoji}
+      <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col items-center justify-center relative page-with-bg">
+        <AnimatedBackground theme="quiz" />
+
+        {score >= 8 && (
+          <ConfettiCelebration message={`Amazing! ${score}/${questions.length}!`} stars={score} onDismiss={() => {}} autoDismissMs={60000} />
+        )}
+
+        <motion.div className="text-center relative z-10" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring' }}>
+          <MascotLion size={120} expression={mascotExpression} animated />
+
+          <h1 className="font-display text-3xl text-white mt-4 mb-2" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+            {message}
+          </h1>
+          <p className="font-display text-xl text-white/80 mb-3">
+            You got {score} out of {questions.length}!
+          </p>
+
+          {/* Star row */}
+          <motion.div className="flex gap-1.5 justify-center mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+            {Array.from({ length: questions.length }).map((_, i) => (
+              <svg key={i} width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L15 9H22L16.5 13.5L18.5 21L12 17L5.5 21L7.5 13.5L2 9H9Z"
+                  fill={i < score ? '#FFD93D' : 'rgba(255,255,255,0.2)'}
+                  stroke={i < score ? '#F59E0B' : 'rgba(255,255,255,0.1)'}
+                  strokeWidth="1"
+                />
+              </svg>
+            ))}
+          </motion.div>
+
+          <div className="flex gap-3 justify-center">
+            <motion.button className="btn-primary" onClick={handlePlayAgain} whileTap={{ scale: 0.95 }}>
+              Play Again
+            </motion.button>
+            <motion.button className="btn-secondary" style={{ borderColor: 'white', color: 'white', background: 'rgba(255,255,255,0.15)' }} onClick={() => navigate('/menu')} whileTap={{ scale: 0.95 }}>
+              Menu
+            </motion.button>
+          </div>
         </motion.div>
-        <motion.h1
-          className="text-3xl font-extrabold mb-2"
-          style={{ color: '#FF8C42' }}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-        >
-          {message}
-        </motion.h1>
-        <motion.p
-          className="text-xl mb-2"
-          style={{ color: '#6B6B7B' }}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
-          You got {score} out of {questions.length}!
-        </motion.p>
-        <motion.div
-          className="flex gap-1 mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          {Array.from({ length: questions.length }).map((_, i) => (
-            <span key={i} className="text-2xl">{i < score ? '⭐' : '⚪'}</span>
-          ))}
-        </motion.div>
-        <div className="flex gap-3">
-          <motion.button
-            className="text-white rounded-[14px] px-7 py-3 font-bold cursor-pointer bg-gradient-to-r from-[#FF8C42] to-[#FFB347]"
-            style={{ boxShadow: '0 4px 20px rgba(255,140,66,0.25)' }}
-            onClick={handlePlayAgain}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🔄 Play Again
-          </motion.button>
-          <motion.button
-            className="rounded-[14px] px-7 py-3 font-bold cursor-pointer"
-            style={{ backgroundColor: '#FFF8F0', color: '#6B6B7B', border: '1px solid #F0EAE0', boxShadow: '0 2px 12px rgba(45,45,58,0.06)' }}
-            onClick={() => navigate('/menu')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🏠 Menu
-          </motion.button>
-        </div>
       </div>
     );
   }
