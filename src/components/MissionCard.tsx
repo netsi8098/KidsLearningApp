@@ -153,15 +153,12 @@ export default function MissionCard({
             </motion.div>
           ) : (
             <div className="flex items-center gap-2">
-              {/* Start pill button */}
+              {/* Green GO button */}
               <div
-                className="rounded-full px-3 py-1.5 text-[11px] font-bold text-white"
-                style={{
-                  background: `linear-gradient(135deg, ${accentColor}, ${accentColor}CC)`,
-                  boxShadow: `0 2px 8px ${accentColor}30`,
-                }}
+                className="btn-go text-sm"
+                style={{ minWidth: '72px', textAlign: 'center' }}
               >
-                Start
+                GO!
               </div>
               {/* Pulsing dot indicator */}
               <div className="w-6 h-6 rounded-full border-2 border-[#F0EAE0] flex items-center justify-center relative">
