@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -24,6 +24,7 @@ import { collections } from '../registry/collectionsConfig';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import { HomeIcon, LearnIcon, PlayIcon, CreateIcon, ListenIcon, WellbeingIcon, ExploreIcon } from '../components/svg/NavIcons';
+import { AbcIcon, NumbersIcon, ColorsIcon, ShapesIcon, AnimalsIcon, BodyIcon, LessonsIcon, WorldIcon, QuizIcon, MatchingIcon, GamesIcon, MovementIcon } from '../components/svg/SubjectIcons';
 
 /* ─── Tab definitions ──────────────────────────────────── */
 
@@ -36,6 +37,22 @@ const menuTabs: MenuTab[] = [
   { key: 'wellbeing', label: 'Wellbeing', emoji: '💚' },
   { key: 'explore', label: 'Explore', emoji: '🌍' },
 ];
+
+/* ─── SVG icon map for activity tiles ─────────────────── */
+const tileIconMap: Record<string, React.ReactNode> = {
+  '/abc': <AbcIcon size={56} />,
+  '/numbers': <NumbersIcon size={56} />,
+  '/colors': <ColorsIcon size={56} />,
+  '/shapes': <ShapesIcon size={56} />,
+  '/animals': <AnimalsIcon size={56} />,
+  '/bodyparts': <BodyIcon size={56} />,
+  '/lessons': <LessonsIcon size={56} />,
+  '/explorer': <WorldIcon size={56} />,
+  '/quiz': <QuizIcon size={56} />,
+  '/matching': <MatchingIcon size={56} />,
+  '/games': <GamesIcon size={56} />,
+  '/movement': <MovementIcon size={56} />,
+};
 
 /* ─── Tile definitions per tab ─────────────────────────── */
 
@@ -883,14 +900,32 @@ export default function MainMenu() {
                   }}
                 >
                   <div className="relative z-10 p-4 flex items-center gap-3">
-                    <div className="animate-breathe"><MascotLion size={100} expression="happy" animated /></div>
+                    <div className="animate-breathe">
+                      <MascotLion
+                        size={100}
+                        expression={(() => {
+                          const h = new Date().getHours();
+                          if (h >= 20 || h < 6) return 'sleeping';
+                          if (h >= 17) return 'happy';
+                          return 'excited';
+                        })()}
+                        animated
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div
                         className="rounded-2xl rounded-bl-sm px-4 py-2.5 mb-2"
                         style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(45,45,58,0.04)' }}
                       >
                         <p className="font-display text-base text-[#2D2D3A]">
-                          Hi {currentPlayer.name}! Ready to learn something amazing?
+                          {(() => {
+                            const h = new Date().getHours();
+                            const name = currentPlayer.name;
+                            if (h >= 6 && h < 12) return `Good morning, ${name}! Let's learn something new!`;
+                            if (h >= 12 && h < 17) return `Good afternoon, ${name}! Ready for more fun?`;
+                            if (h >= 17 && h < 20) return `Good evening, ${name}! What shall we explore?`;
+                            return `Bedtime learning, ${name}? Let's do something cozy!`;
+                          })()}
                         </p>
                       </div>
                       <motion.button
@@ -1031,7 +1066,7 @@ export default function MainMenu() {
                 {/* Tiles grid — fills remaining space */}
                 <div className="flex-1 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr pb-2 content-start">
                   {activeTiles.map((tile, i) => (
-                    <BigTileButton key={tile.to} {...tile} delay={i * 0.04} />
+                    <BigTileButton key={tile.to} {...tile} delay={i * 0.04} icon={tileIconMap[tile.to]} />
                   ))}
                 </div>
               </div>

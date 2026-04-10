@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,9 +8,10 @@ interface BigTileButtonProps {
   to: string;
   bgColor: string;
   delay?: number;
+  /** Optional SVG icon to render instead of emoji */
+  icon?: ReactNode;
 }
 
-/** Lighten a hex color by mixing with white */
 function lighten(hex: string, amount: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -20,16 +22,17 @@ function lighten(hex: string, amount: number): string {
   return `rgb(${lr},${lg},${lb})`;
 }
 
-export default function BigTileButton({ emoji, label, to, bgColor, delay = 0 }: BigTileButtonProps) {
+export default function BigTileButton({ emoji, label, to, bgColor, delay = 0, icon }: BigTileButtonProps) {
   const navigate = useNavigate();
 
   return (
     <motion.button
-      className="rounded-[22px] flex flex-col items-center justify-center gap-2.5 w-full cursor-pointer relative overflow-hidden"
+      className="card-activity flex flex-col items-center justify-center gap-2.5 w-full cursor-pointer relative overflow-hidden"
       style={{
         background: `linear-gradient(160deg, ${lighten(bgColor, 0.15)}, ${bgColor}, ${bgColor}DD)`,
         boxShadow: `0 8px 24px ${bgColor}35, 0 2px 6px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,0.25)`,
         aspectRatio: '1 / 1',
+        borderRadius: '24px',
       }}
       onClick={() => navigate(to)}
       initial={{ scale: 0, opacity: 0 }}
@@ -47,7 +50,7 @@ export default function BigTileButton({ emoji, label, to, bgColor, delay = 0 }: 
         }}
       />
 
-      {/* Soft blob shapes */}
+      {/* Soft blob decorations */}
       <div
         className="absolute -top-8 -right-8 w-28 h-28 rounded-full pointer-events-none"
         style={{ background: 'rgba(255,255,255,0.12)', filter: 'blur(2px)' }}
@@ -56,29 +59,25 @@ export default function BigTileButton({ emoji, label, to, bgColor, delay = 0 }: 
         className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full pointer-events-none"
         style={{ background: 'rgba(255,255,255,0.08)', filter: 'blur(2px)' }}
       />
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%)` }}
-      />
 
-      {/* Emoji with 3D feel */}
+      {/* Icon/Emoji area — top 65% */}
       <motion.div
         className="relative z-10 flex items-center justify-center"
         style={{
-          width: 64,
-          height: 64,
-          borderRadius: '50%',
+          width: icon ? 80 : 64,
+          height: icon ? 80 : 64,
+          borderRadius: icon ? '20px' : '50%',
           background: 'rgba(255,255,255,0.18)',
           backdropFilter: 'blur(4px)',
           boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.08)',
         }}
       >
-        <span className="text-[40px] drop-shadow-md">{emoji}</span>
+        {icon || <span className="text-[40px] drop-shadow-md">{emoji}</span>}
       </motion.div>
 
-      {/* Label */}
+      {/* Label — Fredoka One */}
       <span
-        className="text-white text-[15px] font-extrabold relative z-10 tracking-tight"
+        className="font-display text-white text-[15px] relative z-10"
         style={{ textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}
       >
         {label}

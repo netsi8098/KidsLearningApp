@@ -8,6 +8,8 @@ import { db } from '../db/database';
 import NavButton from '../components/NavButton';
 import StarCounter from '../components/StarCounter';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import MascotLion from '../components/svg/MascotLion';
+import ConfettiCelebration from '../components/ConfettiCelebration';
 import StoryIllustration from '../components/StoryIllustration';
 import { stopSpeaking as stopAIVoice } from '../services/ttsService';
 import {
@@ -48,6 +50,7 @@ export default function StoriesPage() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [spokenWordIndex, setSpokenWordIndex] = useState(-1);
   const [turnDirection, setTurnDirection] = useState<'next' | 'prev'>('next');
+  const [showingCover, setShowingCover] = useState(true);
 
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
 
@@ -188,6 +191,7 @@ export default function StoriesPage() {
 
       setActiveStoryId(storyId);
       setViewMode('reader');
+      setShowingCover(true);
       setSpokenWordIndex(-1);
       setIsSpeaking(false);
     },
@@ -743,92 +747,56 @@ export default function StoriesPage() {
 
   // ===== STORY COMPLETE VIEW =====
   if (viewMode === 'complete' && activeStory) {
-    const wasFirstCompletion = !(
-      allProgress?.find((p) => p.storyId === activeStory.id && p.completed)
-    );
-
     return (
-      <div
-        className="min-h-dvh flex flex-col items-center justify-center p-6"
-        style={{ background: 'linear-gradient(180deg, #F3EFFE 0%, #EDFAEF 100%)' }}
-      >
+      <div className="min-h-dvh flex flex-col items-center justify-center p-6 relative page-with-bg">
+        <AnimatedBackground theme="stories" />
+        <ConfettiCelebration
+          message={`You finished ${activeStory.title}!`}
+          stars={1}
+          onDismiss={() => {}}
+          autoDismissMs={60000}
+        />
+
         <motion.div
-          className="text-center max-w-sm"
+          className="text-center max-w-sm relative z-10"
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', duration: 0.6 }}
         >
-          {/* Celebration emoji */}
-          <motion.div
-            className="text-[100px] mb-5 drop-shadow-lg"
-            animate={{ rotate: [0, -10, 10, -10, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            🎉
-          </motion.div>
+          <MascotLion size={120} expression="celebrating" animated />
 
-          <h2 className="text-3xl font-extrabold text-[#2D2D3A] mb-2">Great Reading!</h2>
+          <h2 className="font-display text-3xl text-[#2D2D3A] mt-4 mb-2">Great Reading!</h2>
 
-          <p className="text-[15px] font-medium text-[#6B6B7B] mb-4">
-            You finished <span className="font-bold" style={{ color: '#A78BFA' }}>{activeStory.title}</span>!
+          <p className="text-[15px] font-bold text-[#6B6B7B] mb-6">
+            You finished <span style={{ color: '#A78BFA' }}>{activeStory.title}</span>!
           </p>
 
-          {/* Stars earned */}
-          <motion.div
-            className="flex items-center justify-center gap-2 rounded-[16px] px-6 py-3 mb-6 mx-auto w-fit"
-            style={{
-              background: 'linear-gradient(135deg, rgba(167,139,250,0.15), rgba(139,92,246,0.10))',
-              border: '1px solid rgba(167,139,250,0.25)',
-            }}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <span className="text-3xl drop-shadow-md">⭐</span>
-            <span className="text-xl font-bold text-amber-700">+1 Star</span>
-          </motion.div>
-
-          {/* Story emoji */}
-          <motion.div
-            className="text-6xl mb-6 drop-shadow-md"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.7, type: 'spring' }}
-          >
-            {activeStory.emoji}
-          </motion.div>
-
-          {/* Action buttons */}
           <div className="flex flex-col gap-3">
             <motion.button
-              className="w-full text-white font-bold py-3.5 px-6 rounded-[14px] shadow-[0_4px_20px_rgba(167,139,250,0.3)] text-lg cursor-pointer"
-              style={{
-                background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
-              }}
+              className="w-full btn-primary text-lg"
               onClick={() => {
                 setCurrentPage(0);
+                setShowingCover(true);
                 setViewMode('reader');
                 savePageProgress(0);
               }}
-              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 0.5 }}
             >
-              📖 Read Again
+              Read Again
             </motion.button>
 
             <motion.button
-              className="w-full bg-white text-[#6B6B7B] font-bold py-3.5 px-6 rounded-[14px] shadow-[0_2px_12px_rgba(45,45,58,0.06)] border border-[#F0EAE0] text-lg cursor-pointer"
+              className="w-full btn-secondary text-lg"
               onClick={backToLibrary}
-              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.9 }}
+              transition={{ delay: 0.6 }}
             >
-              📚 Back to Library
+              Choose New Story
             </motion.button>
           </div>
         </motion.div>
@@ -843,13 +811,113 @@ export default function StoriesPage() {
     const progressPercent = ((currentPage + 1) / totalPages) * 100;
     const isFavorite = activeProgress?.favorite ?? false;
 
-    /* Cover page (page -1 equivalent — show before page 0) */
-    const showCover = currentPage === 0 && !isSpeaking && !autoRead;
+    // Map story category to background theme
+    const storyTheme = activeStory.category === 'bedtime' ? 'bedtime'
+      : activeStory.category === 'nature' ? 'explore'
+      : activeStory.category === 'adventure' ? 'animals'
+      : 'stories';
 
+    /* ── COVER PAGE ── */
+    if (showingCover) {
+      return (
+        <div className="h-dvh flex flex-col items-center justify-center relative page-with-bg overflow-hidden">
+          <AnimatedBackground theme={storyTheme as any} />
+
+          <motion.div
+            className="text-center max-w-sm px-6 relative z-10"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          >
+            {/* Story cover illustration */}
+            <motion.div
+              className="w-48 h-48 mx-auto mb-6 rounded-3xl flex items-center justify-center text-8xl"
+              style={{
+                background: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+              }}
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
+              {activeStory.emoji}
+            </motion.div>
+
+            {/* Title */}
+            <h1
+              className="font-display text-white mb-2"
+              style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', textShadow: '0 3px 12px rgba(0,0,0,0.3)' }}
+            >
+              {activeStory.title}
+            </h1>
+
+            {/* Category badge */}
+            <motion.span
+              className="inline-block px-4 py-1.5 rounded-full font-display text-sm text-white mb-8"
+              style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)' }}
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {activeStory.category}
+            </motion.span>
+
+            {/* Sparkle decorations */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[
+                { top: '10%', left: '15%', delay: 0 },
+                { top: '20%', right: '10%', delay: 0.5 },
+                { top: '70%', left: '20%', delay: 1 },
+                { top: '80%', right: '15%', delay: 1.5 },
+              ].map((s, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 rounded-full bg-white animate-sparkle"
+                  style={{ top: s.top, left: 'left' in s ? s.left : undefined, right: 'right' in s ? s.right : undefined, animationDelay: `${s.delay}s` }}
+                />
+              ))}
+            </div>
+
+            {/* Start Reading button */}
+            <motion.button
+              className="btn-primary text-xl px-10 py-4 animate-glow-pulse"
+              onClick={() => setShowingCover(false)}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Start Reading
+              <motion.span
+                className="inline-block ml-2"
+                animate={{ x: [0, 5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                &#8594;
+              </motion.span>
+            </motion.button>
+
+            {/* Back to library */}
+            <motion.button
+              className="block mt-4 text-white/70 font-bold text-sm cursor-pointer mx-auto"
+              onClick={backToLibrary}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              Back to Library
+            </motion.button>
+          </motion.div>
+        </div>
+      );
+    }
+
+    /* ── READER VIEW ── */
     return (
       <div className="h-dvh flex flex-col overflow-hidden relative page-with-bg">
         {/* Immersive animated background */}
-        <AnimatedBackground theme="stories" />
+        <AnimatedBackground theme={storyTheme as any} />
 
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2 relative z-10">
