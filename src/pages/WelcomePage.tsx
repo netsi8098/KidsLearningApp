@@ -114,16 +114,23 @@ function ShieldLockIcon() {
   );
 }
 
-/* Title with letter-by-letter animation */
+/* Title with per-letter rainbow colors + bounce animation */
+const TITLE_COLORS = ['#FF6B6B', '#FF8C42', '#FFE66D', '#6BCB77', '#4ECDC4', '#45B7D1', '#A78BFA', '#FF8FAB'];
+
 function AnimatedTitle() {
   const text = 'Kids Learning Fun!';
   return (
-    <h1 className="text-center" style={{ fontSize: 'clamp(2.2rem, 8vw, 3.2rem)', lineHeight: 1.1 }}>
+    <h1 className="text-center" style={{ fontSize: 'clamp(2.5rem, 9vw, 3.5rem)', lineHeight: 1.1 }}>
       {text.split('').map((char, i) => (
         <span
           key={i}
-          className="font-display text-bubbly text-rainbow animate-letter-bounce inline-block"
-          style={{ animationDelay: `${i * 0.04}s`, display: char === ' ' ? 'inline' : 'inline-block' }}
+          className="font-display animate-letter-bounce inline-block"
+          style={{
+            animationDelay: `${i * 0.04}s`,
+            display: char === ' ' ? 'inline' : 'inline-block',
+            color: TITLE_COLORS[i % TITLE_COLORS.length],
+            textShadow: '0 2px 0 rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06)',
+          }}
         >
           {char === ' ' ? '\u00A0' : char}
         </span>
@@ -150,12 +157,29 @@ export default function WelcomePage() {
   const isLoading = profiles === undefined;
 
   async function handleSelectProfile(profile: typeof profiles[number]) {
-    setSelectedProfileId(profile.id ?? null);
-    setTimeout(async () => {
-      setCurrentPlayer(profile);
-      await updateLastPlayed(profile.id!);
-      navigate('/menu');
-    }, 400);
+    try {
+      setSelectedProfileId(profile.id ?? null);
+      // Ensure safe defaults
+      const safeProfile = {
+        ...profile,
+        avatarEmoji: profile.avatarEmoji || '\u{1F981}',
+        totalStars: profile.totalStars ?? 0,
+        streakDays: profile.streakDays ?? 0,
+        name: profile.name || 'Player',
+      };
+      setTimeout(async () => {
+        try {
+          setCurrentPlayer(safeProfile);
+          if (safeProfile.id) await updateLastPlayed(safeProfile.id);
+          navigate('/menu');
+        } catch (err) {
+          console.error('[WelcomePage] Error navigating to menu:', err);
+          navigate('/menu');
+        }
+      }, 400);
+    } catch (err) {
+      console.error('[WelcomePage] Error selecting profile:', err);
+    }
   }
 
   function goToStep(step: CreateStep) {
@@ -220,7 +244,9 @@ export default function WelcomePage() {
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
       >
-        <MascotLion size={160} expression="waving" animated />
+        <div className="animate-float-gentle">
+          <MascotLion size={180} expression="waving" animated />
+        </div>
 
         {/* Speech bubble */}
         <motion.div
@@ -320,8 +346,8 @@ export default function WelcomePage() {
                     >
                       {/* Avatar with colored ring */}
                       <div
-                        className="flex-shrink-0 w-[72px] h-[72px] rounded-full flex items-center justify-center overflow-hidden"
-                        style={{ border: `3px solid ${accent}`, background: `${accent}15` }}
+                        className="flex-shrink-0 w-[76px] h-[76px] rounded-full flex items-center justify-center overflow-hidden"
+                        style={{ border: `4px solid ${accent}`, background: `${accent}15` }}
                       >
                         <AvatarFrame
                           emoji={profile.avatarEmoji}
@@ -333,7 +359,7 @@ export default function WelcomePage() {
                       {/* Profile info */}
                       <div className="text-left flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-display text-lg text-[#2D2D3A]" style={{ wordBreak: 'break-word' }}>{profile.name}</p>
+                          <p className="font-display text-lg text-[#2D2D3A]" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{profile.name}</p>
                           {profile.age && (
                             <span
                               className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white"

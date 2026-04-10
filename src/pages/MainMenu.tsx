@@ -810,7 +810,7 @@ export default function MainMenu() {
       {/* ══════════════════════════════════════════════════════
           1. COMPACT HEADER
          ══════════════════════════════════════════════════════ */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2 md:px-8">
+      <div className="flex-shrink-0 px-4 pt-4 pb-2 md:px-8" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center justify-between max-w-md mx-auto md:max-w-2xl lg:max-w-4xl">
           <motion.button
             className="flex items-center gap-2.5 glass rounded-full px-3 py-1.5 cursor-pointer"
@@ -859,7 +859,7 @@ export default function MainMenu() {
       {/* ══════════════════════════════════════════════════════
           2. FULL-SCREEN CONTENT AREA
          ══════════════════════════════════════════════════════ */}
-      <div className="flex-1 overflow-hidden px-4 md:px-8">
+      <div className="flex-1 overflow-hidden px-4 md:px-8" style={{ position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -1043,11 +1043,11 @@ export default function MainMenu() {
       {/* ══════════════════════════════════════════════════════
           3. BOTTOM TAB BAR — Floating pill with SVG icons
          ══════════════════════════════════════════════════════ */}
-      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-4 mb-2">
+      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-4 mb-2" style={{ position: 'relative', zIndex: 2 }}>
         <div
           className="max-w-md mx-auto md:max-w-2xl flex items-center justify-around px-2 py-1.5 rounded-full"
           style={{
-            background: 'rgba(255,255,255,0.88)',
+            background: 'rgba(255,255,255,0.92)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             boxShadow: '0 8px 32px rgba(45,45,58,0.12), 0 0 0 1px rgba(255,255,255,0.2)',

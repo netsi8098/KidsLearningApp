@@ -115,29 +115,81 @@ button {
 }
 
 /* Global: all headings use Fredoka One display font */
-h1, h2, h3 {
+h1, h2, h3, .title, .heading {
   font-family: 'Fredoka One', 'Nunito', system-ui, sans-serif;
 }
 
-/* Global: primary buttons have 3D pressable effect */
-.btn-primary {
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-  color: white;
-  font-family: 'Fredoka One', sans-serif;
-  border-radius: 1rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
-  min-height: 48px;
-  border-bottom: 3px solid rgba(0,0,0,0.15);
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-.btn-primary:active {
-  transform: scale(0.97);
-  border-bottom-width: 1px;
+/* Global: default body font */
+body, button, input, textarea, select {
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
 }
 
-/* Global: back button styling */
+/* ── Standardized Button System ── */
+
+/* Primary button (Start, GO!, Read Now) — 3D pressable */
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%);
+  color: white;
+  font-family: 'Fredoka One', sans-serif;
+  border-radius: 16px;
+  padding: 0.875rem 1.75rem;
+  font-weight: 700;
+  font-size: 1rem;
+  min-height: 52px;
+  min-width: 100px;
+  border: none;
+  border-bottom: 4px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 4px 16px rgba(255,107,107,0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,107,107,0.35);
+}
+.btn-primary:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  box-shadow: 0 2px 8px rgba(255,107,107,0.2);
+}
+
+/* Secondary button (Back, Cancel) */
+.btn-secondary {
+  background: white;
+  color: #FF6B6B;
+  font-family: 'Fredoka One', sans-serif;
+  border-radius: 16px;
+  padding: 0.875rem 1.75rem;
+  font-weight: 700;
+  min-height: 52px;
+  border: 2px solid #FF6B6B;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+.btn-secondary:hover {
+  background: #FFF0F0;
+}
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* Icon button (nav, close, settings) */
+.btn-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s;
+}
+.btn-icon:active {
+  transform: scale(0.9);
+}
+
+/* Back button — teal circle */
 .btn-back {
   width: 48px;
   height: 48px;
@@ -148,12 +200,50 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+  box-shadow: 0 3px 12px rgba(78, 205, 196, 0.3);
   border: none;
   transition: transform 0.1s;
 }
 .btn-back:active {
-  transform: scale(0.93);
+  transform: scale(0.9);
+}
+
+/* Green GO/Start button */
+.btn-go {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  font-family: 'Fredoka One', sans-serif;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 700;
+  min-width: 80px;
+  border: none;
+  border-bottom: 3px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.1s;
+  box-shadow: 0 3px 12px rgba(76,175,80,0.3);
+}
+.btn-go:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+/* ── Standardized Card System ── */
+.card-activity {
+  border-radius: 24px;
+  min-height: 180px;
+  padding: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 150ms;
+  position: relative;
+}
+.card-activity:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.card-activity:active {
+  transform: scale(0.97);
 }
 
 /* Smooth scrolling */
