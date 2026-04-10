@@ -1157,7 +1157,7 @@ export default function GamesPage() {
 
   if (screen === 'hub') {
     return (
-      <div className="min-h-dvh pb-24 md:pb-8 relative">
+      <div className="min-h-dvh pb-24 md:pb-8 relative page-with-bg">
         <AnimatedBackground theme="play" />
         {/* Header */}
         <div className="px-4 pt-4 md:px-8 md:pt-6 relative z-10">
@@ -1414,7 +1414,7 @@ export default function GamesPage() {
   if (screen === 'gameover' && selectedGame && selectedDifficulty && gameResult) {
     return (
       <div
-        className="min-h-dvh px-4 pt-4 pb-24 flex flex-col relative overflow-hidden"
+        className="min-h-dvh px-4 pt-4 pb-24 flex flex-col relative page-with-bg overflow-hidden"
         style={{ background: `linear-gradient(180deg, ${selectedGame.color}08 0%, #FFF8F0 30%, #EDFAF8 100%)` }}
       >
         {/* Subtle top accent */}

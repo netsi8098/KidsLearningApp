@@ -23,8 +23,9 @@ type AgeGroup = '2-3' | '4-5' | '6-8';
 type CategoryKey = 'adventure' | 'animals' | 'bedtime' | 'friendship' | 'nature';
 type ViewMode = 'library' | 'reader' | 'complete';
 
-const ageGroups: AgeGroup[] = ['2-3', '4-5', '6-8'];
-const ageLabels: Record<AgeGroup, string> = {
+const ageGroups: (AgeGroup | 'all')[] = ['all', '2-3', '4-5', '6-8'];
+const ageLabels: Record<AgeGroup | 'all', string> = {
+  'all': 'All Ages',
   '2-3': 'Ages 2-3',
   '4-5': 'Ages 4-5',
   '6-8': 'Ages 6-8',
@@ -36,9 +37,7 @@ export default function StoriesPage() {
   const { speak, playCorrect, playCelebration } = useAudio();
 
   // Library state
-  const [selectedAge, setSelectedAge] = useState<AgeGroup>(
-    (currentPlayer?.ageGroup as AgeGroup) || '2-3'
-  );
+  const [selectedAge, setSelectedAge] = useState<AgeGroup | 'all'>('all');
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | 'all'>('all');
 
   // Reader state
@@ -76,7 +75,7 @@ export default function StoriesPage() {
 
   // Filtered stories for library
   const filteredStories = useMemo(() => {
-    let stories = getStoriesByAge(selectedAge);
+    let stories = selectedAge === 'all' ? storiesData : getStoriesByAge(selectedAge as AgeGroup);
     if (selectedCategory !== 'all') {
       stories = stories.filter((s) => s.category === selectedCategory);
     }
@@ -401,7 +400,7 @@ export default function StoriesPage() {
   // ===== LIBRARY VIEW =====
   if (viewMode === 'library') {
     return (
-      <div className="min-h-dvh pb-24 md:pb-8 relative">
+      <div className="min-h-dvh pb-24 md:pb-8 relative page-with-bg">
         <AnimatedBackground theme="stories" />
         {/* Premium Hero Banner */}
         <div

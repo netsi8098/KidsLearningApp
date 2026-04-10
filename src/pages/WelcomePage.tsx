@@ -196,7 +196,7 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center p-6 md:p-10 relative overflow-hidden">
+    <div className="min-h-dvh flex flex-col items-center justify-center p-6 md:p-10 relative page-with-bg overflow-hidden">
       {/* Immersive animated background */}
       <AnimatedBackground theme="home" />
 
@@ -333,7 +333,7 @@ export default function WelcomePage() {
                       {/* Profile info */}
                       <div className="text-left flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-display text-xl text-[#2D2D3A] truncate">{profile.name}</p>
+                          <p className="font-display text-lg text-[#2D2D3A]" style={{ wordBreak: 'break-word' }}>{profile.name}</p>
                           {profile.age && (
                             <span
                               className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white"

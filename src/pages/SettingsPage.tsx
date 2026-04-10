@@ -320,7 +320,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-24 md:px-8 md:pt-6 md:pb-8 relative">
+    <div className="min-h-dvh px-4 pt-4 pb-24 md:px-8 md:pt-6 md:pb-8 relative page-with-bg">
       <AnimatedBackground theme="home" />
       <div className="flex items-center justify-between mb-6 md:max-w-2xl md:mx-auto relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />

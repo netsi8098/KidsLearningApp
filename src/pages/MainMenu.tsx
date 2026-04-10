@@ -380,15 +380,9 @@ function QuestBoard({
       >
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h2
-              className="text-[18px] font-extrabold"
-              style={{
-                background: 'linear-gradient(135deg, #FF6B6B, #FF8C42, #FFD93D)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              {'\uD83D\uDDFA\uFE0F'} Today's Quest Board
+            <h2 className="font-display text-lg text-[#2D2D3A] flex items-center gap-2">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="3" width="18" height="16" rx="2" fill="#FFE66D" stroke="#F59E0B" strokeWidth="1.5"/><path d="M6 1V5M16 1V5" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round"/><path d="M2 9H20" stroke="#F59E0B" strokeWidth="1.2"/><path d="M7 13L10 16L15 11" stroke="#4CAF50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Today&apos;s Quest Board
             </h2>
             <p className="text-caption text-text-tertiary mt-0.5">{formatTodayDate()}</p>
           </div>
@@ -809,7 +803,7 @@ export default function MainMenu() {
   const missionsTotal = missions.length;
 
   return (
-    <div className="h-dvh flex flex-col overflow-hidden relative">
+    <div className="h-dvh flex flex-col overflow-hidden relative page-with-bg">
       {/* Immersive animated background per tab */}
       <AnimatedBackground theme={activeTab === 'home' ? 'home' : activeTab as any} />
 
@@ -882,20 +876,20 @@ export default function MainMenu() {
                 <motion.div
                   className="rounded-3xl overflow-hidden relative mb-4"
                   style={{
-                    background: 'rgba(255,255,255,0.75)',
+                    background: 'linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,200,150,0.2), rgba(255,255,255,0.8))',
                     backdropFilter: 'blur(12px)',
                     border: '1px solid rgba(255,255,255,0.3)',
-                    boxShadow: '0 4px 20px rgba(45,45,58,0.08)',
+                    boxShadow: '0 4px 20px rgba(255,107,107,0.12)',
                   }}
                 >
                   <div className="relative z-10 p-4 flex items-center gap-3">
-                    <MascotLion size={80} expression="happy" animated />
+                    <div className="animate-breathe"><MascotLion size={100} expression="happy" animated /></div>
                     <div className="flex-1 min-w-0">
                       <div
                         className="rounded-2xl rounded-bl-sm px-4 py-2.5 mb-2"
                         style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(45,45,58,0.04)' }}
                       >
-                        <p className="font-display text-sm text-[#2D2D3A]">
+                        <p className="font-display text-base text-[#2D2D3A]">
                           Hi {currentPlayer.name}! Ready to learn something amazing?
                         </p>
                       </div>

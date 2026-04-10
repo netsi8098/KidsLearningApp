@@ -102,7 +102,7 @@ export default function ColoringPage() {
 
   // ===== MAIN PAGE =====
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-8 relative">
+    <div className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
       <AnimatedBackground theme="create" />
       {/* Header */}
       <div className="flex items-center justify-between mb-5">

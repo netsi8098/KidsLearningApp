@@ -1140,7 +1140,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = React.memo(({ them
   const Scene = themeMap[theme] || themeMap.home;
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
+    <div
+      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}
+    >
       <Scene />
     </div>
   );

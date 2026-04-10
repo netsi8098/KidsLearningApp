@@ -272,7 +272,7 @@ export default function AudioPage() {
   const isSingAlong = (cat: string) => cat === 'sing-along';
 
   return (
-    <div className="min-h-dvh flex flex-col relative">
+    <div className="min-h-dvh flex flex-col relative page-with-bg">
       <AnimatedBackground theme="stories" />
       {/* Global floating musical notes */}
       <FloatingNotes />

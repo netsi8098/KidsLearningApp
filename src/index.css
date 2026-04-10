@@ -114,6 +114,48 @@ button {
   user-select: none;
 }
 
+/* Global: all headings use Fredoka One display font */
+h1, h2, h3 {
+  font-family: 'Fredoka One', 'Nunito', system-ui, sans-serif;
+}
+
+/* Global: primary buttons have 3D pressable effect */
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  color: white;
+  font-family: 'Fredoka One', sans-serif;
+  border-radius: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  min-height: 48px;
+  border-bottom: 3px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.btn-primary:active {
+  transform: scale(0.97);
+  border-bottom-width: 1px;
+}
+
+/* Global: back button styling */
+.btn-back {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(78, 205, 196, 0.9);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+  border: none;
+  transition: transform 0.1s;
+}
+.btn-back:active {
+  transform: scale(0.93);
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -523,6 +565,18 @@ html {
 .animate-shimmer {
   animation: shimmer 2s linear infinite;
   background-size: 200% 100%;
+}
+
+/* ── Content above AnimatedBackground ───────────────── */
+.above-bg {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure pages with AnimatedBackground don't let bg eat clicks */
+.page-with-bg > *:not([style*="position: fixed"]) {
+  position: relative;
+  z-index: 1;
 }
 
 /* ══════════════════════════════════════════════════════════

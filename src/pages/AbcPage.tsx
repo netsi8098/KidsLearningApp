@@ -70,7 +70,7 @@ export default function AbcPage() {
   }
 
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-8 md:px-8 md:pt-6 flex flex-col relative">
+    <div className="min-h-dvh px-4 pt-4 pb-8 md:px-8 md:pt-6 flex flex-col relative page-with-bg">
       <AnimatedBackground theme="abc" />
       <div className="flex items-center justify-between mb-5 md:max-w-xl md:mx-auto md:w-full relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />

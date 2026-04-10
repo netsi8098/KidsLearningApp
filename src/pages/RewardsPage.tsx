@@ -215,7 +215,7 @@ export default function RewardsPage() {
   }, [favorites]);
 
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-24 relative">
+    <div className="min-h-dvh px-4 pt-4 pb-24 relative page-with-bg">
       <AnimatedBackground theme="rewards" />
       {/* Header */}
       <div className="flex items-center justify-between mb-4 relative z-10">
