@@ -685,13 +685,13 @@ export default function StoriesPage() {
                       {/* Status badges */}
                       <div className="absolute top-3 right-3 flex gap-1">
                         {isCompleted && (
-                          <span className="text-sm bg-[#EDFAEF] rounded-full w-7 h-7 flex items-center justify-center shadow-sm border border-[#6BCB77]/20" title="Completed">
-                            ✅
+                          <span className="bg-[#4CAF50] text-white text-[10px] font-display rounded-full px-2.5 py-1 shadow-sm" title="Completed">
+                            Read!
                           </span>
                         )}
                         {isFavorite && (
-                          <span className="text-sm bg-[#FFF0F0] rounded-full w-7 h-7 flex items-center justify-center shadow-sm border border-[#FF6B6B]/20" title="Favorite">
-                            ❤️
+                          <span className="bg-[#FFF0F0] rounded-full w-7 h-7 flex items-center justify-center shadow-sm border border-[#FF6B6B]/20" title="Favorite">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="#FF6B6B"><path d="M7 12S1 8.5 1 5C1 3 3 1.5 5 1.5C6 1.5 6.5 2 7 3C7.5 2 8 1.5 9 1.5C11 1.5 13 3 13 5C13 8.5 7 12 7 12Z"/></svg>
                           </span>
                         )}
                       </div>

@@ -436,8 +436,11 @@ function QuestBoard({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <span className="text-sm">{'\uD83D\uDD25'}</span>
-            <span className="text-[11px] font-extrabold text-orange-700">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="animate-wiggle" style={{ transformOrigin: 'center bottom' }}>
+              <path d="M8 1C8 1 12 5 12 9C12 11.8 10.2 14 8 14C5.8 14 4 11.8 4 9C4 7 5 5 6 4C6 6 7 7 8 6C8 4 8 1 8 1Z" fill="#FF6B6B" stroke="#EF4444" strokeWidth="0.8"/>
+              <path d="M8 8C8 8 10 10 10 11.5C10 12.6 9.1 13.5 8 13.5C6.9 13.5 6 12.6 6 11.5C6 10 8 8 8 8Z" fill="#FFE66D"/>
+            </svg>
+            <span className="text-[11px] font-display text-orange-700">
               {streakDays}-day streak!
             </span>
           </motion.div>

@@ -6,6 +6,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import CelebrationOverlay from './components/CelebrationOverlay';
 import StarBurst from './components/StarBurst';
 import BadgeToast from './components/BadgeToast';
+import IdleMascot from './components/IdleMascot';
 import { startAutoSync, stopAutoSync } from './services/syncService';
 
 // Lazy load pages for better PWA performance
@@ -145,6 +146,7 @@ export default function App() {
         <CelebrationOverlay />
         <StarBurst />
         <BadgeToast />
+        <IdleMascot />
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<WelcomePage />} />
