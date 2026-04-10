@@ -1,7 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { useApp } from '../context/AppContext';
+import {
+  syncNow,
+  startAutoSync,
+  stopAutoSync,
+  getSyncStatus as getServiceStatus,
+  onSyncStatusChange,
+  type SyncStatus as ServiceSyncStatus,
+} from '../services/syncService';
+import { isBackendOnline, onBackendStatusChange } from '../services/apiService';
 
 export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error';
 
@@ -11,12 +20,27 @@ export interface SyncState {
   triggerSync: () => Promise<void>;
   conflicts: number;
   pendingCount: number;
+  backendOnline: boolean;
+}
+
+function mapStatus(s: ServiceSyncStatus): SyncStatus {
+  if (s === 'idle') return 'synced';
+  return s;
 }
 
 export function useSync(): SyncState {
   const { currentPlayer } = useApp();
   const playerId = currentPlayer?.id;
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>('synced');
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(mapStatus(getServiceStatus()));
+  const [backendOnline, setBackendOnline] = useState(isBackendOnline());
+
+  // Subscribe to sync service status
+  useEffect(() => {
+    onSyncStatusChange((s) => setSyncStatus(mapStatus(s)));
+    onBackendStatusChange(setBackendOnline);
+    startAutoSync();
+    return () => stopAutoSync();
+  }, []);
 
   const queue = useLiveQuery(
     () => (playerId ? db.syncQueue.where('playerId').equals(playerId).toArray() : []),
@@ -34,33 +58,12 @@ export function useSync(): SyncState {
   const lastSyncedAt = lastSynced?.syncedAt ? new Date(lastSynced.syncedAt) : null;
 
   const triggerSync = useCallback(async () => {
-    if (!playerId) return;
     if (!navigator.onLine) {
       setSyncStatus('offline');
       return;
     }
-
-    setSyncStatus('syncing');
-    try {
-      // Process pending queue items
-      const pendingItems = await db.syncQueue
-        .where('playerId')
-        .equals(playerId)
-        .filter((item) => item.status === 'pending')
-        .toArray();
-
-      for (const item of pendingItems) {
-        await db.syncQueue.update(item.id!, {
-          status: 'synced',
-          syncedAt: new Date(),
-        });
-      }
-
-      setSyncStatus('synced');
-    } catch {
-      setSyncStatus('error');
-    }
-  }, [playerId]);
+    await syncNow();
+  }, []);
 
   return {
     syncStatus,
@@ -68,5 +71,6 @@ export function useSync(): SyncState {
     triggerSync,
     conflicts,
     pendingCount,
+    backendOnline,
   };
 }

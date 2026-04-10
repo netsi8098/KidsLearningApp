@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type PlayerProfile } from '../db/database';
+import { queueChange } from '../services/syncService';
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
@@ -40,7 +41,7 @@ export function useProfiles() {
       bedtimeMode: false,
       characterPreference: '',
     });
-    return {
+    const profile: PlayerProfile = {
       id,
       name,
       avatarEmoji,
@@ -56,10 +57,20 @@ export function useProfiles() {
       bedtimeMode: false,
       characterPreference: '',
     };
+
+    // Queue for backend sync
+    queueChange(id as number, 'profile', String(id), 'create', {
+      name, avatarEmoji, age, ageGroup, interests: interests ?? [],
+      totalStars: 0, streakDays: 1, bedtimeMode: false,
+    });
+
+    return profile;
   }
 
   async function updateProfile(playerId: number, updates: Partial<PlayerProfile>): Promise<void> {
     await db.profiles.update(playerId, updates);
+    // Queue for backend sync
+    queueChange(playerId, 'profile', String(playerId), 'update', updates as Record<string, unknown>);
   }
 
   async function updateLastPlayed(playerId: number) {
@@ -90,7 +101,11 @@ export function useProfiles() {
   async function addStars(playerId: number, count: number) {
     const profile = await db.profiles.get(playerId);
     if (profile) {
-      await db.profiles.update(playerId, { totalStars: profile.totalStars + count });
+      const newTotal = profile.totalStars + count;
+      await db.profiles.update(playerId, { totalStars: newTotal });
+      queueChange(playerId, 'star', `stars-${Date.now()}`, 'create', {
+        starsEarned: count, totalStars: newTotal,
+      });
     }
   }
 

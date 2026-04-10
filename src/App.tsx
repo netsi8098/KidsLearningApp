@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
@@ -6,6 +6,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import CelebrationOverlay from './components/CelebrationOverlay';
 import StarBurst from './components/StarBurst';
 import BadgeToast from './components/BadgeToast';
+import { startAutoSync, stopAutoSync } from './services/syncService';
 
 // Lazy load pages for better PWA performance
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
@@ -74,6 +75,12 @@ function LoadingScreen() {
 }
 
 export default function App() {
+  // Start offline-first background sync with backend
+  useEffect(() => {
+    startAutoSync();
+    return () => stopAutoSync();
+  }, []);
+
   return (
     <ErrorBoundary>
     <BrowserRouter>
