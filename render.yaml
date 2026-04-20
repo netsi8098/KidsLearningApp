@@ -1,0 +1,52 @@
+# Render Blueprint — auto-deploys backend + database
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ── Backend API ──────────────────────────────
+  - type: web
+    name: kids-learning-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: "7d"
+      - key: CORS_ORIGIN
+        value: https://thankful-tree-0cf247010.2.azurestaticapps.net
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: RATE_LIMIT_MAX
+        value: "100"
+      - key: STORAGE_PROVIDER
+        value: local
+      - key: STORAGE_LOCAL_PATH
+        value: /tmp/uploads
+      - key: DATABASE_URL
+        sync: false  # Set manually from Neon
+      - key: REDIS_URL
+        value: ""  # Redis optional on free tier
+      - key: RESEND_API_KEY
+        sync: false  # Set manually from Resend
+
+  # ── Background Worker (optional, free tier) ──
+  # Uncomment when needed:
+  # - type: worker
+  #   name: kids-learning-worker
+  #   runtime: node
+  #   region: oregon
+  #   plan: free
+  #   rootDir: backend
+  #   buildCommand: npm ci && npx prisma generate && npm run build
+  #   startCommand: node dist/worker.js

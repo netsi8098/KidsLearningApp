@@ -69,4 +69,73 @@ router.patch(
   }
 );
 
+// ── POST /api/auth/forgot-password ───────────────────────
+
+const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+  }),
+});
+
+router.post('/forgot-password', validate(forgotPasswordSchema), async (req, res) => {
+  try {
+    // Always return success to prevent email enumeration
+    const { email } = req.body;
+    // In production, this would:
+    // 1. Look up user by email
+    // 2. Generate a reset token (crypto.randomUUID())
+    // 3. Store token with expiry in DB
+    // 4. Send email via emailService.sendPasswordResetEmail()
+    console.log(`[Auth] Password reset requested for: ${email}`);
+    res.json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch {
+    res.json({ message: 'If that email exists, a reset link has been sent.' });
+  }
+});
+
+// ── POST /api/auth/verify-email ─────────────────────────
+
+const verifyEmailSchema = z.object({
+  body: z.object({
+    token: z.string().min(1),
+  }),
+});
+
+router.post('/verify-email', validate(verifyEmailSchema), async (req, res) => {
+  try {
+    // In production, this would:
+    // 1. Look up verification token in DB
+    // 2. Mark user's email as verified
+    // 3. Delete the token
+    console.log(`[Auth] Email verification token: ${req.body.token}`);
+    res.json({ message: 'Email verified successfully!' });
+  } catch {
+    res.status(400).json({ message: 'Invalid or expired verification token.' });
+  }
+});
+
+// ── POST /api/auth/reset-password ───────────────────────
+
+const resetPasswordSchema = z.object({
+  body: z.object({
+    token: z.string().min(1),
+    password: z.string().min(8),
+  }),
+});
+
+router.post('/reset-password', validate(resetPasswordSchema), async (req, res) => {
+  try {
+    // In production, this would:
+    // 1. Look up reset token in DB
+    // 2. Verify it hasn't expired
+    // 3. Hash new password
+    // 4. Update user's password
+    // 5. Delete the token
+    console.log(`[Auth] Password reset with token: ${req.body.token}`);
+    res.json({ message: 'Password has been reset successfully!' });
+  } catch {
+    res.status(400).json({ message: 'Invalid or expired reset token.' });
+  }
+});
+
 export default router;
