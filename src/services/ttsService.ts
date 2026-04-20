@@ -34,6 +34,11 @@ let _currentAudio: HTMLAudioElement | null = null;
 let _lastCheck: number | null = null;
 let _speakingPromiseReject: (() => void) | null = null;
 
+/** Get the current playing audio element (for duration/time tracking) */
+export function getCurrentAudio(): HTMLAudioElement | null {
+  return _currentAudio;
+}
+
 /** Check if the TTS server is running (caches for 60s to reduce latency) */
 export async function checkTTSServer(): Promise<boolean> {
   if (_serverAvailable !== null && _lastCheck && Date.now() - _lastCheck < 60000) {

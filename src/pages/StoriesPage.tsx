@@ -11,7 +11,7 @@ import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import ConfettiCelebration from '../components/ConfettiCelebration';
 import StoryIllustration from '../components/StoryIllustration';
-import { stopSpeaking as stopAIVoice } from '../services/ttsService';
+import { stopSpeaking as stopAIVoice, getCurrentAudio } from '../services/ttsService';
 import {
   storiesData,
   storyCategories,
@@ -134,23 +134,46 @@ export default function StoriesPage() {
     if (autoRead && viewMode === 'reader' && activeStory) {
       const pageData = activeStory.pages[currentPage];
       if (!pageData) return;
-      const wordCount = pageData.text.split(/\s+/).length;
-      const avgWordDuration = activeStory.ageGroup === '2-3' ? 420 : 350;
 
       // Start reading after a short delay
       const readTimer = setTimeout(() => {
         handleReadAloud();
       }, 500);
 
-      // Auto-advance to next page after speech finishes + pause
-      const totalReadTime = wordCount * avgWordDuration + 1500; // extra pause before turning
-      autoAdvanceRef.current = setTimeout(() => {
-        if (activeStory && currentPage < activeStory.pages.length - 1) {
-          goToPage(currentPage + 1);
-        } else if (activeStory && currentPage >= activeStory.pages.length - 1) {
-          completeStory();
+      // Poll for speech completion, then auto-advance
+      const pollForEnd = () => {
+        const audio = getCurrentAudio();
+        // Check if AI audio finished
+        if (audio && audio.ended) {
+          setTimeout(() => {
+            if (activeStory && currentPage < activeStory.pages.length - 1) {
+              goToPage(currentPage + 1);
+            } else if (activeStory) {
+              completeStory();
+            }
+          }, 1200); // 1.2s pause before turning page
+          return;
         }
-      }, totalReadTime);
+        // Check if browser speech finished (no audio element + not speaking)
+        if (!audio && !window.speechSynthesis?.speaking) {
+          // Wait a bit to make sure it actually started
+          const wordCount = pageData.text.split(/\s+/).length;
+          const minTime = wordCount * 250 + 1000; // minimum expected duration
+          setTimeout(() => {
+            if (!window.speechSynthesis?.speaking && !getCurrentAudio()) {
+              if (activeStory && currentPage < activeStory.pages.length - 1) {
+                goToPage(currentPage + 1);
+              } else if (activeStory) {
+                completeStory();
+              }
+            }
+          }, Math.max(0, minTime));
+          return;
+        }
+        autoAdvanceRef.current = setTimeout(pollForEnd, 300);
+      };
+      // Start polling after speech should have begun
+      autoAdvanceRef.current = setTimeout(pollForEnd, 1500);
 
       return () => {
         clearTimeout(readTimer);
@@ -266,6 +289,7 @@ export default function StoriesPage() {
       window.speechSynthesis.cancel();
     }
     if (wordTimerRef.current) {
+      clearTimeout(wordTimerRef.current as unknown as number);
       clearInterval(wordTimerRef.current);
       wordTimerRef.current = null;
     }
@@ -302,27 +326,59 @@ export default function StoriesPage() {
     stopReading();
 
     const words = pageData.text.split(/\s+/);
-    const avgWordDuration = activeStory.ageGroup === '2-3' ? 420 : 350; // ms per word
+    const wordCount = words.length;
 
     setIsSpeaking(true);
     setSpokenWordIndex(0);
 
-    // Speak using the app's audio system (which uses AI voice if available)
+    // Speak using the app's audio system (AI voice or browser fallback)
     speak(pageData.text);
 
-    // Animate word highlighting in sync
-    let wordIdx = 0;
-    wordTimerRef.current = setInterval(() => {
-      wordIdx++;
-      if (wordIdx >= words.length) {
-        if (wordTimerRef.current) clearInterval(wordTimerRef.current);
-        wordTimerRef.current = null;
-        setIsSpeaking(false);
-        setSpokenWordIndex(-1);
-        return;
+    // Sync word highlighting with actual audio playback.
+    // Strategy: poll the audio element's currentTime and map it to word index.
+    // If no audio element (browser SpeechSynthesis), use time-based estimation.
+    const startTime = Date.now();
+    let resolved = false;
+
+    const syncHighlight = () => {
+      if (resolved) return;
+
+      const audio = getCurrentAudio();
+
+      if (audio && audio.duration && audio.duration > 0) {
+        // AI voice mode: sync to actual audio progress
+        const progress = audio.currentTime / audio.duration;
+        const wordIdx = Math.min(Math.floor(progress * wordCount), wordCount - 1);
+        setSpokenWordIndex(wordIdx);
+
+        if (audio.ended || audio.paused) {
+          resolved = true;
+          setIsSpeaking(false);
+          setSpokenWordIndex(-1);
+          return;
+        }
+      } else {
+        // Browser SpeechSynthesis fallback: estimate based on elapsed time
+        const elapsed = Date.now() - startTime;
+        // Estimate ~300ms per word for browser speech
+        const estimatedDuration = wordCount * 300;
+        const progress = Math.min(elapsed / estimatedDuration, 1);
+        const wordIdx = Math.min(Math.floor(progress * wordCount), wordCount - 1);
+        setSpokenWordIndex(wordIdx);
+
+        if (progress >= 1) {
+          resolved = true;
+          setIsSpeaking(false);
+          setSpokenWordIndex(-1);
+          return;
+        }
       }
-      setSpokenWordIndex(wordIdx);
-    }, avgWordDuration);
+
+      wordTimerRef.current = setTimeout(syncHighlight, 80) as unknown as ReturnType<typeof setInterval>;
+    };
+
+    // Start sync after a short delay to let audio begin loading
+    wordTimerRef.current = setTimeout(syncHighlight, 200) as unknown as ReturnType<typeof setInterval>;
   }, [activeStory, currentPage, speak, stopReading]);
 
   // Toggle favorite
