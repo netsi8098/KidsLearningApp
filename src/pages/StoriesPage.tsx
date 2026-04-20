@@ -971,9 +971,8 @@ export default function StoriesPage() {
 
     /* ── READER VIEW ── */
     return (
-      <div className="h-dvh flex flex-col overflow-hidden relative page-with-bg">
-        {/* Immersive animated background */}
-        <AnimatedBackground theme={storyTheme as any} />
+      <div className="h-dvh flex flex-col overflow-hidden relative" style={{ background: '#1a1a2e' }}>
+        {/* No AnimatedBackground — the story illustration IS the full-screen background */}
 
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2 relative z-10">
@@ -1005,58 +1004,85 @@ export default function StoriesPage() {
           </motion.button>
         </div>
 
-        {/* FULL-SCREEN illustration as background */}
-        <div className="flex-1 relative overflow-hidden">
+        {/* FULL-SCREEN illustration — covers entire viewport, no purple visible */}
+        <div className="fixed inset-0" style={{ zIndex: 0 }}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentPage}
-              className="absolute inset-0"
-              initial={{ x: turnDirection === 'next' ? '100%' : '-100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: turnDirection === 'next' ? '-100%' : '100%', opacity: 0 }}
-              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className={`absolute inset-0 ${turnDirection === 'next' ? 'page-enter-forward' : 'page-enter-backward'}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              style={{ perspective: '1200px' }}
             >
-              {/* Illustration fills entire screen */}
-              <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.15) 100%)' }}>
-                <div style={{ transform: 'scale(2.2)', transformOrigin: 'center center' }}>
+              {/* Illustration as full-screen background using object-fit cover approach */}
+              <div
+                className="absolute inset-0 flex items-center justify-center overflow-hidden"
+                style={{ background: '#1a1a2e' }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: '-20%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: 'scale(3)',
+                    transformOrigin: 'center center',
+                    filter: 'blur(0.5px)',
+                  }}
+                >
+                  <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
+                </div>
+                {/* Sharper centered version on top */}
+                <div style={{ position: 'relative', zIndex: 1, transform: 'scale(2.8)', transformOrigin: 'center center' }}>
                   <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
                 </div>
               </div>
             </motion.div>
           </AnimatePresence>
+        </div>
 
-          {/* Text subtitle overlay at TOP of image */}
-          <div
-            className="absolute top-0 left-0 right-0 z-10"
-            style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 70%, transparent 100%)',
-              padding: '60px 24px 40px',
-            }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPage}
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 10, opacity: 0 }}
-                transition={{ duration: 0.3 }}
+        {/* Text overlay at BOTTOM of screen with frosted glass */}
+        <div className="flex-1" />
+        <div
+          className="relative z-10"
+          style={{
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderRadius: '24px 24px 0 0',
+            padding: '24px 24px 8px',
+            marginTop: 'auto',
+          }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPage}
+              initial={{ y: 15, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -15, opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <p
+                className="text-center text-white font-bold leading-relaxed"
+                style={{
+                  fontFamily: "'Nunito', sans-serif",
+                  fontSize: '20px',
+                  lineHeight: 1.8,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                  maxWidth: '500px',
+                  margin: '0 auto',
+                }}
               >
-                <p
-                  className="text-center text-white font-bold leading-relaxed"
-                  style={{
-                    fontFamily: "'Nunito', sans-serif",
-                    fontSize: '20px',
-                    lineHeight: 1.7,
-                    textShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                    maxWidth: '500px',
-                    margin: '0 auto',
-                  }}
-                >
-                  {renderPageText(pageData, spokenWordIndex)}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                {renderPageText(pageData, spokenWordIndex)}
+              </p>
+              <p className="text-center text-white/40 text-xs font-bold mt-2">
+                Page {currentPage + 1} of {totalPages}
+              </p>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Progress dots */}

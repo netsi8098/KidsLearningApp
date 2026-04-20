@@ -637,6 +637,36 @@ html {
   background-clip: text;
 }
 
+/* ── Book page-flip 3D animation ── */
+@keyframes page-flip-forward {
+  0% { transform: perspective(1200px) rotateY(0deg); }
+  100% { transform: perspective(1200px) rotateY(-180deg); }
+}
+@keyframes page-flip-backward {
+  0% { transform: perspective(1200px) rotateY(0deg); }
+  100% { transform: perspective(1200px) rotateY(180deg); }
+}
+.page-flip-forward {
+  animation: page-flip-forward 0.7s ease-in-out forwards;
+  transform-origin: left center;
+  backface-visibility: hidden;
+}
+.page-flip-backward {
+  animation: page-flip-backward 0.7s ease-in-out forwards;
+  transform-origin: right center;
+  backface-visibility: hidden;
+}
+.page-enter-forward {
+  animation: page-flip-backward 0.7s ease-in-out reverse forwards;
+  transform-origin: left center;
+  backface-visibility: hidden;
+}
+.page-enter-backward {
+  animation: page-flip-forward 0.7s ease-in-out reverse forwards;
+  transform-origin: right center;
+  backface-visibility: hidden;
+}
+
 /* Active button tap effect */
 .tap-bounce:active {
   animation: pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
