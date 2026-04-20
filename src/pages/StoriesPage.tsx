@@ -1005,25 +1005,61 @@ export default function StoriesPage() {
           </motion.button>
         </div>
 
-        {/* Full-screen illustration */}
+        {/* FULL-SCREEN illustration as background */}
         <div className="flex-1 relative overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentPage}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0"
               initial={{ x: turnDirection === 'next' ? '100%' : '-100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: turnDirection === 'next' ? '-100%' : '100%', opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="relative z-10">
-                <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
+              {/* Illustration fills entire screen */}
+              <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.15) 100%)' }}>
+                <div style={{ transform: 'scale(2.2)', transformOrigin: 'center center' }}>
+                  <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
+
+          {/* Text subtitle overlay at TOP of image */}
+          <div
+            className="absolute top-0 left-0 right-0 z-10"
+            style={{
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 70%, transparent 100%)',
+              padding: '60px 24px 40px',
+            }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 10, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p
+                  className="text-center text-white font-bold leading-relaxed"
+                  style={{
+                    fontFamily: "'Nunito', sans-serif",
+                    fontSize: '20px',
+                    lineHeight: 1.7,
+                    textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                    maxWidth: '500px',
+                    margin: '0 auto',
+                  }}
+                >
+                  {renderPageText(pageData, spokenWordIndex)}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Progress dots at top center */}
+        {/* Progress dots */}
         <div className="fixed top-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
           {Array.from({ length: totalPages }).map((_, i) => (
             <div
@@ -1059,42 +1095,22 @@ export default function StoriesPage() {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#2D2D3A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </motion.button>
 
-        {/* Frosted glass text panel at bottom */}
+        {/* Slim controls bar at bottom */}
         <div
           className="fixed bottom-0 left-0 right-0 z-10"
           style={{
-            background: 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            borderRadius: '24px 24px 0 0',
-            padding: '20px 24px 24px',
-            minHeight: '30vh',
-            boxShadow: '0 -4px 24px rgba(0,0,0,0.08)',
+            background: 'linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%)',
+            padding: '40px 24px 24px',
           }}
         >
-          {/* Story text */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPage}
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -10, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <p className="text-center leading-relaxed text-[#2D2D3A] font-medium" style={{ fontFamily: "'Nunito', sans-serif", fontSize: '20px', lineHeight: 1.7 }}>
-                {renderPageText(pageData, spokenWordIndex)}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Controls row inside text panel */}
-          <div className="flex items-center justify-center gap-3 mt-4">
+          <div className="flex items-center justify-center gap-3">
+            {/* Read aloud button */}
             <motion.button
-              className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full font-display text-sm cursor-pointer ${isSpeaking ? 'text-white' : 'text-[#6B6B7B]'}`}
+              className={`flex items-center gap-1.5 px-6 py-3 rounded-full font-display text-sm cursor-pointer ${isSpeaking ? 'text-white' : 'text-white/80'}`}
               style={
                 isSpeaking
-                  ? { background: 'linear-gradient(135deg, #A78BFA, #8B5CF6)', boxShadow: '0 4px 14px rgba(167,139,250,0.3)' }
-                  : { background: '#F0EAE0' }
+                  ? { background: 'linear-gradient(135deg, #A78BFA, #8B5CF6)', boxShadow: '0 4px 14px rgba(167,139,250,0.4)' }
+                  : { background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }
               }
               onClick={isSpeaking ? stopReading : handleReadAloud}
               whileTap={{ scale: 0.95 }}
@@ -1104,13 +1120,14 @@ export default function StoriesPage() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
                 </motion.span>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 22 22" fill="none"><path d="M3 8V14H6L10 17V5L6 8H3Z" fill="currentColor"/><path d="M13 8C14 9.5 14 12.5 13 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                <svg width="18" height="18" viewBox="0 0 22 22" fill="none"><path d="M3 8V14H6L10 17V5L6 8H3Z" fill="white"/><path d="M13 8C14 9.5 14 12.5 13 14" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
               )}
               <span>{isSpeaking ? 'Pause' : 'Read'}</span>
             </motion.button>
 
+            {/* Auto toggle */}
             <motion.button
-              className={`px-4 py-2.5 rounded-full font-display text-xs cursor-pointer ${autoRead ? 'text-white' : 'text-[#9B9BAB]'}`}
+              className={`px-5 py-3 rounded-full font-display text-xs cursor-pointer ${autoRead ? 'text-white' : 'text-white/60'}`}
                 style={
                   autoRead
                     ? { background: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)', boxShadow: '0 2px 10px rgba(78,205,196,0.2)' }
