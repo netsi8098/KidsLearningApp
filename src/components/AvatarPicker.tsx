@@ -83,18 +83,14 @@ export default function AvatarPicker({ selected, onSelect, photo, onPhotoChange 
 
   return (
     <div className="space-y-4">
-      {/* Mode toggle tabs */}
+      {/* Mode toggle tabs — Photo mode disabled for child safety (COPPA) */}
       <div className="flex gap-2 justify-center">
         <motion.button
-          className={`px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-all border ${
-            mode === 'sticker'
-              ? 'bg-gradient-to-r from-coral to-[#FF8E8E] text-white border-coral/30 shadow-md'
-              : 'bg-white text-[#6B6B7B] border-[#F0EAE0]'
-          }`}
+          className="px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-all border bg-gradient-to-r from-coral to-[#FF8E8E] text-white border-coral/30 shadow-md"
           onClick={() => setMode('sticker')}
           whileTap={{ scale: 0.95 }}
         >
-          {'\u{1F43E}'} Stickers
+          Choose Avatar
         </motion.button>
         <motion.button
           className={`px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-all border ${
