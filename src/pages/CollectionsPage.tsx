@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { CheckIcon } from '../components/svg/CommonIcons';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useApp } from '../context/AppContext';
 import { db } from '../db/database';
@@ -273,7 +274,7 @@ export default function CollectionsPage() {
                   {/* Completion badge */}
                   {isComplete && (
                     <span className="absolute top-2 right-2 text-sm bg-white/90 rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
-                      ✅
+                      <CheckIcon size={16} />
                     </span>
                   )}
                 </div>
@@ -371,7 +372,7 @@ export default function CollectionsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-extrabold text-[#2D2D3A] truncate text-[15px]">{col.title}</h3>
-                      {isComplete && <span className="text-sm">✅</span>}
+                      {isComplete && <CheckIcon size={16} />}
                     </div>
                     <p className="text-[11px] text-[#9B9BAB] mt-0.5 line-clamp-2 leading-relaxed">{col.description}</p>
 

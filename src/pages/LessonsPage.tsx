@@ -854,7 +854,7 @@ function ActivityStep({ step, onDone }: { step: LessonStep; onDone: () => void }
         whileTap={{ scale: 0.95 }}
         animate={done ? { scale: [1, 1.15, 1] } : {}}
       >
-        {done ? '✅ Done!' : '👆 Done!'}
+        {done ? 'Done!' : 'Mark Done!'}
       </motion.button>
     </div>
   );
@@ -975,7 +975,7 @@ function QuizStep({
             exit={{ opacity: 0 }}
           >
             {result === 'correct'
-              ? '🎉 Correct! Great job!'
+              ? 'Correct! Great job!'
               : `❌ The answer is: ${step.correctAnswer}`}
           </motion.div>
         )}

@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useAudio } from '../hooks/useAudio';
 import { useCooking } from '../hooks/useCooking';
 import NavButton from '../components/NavButton';
+import { WarningIcon, SearchIcon } from '../components/svg/CommonIcons';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import RecipeCard from '../components/RecipeCard';
 import StepIndicator from '../components/StepIndicator';
@@ -246,7 +247,7 @@ export default function CookingPage() {
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
           >
-            <span className="text-xl flex-shrink-0 mt-0.5">⚠️</span>
+            <WarningIcon size={20} />
             <div>
               <p className="text-xs font-bold text-amber-700 uppercase tracking-[0.06em] mb-0.5">Parent Assistance Needed</p>
               <p className="text-sm text-amber-700 font-medium">{activeRecipe.safetyNote}</p>
@@ -451,7 +452,7 @@ export default function CookingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <p className="text-5xl mb-3">🔍</p>
+          <div className="flex justify-center mb-3"><SearchIcon size={48} /></div>
           <p className="font-bold text-[#6B6B7B]">No recipes found</p>
           <p className="text-sm">Try a different category!</p>
         </motion.div>

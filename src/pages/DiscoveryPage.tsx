@@ -4,6 +4,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useRecommendations } from '../hooks/useRecommendations';
 import NavButton from '../components/NavButton';
+import { FlameIconSm } from '../components/svg/CommonIcons';
 import SearchOverlay from '../components/SearchOverlay';
 import RecommendationRail from '../components/RecommendationRail';
 import { collections } from '../registry/collectionsConfig';
@@ -243,7 +244,7 @@ export default function DiscoveryPage() {
             transition={{ delay: 0.35 }}
           >
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-sm">🔥</span>
+              <FlameIconSm size={14} />
               <h3 className="text-[13px] font-extrabold text-[#6B6B7B] uppercase tracking-wider">Trending Now</h3>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">

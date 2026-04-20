@@ -11,6 +11,7 @@ import EmotionPicker from '../components/EmotionPicker';
 import ContentCard from '../components/ContentCard';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import { CheckIcon, StarIconSm } from '../components/svg/CommonIcons';
 
 type SectionView = 'checkin' | 'explorer' | 'skills';
 
@@ -219,7 +220,7 @@ export default function EmotionsPage() {
           [
             { key: 'checkin', label: 'How I Feel', emoji: '💭' },
             { key: 'explorer', label: 'Explore', emoji: '🔍' },
-            { key: 'skills', label: 'Life Skills', emoji: '🌟' },
+            { key: 'skills', label: 'Life Skills', emoji: '' },
           ] as const
         ).map((tab) => (
           <motion.button
@@ -415,7 +416,7 @@ export default function EmotionsPage() {
                   />
                   {completed && (
                     <div className="absolute top-3 right-3">
-                      <span className="text-lg">✅</span>
+                      <CheckIcon size={20} />
                     </div>
                   )}
                 </div>
@@ -425,7 +426,7 @@ export default function EmotionsPage() {
 
           {filteredSkills.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-5xl mb-3">🌟</p>
+              <StarIconSm size={48} />
               <p className="text-[#6B6B7B] font-bold">No skills in this category</p>
             </div>
           )}

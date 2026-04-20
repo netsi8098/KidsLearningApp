@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { SearchIcon, CheckIcon } from '../components/svg/CommonIcons';
 import { useApp } from '../context/AppContext';
 import { useHelpArticles, type HelpArticle, type HelpCategory } from '../hooks/useHelpArticles';
 import NavButton from '../components/NavButton';
@@ -103,7 +104,7 @@ export default function HelpCenterPage() {
             placeholder="Search help articles..."
             className="w-full bg-white rounded-[14px] px-4 py-3.5 pl-10 outline-none focus:ring-4 focus:ring-grape/15 shadow-[0_2px_12px_rgba(45,45,58,0.06)] border border-[#E2E8F0] text-sm text-[#2D2D3A] placeholder:text-[#9B9BAB]"
           />
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9B9BAB]">🔍</span>
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2"><SearchIcon size={16} /></span>
           {searchQuery && (
             <motion.button
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B9BAB] text-sm cursor-pointer"
@@ -142,7 +143,7 @@ export default function HelpCenterPage() {
             ))}
             {filteredArticles.length === 0 && (
               <div className="text-center py-12">
-                <span className="text-4xl block mb-2">🔍</span>
+                <span className="block mb-2"><SearchIcon size={40} /></span>
                 <p className="text-sm text-[#6B6B7B]">No articles found. Try different keywords.</p>
               </div>
             )}
@@ -333,7 +334,7 @@ export default function HelpCenterPage() {
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                 >
-                  <p className="text-5xl mb-3">✅</p>
+                  <p className="mb-3"><CheckIcon size={48} /></p>
                   <h3 className="font-bold text-lg text-[#2D2D3A]">Message Sent!</h3>
                   <p className="text-sm text-[#6B6B7B] mt-1">We&apos;ll get back to you as soon as possible.</p>
                 </motion.div>

@@ -14,6 +14,7 @@ import {
 import { storiesData } from '../data/storiesData';
 import NavButton from '../components/NavButton';
 import BreathingGuide from '../components/BreathingGuide';
+import { MoonIcon, SunIcon, BookIcon } from '../components/svg/CommonIcons';
 
 // ── Web Audio helpers for calm sounds ──────────────────────
 
@@ -579,7 +580,7 @@ export default function BedtimePage() {
       >
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-[#6C5CE7]/15 flex items-center justify-center">
-            <span className="text-2xl">{isBedtime ? '🌙' : '☀️'}</span>
+            {isBedtime ? <MoonIcon size={24} /> : <SunIcon size={24} />}
           </div>
           <div>
             <p className="font-bold text-[#D4D4E8]">Bedtime Mode</p>
@@ -611,7 +612,7 @@ export default function BedtimePage() {
         transition={{ delay: 0.05 }}
       >
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-base">🌙</span>
+          <MoonIcon size={16} />
           <h3 className="text-[13px] font-extrabold text-[#7B7BA0] uppercase tracking-wider">
             Tonight&apos;s Wind-Down
           </h3>
@@ -719,7 +720,7 @@ export default function BedtimePage() {
         transition={{ delay: 0.08 }}
       >
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-base">📖</span>
+          <BookIcon size={16} />
           <h3 className="text-[13px] font-extrabold text-[#7B7BA0] uppercase tracking-wider">Bedtime Stories</h3>
         </div>
 
@@ -933,7 +934,7 @@ export default function BedtimePage() {
             className="absolute -left-4 top-1/2 -translate-y-1/2 w-24 h-24 rounded-full pointer-events-none"
             style={{ background: 'radial-gradient(circle, rgba(108,92,231,0.08) 0%, transparent 70%)' }}
           />
-          <span className="text-4xl relative">📖</span>
+          <BookIcon size={36} />
           <div className="flex-1 text-left">
             <p className="font-bold text-[#D4D4E8]">All Bedtime Stories</p>
             <p className="text-xs text-[#7B7BA0]">Browse the full collection of cozy stories</p>

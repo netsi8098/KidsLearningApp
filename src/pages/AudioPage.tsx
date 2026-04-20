@@ -11,6 +11,7 @@ import CategoryFilterBar from '../components/CategoryFilterBar';
 import EpisodeCard from '../components/EpisodeCard';
 import AudioPlayerBar from '../components/AudioPlayerBar';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import { HeadphonesIcon, HeartIcon } from '../components/svg/CommonIcons';
 import NavButton from '../components/NavButton';
 
 type TabKey = 'browse' | 'favorites' | 'recent';
@@ -541,7 +542,7 @@ export default function AudioPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
                 {filteredEpisodes.length === 0 ? (
                   <div className="col-span-full text-center py-16">
-                    <p className="text-5xl mb-3">🎧</p>
+                    <div className="flex justify-center mb-3"><HeadphonesIcon size={48} /></div>
                     <p className="text-[#6B6B7B] font-bold">No episodes found</p>
                   </div>
                 ) : (
@@ -630,7 +631,7 @@ export default function AudioPage() {
             >
               {favoriteEpisodes.length === 0 ? (
                 <div className="col-span-full text-center py-16">
-                  <p className="text-5xl mb-3">❤️</p>
+                  <div className="flex justify-center mb-3"><HeartIcon size={48} /></div>
                   <p className="text-[#6B6B7B] font-bold">No favorites yet</p>
                   <p className="text-[#9B9BAB] text-sm mt-1">
                     Tap the heart on any episode to save it here

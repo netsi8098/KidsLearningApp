@@ -6,6 +6,7 @@ import { useAudio } from '../hooks/useAudio';
 import { db } from '../db/database';
 import NavButton from '../components/NavButton';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import { TrophyIcon, StarIconSm, FlameIconSm, BrainIcon, TimerIcon } from '../components/svg/CommonIcons';
 import { gamesConfig, wordBuilderWords, numberPopEmojis, type GameDifficulty, type GameConfig } from '../data/gamesConfig';
 import { animalsData } from '../data/animalsData';
 import { shapesData } from '../data/shapesData';
@@ -531,7 +532,7 @@ function ColorSplashGame({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                 >
-                  {item.isTarget ? '✅' : '❌'}
+                  {item.isTarget ? <span className="text-green-500 font-bold">✓</span> : <span className="text-red-400 font-bold">✗</span>}
                 </motion.span>
               )}
             </motion.button>
@@ -974,7 +975,7 @@ function GameOverScreen({
             animate={{ scale: 1 }}
             transition={{ delay: 0.3 + s * 0.15, type: 'spring' }}
           >
-            {s <= result.stars ? '⭐' : '☆'}
+            <StarIconSm size={20} filled={s <= result.stars} />
           </motion.span>
         ))}
       </motion.div>
@@ -1458,7 +1459,7 @@ export default function GamesPage() {
                 className="flex items-center gap-1 bg-white rounded-full px-3 py-1 shadow-sm"
                 style={{ color: timer <= 10 ? '#EF4444' : '#6B7280' }}
               >
-                <span className="text-sm">⏱️</span>
+                <TimerIcon size={16} />
                 <span className="text-sm font-bold">{formatTime(timer)}</span>
               </div>
             )}

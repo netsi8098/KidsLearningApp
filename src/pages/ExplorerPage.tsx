@@ -12,6 +12,7 @@ import {
 import NavButton from '../components/NavButton';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import CompletionSummary from '../components/CompletionSummary';
+import { GlobeIcon, CheckIcon } from '../components/svg/CommonIcons';
 
 type ViewMode = 'browse' | 'explore' | 'quiz' | 'complete';
 
@@ -163,7 +164,7 @@ export default function ExplorerPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <NavButton onClick={() => navigate('/menu')} direction="back" />
-          <h2 className="text-xl font-extrabold tracking-tight" style={{ color: '#4ECDC4' }}>Discover the World 🌍</h2>
+          <h2 className="text-xl font-extrabold tracking-tight" style={{ color: '#4ECDC4' }}>Discover the World</h2>
           <div className="w-14" />
         </div>
 
@@ -191,7 +192,7 @@ export default function ExplorerPage() {
           >
             {filteredTopics.length === 0 ? (
               <div className="col-span-full text-center py-12">
-                <p className="text-5xl mb-3">🌍</p>
+                <div className="flex justify-center mb-3"><GlobeIcon size={48} /></div>
                 <p className="font-medium" style={{ color: '#6B6B7B' }}>No topics found</p>
                 <p className="text-sm mt-1" style={{ color: '#9B9BAB' }}>Try a different category</p>
               </div>
@@ -217,7 +218,7 @@ export default function ExplorerPage() {
                   >
                     {/* Completed badge */}
                     {completed && (
-                      <span className="absolute top-2 right-2 text-lg">✅</span>
+                      <span className="absolute top-2 right-2"><CheckIcon size={20} /></span>
                     )}
 
                     <span className="text-4xl block mb-2">{topic.emoji}</span>

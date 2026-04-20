@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
+import { CheckIcon, PartyIcon, PlayBtnIcon } from '../components/svg/CommonIcons';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useApp } from '../context/AppContext';
 import { db } from '../db/database';
@@ -193,7 +194,7 @@ export default function CollectionDetailPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
               >
-                <span className="text-lg">🎉</span>
+                <PartyIcon size={20} />
                 <span className="font-bold text-white text-sm">Collection Complete!</span>
               </motion.div>
             )}
@@ -234,7 +235,7 @@ export default function CollectionDetailPage() {
             transition={{ delay: 0.3 }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent" />
-            <span className="text-2xl relative z-10">▶️</span>
+            <PlayBtnIcon size={28} />
             <div className="text-left relative z-10">
               <p className="text-sm font-extrabold">{completedCount > 0 ? 'Continue' : 'Play Next'}</p>
               <p className="text-white/80 text-xs font-medium">{nextItem.emoji} {nextItem.title}</p>
@@ -311,7 +312,7 @@ export default function CollectionDetailPage() {
                 </div>
 
                 {/* Icon */}
-                <span className="text-xl flex-shrink-0">{done ? '✅' : item.emoji}</span>
+                <span className="text-xl flex-shrink-0">{done ? <CheckIcon size={22} /> : item.emoji}</span>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0 text-left">
