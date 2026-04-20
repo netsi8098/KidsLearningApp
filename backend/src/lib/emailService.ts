@@ -7,7 +7,7 @@
  */
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const FROM_EMAIL = 'Kids Learning Fun <noreply@kidslearningfun.app>';
+const FROM_EMAIL = 'Kids Learning Fun <onboarding@resend.dev>';
 const APP_NAME = 'Kids Learning Fun';
 
 interface EmailOptions {
