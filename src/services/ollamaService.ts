@@ -5,7 +5,7 @@
 
 const OLLAMA_URLS = [
   'http://localhost:11434',
-  'https://gabriel-aqua-friday-tiger.trycloudflare.com',
+  'https://extra-sticker-salvador-maybe.trycloudflare.com',
 ];
 let OLLAMA_BASE = OLLAMA_URLS[0];
 const DEFAULT_MODEL = 'gemma4:e2b';

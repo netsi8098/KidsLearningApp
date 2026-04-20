@@ -9,7 +9,7 @@
 const BACKEND_URLS = [
   'http://localhost:4000',
   'http://127.0.0.1:4000',
-  'https://diamond-pieces-rough-informed.trycloudflare.com',
+  'https://painted-burlington-currency-respiratory.trycloudflare.com',
 ];
 
 const STORAGE_KEY_TOKEN = 'klf-auth-token';

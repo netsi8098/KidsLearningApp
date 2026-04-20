@@ -12,7 +12,7 @@
 
 const TTS_URLS = [
   'http://localhost:5555',
-  'https://grip-waves-thrown-berkeley.trycloudflare.com',
+  'https://highlighted-locally-agrees-bureau.trycloudflare.com',
 ];
 let TTS_BASE = TTS_URLS[0];
 
