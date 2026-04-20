@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ProtectedRoute, SafeRoute } from './components/ProtectedRoute';
 import CelebrationOverlay from './components/CelebrationOverlay';
 import StarBurst from './components/StarBurst';
 import BadgeToast from './components/BadgeToast';
@@ -155,58 +156,57 @@ export default function App() {
         <IdleMascot />
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
-            <Route path="/" element={<WelcomePage />} />
-            <Route path="/menu" element={<MainMenu />} />
-            <Route path="/abc" element={<AbcPage />} />
-            <Route path="/numbers" element={<NumbersPage />} />
-            <Route path="/colors" element={<ColorsPage />} />
-            <Route path="/shapes" element={<ShapesPage />} />
-            <Route path="/animals" element={<AnimalsPage />} />
-            <Route path="/bodyparts" element={<BodyPartsPage />} />
-            <Route path="/quiz" element={<QuizPage />} />
-            <Route path="/rewards" element={<RewardsPage />} />
-            <Route path="/matching" element={<MatchingPage />} />
-            <Route path="/videos" element={<VideosPage />} />
-            <Route path="/stories" element={<StoriesPage />} />
-            <Route path="/lessons" element={<LessonsPage />} />
-            <Route path="/games" element={<GamesPage />} />
-            <Route path="/printables" element={<PrintablesPage />} />
-            <Route path="/parent-dashboard" element={<ParentDashboard />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            {/* v5 new routes */}
-            <Route path="/characters" element={<CharacterMeetPage />} />
-            <Route path="/emotions" element={<EmotionsPage />} />
-            <Route path="/bedtime" element={<BedtimePage />} />
-            <Route path="/audio" element={<AudioPage />} />
-            <Route path="/coloring" element={<ColoringPage />} />
-            <Route path="/movement" element={<MovementPage />} />
-            <Route path="/cooking" element={<CookingPage />} />
-            <Route path="/home-activities" element={<HomeActivitiesPage />} />
-            <Route path="/discover" element={<DiscoveryPage />} />
-            <Route path="/queue" element={<QueuePage />} />
-            <Route path="/assessment" element={<AssessmentPage />} />
-            <Route path="/explorer" element={<ExplorerPage />} />
-            <Route path="/scrapbook" element={<ScrapbookPage />} />
-            {/* v6 new routes */}
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/collections" element={<CollectionsPage />} />
-            <Route path="/collections/:id" element={<CollectionDetailPage />} />
-            <Route path="/weekly-recap" element={<WeeklyRecapPage />} />
-            <Route path="/preview" element={<PreviewPage />} />
-            {/* v7 new routes */}
-            <Route path="/billing" element={<BillingPage />} />
-            <Route path="/parent-tips" element={<ParentTipsPage />} />
-            <Route path="/help" element={<HelpCenterPage />} />
-            <Route path="/privacy" element={<PrivacySettingsPage />} />
-            <Route path="/inbox" element={<InboxPage />} />
-            <Route path="/routines" element={<RoutinePlannerPage />} />
-            <Route path="/routines/:id/play" element={<RoutinePlayerPage />} />
-            {/* v8 AI-powered routes */}
-            <Route path="/ai/whats-this" element={<WhatsThisPage />} />
-            <Route path="/ai/drawing-detective" element={<DrawingDetectivePage />} />
-            <Route path="/ai/letter-reader" element={<LetterReaderPage />} />
-            <Route path="/ai/nature-explorer" element={<NatureExplorerPage />} />
-            <Route path="/ai/color-finder" element={<ColorFinderPage />} />
+            {/* Public routes — no player required */}
+            <Route path="/" element={<SafeRoute><WelcomePage /></SafeRoute>} />
+            <Route path="/onboarding" element={<SafeRoute><OnboardingPage /></SafeRoute>} />
+
+            {/* Protected routes — require active player profile */}
+            <Route path="/menu" element={<ProtectedRoute><MainMenu /></ProtectedRoute>} />
+            <Route path="/abc" element={<ProtectedRoute><AbcPage /></ProtectedRoute>} />
+            <Route path="/numbers" element={<ProtectedRoute><NumbersPage /></ProtectedRoute>} />
+            <Route path="/colors" element={<ProtectedRoute><ColorsPage /></ProtectedRoute>} />
+            <Route path="/shapes" element={<ProtectedRoute><ShapesPage /></ProtectedRoute>} />
+            <Route path="/animals" element={<ProtectedRoute><AnimalsPage /></ProtectedRoute>} />
+            <Route path="/bodyparts" element={<ProtectedRoute><BodyPartsPage /></ProtectedRoute>} />
+            <Route path="/quiz" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+            <Route path="/rewards" element={<ProtectedRoute><RewardsPage /></ProtectedRoute>} />
+            <Route path="/matching" element={<ProtectedRoute><MatchingPage /></ProtectedRoute>} />
+            <Route path="/videos" element={<ProtectedRoute><VideosPage /></ProtectedRoute>} />
+            <Route path="/stories" element={<ProtectedRoute><StoriesPage /></ProtectedRoute>} />
+            <Route path="/lessons" element={<ProtectedRoute><LessonsPage /></ProtectedRoute>} />
+            <Route path="/games" element={<ProtectedRoute><GamesPage /></ProtectedRoute>} />
+            <Route path="/printables" element={<ProtectedRoute><PrintablesPage /></ProtectedRoute>} />
+            <Route path="/parent-dashboard" element={<SafeRoute><ParentDashboard /></SafeRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/characters" element={<ProtectedRoute><CharacterMeetPage /></ProtectedRoute>} />
+            <Route path="/emotions" element={<ProtectedRoute><EmotionsPage /></ProtectedRoute>} />
+            <Route path="/bedtime" element={<ProtectedRoute><BedtimePage /></ProtectedRoute>} />
+            <Route path="/audio" element={<ProtectedRoute><AudioPage /></ProtectedRoute>} />
+            <Route path="/coloring" element={<ProtectedRoute><ColoringPage /></ProtectedRoute>} />
+            <Route path="/movement" element={<ProtectedRoute><MovementPage /></ProtectedRoute>} />
+            <Route path="/cooking" element={<ProtectedRoute><CookingPage /></ProtectedRoute>} />
+            <Route path="/home-activities" element={<ProtectedRoute><HomeActivitiesPage /></ProtectedRoute>} />
+            <Route path="/discover" element={<ProtectedRoute><DiscoveryPage /></ProtectedRoute>} />
+            <Route path="/queue" element={<ProtectedRoute><QueuePage /></ProtectedRoute>} />
+            <Route path="/assessment" element={<ProtectedRoute><AssessmentPage /></ProtectedRoute>} />
+            <Route path="/explorer" element={<ProtectedRoute><ExplorerPage /></ProtectedRoute>} />
+            <Route path="/scrapbook" element={<ProtectedRoute><ScrapbookPage /></ProtectedRoute>} />
+            <Route path="/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
+            <Route path="/collections/:id" element={<ProtectedRoute><CollectionDetailPage /></ProtectedRoute>} />
+            <Route path="/weekly-recap" element={<ProtectedRoute><WeeklyRecapPage /></ProtectedRoute>} />
+            <Route path="/preview" element={<ProtectedRoute><PreviewPage /></ProtectedRoute>} />
+            <Route path="/billing" element={<SafeRoute><BillingPage /></SafeRoute>} />
+            <Route path="/parent-tips" element={<SafeRoute><ParentTipsPage /></SafeRoute>} />
+            <Route path="/help" element={<SafeRoute><HelpCenterPage /></SafeRoute>} />
+            <Route path="/privacy" element={<SafeRoute><PrivacySettingsPage /></SafeRoute>} />
+            <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
+            <Route path="/routines" element={<ProtectedRoute><RoutinePlannerPage /></ProtectedRoute>} />
+            <Route path="/routines/:id/play" element={<ProtectedRoute><RoutinePlayerPage /></ProtectedRoute>} />
+            <Route path="/ai/whats-this" element={<ProtectedRoute><WhatsThisPage /></ProtectedRoute>} />
+            <Route path="/ai/drawing-detective" element={<ProtectedRoute><DrawingDetectivePage /></ProtectedRoute>} />
+            <Route path="/ai/letter-reader" element={<ProtectedRoute><LetterReaderPage /></ProtectedRoute>} />
+            <Route path="/ai/nature-explorer" element={<ProtectedRoute><NatureExplorerPage /></ProtectedRoute>} />
+            <Route path="/ai/color-finder" element={<ProtectedRoute><ColorFinderPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

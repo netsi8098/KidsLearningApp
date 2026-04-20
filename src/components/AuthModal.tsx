@@ -125,7 +125,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -135,7 +135,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
         {/* Modal */}
         <motion.div
-          className="relative w-full max-w-md rounded-3xl overflow-hidden"
+          className="relative w-full max-w-md rounded-3xl overflow-y-auto"
+          style={{ maxHeight: '90vh' }}
           style={{
             background: 'white',
             boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
