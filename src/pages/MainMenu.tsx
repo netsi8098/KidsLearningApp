@@ -975,8 +975,8 @@ export default function MainMenu() {
                         </p>
                       </div>
                       <motion.button
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold cursor-pointer text-white tap-bounce"
-                        style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8C42)', boxShadow: '0 4px 12px rgba(255,107,107,0.3)' }}
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold cursor-pointer text-white tap-bounce animate-glow-pulse"
+                        style={{ background: 'linear-gradient(135deg, #FFD166, #FF8C42)', boxShadow: '0 4px 12px rgba(255,209,102,0.4)' }}
                         onClick={() => { const r = ['/lessons', '/stories', '/discover']; navigate(r[Math.floor(Math.random() * r.length)]); }}
                         whileTap={{ scale: 0.93 }}
                       >

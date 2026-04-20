@@ -410,7 +410,7 @@ export default function WelcomePage() {
                       {/* Play indicator */}
                       {isLastPlayed && (
                         <div className="absolute top-2 right-3">
-                          <span className="text-[10px] font-bold text-white uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: accent }}>
+                          <span className="text-[10px] font-bold text-white uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: '#4CAF7D' }}>
                             Recent
                           </span>
                         </div>
