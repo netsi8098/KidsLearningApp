@@ -304,20 +304,35 @@ export default function WelcomePage() {
                 ))}
               </div>
             ) : profiles.length === 0 ? (
-              /* Empty State */
+              /* Empty State — prompt to sign up first */
               <motion.div className="text-center py-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <MascotLion size={120} expression="excited" animated className="mx-auto mb-4" />
-                <p className="font-display text-2xl text-[#2D2D3A] mb-1">Let&apos;s get started!</p>
-                <p className="text-sm text-[#9B9BAB] mb-6">Create your first player profile</p>
-                <motion.button
-                  className="mx-auto px-8 py-4 rounded-2xl font-display text-lg text-white cursor-pointer animate-glow-pulse"
-                  style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)' }}
-                  onClick={() => setShowCreate(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  + Create Player
-                </motion.button>
+                <p className="font-display text-2xl text-[#2D2D3A] mb-1">Welcome!</p>
+                <p className="text-sm text-[#6B6B7B] mb-6 max-w-xs mx-auto">
+                  Create a free parent account to set up your child&apos;s learning profile
+                </p>
+                <div className="flex flex-col gap-3 max-w-xs mx-auto">
+                  <motion.button
+                    className="w-full px-8 py-4 rounded-2xl font-display text-lg text-white cursor-pointer animate-glow-pulse"
+                    style={{ background: 'linear-gradient(135deg, #4ECDC4 0%, #3DBDB4 100%)', boxShadow: '0 4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(78,205,196,0.3)' }}
+                    onClick={() => setShowAuthModal(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Get Started — Free
+                  </motion.button>
+                  <motion.button
+                    className="w-full px-6 py-3 rounded-2xl font-display text-sm cursor-pointer"
+                    style={{ background: 'rgba(255,255,255,0.7)', color: '#6B6B7B', border: '2px solid #E8E0D4' }}
+                    onClick={() => setShowAuthModal(true)}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Already have an account? Sign In
+                  </motion.button>
+                  <p className="text-[10px] text-[#9B9BAB] mt-2">
+                    Free forever. No credit card needed. COPPA compliant.
+                  </p>
+                </div>
               </motion.div>
             ) : (
               /* Profile Cards */
