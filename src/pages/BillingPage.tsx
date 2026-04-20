@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { StarIconSm } from '../components/svg/CommonIcons';
 import { useApp } from '../context/AppContext';
 import { useSubscription } from '../hooks/useSubscription';
 import NavButton from '../components/NavButton';
@@ -547,7 +548,7 @@ export default function BillingPage() {
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-full bg-grape-soft flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm">⭐</span>
+                  <StarIconSm size={16} />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-[#2D2D3A]">Premium Badge</p>

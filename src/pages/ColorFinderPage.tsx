@@ -206,7 +206,7 @@ export default function ColorFinderPage() {
                       transition={{ delay: 0.7 + i * 0.1 }}
                       className="flex gap-2 text-gray-700"
                     >
-                      <span className="text-lg">🎨</span>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{display:'inline-block'}}><ellipse cx="10" cy="10" rx="8" ry="7" stroke="#A78BFA" strokeWidth="1.5" fill="none"/><circle cx="7" cy="8" r="2" fill="#FF6B6B"/><circle cx="13" cy="8" r="2" fill="#4ECDC4"/><circle cx="10" cy="13" r="2" fill="#FFE66D"/></svg>
                       <span>{friend}</span>
                     </motion.li>
                   ))}
