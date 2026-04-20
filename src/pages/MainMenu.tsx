@@ -27,6 +27,7 @@ import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import { HomeIcon, LearnIcon, PlayIcon, CreateIcon, ListenIcon, WellbeingIcon, ExploreIcon } from '../components/svg/NavIcons';
 import { AbcIcon, NumbersIcon, ColorsIcon, ShapesIcon, AnimalsIcon, BodyIcon, LessonsIcon, WorldIcon, QuizIcon, MatchingIcon, GamesIcon, MovementIcon } from '../components/svg/SubjectIcons';
+import SearchBar from '../components/SearchBar';
 
 /* ─── Tab definitions ──────────────────────────────────── */
 
@@ -929,6 +930,11 @@ export default function MainMenu() {
             {activeTab === 'home' ? (
               /* ── HOME TAB ── */
               <div className="flex-1 overflow-y-auto pb-4 scrollbar-hide">
+                {/* Search bar */}
+                <div className="mb-3">
+                  <SearchBar />
+                </div>
+
                 {/* Hero greeting with mascot */}
                 <motion.div
                   className="rounded-3xl overflow-hidden relative mb-4"
