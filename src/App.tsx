@@ -7,6 +7,7 @@ import CelebrationOverlay from './components/CelebrationOverlay';
 import StarBurst from './components/StarBurst';
 import BadgeToast from './components/BadgeToast';
 import IdleMascot from './components/IdleMascot';
+import { NotificationProvider } from './components/NotificationToast';
 import { startAutoSync, stopAutoSync } from './services/syncService';
 import { initErrorReporting } from './services/errorReporter';
 
@@ -146,6 +147,7 @@ export default function App() {
     <ErrorBoundary>
     <BrowserRouter>
       <AppProvider>
+        <NotificationProvider>
         <AccessibilityProvider>
         <CelebrationOverlay />
         <StarBurst />
@@ -209,6 +211,7 @@ export default function App() {
           </Routes>
         </Suspense>
         </AccessibilityProvider>
+        </NotificationProvider>
       </AppProvider>
     </BrowserRouter>
     </ErrorBoundary>

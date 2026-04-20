@@ -3,14 +3,14 @@
 
 import { useCallback } from 'react';
 import en from './en';
+import es from './es';
 import type { Locale } from './i18nConfig';
 
 const strings: Record<Locale, Record<string, string>> = {
   en,
-  // Future: import and add es, fr, am
-  es: en, // fallback to English
-  fr: en,
-  am: en,
+  es,
+  fr: en, // fallback to English
+  am: en, // fallback to English
 };
 
 /**
