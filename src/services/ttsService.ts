@@ -10,11 +10,10 @@
  * by splitting text into phrases and adding prosody variation.
  */
 
-const TTS_URLS = [
-  'http://localhost:5555',
-  'https://highlighted-locally-agrees-bureau.trycloudflare.com',
-];
-let TTS_BASE = TTS_URLS[0];
+import { getTtsUrls } from '../config';
+
+const TTS_URLS = getTtsUrls();
+let TTS_BASE = TTS_URLS[0] || 'http://localhost:5555';
 
 export type VoicePreset = 'kids' | 'boy' | 'girl' | 'teacher' | 'storyteller' | 'fun';
 

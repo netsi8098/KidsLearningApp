@@ -7,6 +7,7 @@ import AvatarPicker from '../components/AvatarPicker';
 import AvatarFrame from '../components/AvatarFrame';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
+import AuthModal from '../components/AuthModal';
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -152,6 +153,7 @@ export default function WelcomePage() {
   const [selectedAge, setSelectedAge] = useState<number | null>(null);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const lastPlayedId = getLastPlayedId(profiles);
   const isLoading = profiles === undefined;
@@ -227,7 +229,7 @@ export default function WelcomePage() {
       {/* Parent access — shield/lock icon */}
       <motion.button
         className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer glass"
-        onClick={() => navigate('/parent-dashboard')}
+        onClick={() => setShowAuthModal(true)}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
@@ -549,6 +551,16 @@ export default function WelcomePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Parent Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={(user) => {
+          console.log('[Auth] Logged in as:', user.email);
+          navigate('/parent-dashboard');
+        }}
+      />
     </div>
   );
 }

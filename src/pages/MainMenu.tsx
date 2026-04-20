@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useProgress } from '../hooks/useProgress';
+import { useDailyBonus } from '../hooks/useDailyBonus';
+import ConfettiCelebration from '../components/ConfettiCelebration';
 import { useDailyMissions } from '../hooks/useDailyMissions';
 import { useCharacter } from '../hooks/useCharacter';
 import { useSeasonalContent } from '../hooks/useSeasonalContent';
@@ -780,6 +782,7 @@ export default function MainMenu() {
   if (!currentPlayer) return <Navigate to="/" replace />;
 
   const streakDays = liveProfile?.streakDays ?? 0;
+  const { showBonus, dismissBonus } = useDailyBonus(currentPlayer?.id);
 
   function handleSwitchPlayer() {
     setCurrentPlayer(null);
@@ -850,6 +853,16 @@ export default function MainMenu() {
     <div className="h-dvh flex flex-col overflow-hidden relative page-with-bg">
       {/* Immersive animated background per tab */}
       <AnimatedBackground theme={activeTab === 'home' ? 'home' : activeTab as any} />
+
+      {/* Daily bonus celebration */}
+      {showBonus && (
+        <ConfettiCelebration
+          message="Daily Bonus!"
+          stars={1}
+          onDismiss={dismissBonus}
+          autoDismissMs={3000}
+        />
+      )}
 
       {/* ══════════════════════════════════════════════════════
           1. COMPACT HEADER

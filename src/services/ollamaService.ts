@@ -3,11 +3,10 @@
  * Requires Ollama running on localhost:11434 with gemma4 model pulled.
  */
 
-const OLLAMA_URLS = [
-  'http://localhost:11434',
-  'https://extra-sticker-salvador-maybe.trycloudflare.com',
-];
-let OLLAMA_BASE = OLLAMA_URLS[0];
+import { getOllamaUrls } from '../config';
+
+const OLLAMA_URLS = getOllamaUrls();
+let OLLAMA_BASE = OLLAMA_URLS[0] || 'http://localhost:11434';
 const DEFAULT_MODEL = 'gemma4:e2b';
 
 export interface OllamaResponse {

@@ -6,11 +6,9 @@
  * When the backend is reachable, data syncs automatically.
  */
 
-const BACKEND_URLS = [
-  'http://localhost:4000',
-  'http://127.0.0.1:4000',
-  'https://painted-burlington-currency-respiratory.trycloudflare.com',
-];
+import { getApiUrls } from '../config';
+
+const BACKEND_URLS = getApiUrls();
 
 const STORAGE_KEY_TOKEN = 'klf-auth-token';
 const STORAGE_KEY_URL = 'klf-backend-url';

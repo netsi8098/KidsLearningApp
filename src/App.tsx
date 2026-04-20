@@ -8,6 +8,10 @@ import StarBurst from './components/StarBurst';
 import BadgeToast from './components/BadgeToast';
 import IdleMascot from './components/IdleMascot';
 import { startAutoSync, stopAutoSync } from './services/syncService';
+import { initErrorReporting } from './services/errorReporter';
+
+// Initialize error reporting on app load
+initErrorReporting();
 
 // Lazy load pages for better PWA performance
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
