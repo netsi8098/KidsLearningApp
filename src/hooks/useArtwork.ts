@@ -32,6 +32,17 @@ export function useArtwork(playerId: number | undefined) {
         createdAt: new Date(),
       });
 
+      // Also add to scrapbook entries so it shows in Scrapbook > Artworks tab
+      await db.scrapbookEntries.add({
+        playerId,
+        entryType: 'artwork',
+        title: title || 'My Drawing',
+        emoji: '🎨',
+        description: templateId ? `Colored: ${title}` : 'Free Draw',
+        imageUrl: dataUrl,
+        createdAt: new Date(),
+      });
+
       // Enforce the 50-item limit by deleting oldest
       const all = await db.artworks
         .where('playerId')

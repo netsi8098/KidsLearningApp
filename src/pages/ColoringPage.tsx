@@ -48,7 +48,7 @@ export default function ColoringPage() {
     setActiveTemplate(null);
   }, []);
 
-  // Save artwork from canvas
+  // Save artwork from canvas — saves to artworks + scrapbook
   const handleSave = useCallback(
     (dataUrl: string) => {
       const title = activeTemplate
@@ -57,6 +57,8 @@ export default function ColoringPage() {
       saveArtwork(title, dataUrl, activeTemplate?.id);
       exitDrawing();
       setActiveTab('gallery');
+      // Show success feedback
+      alert('Saved to your Scrapbook!');
     },
     [activeTemplate, saveArtwork, exitDrawing]
   );
