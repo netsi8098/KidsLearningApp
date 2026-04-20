@@ -407,17 +407,15 @@ export default function WelcomePage() {
                 {/* Add Player Card */}
                 <motion.button
                   className="w-full rounded-3xl p-5 font-display text-lg cursor-pointer border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[100px] transition-all"
-                  style={{
-                    borderColor: '#4ECDC480',
-                    color: '#4ECDC4',
-                    background: 'rgba(78, 205, 196, 0.05)',
-                  }}
+                  style={profiles.length >= 6
+                    ? { opacity: 0.4, cursor: 'not-allowed', borderColor: '#9B9BAB80', color: '#9B9BAB', background: 'rgba(155,155,171,0.05)' }
+                    : { borderColor: '#4ECDC480', color: '#4ECDC4', background: 'rgba(78, 205, 196, 0.05)' }
+                  }
                   onClick={() => { if (profiles.length < 6) setShowCreate(true); }}
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: profiles.length * 0.1 }}
                   whileHover={{ scale: profiles.length < 6 ? 1.02 : 1 }}
-                  style={profiles.length >= 6 ? { opacity: 0.4, cursor: 'not-allowed', borderColor: '#9B9BAB80', color: '#9B9BAB' } : { borderColor: '#4ECDC480', color: '#4ECDC4', background: 'rgba(78, 205, 196, 0.05)' }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <span className="w-12 h-12 rounded-full bg-teal/10 flex items-center justify-center text-2xl animate-float-gentle">+</span>
