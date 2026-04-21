@@ -74,7 +74,7 @@ export default function ColoringPage() {
   // ===== DRAWING MODE =====
   if (drawingMode) {
     return (
-      <div className="min-h-dvh bg-[#FFF8F0] flex flex-col">
+      <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh bg-[#FFF8F0] flex flex-col">
         {/* Drawing header */}
         <div className="px-4 pt-4 pb-2 flex items-center justify-between">
           <motion.button
@@ -104,7 +104,7 @@ export default function ColoringPage() {
 
   // ===== MAIN PAGE =====
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
+    <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
       <AnimatedBackground theme="create" />
       {/* Header */}
       <div className="flex items-center justify-between mb-5">

@@ -35,9 +35,9 @@ export default function BigTileButton({ emoji, label, to, bgColor, delay = 0, ic
         borderRadius: '24px',
       }}
       onClick={() => navigate(to)}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: 'spring', damping: 18, stiffness: 280, delay }}
+      initial={{ scale: 0.8, opacity: 0, y: 20 }}
+      animate={{ scale: 1, opacity: 1, y: 0 }}
+      transition={{ type: 'spring', damping: 16, stiffness: 200, delay }}
       whileHover={{ scale: 1.06, y: -4, boxShadow: `0 14px 36px ${bgColor}45, 0 4px 12px rgba(0,0,0,0.08)` }}
       whileTap={{ scale: 0.94 }}
     >

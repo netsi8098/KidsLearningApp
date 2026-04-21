@@ -520,8 +520,8 @@ export default function ParentDashboard() {
         <motion.div className="text-7xl mb-5 drop-shadow-md" initial={{ scale: 0 }} animate={{ scale: 1 }}>
           📊
         </motion.div>
-        <h2 className="text-2xl font-extrabold text-[#2D2D3A] mb-2">Parent Dashboard</h2>
-        <p className="text-[15px] font-medium text-[#6B6B7B] mb-6 text-center">Solve this to view your child&apos;s progress</p>
+        <h2 className="font-display text-2xl text-[#2D2D3A] mb-2">Grown-up Check</h2>
+        <p className="text-[15px] font-medium text-[#6B6B7B] mb-6 text-center">Only grown-ups can see this! Solve to continue.</p>
         <motion.div
           className="bg-white rounded-[20px] p-6 shadow-[0_2px_12px_rgba(45,45,58,0.06)] border border-[#F0EAE0] text-center max-w-xs w-full"
           initial={{ y: 20, opacity: 0 }}

@@ -90,7 +90,7 @@ export default function EmotionsPage() {
   if (activeSkill) {
     const quiz = activeSkill.quiz?.[quizIndex];
     return (
-      <div className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
+      <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
       <AnimatedBackground theme="wellbeing" />
         <div className="flex items-center gap-3 mb-6">
           <NavButton
@@ -205,7 +205,7 @@ export default function EmotionsPage() {
   }
 
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
+    <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
       <AnimatedBackground theme="wellbeing" />
       {/* Header */}
       <div className="flex items-center justify-between mb-5">

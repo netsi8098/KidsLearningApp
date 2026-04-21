@@ -460,7 +460,7 @@ export default function StoriesPage() {
   // ===== LIBRARY VIEW =====
   if (viewMode === 'library') {
     return (
-      <div className="min-h-dvh pb-24 md:pb-8 relative" style={{ background: 'linear-gradient(180deg, #1A1040 0%, #2D1B69 40%, #1A1040 100%)' }}>
+      <div className="min-h-dvh pb-24 md:pb-8 relative mx-auto" style={{ background: 'linear-gradient(180deg, #1A1040 0%, #2D1B69 40%, #1A1040 100%)', maxWidth: '1024px' }}>
         {/* Magical reading room atmosphere */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
           {/* Starfield */}
@@ -899,7 +899,7 @@ export default function StoriesPage() {
 
             <motion.button
               className="w-full btn-secondary text-lg"
-              onClick={backToLibrary}
+              aria-label="Back to library" onClick={backToLibrary}
               whileTap={{ scale: 0.97 }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -1009,7 +1009,7 @@ export default function StoriesPage() {
             {/* Back to library */}
             <motion.button
               className="block mt-4 text-white/70 font-bold text-sm cursor-pointer mx-auto"
-              onClick={backToLibrary}
+              aria-label="Back to library" onClick={backToLibrary}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1037,7 +1037,7 @@ export default function StoriesPage() {
           <motion.button
             className="w-11 h-11 rounded-full flex items-center justify-center cursor-pointer text-white"
             style={{ background: 'rgba(78,205,196,0.9)', boxShadow: '0 2px 10px rgba(78,205,196,0.3)' }}
-            onClick={backToLibrary}
+            aria-label="Back to library" onClick={backToLibrary}
             whileTap={{ scale: 0.9 }}
           >
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
@@ -1053,7 +1053,7 @@ export default function StoriesPage() {
           <motion.button
             className="w-11 h-11 rounded-full flex items-center justify-center cursor-pointer"
             style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }}
-            onClick={() => toggleFavorite(activeStory.id)}
+            aria-label="Toggle favorite" onClick={() => toggleFavorite(activeStory.id)}
             whileTap={{ scale: 0.8 }}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill={isFavorite ? '#FF6B6B' : 'none'} stroke={isFavorite ? '#FF6B6B' : 'white'} strokeWidth="1.5">
@@ -1139,7 +1139,7 @@ export default function StoriesPage() {
         <motion.button
           className="fixed left-4 top-1/2 -translate-y-1/2 z-20 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer disabled:opacity-20"
           style={{ background: 'rgba(255,255,255,0.85)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
-          onClick={() => goToPage(currentPage - 1)}
+          aria-label="Previous page" onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 0}
           whileTap={{ scale: 0.9 }}
         >
@@ -1149,7 +1149,7 @@ export default function StoriesPage() {
         <motion.button
           className="fixed right-4 top-1/2 -translate-y-1/2 z-20 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer"
           style={{ background: 'rgba(255,255,255,0.85)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
-          onClick={() => goToPage(currentPage + 1)}
+          aria-label="Next page" onClick={() => goToPage(currentPage + 1)}
           whileTap={{ scale: 0.9 }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#2D2D3A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1200,7 +1200,7 @@ export default function StoriesPage() {
                   ? { background: 'linear-gradient(135deg, #A78BFA, #8B5CF6)', boxShadow: '0 4px 14px rgba(167,139,250,0.4)' }
                   : { background: 'rgba(255,255,255,0.15)' }
               }
-              onClick={isSpeaking ? stopReading : handleReadAloud}
+              aria-label="Read aloud" onClick={isSpeaking ? stopReading : handleReadAloud}
               whileTap={{ scale: 0.95 }}
             >
               {isSpeaking ? (
@@ -1220,7 +1220,7 @@ export default function StoriesPage() {
                   ? { background: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)', boxShadow: '0 2px 10px rgba(78,205,196,0.2)' }
                   : { background: 'rgba(255,255,255,0.15)' }
               }
-              onClick={() => setAutoRead(!autoRead)}
+              aria-label="Auto read" onClick={() => setAutoRead(!autoRead)}
               whileTap={{ scale: 0.95 }}
             >
               Auto

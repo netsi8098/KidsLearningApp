@@ -104,7 +104,7 @@ export default function QuizPage() {
   // Category picker screen
   if (!selectedCategory) {
     return (
-      <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative page-with-bg">
+      <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative page-with-bg">
         <AnimatedBackground theme="quiz" />
         <div className="flex items-center justify-between mb-5 relative z-10">
           <NavButton onClick={() => navigate('/menu')} direction="back" />
@@ -160,7 +160,7 @@ export default function QuizPage() {
     const mascotExpression = score >= 8 ? 'celebrating' as const : score >= 5 ? 'happy' as const : 'thinking' as const;
 
     return (
-      <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col items-center justify-center relative page-with-bg">
+      <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 flex flex-col items-center justify-center relative page-with-bg">
         <AnimatedBackground theme="quiz" />
 
         {score >= 8 && (
@@ -205,7 +205,7 @@ export default function QuizPage() {
 
   // Quiz question screen
   return (
-    <div className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative page-with-bg">
+    <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 flex flex-col relative page-with-bg">
       <AnimatedBackground theme="quiz" />
       <div className="flex items-center justify-between mb-4 relative z-10">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
@@ -225,8 +225,8 @@ export default function QuizPage() {
 
       {streak >= 2 && (
         <motion.div
-          className="text-center text-sm font-bold mb-2"
-          style={{ color: '#FF8C42' }}
+          className="text-center text-sm font-bold mb-2 rounded-full px-3 py-1 inline-block"
+          style={{ color: 'white', background: 'rgba(255,140,66,0.9)' }}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           key={streak}
