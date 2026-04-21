@@ -7,6 +7,8 @@ interface ConfettiCelebrationProps {
   stars?: number;
   onDismiss: () => void;
   autoDismissMs?: number;
+  /** mini=20 particles, normal=40, mega=80 */
+  intensity?: 'mini' | 'normal' | 'mega';
 }
 
 const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A78BFA', '#FF8C42', '#6BCB77', '#FF8FAB', '#45B7D1'];
@@ -15,7 +17,9 @@ function randomBetween(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-const confettiPieces = Array.from({ length: 40 }, (_, i) => ({
+const INTENSITY_MAP = { mini: 20, normal: 40, mega: 80 };
+
+const confettiPieces = Array.from({ length: 80 }, (_, i) => ({
   id: i,
   x: randomBetween(5, 95),
   color: COLORS[i % COLORS.length],
@@ -32,7 +36,9 @@ export default function ConfettiCelebration({
   stars = 5,
   onDismiss,
   autoDismissMs = 3000,
+  intensity = 'normal',
 }: ConfettiCelebrationProps) {
+  const particleCount = INTENSITY_MAP[intensity];
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -59,7 +65,7 @@ export default function ConfettiCelebration({
 
           {/* Confetti particles */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {confettiPieces.map((p) => (
+            {confettiPieces.slice(0, particleCount).map((p) => (
               <motion.div
                 key={p.id}
                 className="absolute"

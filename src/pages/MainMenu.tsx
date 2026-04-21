@@ -959,6 +959,22 @@ export default function MainMenu() {
                     boxShadow: '0 4px 20px rgba(255,107,107,0.12)',
                   }}
                 >
+                  {/* Animated decorative elements inside greeting card */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    {/* Drifting cloud */}
+                    <div className="absolute top-2 animate-drift" style={{ animationDuration: '25s' }}>
+                      <svg width="40" height="20" viewBox="0 0 40 20" fill="white" fillOpacity="0.3"><ellipse cx="20" cy="14" rx="18" ry="6"/><ellipse cx="14" cy="10" rx="10" ry="8"/><ellipse cx="26" cy="10" rx="10" ry="8"/></svg>
+                    </div>
+                    {/* Small bird */}
+                    <div className="absolute top-3 right-8 animate-float-gentle" style={{ animationDelay: '1s' }}>
+                      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1 6C3 2 6 4 8 6C10 4 13 2 15 6" stroke="#6B6B7B" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.3"/></svg>
+                    </div>
+                    {/* Sun rays */}
+                    <div className="absolute -top-4 -right-4 animate-sun-rotate" style={{ animationDuration: '40s' }}>
+                      <svg width="50" height="50" viewBox="0 0 50 50" fill="none" opacity="0.15"><circle cx="25" cy="25" r="8" fill="#FFE66D"/><path d="M25 5V12M25 38V45M5 25H12M38 25H45M11 11L16 16M34 34L39 39M11 39L16 34M34 16L39 11" stroke="#FFE66D" strokeWidth="2" strokeLinecap="round"/></svg>
+                    </div>
+                  </div>
+
                   <div className="relative z-10 p-4 flex items-center gap-3">
                     <div className="animate-breathe">
                       <MascotLion
@@ -1124,7 +1140,7 @@ export default function MainMenu() {
                 </div>
 
                 {/* Tiles grid — fills remaining space */}
-                <div className="flex-1 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 pb-2 content-start" style={{ gridAutoRows: 'min-content' }}>
+                <div className="flex-1 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 pb-2 content-start" style={{ gridAutoRows: 'min-content' }}>
                   {activeTiles.map((tile, i) => (
                     <BigTileButton key={tile.to} {...tile} delay={i * 0.04} icon={tileIconMap[tile.to]} />
                   ))}
