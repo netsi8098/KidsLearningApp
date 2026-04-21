@@ -460,50 +460,40 @@ export default function StoriesPage() {
   // ===== LIBRARY VIEW =====
   if (viewMode === 'library') {
     return (
-      <div className="min-h-dvh pb-24 md:pb-8 relative page-with-bg">
-        <AnimatedBackground theme="stories" />
-        {/* Premium Hero Banner */}
-        <div
-          className="relative overflow-hidden px-4 pt-4 pb-6 md:px-8 md:pb-8"
-          style={{
-            background: 'linear-gradient(180deg, #F3EFFE 0%, #FFF8F0 100%)',
-          }}
-        >
-          {/* Floating decorative elements */}
-          <div className="absolute top-6 right-6 text-[40px] opacity-[0.08] animate-float select-none pointer-events-none">
-            📖
-          </div>
-          <div className="absolute bottom-4 left-8 text-[28px] opacity-[0.06] animate-bedtime-float-gentle select-none pointer-events-none">
-            📄
-          </div>
-          <div className="absolute top-12 left-[40%] text-[20px] opacity-[0.05] animate-bedtime-float-slow select-none pointer-events-none">
-            ✨
-          </div>
+      <div className="min-h-dvh pb-24 md:pb-8 relative" style={{ background: 'linear-gradient(180deg, #3E2723 0%, #5D4037 30%, #4E342E 100%)' }}>
+        {/* Warm bookshelf wood texture background */}
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, opacity: 0.15, background: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.03) 40px, rgba(255,255,255,0.03) 42px)' }} />
 
-          {/* Header */}
-          <div className="flex items-center justify-between mb-5 relative z-10">
+        {/* Header */}
+        <div className="relative z-10 px-4 pt-4 pb-3 md:px-8">
+          <div className="flex items-center justify-between mb-4">
             <NavButton onClick={() => navigate('/menu')} direction="back" />
             <StarCounter />
           </div>
 
-          {/* Hero content */}
-          <div className="relative z-10 text-center">
+          {/* Bookshelf title — warm and inviting */}
+          <div className="text-center mb-4">
             <motion.div
-              className="text-[52px] mb-2 drop-shadow-md"
+              className="inline-block mb-2"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', duration: 0.5 }}
+              transition={{ type: 'spring' }}
             >
-              📚
+              {/* SVG bookshelf icon */}
+              <svg width="56" height="48" viewBox="0 0 56 48" fill="none">
+                <rect x="4" y="38" width="48" height="6" rx="2" fill="#8D6E63" />
+                <rect x="2" y="36" width="52" height="3" rx="1" fill="#A1887F" />
+                <rect x="10" y="8" width="10" height="28" rx="2" fill="#FF6B6B" />
+                <rect x="22" y="12" width="10" height="24" rx="2" fill="#4ECDC4" />
+                <rect x="34" y="6" width="10" height="30" rx="2" fill="#FFE66D" />
+                <rect x="12" y="10" width="6" height="2" rx="1" fill="white" opacity="0.3" />
+                <rect x="24" y="14" width="6" height="2" rx="1" fill="white" opacity="0.3" />
+                <rect x="36" y="8" width="6" height="2" rx="1" fill="white" opacity="0.3" />
+              </svg>
             </motion.div>
             <motion.h1
-              className="text-[28px] font-extrabold leading-tight mb-1"
-              style={{
-                background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #7C3AED 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
+              className="font-display text-2xl text-white mb-1"
+              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
@@ -511,12 +501,12 @@ export default function StoriesPage() {
               Story Time
             </motion.h1>
             <motion.p
-              className="text-[13px] font-semibold text-[#9B9BAB]"
+              className="text-sm font-bold text-white/50"
               initial={{ y: 8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              Magical tales await
+              Pick a book from the shelf
             </motion.p>
           </div>
         </div>
@@ -636,7 +626,7 @@ export default function StoriesPage() {
           {featuredStories.length > 0 && selectedCategory === 'all' && (
             <div className="mb-5">
               <h3 className="text-[13px] font-extrabold text-[#6B6B7B] uppercase tracking-wider mb-2.5">
-                ✨ Featured Stories
+                Featured Stories
               </h3>
               <div className="flex gap-3 overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
                 {featuredStories.map((story, i) => {
@@ -698,7 +688,7 @@ export default function StoriesPage() {
 
           {/* Section Header for All Stories */}
           <h3 className="text-[13px] font-extrabold text-[#6B6B7B] uppercase tracking-wider mb-3">
-            📚 All Stories
+            All Stories
           </h3>
 
           {/* Story Cards Grid */}
@@ -726,10 +716,14 @@ export default function StoriesPage() {
                   return (
                     <motion.button
                       key={story.id}
-                      className="bg-white rounded-[20px] shadow-[0_2px_12px_rgba(45,45,58,0.06)] border border-[#F0EAE0] p-5 text-left cursor-pointer relative overflow-hidden hover:shadow-[0_8px_24px_rgba(45,45,58,0.10)] transition-shadow duration-200"
+                      className="text-left cursor-pointer relative overflow-hidden transition-all duration-200"
                       style={{
-                        background: 'linear-gradient(180deg, #FFFFFF 0%, #FDFBFF 100%)',
-                        borderLeft: '4px solid #A78BFA',
+                        background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F6FF 100%)',
+                        borderRadius: '4px 16px 16px 4px',
+                        borderLeft: '8px solid',
+                        borderLeftColor: catData?.emoji?.includes('🌙') ? '#6366F1' : catData?.emoji?.includes('🐾') ? '#6BCB77' : catData?.emoji?.includes('🤝') ? '#FF8FAB' : '#A78BFA',
+                        boxShadow: '4px 4px 16px rgba(0,0,0,0.15), -2px 0 4px rgba(0,0,0,0.08)',
+                        padding: '16px 16px 16px 12px',
                       }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1004,48 +998,51 @@ export default function StoriesPage() {
           </motion.button>
         </div>
 
-        {/* FULL-SCREEN illustration — covers entire viewport, no purple visible */}
-        <div className="fixed inset-0" style={{ zIndex: 0 }}>
+        {/* Physical book page — fills screen */}
+        <div className="flex-1 relative overflow-hidden" style={{ perspective: '1500px' }}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentPage}
-              className={`absolute inset-0 ${turnDirection === 'next' ? 'page-enter-forward' : 'page-enter-backward'}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
-              style={{ perspective: '1200px' }}
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ backfaceVisibility: 'hidden' }}
+              initial={{
+                rotateY: turnDirection === 'next' ? -90 : 90,
+                opacity: 0,
+                transformOrigin: turnDirection === 'next' ? 'left center' : 'right center',
+              }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              exit={{
+                rotateY: turnDirection === 'next' ? 90 : -90,
+                opacity: 0,
+                transformOrigin: turnDirection === 'next' ? 'right center' : 'left center',
+              }}
+              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             >
-              {/* Illustration as full-screen background using object-fit cover approach */}
+              {/* Book page with illustration */}
               <div
-                className="absolute inset-0 flex items-center justify-center overflow-hidden"
-                style={{ background: '#1a1a2e' }}
+                className="w-full h-full flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #FDF8EE 0%, #F5EDD6 50%, #FDF8EE 100%)',
+                  boxShadow: 'inset 0 0 60px rgba(139,90,43,0.08), inset -3px 0 10px rgba(0,0,0,0.03)',
+                }}
               >
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: '-20%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transform: 'scale(3)',
-                    transformOrigin: 'center center',
-                    filter: 'blur(0.5px)',
-                  }}
-                >
+                {/* Page edge shadow (left side like book binding) */}
+                <div className="absolute left-0 top-0 bottom-0 w-4" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.08), transparent)' }} />
+
+                {/* Illustration centered and large */}
+                <div style={{ transform: 'scale(2.5)', transformOrigin: 'center center' }}>
                   <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
                 </div>
-                {/* Sharper centered version on top */}
-                <div style={{ position: 'relative', zIndex: 1, transform: 'scale(2.8)', transformOrigin: 'center center' }}>
-                  <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
-                </div>
+
+                {/* Subtle page texture */}
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'4\' height=\'4\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'1\' cy=\'1\' r=\'0.5\' fill=\'rgba(0,0,0,0.02)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat' }} />
+
+                {/* Page corner fold */}
+                <div className="absolute top-0 right-0 w-12 h-12" style={{ background: 'linear-gradient(225deg, #E8DFD0 0%, #E8DFD0 50%, transparent 50%)' }} />
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
-
-        {/* Spacer to push bottom panel down */}
-        <div className="flex-1" />
 
         {/* Progress dots */}
         <div className="fixed top-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">

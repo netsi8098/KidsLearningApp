@@ -1154,14 +1154,16 @@ export default function MainMenu() {
       {/* ══════════════════════════════════════════════════════
           3. BOTTOM TAB BAR — Floating pill with SVG icons
          ══════════════════════════════════════════════════════ */}
-      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-4 mb-2" style={{ position: 'relative', zIndex: 2 }}>
+      {/* ══════════════════════════════════════════════════════
+          3. BOTTOM TAB BAR — Colorful kid-friendly design
+         ══════════════════════════════════════════════════════ */}
+      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-3 mb-1" style={{ position: 'relative', zIndex: 2 }}>
         <div
-          className="max-w-md mx-auto md:max-w-2xl flex items-center justify-around px-2 py-1.5 rounded-full"
+          className="max-w-lg mx-auto flex items-center justify-around px-1 py-2 rounded-[28px]"
           style={{
-            background: 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            boxShadow: '0 8px 32px rgba(45,45,58,0.12), 0 0 0 1px rgba(255,255,255,0.2)',
+            background: 'white',
+            boxShadow: '0 -2px 20px rgba(0,0,0,0.08), 0 4px 24px rgba(0,0,0,0.06)',
+            border: '1px solid rgba(0,0,0,0.04)',
           }}
         >
           {menuTabs.map((tab) => {
@@ -1170,34 +1172,48 @@ export default function MainMenu() {
               home: HomeIcon, learn: LearnIcon, play: PlayIcon,
               create: CreateIcon, listen: ListenIcon, wellbeing: WellbeingIcon, explore: ExploreIcon,
             }[tab.key] ?? HomeIcon;
+            const tabColor = {
+              home: '#FF6B6B', learn: '#4ECDC4', play: '#A78BFA',
+              create: '#FF8C42', listen: '#45B7D1', wellbeing: '#6BCB77', explore: '#FFD93D',
+            }[tab.key] ?? '#FF6B6B';
             return (
               <motion.button
                 key={tab.key}
-                className="flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-2xl cursor-pointer relative tap-bounce"
+                className="flex flex-col items-center gap-1 cursor-pointer relative"
+                style={{ minWidth: 48 }}
                 onClick={() => setActiveTab(tab.key)}
-                whileTap={{ scale: 0.85 }}
+                whileTap={{ scale: 0.88 }}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="bottomTabBg"
-                    className="absolute inset-0 rounded-2xl"
-                    style={{ background: 'linear-gradient(135deg, #FF6B6B18, #FF8C4218)' }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                {/* Icon container — colored circle when active */}
+                <motion.div
+                  className="flex items-center justify-center rounded-full"
+                  style={{
+                    width: isActive ? 44 : 36,
+                    height: isActive ? 44 : 36,
+                    background: isActive ? tabColor : 'transparent',
+                    boxShadow: isActive ? `0 4px 12px ${tabColor}40` : 'none',
+                    transition: 'all 0.25s ease',
+                  }}
+                  animate={isActive ? { scale: [1, 1.08, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  <NavIcon
+                    size={isActive ? 24 : 20}
+                    active={isActive}
+                    color={isActive ? 'white' : undefined}
                   />
-                )}
-                <div className="relative z-10">
-                  <NavIcon size={isActive ? 26 : 22} active={isActive} />
-                </div>
-                {isActive && (
-                  <motion.span
-                    className="text-[9px] font-bold relative z-10 text-coral"
-                    initial={{ opacity: 0, y: 2 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {tab.label}
-                  </motion.span>
-                )}
+                </motion.div>
+                {/* Always-visible label */}
+                <span
+                  className="font-bold leading-none"
+                  style={{
+                    fontSize: '9px',
+                    color: isActive ? tabColor : '#9B9BAB',
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  {tab.label}
+                </span>
               </motion.button>
             );
           })}
