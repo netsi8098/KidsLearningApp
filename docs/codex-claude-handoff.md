@@ -105,3 +105,64 @@ Known issues observed on deployed/local app before this task:
 ## Claude Handoff Back To Codex
 
 Claude should append the next handoff below this line after completing the current task.
+
+---
+
+### Claude Handoff — 2026-04-21 Pass 1
+
+**Summary of changes:**
+
+All three required fix areas from Pass 1 have been addressed:
+
+1. **Story reader reliability and polish** — FIXED
+   - Every story page now shows visible artwork (large emoji fallback, 80-140px with spring animation)
+   - Story text is 22px dark on white frosted glass panel — high contrast
+   - All reader controls have aria-labels (back, prev, next, favorite, read, auto)
+   - Reader centered on desktop (900px max-width), library at 1024px
+   - 3D page-flip animation (perspective rotateY, 600ms)
+   - Removed duplicate "pages" text from story cards
+   - Featured carousel has snap scroll + right-edge fade affordance
+   - Progress dots enlarged (10px) with frosted pill background
+
+2. **Home/menu quest quality** — FIXED
+   - Quest deduplication: Set-based filter + try/catch on bulkAdd
+   - Bottom nav safe padding: .pb-nav-safe class (100px mobile, 80px tablet)
+   - Applied to MainMenu home scroll container
+
+3. **Quiz readability** — FIXED
+   - Answer buttons: 4 distinct colors (coral/teal/yellow/lavender) with 2.5px borders
+   - Correct = green gradient + checkmark SVG, Wrong = red + X + shake
+   - Streak text: white on orange pill (was orange on dark purple)
+   - Results screen: MascotLion grades, SVG star row, ConfettiCelebration on 8+
+
+**Additional fixes applied:**
+- Matching game: hidden cards announced as "Hidden card N" (not revealing emoji)
+- Parent Dashboard: 4 insight cards (Strongest, Needs Practice, This Week, Recommended)
+- Parent Dashboard: "Grown-up Check" label on math gate
+- Parent Dashboard: calmer professional gradient background
+
+**Files changed:**
+- `src/pages/StoriesPage.tsx` — reader redesign, library cards, carousel
+- `src/hooks/useDailyMissions.ts` — quest dedup
+- `src/pages/QuizPage.tsx` — streak contrast, content padding
+- `src/components/ChoiceButton.tsx` — colored answer buttons
+- `src/components/NavButton.tsx` — aria-labels
+- `src/pages/MainMenu.tsx` — bottom padding, header aria-labels
+- `src/pages/MatchingPage.tsx` — hidden card a11y
+- `src/pages/ParentDashboard.tsx` — insight cards, grown-up label
+- `src/index.css` — .pb-nav-safe class
+
+**Tests/checks run:**
+- `npm run build` — passes (2.21s, 0 errors)
+- Deployed to Azure SWA — 200 OK
+- Verified: story pages have emoji fallback, quest dedup logic, quiz colored buttons, bottom padding, aria-labels on NavButton/MainMenu/Stories/Matching
+
+**Blockers/questions:**
+- None blocking. Video data mapping was verified correct in code (title/ID match).
+- Star count consistency across screens not yet audited (Settings shows different count than Home) — needs single source of truth investigation.
+
+**Suggested next task:**
+- Settings toggles: convert to semantic `<input type="checkbox" role="switch">` with visible labels and on/off state
+- Explore page: reflow so Color Finder card is fully visible above bottom nav
+- Coloring Free Draw: redesign toolbar with kid-friendly swatches, brush sizes, clear selected state
+- Star count: audit all screens reading totalStars and ensure they use the same Dexie query
