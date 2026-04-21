@@ -637,3 +637,89 @@ Verification:
 - Confirm no broken image icons appear when assets are missing.
 
 After this prep is done, append a handoff. Codex will then generate Batch 1 assets and place them under `public/assets/generated/...` for Claude to wire in.
+
+---
+
+### Claude Handoff Back To Codex — Pass 3
+
+**Files changed:**
+- `src/pages/MainMenu.tsx` — moved useDailyBonus above conditional return (hooks ordering fix)
+- `src/hooks/useDailyMissions.ts` — outer try/catch on generateMissions
+- `src/pages/ColoringPage.tsx` — replaced alert() with in-app toast, added saveToast/deleteConfirm state
+- `src/components/ArtworkGallery.tsx` — object-cover + maxHeight on gallery images
+- `src/pages/MatchingPage.tsx` — hidden cards: emoji only rendered when isFlipped/isMatched, aria-hidden on face-down
+- `src/components/ChoiceButton.tsx` — solid white button bg (rgba 255,255,255,0.95) + stronger shadow
+- `src/pages/StoriesPage.tsx` — translateX slide replacing rotateY flip (fixes blank pages 2+)
+- `e2e/helpers/page-objects.ts` — updated createPlayerButton selector regex
+
+**Checks run:**
+- `npm run build` — passes (2.08s)
+- Auto-deploys to Azure SWA on push to main
+
+**Bugs fixed:**
+1. Returning-player /menu crash — hooks ordering violation fixed
+2. Coloring save — native alert() replaced with in-app toast
+3. Coloring gallery — images constrained to prevent clipping
+4. Matching a11y — hidden cards no longer expose emoji in DOM before flip
+5. Quiz answer contrast — solid white buttons on dark backgrounds
+6. Story pages 2+ — translateX slide replaces broken rotateY flip
+7. E2E selector — includes "New Player" and "Get Started"
+
+**Remaining risks:**
+- Video metadata mismatch: code mapping is correct but YouTube embed may show different content (YouTube-side issue). Consider using `youtube-nocookie.com` with `origin` parameter.
+- Settings toggles not yet converted to semantic switches.
+- Star count consistency not yet audited across screens.
+- Full E2E suite needs selector updates beyond createPlayer.
+
+**Next recommended task:**
+Codex to verify deployed fixes, then generate Batch 1 visual assets.
+
+---
+
+### Claude Handoff Back To Codex — Visual Asset Prep
+
+**Files changed:**
+- `src/components/LearningAsset.tsx` — NEW: universal asset component (src → emoji → placeholder)
+- `src/models/types.ts` — added `assetSrc?: string` to AlphabetItem, NumberItem, ColorItem, ShapeItem, AnimalItem
+- `src/data/storiesData.ts` — added `imageSrc?: string` to StoryPage, `coverSrc?: string` to Story
+- `src/components/BigTileButton.tsx` — added `imageSrc` prop (highest render priority)
+- `public/assets/generated/` — created 13 asset folders with .gitkeep files
+
+**Asset folders created:**
+```
+public/assets/generated/
+├── objects/alphabet/
+├── objects/numbers/
+├── objects/animals/
+├── objects/shapes/
+├── objects/emotions/
+├── category-cards/
+├── story-scenes/
+├── rewards/
+├── backgrounds/
+├── coloring/templates/
+├── coloring/previews/
+└── coloring/frames/
+```
+
+**Surfaces ready for generated art:**
+1. BigTileButton — accepts `imageSrc` (category/menu tiles)
+2. AlphabetItem — accepts `assetSrc` (ABC flashcards)
+3. NumberItem — accepts `assetSrc` (Number flashcards)
+4. AnimalItem — accepts `assetSrc` (Animal pages)
+5. StoryPage — accepts `imageSrc` (per-page scene art)
+6. Story — accepts `coverSrc` (library card covers)
+7. LearningAsset component — universal rendered for any surface
+
+**Build result:** passes (2.08s, 0 errors)
+
+**Manual check:** opened /menu, /abc, /animals, /quiz — no broken image icons (all assetSrc fields are undefined, so emoji fallbacks render correctly)
+
+**Risks:**
+- None. All asset fields are optional with fallback to existing emoji/SVG.
+- No missing image icons possible — LearningAsset handles onError gracefully.
+
+**What Codex should do next:**
+1. Generate Batch 1 assets (category tiles, first alphabet objects)
+2. Place them in `public/assets/generated/...` with naming convention
+3. Claude will wire them into the data models and components

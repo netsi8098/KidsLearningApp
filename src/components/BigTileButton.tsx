@@ -10,6 +10,8 @@ interface BigTileButtonProps {
   delay?: number;
   /** Optional SVG icon to render instead of emoji */
   icon?: ReactNode;
+  /** Path to generated image asset (highest priority) */
+  imageSrc?: string;
 }
 
 function lighten(hex: string, amount: number): string {
@@ -22,7 +24,7 @@ function lighten(hex: string, amount: number): string {
   return `rgb(${lr},${lg},${lb})`;
 }
 
-export default function BigTileButton({ emoji, label, to, bgColor, delay = 0, icon }: BigTileButtonProps) {
+export default function BigTileButton({ emoji, label, to, bgColor, delay = 0, icon, imageSrc }: BigTileButtonProps) {
   const navigate = useNavigate();
 
   return (
@@ -72,7 +74,9 @@ export default function BigTileButton({ emoji, label, to, bgColor, delay = 0, ic
           boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.08)',
         }}
       >
-        {icon || <span className="text-[40px] drop-shadow-md">{emoji}</span>}
+        {imageSrc ? (
+          <img src={imageSrc} alt={label} className="w-full h-full object-contain" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        ) : icon || <span className="text-[40px] drop-shadow-md">{emoji}</span>}
       </motion.div>
 
       {/* Label — Fredoka One */}

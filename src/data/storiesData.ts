@@ -2,6 +2,8 @@ export interface StoryPage {
   text: string;
   emoji: string;
   highlightWords?: string[];
+  /** Path to generated full-scene illustration for this page */
+  imageSrc?: string;
 }
 
 export interface Story {
@@ -12,6 +14,8 @@ export interface Story {
   ageGroup: '2-3' | '4-5' | '6-8';
   description: string;
   pages: StoryPage[];
+  /** Path to generated cover art for library card */
+  coverSrc?: string;
 }
 
 export const storyCategories = [

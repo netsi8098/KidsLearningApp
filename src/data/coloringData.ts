@@ -11,6 +11,10 @@ export interface ColoringTemplate {
   category: string;
   difficulty: 'easy' | 'medium' | 'hard';
   svgOutline: string;
+  /** Path to generated clean line-art template image */
+  templateSrc?: string;
+  /** Path to generated preview thumbnail for the card */
+  previewSrc?: string;
 }
 
 export const coloringCategories: ColoringCategory[] = [
