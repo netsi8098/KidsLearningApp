@@ -10,6 +10,7 @@ import ArtworkGallery from '../components/ArtworkGallery';
 import NavButton from '../components/NavButton';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import { getColoringPreview } from '../components/svg/ColoringPreviews';
+import { getColoringCategoryIcon } from '../components/svg/CategoryIcons';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -165,14 +166,15 @@ export default function ColoringPage() {
                   key: c.key,
                   label: c.label,
                   emoji: c.emoji,
+                  icon: getColoringCategoryIcon(c.key, 14),
                 }))}
                 activeCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
               />
             </div>
 
-            {/* Template cards grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {/* Template cards grid — with subtle backdrop to reduce background noise */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 relative z-10 rounded-2xl p-2 -mx-2" style={{ background: 'rgba(255,248,240,0.5)', backdropFilter: 'blur(4px)' }}>
               {filteredTemplates.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <p className="text-5xl mb-3"><svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{display:'inline-block'}}><rect x="6" y="6" width="36" height="36" rx="4" stroke="#A78BFA" strokeWidth="2.5" fill="#F3EFFE"/><path d="M12 30L20 22L28 30L36 20" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="16" cy="16" r="3" fill="#FFE66D"/></svg></p>

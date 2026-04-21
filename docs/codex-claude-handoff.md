@@ -1138,3 +1138,59 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - [ ] /coloring — cards have colored backgrounds, larger previews, richer look
 - [ ] Production console (deployed) — no localhost:5555 or localhost:4000 errors
 - [ ] All previously verified features still working
+
+---
+
+### Claude Batch 1C — Reader Layout, Ages 4-5 Art, Category Icons, Coloring Polish
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors, 2.63s
+
+#### What was built
+
+**1. Story Reader Layout Overhaul** — `src/pages/StoriesPage.tsx`
+- Book page changed from centered flex to flex-column layout
+- Illustration now fills the majority of the page (flex-1 + items-stretch)
+- Removed max-w constraint on art container — art stretches full width
+- Page number moved to compact bottom strip
+- Result: art fills the book page like a real children's book spread
+
+**2. Ages 4-5 Story Page Art** — `src/components/svg/StoryPageArt.tsx`
+- 21 new narrative SVG scenes (7 pages × 3 stories):
+  - **The Magic Garden** (s-4-adv-1): tiny door behind oak tree, stepping into magical garden, dancing flowers in breeze, rainbow butterfly saying "Welcome!", golden sunflower glowing, sparkle magic everywhere, Lily waving goodbye
+  - **Rainbow After Rain** (s-4-nat-1): grey rainy meadow, flowers drinking water, sun peeking from clouds, full rainbow across sky, six color blobs, animals watching rainbow, lush nature meadow
+  - **The Brave Little Cat** (s-4-ani-1): brave Whiskers standing proud, hearing "Help!" cry, baby bird fallen from nest, climbing tree determined, cradling bird in paws, returning bird to nest, proud cat with bird chirping thanks
+- All ages 2-3 and 4-5 stories now have full page art (6 of 9 stories complete)
+
+**3. CategoryIcon System** — `src/components/svg/CategoryIcons.tsx`
+- 9 small inline SVG icons for filter chips:
+  - Story categories: adventure (mountain), animals (paw), bedtime (crescent), friendship (heart), nature (leaf)
+  - Coloring categories: animals, alphabet (A block), numbers (1 block), holidays (star), nature, emotions (smiley)
+- Wired into StoriesPage category filter chips and card badges
+- Wired into ColoringPage via CategoryFilterBar `icon` prop
+- CategoryFilterBar updated to accept optional `icon` ReactNode per category
+
+**4. Coloring Page Polish** — `src/pages/ColoringPage.tsx`
+- Card grid wrapped in frosted backdrop (`rgba(255,248,240,0.5)` + blur) to reduce background clutter
+- Category chips now use SVG icons instead of OS emoji
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/components/svg/StoryPageArt.tsx` | +21 page scenes (Magic Garden, Rainbow, Brave Cat) |
+| `src/components/svg/CategoryIcons.tsx` | **NEW** — 9 category icons |
+| `src/pages/StoriesPage.tsx` | Reader layout flex-col, category icons |
+| `src/pages/ColoringPage.tsx` | Category icons, grid backdrop |
+| `src/components/CategoryFilterBar.tsx` | Added `icon` prop support |
+| `docs/codex-claude-handoff.md` | This handoff |
+
+#### Codex verification checklist
+- [ ] /stories reader — art fills most of the book page (less blank paper)
+- [ ] /stories "The Magic Garden" — 7 pages of illustrated art (no emoji fallback)
+- [ ] /stories "Rainbow After Rain" — 7 pages of illustrated art
+- [ ] /stories "The Brave Little Cat" — 7 pages of illustrated art
+- [ ] /stories category chips show SVG icons (paw, heart, moon, mountain, leaf)
+- [ ] /coloring category chips show SVG icons instead of OS emoji
+- [ ] /coloring card grid looks cleaner with frosted backdrop
+- [ ] Production console remains clean (no localhost errors)
+- [ ] Mobile viewport: story art fills page well on small screens

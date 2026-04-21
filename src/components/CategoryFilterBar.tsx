@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 interface CategoryFilterBarProps {
-  categories: { key: string; label: string; emoji: string }[];
+  categories: { key: string; label: string; emoji: string; icon?: React.ReactNode }[];
   activeCategory: string;
   onCategoryChange: (key: string) => void;
 }
@@ -35,7 +35,7 @@ export default function CategoryFilterBar({
           onClick={() => onCategoryChange(cat.key)}
           whileTap={{ scale: 0.95 }}
         >
-          <span>{cat.emoji}</span>
+          <span className="flex items-center">{cat.icon || cat.emoji}</span>
           <span>{cat.label}</span>
         </motion.button>
       ))}

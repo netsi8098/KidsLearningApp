@@ -13,6 +13,7 @@ import ConfettiCelebration from '../components/ConfettiCelebration';
 import StoryIllustration from '../components/StoryIllustration';
 import { getStoryCover } from '../components/svg/StoryCovers';
 import { getStoryPageArt } from '../components/svg/StoryPageArt';
+import { getStoryCategoryIcon } from '../components/svg/CategoryIcons';
 import { stopSpeaking as stopAIVoice, getCurrentAudio } from '../services/ttsService';
 import {
   storiesData,
@@ -590,7 +591,7 @@ export default function StoriesPage() {
                 onClick={() => setSelectedCategory(cat.key as CategoryKey)}
                 whileTap={{ scale: 0.95 }}
               >
-                {cat.emoji} {cat.label}
+                {getStoryCategoryIcon(cat.key, 14) || cat.emoji} {cat.label}
               </motion.button>
             ))}
           </div>
@@ -703,7 +704,7 @@ export default function StoriesPage() {
                             color: '#7C3AED',
                           }}
                         >
-                          {catData?.emoji} {story.category}
+                          {getStoryCategoryIcon(story.category, 12) || catData?.emoji} {story.category}
                         </span>
                         <p className="text-[11px] text-[#9B9BAB] mt-1.5 font-medium">
                           {story.pages.length} pages
@@ -1095,7 +1096,7 @@ export default function StoriesPage() {
 
                 {/* Main book page */}
                 <div
-                  className="relative w-full h-full rounded-[4px_12px_12px_4px] overflow-hidden flex items-center justify-center"
+                  className="relative w-full h-full rounded-[4px_12px_12px_4px] overflow-hidden flex flex-col"
                   style={{
                     background: 'linear-gradient(135deg, #FDF8EE 0%, #FAF3E5 40%, #FDF8EE 100%)',
                     boxShadow: 'inset 0 0 40px rgba(139,90,43,0.06), 0 4px 20px rgba(0,0,0,0.15)',
@@ -1107,11 +1108,11 @@ export default function StoriesPage() {
                   {/* Fold/gutter line */}
                   <div className="absolute left-4 top-4 bottom-4 w-[1px]" style={{ background: 'rgba(0,0,0,0.04)' }} />
 
-                  {/* Illustration — narrative scene or emoji fallback */}
-                  <div className="flex items-center justify-center flex-1" style={{ minHeight: '200px' }}>
+                  {/* Illustration — fills most of the book page */}
+                  <div className="flex-1 flex items-stretch justify-center p-2 pt-2 pb-0 overflow-hidden">
                     {activeStoryId && getStoryPageArt(activeStoryId, currentPage) ? (
                       <motion.div
-                        className="w-full h-full max-w-[340px] rounded-xl overflow-hidden"
+                        className="w-full rounded-lg overflow-hidden"
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: 'spring', damping: 15 }}
@@ -1120,26 +1121,30 @@ export default function StoriesPage() {
                         {getStoryPageArt(activeStoryId, currentPage)}
                       </motion.div>
                     ) : (
-                      <motion.span
-                        className="select-none"
-                        style={{ fontSize: 'clamp(80px, 20vw, 140px)', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: 'spring', damping: 15 }}
-                        key={pageData.emoji}
-                      >
-                        {pageData.emoji}
-                      </motion.span>
+                      <div className="w-full flex items-center justify-center">
+                        <motion.span
+                          className="select-none"
+                          style={{ fontSize: 'clamp(80px, 20vw, 140px)', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: 'spring', damping: 15 }}
+                          key={pageData.emoji}
+                        >
+                          {pageData.emoji}
+                        </motion.span>
+                      </div>
                     )}
+                  </div>
+
+                  {/* Page number badge — compact bottom strip */}
+                  <div className="flex-shrink-0 flex justify-end px-4 py-1.5">
+                    <div className="text-[11px] font-bold text-[#BBA88A] bg-white/50 px-2 py-0.5 rounded-full">
+                      {currentPage + 1}
+                    </div>
                   </div>
 
                   {/* Page corner fold */}
                   <div className="absolute top-0 right-0 w-10 h-10" style={{ background: 'linear-gradient(225deg, #EDE5D5 0%, #EDE5D5 50%, transparent 50%)' }} />
-
-                  {/* Page number badge */}
-                  <div className="absolute bottom-3 right-4 text-[11px] font-bold text-[#BBA88A] bg-white/50 px-2 py-0.5 rounded-full">
-                    {currentPage + 1}
-                  </div>
                 </div>
               </div>
             </motion.div>
