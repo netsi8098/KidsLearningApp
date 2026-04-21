@@ -615,6 +615,40 @@ export default function ParentDashboard() {
         {/* 2. Weekly Activity Chart */}
         <WeeklyActivityChart data={weeklyData} />
 
+        {/* 2.5. Parent Insight Cards */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="rounded-2xl p-4" style={{ background: '#E8F5E9', border: '1px solid #C8E6C9' }}>
+            <p className="text-[10px] font-bold text-[#2E7D32] uppercase mb-1">Strongest Area</p>
+            <p className="font-display text-sm text-[#1B5E20]">
+              {categoryProgressData.length > 0
+                ? categoryProgressData.reduce((best, c) => (c.learned / c.total) > (best.learned / best.total) ? c : best).label
+                : 'Getting started'}
+            </p>
+          </div>
+          <div className="rounded-2xl p-4" style={{ background: '#FFF3E0', border: '1px solid #FFE0B2' }}>
+            <p className="text-[10px] font-bold text-[#E65100] uppercase mb-1">Needs Practice</p>
+            <p className="font-display text-sm text-[#BF360C]">
+              {categoryProgressData.length > 0
+                ? categoryProgressData.reduce((worst, c) => (c.learned / c.total) < (worst.learned / worst.total) ? c : worst).label
+                : 'Not enough data'}
+            </p>
+          </div>
+          <div className="rounded-2xl p-4" style={{ background: '#E3F2FD', border: '1px solid #BBDEFB' }}>
+            <p className="text-[10px] font-bold text-[#1565C0] uppercase mb-1">This Week</p>
+            <p className="font-display text-sm text-[#0D47A1]">
+              {totalActivities} activities completed
+            </p>
+          </div>
+          <div className="rounded-2xl p-4" style={{ background: '#F3E5F5', border: '1px solid #E1BEE7' }}>
+            <p className="text-[10px] font-bold text-[#6A1B9A] uppercase mb-1">Recommended Next</p>
+            <p className="font-display text-sm text-[#4A148C]">
+              {categoryProgressData.length > 0
+                ? categoryProgressData.reduce((worst, c) => (c.learned / c.total) < (worst.learned / worst.total) ? c : worst).label + ' practice'
+                : 'Start with ABCs'}
+            </p>
+          </div>
+        </div>
+
         {/* 3. Category Progress */}
         <CategoryProgress progressData={categoryProgressData} />
 

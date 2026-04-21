@@ -374,6 +374,7 @@ export default function MatchingPage() {
                 className="aspect-square rounded-[16px] cursor-pointer relative"
                 style={{ perspective: '600px', boxShadow: '0 2px 12px rgba(45,45,58,0.08)' }}
                 onClick={() => handleCardClick(index)}
+                aria-label={card.isFlipped || card.isMatched ? card.emoji : `Hidden card ${index + 1}`}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.05, type: 'spring', damping: 12 }}
