@@ -1,154 +1,156 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ColorPalette from './ColorPalette';
-import BrushSizePicker from './BrushSizePicker';
-import StampPicker from './StampPicker';
+/**
+ * DrawingCanvas — Studio-grade HTML5 Canvas drawing component.
+ *
+ * Supports multiple brush types, eraser, sticker stamps, undo/redo.
+ * All UI chrome (toolbar, color picker, brush drawer) is external —
+ * this component exposes its API via the onReady callback.
+ */
+import { useRef, useState, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { type BrushId, type StickerDef, applyBrushStyle, drawGlitterAt, drawCrayonJitter, rainbowColors } from './coloring/coloringTools';
+
+export interface CanvasApi {
+  undo: () => void;
+  redo: () => void;
+  clear: () => void;
+  save: () => string | null;
+  canUndo: boolean;
+  canRedo: boolean;
+}
 
 interface DrawingCanvasProps {
   width?: number;
   height?: number;
   templateSvg?: string;
-  onSave: (dataUrl: string) => void;
+  /** Active drawing tool */
+  tool: 'brush' | 'eraser' | 'fill' | 'stamp';
+  /** Active brush type */
+  brush: BrushId;
+  /** Active color */
+  color: string;
+  /** Brush size in px */
+  brushSize: number;
+  /** Brush opacity 0-1 */
+  brushOpacity: number;
+  /** Active sticker for stamp mode */
+  activeSticker?: StickerDef | null;
+  /** Called when undo/redo state changes */
+  onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
+  /** Called when save is triggered externally */
+  onSave?: (dataUrl: string) => void;
 }
-
-type DrawingMode = 'draw' | 'erase' | 'stamp';
 
 const MAX_UNDO = 30;
 
-export default function DrawingCanvas({
-  width = 350,
-  height = 450,
-  templateSvg,
-  onSave,
-}: DrawingCanvasProps) {
+const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function DrawingCanvas(
+  {
+    width = 350,
+    height = 450,
+    templateSvg,
+    tool,
+    brush,
+    color,
+    brushSize,
+    brushOpacity,
+    activeSticker,
+    onHistoryChange,
+    onSave,
+  },
+  ref
+) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
-
-  const [mode, setMode] = useState<DrawingMode>('draw');
-  const [color, setColor] = useState('#000000');
-  const [brushSize, setBrushSize] = useState(4);
-  const [selectedStamp, setSelectedStamp] = useState('🐱');
+  const strokeIndexRef = useRef(0);
 
   const [undoStack, setUndoStack] = useState<ImageData[]>([]);
   const [redoStack, setRedoStack] = useState<ImageData[]>([]);
 
-  // Popover visibility states
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showBrushPicker, setShowBrushPicker] = useState(false);
-  const [showStampPicker, setShowStampPicker] = useState(false);
-
-  // Close all popovers
-  const closePopovers = useCallback(() => {
-    setShowColorPicker(false);
-    setShowBrushPicker(false);
-    setShowStampPicker(false);
-  }, []);
+  // Notify parent of history changes
+  useEffect(() => {
+    onHistoryChange?.(undoStack.length > 1, redoStack.length > 0);
+  }, [undoStack.length, redoStack.length, onHistoryChange]);
 
   // Initialize canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas internal resolution
     canvas.width = width;
     canvas.height = height;
 
-    // White background
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, width, height);
 
-    // Draw template SVG if provided
     if (templateSvg) {
       const img = new Image();
       const svgBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(svgBlob);
-
       img.onload = () => {
         ctx.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
-        // Save initial state to undo stack
         const initialState = ctx.getImageData(0, 0, width, height);
         setUndoStack([initialState]);
+        setRedoStack([]);
       };
       img.src = url;
     } else {
-      // Save initial blank state
       const initialState = ctx.getImageData(0, 0, width, height);
       setUndoStack([initialState]);
+      setRedoStack([]);
     }
   }, [width, height, templateSvg]);
 
-  // Save current canvas state to undo stack
   const saveState = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setUndoStack((prev) => {
-      const newStack = [...prev, imageData];
-      if (newStack.length > MAX_UNDO) {
-        return newStack.slice(newStack.length - MAX_UNDO);
-      }
-      return newStack;
+      const next = [...prev, imageData];
+      return next.length > MAX_UNDO ? next.slice(next.length - MAX_UNDO) : next;
     });
     setRedoStack([]);
   }, []);
 
-  // Undo
   const handleUndo = useCallback(() => {
     if (undoStack.length <= 1) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    const currentState = undoStack[undoStack.length - 1];
-    const previousState = undoStack[undoStack.length - 2];
-
-    setRedoStack((prev) => [...prev, currentState]);
-    setUndoStack((prev) => prev.slice(0, -1));
-
-    ctx.putImageData(previousState, 0, 0);
+    const current = undoStack[undoStack.length - 1];
+    const prev = undoStack[undoStack.length - 2];
+    setRedoStack((r) => [...r, current]);
+    setUndoStack((u) => u.slice(0, -1));
+    ctx.putImageData(prev, 0, 0);
   }, [undoStack]);
 
-  // Redo
   const handleRedo = useCallback(() => {
     if (redoStack.length === 0) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    const nextState = redoStack[redoStack.length - 1];
-
-    setUndoStack((prev) => [...prev, nextState]);
-    setRedoStack((prev) => prev.slice(0, -1));
-
-    ctx.putImageData(nextState, 0, 0);
+    const next = redoStack[redoStack.length - 1];
+    setUndoStack((u) => [...u, next]);
+    setRedoStack((r) => r.slice(0, -1));
+    ctx.putImageData(next, 0, 0);
   }, [redoStack]);
 
-  // Clear canvas
   const handleClear = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Re-draw template if present
     if (templateSvg) {
       const img = new Image();
       const svgBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(svgBlob);
-
       img.onload = () => {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
@@ -160,104 +162,158 @@ export default function DrawingCanvas({
     }
   }, [templateSvg, saveState]);
 
-  // Save artwork
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback((): string | null => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return null;
     const dataUrl = canvas.toDataURL('image/png');
-    onSave(dataUrl);
+    onSave?.(dataUrl);
+    return dataUrl;
   }, [onSave]);
 
-  // Get pointer position relative to canvas
-  const getPos = useCallback(
-    (e: React.PointerEvent<HTMLCanvasElement>) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return { x: 0, y: 0 };
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY,
-      };
-    },
-    []
-  );
+  // Expose API via ref
+  useImperativeHandle(ref, () => ({
+    undo: handleUndo,
+    redo: handleRedo,
+    clear: handleClear,
+    save: handleSave,
+    get canUndo() { return undoStack.length > 1; },
+    get canRedo() { return redoStack.length > 0; },
+  }), [handleUndo, handleRedo, handleClear, handleSave, undoStack.length, redoStack.length]);
 
-  // Place stamp at position
-  const placeStamp = useCallback(
-    (x: number, y: number) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+  const getPos = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  }, []);
 
-      const fontSize = brushSize * 3 + 16;
-      ctx.font = `${fontSize}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(selectedStamp, x, y);
+  // Place SVG sticker at position
+  const placeSticker = useCallback((x: number, y: number) => {
+    if (!activeSticker) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const size = brushSize * 3 + 20;
+    const img = new Image();
+    const svgBlob = new Blob([activeSticker.svg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(svgBlob);
+    img.onload = () => {
+      ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+      URL.revokeObjectURL(url);
       saveState();
-    },
-    [selectedStamp, brushSize, saveState]
-  );
+    };
+    img.src = url;
+  }, [activeSticker, brushSize, saveState]);
 
-  // Pointer down
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      closePopovers();
+  // Pointer handlers
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const pos = getPos(e);
 
-      const pos = getPos(e);
+    if (tool === 'stamp') {
+      placeSticker(pos.x, pos.y);
+      return;
+    }
 
-      if (mode === 'stamp') {
-        placeStamp(pos.x, pos.y);
-        return;
-      }
+    if (tool === 'fill') {
+      // TODO: Implement flood fill. For now, save state as placeholder.
+      saveState();
+      return;
+    }
 
-      isDrawingRef.current = true;
-      lastPosRef.current = pos;
+    isDrawingRef.current = true;
+    lastPosRef.current = pos;
+    strokeIndexRef.current = 0;
 
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    // Draw a dot at the starting point
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
+    if (tool === 'eraser') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-    },
-    [mode, getPos, placeStamp, closePopovers]
-  );
+      ctx.arc(pos.x, pos.y, brushSize * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (brush === 'glitter') {
+      drawGlitterAt(ctx, pos.x, pos.y, brushSize, color, brushOpacity);
+    } else if (brush === 'crayon') {
+      drawCrayonJitter(ctx, pos.x, pos.y, brushSize, color, brushOpacity);
+    }
+  }, [tool, brush, color, brushSize, brushOpacity, getPos, placeSticker, saveState]);
 
-  // Pointer move
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLCanvasElement>) => {
-      if (!isDrawingRef.current || mode === 'stamp') return;
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDrawingRef.current || tool === 'stamp' || tool === 'fill') return;
 
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-      const pos = getPos(e);
-      const last = lastPosRef.current;
-      if (!last) return;
+    const pos = getPos(e);
+    const last = lastPosRef.current;
+    if (!last) return;
 
+    if (tool === 'eraser') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = brushSize * 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.beginPath();
       ctx.moveTo(last.x, last.y);
       ctx.lineTo(pos.x, pos.y);
-      ctx.strokeStyle = mode === 'erase' ? '#FFFFFF' : color;
-      ctx.lineWidth = mode === 'erase' ? brushSize * 3 : brushSize;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
       ctx.stroke();
+    } else if (brush === 'glitter') {
+      // Scatter particles along the stroke
+      const dist = Math.hypot(pos.x - last.x, pos.y - last.y);
+      const steps = Math.max(1, Math.floor(dist / 3));
+      for (let i = 0; i < steps; i++) {
+        const t = i / steps;
+        const px = last.x + (pos.x - last.x) * t;
+        const py = last.y + (pos.y - last.y) * t;
+        drawGlitterAt(ctx, px, py, brushSize * 0.6, color, brushOpacity);
+      }
+    } else if (brush === 'crayon') {
+      // Normal stroke + jitter
+      applyBrushStyle(ctx, brush, color, brushSize, brushOpacity);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      drawCrayonJitter(ctx, pos.x, pos.y, brushSize, color, brushOpacity);
+    } else if (brush === 'rainbow') {
+      strokeIndexRef.current++;
+      applyBrushStyle(ctx, brush, color, brushSize, brushOpacity, strokeIndexRef.current);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    } else {
+      // Standard brush rendering
+      applyBrushStyle(ctx, brush, color, brushSize, brushOpacity);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
 
-      lastPosRef.current = pos;
-    },
-    [mode, color, brushSize, getPos]
-  );
+    // Reset composite operation
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
 
-  // Pointer up
+    lastPosRef.current = pos;
+  }, [tool, brush, color, brushSize, brushOpacity, getPos]);
+
   const handlePointerUp = useCallback(() => {
     if (isDrawingRef.current) {
       isDrawingRef.current = false;
@@ -266,173 +322,22 @@ export default function DrawingCanvas({
     }
   }, [saveState]);
 
-  // Toggle helpers
-  function toggleMode(targetMode: DrawingMode) {
-    closePopovers();
-    setMode((prev) => (prev === targetMode ? 'draw' : targetMode));
-  }
-
   return (
-    <div className="flex flex-col items-center gap-3 w-full">
-      {/* Canvas */}
-      <div className="relative w-full" style={{ maxWidth: width }}>
-        <canvas
-          ref={canvasRef}
-          className="w-full rounded-2xl shadow-md bg-white"
-          style={{
-            touchAction: 'none',
-            aspectRatio: `${width} / ${height}`,
-          }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        />
-
-        {/* Popover panels positioned above the toolbar */}
-        <AnimatePresence>
-          {showColorPicker && (
-            <motion.div
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-2xl shadow-lg border border-gray-100 z-10"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-            >
-              <ColorPalette selectedColor={color} onColorChange={(c) => { setColor(c); setMode('draw'); setShowColorPicker(false); }} />
-            </motion.div>
-          )}
-
-          {showBrushPicker && (
-            <motion.div
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-2xl shadow-lg border border-gray-100 z-10"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-            >
-              <BrushSizePicker selectedSize={brushSize} onSizeChange={(s) => { setBrushSize(s); setShowBrushPicker(false); }} />
-            </motion.div>
-          )}
-
-          {showStampPicker && (
-            <motion.div
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-2xl shadow-lg border border-gray-100 z-10 max-h-52 overflow-y-auto"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-            >
-              <StampPicker onStampSelect={(emoji) => { setSelectedStamp(emoji); setMode('stamp'); setShowStampPicker(false); }} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex items-center gap-1.5 flex-wrap justify-center bg-white rounded-2xl shadow-md px-3 py-2 w-full" style={{ maxWidth: width }}>
-        {/* Color picker toggle */}
-        <motion.button
-          className="w-9 h-9 rounded-full border-2 border-gray-200 cursor-pointer flex items-center justify-center"
-          style={{ backgroundColor: color }}
-          onClick={() => { closePopovers(); setShowColorPicker(!showColorPicker); }}
-          whileTap={{ scale: 0.9 }}
-          title="Color"
-        />
-
-        {/* Brush size toggle */}
-        <motion.button
-          className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer ${
-            showBrushPicker ? 'bg-teal text-white' : 'bg-gray-100 text-gray-700'
-          }`}
-          onClick={() => { closePopovers(); setShowBrushPicker(!showBrushPicker); }}
-          whileTap={{ scale: 0.9 }}
-          title="Brush Size"
-        >
-          <div className="rounded-full bg-current" style={{ width: Math.min(brushSize, 14), height: Math.min(brushSize, 14) }} />
-        </motion.button>
-
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-200 mx-0.5" />
-
-        {/* Undo */}
-        <motion.button
-          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-sm cursor-pointer disabled:opacity-30"
-          onClick={handleUndo}
-          disabled={undoStack.length <= 1}
-          whileTap={{ scale: 0.9 }}
-          title="Undo"
-        >
-          ↩️
-        </motion.button>
-
-        {/* Redo */}
-        <motion.button
-          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-sm cursor-pointer disabled:opacity-30"
-          onClick={handleRedo}
-          disabled={redoStack.length === 0}
-          whileTap={{ scale: 0.9 }}
-          title="Redo"
-        >
-          ↪️
-        </motion.button>
-
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-200 mx-0.5" />
-
-        {/* Eraser toggle */}
-        <motion.button
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm cursor-pointer ${
-            mode === 'erase' ? 'bg-coral text-white' : 'bg-gray-100'
-          }`}
-          onClick={() => toggleMode('erase')}
-          whileTap={{ scale: 0.9 }}
-          title="Eraser"
-        >
-          🧹
-        </motion.button>
-
-        {/* Stamp toggle */}
-        <motion.button
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm cursor-pointer ${
-            mode === 'stamp' ? 'bg-grape text-white' : 'bg-gray-100'
-          }`}
-          onClick={() => {
-            if (mode === 'stamp') {
-              setMode('draw');
-              setShowStampPicker(false);
-            } else {
-              closePopovers();
-              setShowStampPicker(true);
-              setMode('stamp');
-            }
-          }}
-          whileTap={{ scale: 0.9 }}
-          title="Stamp"
-        >
-          {selectedStamp}
-        </motion.button>
-
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-200 mx-0.5" />
-
-        {/* Clear */}
-        <motion.button
-          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-sm cursor-pointer"
-          onClick={handleClear}
-          whileTap={{ scale: 0.9 }}
-          title="Clear"
-        >
-          🗑️
-        </motion.button>
-
-        {/* Save */}
-        <motion.button
-          className="w-9 h-9 rounded-full bg-teal text-white flex items-center justify-center text-sm cursor-pointer shadow-md"
-          onClick={handleSave}
-          whileTap={{ scale: 0.9 }}
-          title="Save"
-        >
-          💾
-        </motion.button>
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="w-full rounded-xl"
+      style={{
+        touchAction: 'none',
+        aspectRatio: `${width} / ${height}`,
+        maxWidth: width,
+        boxShadow: '0 4px 24px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1)',
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+    />
   );
-}
+});
+
+export default DrawingCanvas;

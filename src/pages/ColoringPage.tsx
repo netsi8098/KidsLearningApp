@@ -1,16 +1,21 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useArtwork } from '../hooks/useArtwork';
 import { coloringTemplates, coloringCategories, type ColoringTemplate } from '../data/coloringData';
 import CategoryFilterBar from '../components/CategoryFilterBar';
-import DrawingCanvas from '../components/DrawingCanvas';
+import DrawingCanvas, { type CanvasApi } from '../components/DrawingCanvas';
 import ArtworkGallery from '../components/ArtworkGallery';
 import NavButton from '../components/NavButton';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import { getColoringPreview } from '../components/svg/ColoringPreviews';
 import { getColoringCategoryIcon } from '../components/svg/CategoryIcons';
+import ToolRail from '../components/coloring/ToolRail';
+import ColorRail from '../components/coloring/ColorRail';
+import BrushDrawer from '../components/coloring/BrushDrawer';
+import StickerPicker from '../components/coloring/StickerPicker';
+import { brushes, type ToolId, type BrushId, type StickerDef } from '../components/coloring/coloringTools';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -68,6 +73,50 @@ export default function ColoringPage() {
     [activeTemplate, saveArtwork, exitDrawing]
   );
 
+  // ── Studio state (drawing mode) ──────────────────────────
+  const canvasApiRef = useRef<CanvasApi>(null);
+  const [activeTool, setActiveTool] = useState<ToolId>('brush');
+  const [activeBrush, setActiveBrush] = useState<BrushId>('crayon');
+  const [activeColor, setActiveColor] = useState('#FF6B6B');
+  const [studioBrushSize, setStudioBrushSize] = useState(8);
+  const [studioOpacity, setStudioOpacity] = useState(0.85);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [showBrushDrawer, setShowBrushDrawer] = useState(false);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
+  const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
+  const [recentColors, setRecentColors] = useState<string[]>([]);
+
+  const handleColorChange = useCallback((hex: string) => {
+    setActiveColor(hex);
+    setActiveTool('brush');
+    setRecentColors((prev) => {
+      const next = [hex, ...prev.filter((c) => c !== hex)];
+      return next.slice(0, 8);
+    });
+  }, []);
+
+  const handleBrushChange = useCallback((id: BrushId) => {
+    setActiveBrush(id);
+    setActiveTool('brush');
+    const b = brushes.find((br) => br.id === id);
+    if (b) {
+      setStudioBrushSize(b.defaultSize);
+      setStudioOpacity(b.defaultOpacity);
+    }
+  }, []);
+
+  const handleToolChange = useCallback((tool: ToolId) => {
+    setActiveTool(tool);
+    if (tool === 'brush') setShowBrushDrawer(true);
+    if (tool === 'stamp') setShowStickerPicker(true);
+  }, []);
+
+  const handleHistoryChange = useCallback((u: boolean, r: boolean) => {
+    setCanUndo(u);
+    setCanRedo(r);
+  }, []);
+
   if (!currentPlayer) return <Navigate to="/" replace />;
 
   const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
@@ -76,33 +125,89 @@ export default function ColoringPage() {
     { key: 'gallery', label: 'Gallery', icon: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor" opacity="0.3"/><circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.3"/>{[0,60,120,180,240,300].map(a=><circle key={a} cx={8+Math.cos(a*Math.PI/180)*5.5} cy={8+Math.sin(a*Math.PI/180)*5.5} r="1.2" fill="currentColor" opacity="0.5"/>)}</svg> },
   ];
 
-  // ===== DRAWING MODE =====
+  // ===== DRAWING STUDIO MODE =====
   if (drawingMode) {
     return (
-      <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh bg-[#FFF8F0] flex flex-col">
-        {/* Drawing header */}
-        <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+      <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'linear-gradient(180deg, #1A1A2E 0%, #16213E 50%, #1A1A2E 100%)' }}>
+        {/* Studio header — title + brush indicator */}
+        <div className="flex-shrink-0 flex items-center justify-between px-3 pt-3 pb-1.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: activeColor, boxShadow: `0 0 6px ${activeColor}50` }} />
+            <h3 className="text-xs font-bold text-white/60 truncate">
+              {activeTemplate ? activeTemplate.title : 'Free Draw'}
+            </h3>
+          </div>
           <motion.button
-            className="w-10 h-10 rounded-full flex items-center justify-center text-lg cursor-pointer"
-            style={{ backgroundColor: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(45,45,58,0.06)' }}
-            onClick={exitDrawing}
-            whileTap={{ scale: 0.9 }}
+            className="px-3 py-1 rounded-full text-[10px] font-bold cursor-pointer"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}
+            onClick={() => setShowBrushDrawer(true)}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Open brush settings"
           >
-            ✕
+            {brushes.find((b) => b.id === activeBrush)?.label || 'Brush'} &middot; {studioBrushSize}px
           </motion.button>
-          <h3 className="text-sm font-bold truncate mx-3 flex-1 text-center" style={{ color: '#2D2D3A' }}>
-            {activeTemplate ? activeTemplate.title : 'Free Draw'}
-          </h3>
-          <div className="w-10" />
         </div>
 
-        {/* Canvas */}
-        <div className="flex-1 flex items-center justify-center px-4 pb-4">
+        {/* Canvas area — centered with framed artboard */}
+        <div className="flex-1 flex items-center justify-center px-3 py-2 overflow-hidden">
           <DrawingCanvas
+            ref={canvasApiRef}
             templateSvg={activeTemplate?.svgOutline}
+            tool={activeTool}
+            brush={activeBrush}
+            color={activeColor}
+            brushSize={studioBrushSize}
+            brushOpacity={studioOpacity}
+            activeSticker={activeSticker}
+            onHistoryChange={handleHistoryChange}
             onSave={handleSave}
           />
         </div>
+
+        {/* Tool rail */}
+        <div className="flex-shrink-0 flex justify-center px-3 pb-1.5">
+          <ToolRail
+            activeTool={activeTool}
+            onToolChange={handleToolChange}
+            onUndo={() => canvasApiRef.current?.undo()}
+            onRedo={() => canvasApiRef.current?.redo()}
+            onClear={() => canvasApiRef.current?.clear()}
+            onSave={() => canvasApiRef.current?.save()}
+            onClose={exitDrawing}
+            canUndo={canUndo}
+            canRedo={canRedo}
+          />
+        </div>
+
+        {/* Color rail */}
+        <div className="flex-shrink-0 px-3 pb-3">
+          <ColorRail
+            activeColor={activeColor}
+            onColorChange={handleColorChange}
+            recentColors={recentColors}
+          />
+        </div>
+
+        {/* Brush drawer */}
+        <BrushDrawer
+          open={showBrushDrawer}
+          onClose={() => setShowBrushDrawer(false)}
+          activeBrush={activeBrush}
+          onBrushChange={handleBrushChange}
+          brushSize={studioBrushSize}
+          onSizeChange={setStudioBrushSize}
+          brushOpacity={studioOpacity}
+          onOpacityChange={setStudioOpacity}
+          activeColor={activeColor}
+        />
+
+        {/* Sticker picker */}
+        <StickerPicker
+          open={showStickerPicker}
+          onClose={() => setShowStickerPicker(false)}
+          activeSticker={activeSticker?.id || null}
+          onStickerSelect={(s) => { setActiveSticker(s); setActiveTool('stamp'); }}
+        />
       </div>
     );
   }
