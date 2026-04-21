@@ -55,9 +55,22 @@ class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, RouteErrorBo
   }
 }
 
-/** Requires active player — redirects to splash if none */
+/** Requires active player — waits for hydration, then redirects if none */
 function RequirePlayer({ children }: { children: ReactNode }) {
-  const { currentPlayer } = useApp();
+  const { currentPlayer, isHydrating } = useApp();
+
+  // Wait while app is restoring saved player from storage
+  if (isHydrating) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#FFF8F0' }}>
+        <div className="text-center">
+          <div className="text-5xl animate-float-gentle mb-3">📚</div>
+          <p className="text-[#9B9BAB] font-bold text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentPlayer) {
     return <Navigate to="/" replace />;
   }

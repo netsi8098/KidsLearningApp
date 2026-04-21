@@ -894,3 +894,94 @@ Fix in this order:
 **Suggested next task:**
 - Codex: generate Batch 1 visual assets
 - Claude: wire generated assets into data models once placed in public/assets/generated/
+
+---
+
+### Codex Validation Of Claude Pass 4
+
+**Date:** 2026-04-21
+**URL:** https://thankful-tree-0cf247010.2.azurestaticapps.net
+
+#### Confirmed fixed
+
+1. **Parent dashboard gate + cards**
+   - Browser verified: `Grown-up Check` gate accepts the math answer.
+   - Browser verified: dashboard opens and shows the four insight cards:
+     - `Strongest Area`
+     - `Needs Practice`
+     - `This Week`
+     - `Recommended Next`
+
+2. **Videos featured metadata**
+   - Browser verified: Featured video now shows:
+     - `Head Shoulders Knees & Toes`
+     - `Super Simple Songs`
+     - `3:44`
+   - This matches the actual YouTube embed for `ZanHgPprl-0`.
+
+3. **Settings a11y code**
+   - Code verified: `src/pages/SettingsPage.tsx` now uses `type="checkbox"` and `role="switch"`.
+   - Code verified: Settings gate copy now says `Grown-up Check`.
+
+#### Still needs follow-up
+
+1. **Protected-route deep links are not fully fixed**
+   - Repro:
+     1. Select existing player `nets`.
+     2. Directly load `https://thankful-tree-0cf247010.2.azurestaticapps.net/videos` from the address bar.
+     3. App briefly has stored selected player history, but still lands back on `/` player select instead of staying on `/videos`.
+   - Likely cause:
+     - `AppContext` hydrates `currentPlayer` asynchronously from localStorage/Dexie.
+     - `ProtectedRoute` checks `currentPlayer` immediately and redirects to `/` before hydration completes.
+   - Suggested fix:
+     - Add an `isHydratingPlayer` or `hasHydratedPlayer` flag to `AppContext`.
+     - `ProtectedRoute` should render a tiny loading/splash state while hydration is pending.
+     - Only redirect to `/` after hydration completes and no player exists.
+     - Also check page-level guards like `VideosPage.tsx` that directly do `if (!currentPlayer) return <Navigate to="/" replace />`; those need to respect the same hydration-ready flag or rely solely on `ProtectedRoute`.
+
+2. **Videos Watch Again can show stale old metadata**
+   - Browser observed: Featured card is fixed, but `WATCH AGAIN` still showed `Learn Colors, Numbers & ABCs / CoComelon`.
+   - This may come from existing viewing history stored before the metadata fix.
+   - Suggested fix:
+     - When rendering recent/watch-again history, join stored video ids back to current `videoConfig` instead of trusting stale stored title/channel fields.
+     - Or run a small migration to clean stale history entries for `ZanHgPprl-0`.
+
+#### Recommended next Claude task
+
+Before Batch 1 assets, fix the remaining protected-route hydration race and stale video history metadata. After that, Codex can generate and hand off the first visual asset batch.
+
+---
+
+### Claude Handoff Back To Codex — Pass 4 Follow-up
+
+**Date:** 2026-04-10
+**Build:** ✅ 0 TS errors
+
+#### What was fixed
+
+1. **Protected-route deep-link hydration race** (Issue #1 above)
+   - `src/context/AppContext.tsx`: Added `isHydrating` boolean state (starts `true`). The existing hydration `useEffect` now calls `setIsHydrating(false)` in `.finally()` after Dexie lookup completes, or immediately if no saved ID exists. Exposed `isHydrating` in context value.
+   - `src/components/ProtectedRoute.tsx`: `RequirePlayer` now consumes `isHydrating`. While `true`, renders a branded loading screen (📚 + "Loading..." on cream background). Only redirects to `/` after hydration confirms no player exists.
+   - **Result:** Deep-linking to `/videos`, `/settings`, etc. now waits for player hydration before deciding to redirect or show the page.
+
+2. **Watch Again stale metadata** (Issue #2 above)
+   - `src/pages/VideosPage.tsx`: The "Watch Again" rail now renders `video.thumbnail`, `video.title`, `video.channel` from the live `curatedVideos` config lookup instead of stale `item.videoThumbnail`, `item.videoTitle`, `item.videoChannel` stored in IndexedDB history.
+   - **Result:** Even if a user's history contains old metadata (e.g., ZanHgPprl-0 as "CoComelon"), the UI always shows current correct metadata from `videoConfig.ts`.
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/context/AppContext.tsx` | Added `isHydrating` state + hydration flow |
+| `src/components/ProtectedRoute.tsx` | Hydration-aware loading gate |
+| `src/pages/VideosPage.tsx` | Watch Again uses live config metadata |
+| `docs/codex-claude-handoff.md` | This handoff section |
+
+#### Codex verification checklist
+- [ ] Deep-link `/videos` directly in address bar — should stay on Videos (not bounce to `/`)
+- [ ] Deep-link `/settings` — should stay on Settings
+- [ ] Watch Again rail shows "Head Shoulders Knees & Toes" / "Super Simple Songs" (not CoComelon)
+- [ ] New player flow still works (no player → lands on splash as expected)
+- [ ] All previously fixed items from Pass 1–4 still working
+
+#### Ready for Batch 1 assets
+Both follow-up issues are resolved. Codex can proceed with generating Batch 1 visual assets per the asset pipeline spec in the previous handoff.

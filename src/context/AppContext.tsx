@@ -8,6 +8,8 @@ const PLAYER_KEY = 'klf-selected-player-id';
 interface AppState {
   currentPlayer: PlayerProfile | null;
   setCurrentPlayer: (player: PlayerProfile | null) => void;
+  /** True while the app is restoring the selected player from storage */
+  isHydrating: boolean;
   celebrationVisible: boolean;
   showCelebration: () => void;
   hideCelebration: () => void;
@@ -31,6 +33,7 @@ const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentPlayer, setCurrentPlayerState] = useState<PlayerProfile | null>(null);
+  const [isHydrating, setIsHydrating] = useState(true);
 
   // Persist selected player ID and hydrate on boot
   const setCurrentPlayer = useCallback((player: PlayerProfile | null) => {
@@ -47,14 +50,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Hydrate player from localStorage on app start
   useEffect(() => {
     const savedId = localStorage.getItem(PLAYER_KEY);
-    if (savedId && !currentPlayer) {
+    if (savedId) {
       const id = parseInt(savedId, 10);
       if (!isNaN(id)) {
         db.profiles.get(id).then((profile) => {
           if (profile) setCurrentPlayerState(profile);
-        }).catch(() => { /* profile not found, stay on player select */ });
+        }).catch(() => {}).finally(() => setIsHydrating(false));
+        return;
       }
     }
+    setIsHydrating(false);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [celebrationVisible, setCelebrationVisible] = useState(false);
   const [starBurstVisible, setStarBurstVisible] = useState(false);
@@ -152,6 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         currentPlayer,
         setCurrentPlayer,
+        isHydrating,
         celebrationVisible,
         showCelebration,
         hideCelebration,

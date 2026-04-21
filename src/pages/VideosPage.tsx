@@ -423,8 +423,8 @@ export default function VideosPage() {
                             >
                               <div className="relative">
                                 <img
-                                  src={item.videoThumbnail}
-                                  alt={item.videoTitle}
+                                  src={video.thumbnail}
+                                  alt={video.title}
                                   className="w-full aspect-video object-cover bg-[#F0EAE0]"
                                   loading="lazy"
                                 />
@@ -448,9 +448,9 @@ export default function VideosPage() {
                               </div>
                               <div className="p-2">
                                 <p className="text-[12px] font-bold text-[#2D2D3A] line-clamp-1 leading-tight">
-                                  {item.videoTitle}
+                                  {video.title}
                                 </p>
-                                <p className="text-[10px] text-[#9B9BAB] mt-0.5">{item.videoChannel}</p>
+                                <p className="text-[10px] text-[#9B9BAB] mt-0.5">{video.channel}</p>
                               </div>
                             </motion.div>
                           );
