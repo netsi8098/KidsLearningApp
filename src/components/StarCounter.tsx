@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
@@ -31,6 +32,38 @@ export default function StarCounter() {
   );
 
   const stars = profile?.totalStars ?? 0;
+  const prevStars = useRef(stars);
+  const [displayStars, setDisplayStars] = useState(stars);
+  const [spinning, setSpinning] = useState(false);
+
+  // Animate count-up when stars change
+  useEffect(() => {
+    if (stars !== prevStars.current) {
+      const from = prevStars.current;
+      const to = stars;
+      const diff = to - from;
+      if (diff > 0) {
+        setSpinning(true);
+        // Count up over 600ms
+        const steps = Math.min(diff, 20);
+        const stepDuration = 600 / steps;
+        let step = 0;
+        const interval = setInterval(() => {
+          step++;
+          setDisplayStars(from + Math.round((step / steps) * diff));
+          if (step >= steps) {
+            clearInterval(interval);
+            setDisplayStars(to);
+            setTimeout(() => setSpinning(false), 300);
+          }
+        }, stepDuration);
+        prevStars.current = to;
+        return () => clearInterval(interval);
+      }
+      prevStars.current = to;
+      setDisplayStars(to);
+    }
+  }, [stars]);
 
   return (
     <motion.div
@@ -39,20 +72,28 @@ export default function StarCounter() {
         background: 'linear-gradient(135deg, rgba(255,217,61,0.18), rgba(255,140,66,0.12))',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        boxShadow: '0 2px 10px rgba(255,217,61,0.10), inset 0 1px 1px rgba(255,255,255,0.3)',
+        boxShadow: spinning
+          ? '0 0 16px rgba(255,217,61,0.4), 0 2px 10px rgba(255,217,61,0.15)'
+          : '0 2px 10px rgba(255,217,61,0.10), inset 0 1px 1px rgba(255,255,255,0.3)',
         border: '1px solid rgba(255,217,61,0.18)',
+        transition: 'box-shadow 0.3s',
       }}
-      key={stars}
-      animate={{ scale: [1, 1.12, 1] }}
+      key={`star-${stars}`}
+      animate={{ scale: spinning ? [1, 1.15, 1] : 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <motion.div
-        animate={{ rotate: [0, 12, -12, 0] }}
-        transition={{ duration: 2, repeat: Infinity, repeatDelay: 5, ease: 'easeInOut' }}
+        animate={spinning ? { rotate: 360 } : { rotate: [0, 12, -12, 0] }}
+        transition={spinning
+          ? { duration: 0.6, ease: 'easeOut' }
+          : { duration: 2, repeat: Infinity, repeatDelay: 5, ease: 'easeInOut' }
+        }
       >
         <StarIcon />
       </motion.div>
-      <span className="text-sm font-extrabold tracking-tight" style={{ color: '#B8860B' }}>{stars}</span>
+      <span className="text-sm font-extrabold tracking-tight" style={{ color: '#B8860B' }}>
+        {displayStars}
+      </span>
     </motion.div>
   );
 }
