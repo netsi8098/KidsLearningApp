@@ -717,6 +717,14 @@ button:active, [role="button"]:active {
   animation: ripple-expand 0.4s ease-out;
 }
 
+/* ── Global bottom nav safe padding ── */
+.pb-nav-safe {
+  padding-bottom: 100px;
+}
+@media (min-width: 768px) {
+  .pb-nav-safe { padding-bottom: 80px; }
+}
+
 /* ══════════════════════════════════════════════════════════
    NEW PREMIUM ANIMATIONS
    ══════════════════════════════════════════════════════════ */

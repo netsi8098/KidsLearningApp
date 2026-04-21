@@ -79,14 +79,26 @@ export function useDailyMissions(playerId: number | undefined) {
     const count = getMissionCount(seed);
     const selected = pickMissions(seed, missionTemplates, count);
 
-    const records: DailyMission[] = selected.map((template) => ({
+    // Deduplicate templates to prevent identical quests
+    const seen = new Set<string>();
+    const uniqueSelected = selected.filter((t) => {
+      if (seen.has(t.id)) return false;
+      seen.add(t.id);
+      return true;
+    });
+
+    const records: DailyMission[] = uniqueSelected.map((template) => ({
       playerId,
       date: todayKey,
       missionId: template.id,
       completed: false,
     }));
 
-    await db.dailyMissions.bulkAdd(records);
+    try {
+      await db.dailyMissions.bulkAdd(records);
+    } catch {
+      // Silently handle duplicate key errors from race conditions
+    }
   }, [playerId, todayKey]);
 
   // Generate on mount / player change

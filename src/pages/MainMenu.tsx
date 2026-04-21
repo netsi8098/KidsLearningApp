@@ -955,7 +955,7 @@ export default function MainMenu() {
           >
             {activeTab === 'home' ? (
               /* ── HOME TAB — DAILY ADVENTURE HUB ── */
-              <div className="flex-1 overflow-y-auto pb-4 scrollbar-hide">
+              <div className="flex-1 overflow-y-auto pb-nav-safe scrollbar-hide">
                 {/* Search bar */}
                 <div className="mb-3">
                   <SearchBar />
