@@ -595,6 +595,7 @@ function QuestBoard({
                   rewardStars={5}
                   highlighted
                   index={0}
+                  missionType={nextMission.missionId}
                 />
               </div>
             )}
@@ -708,6 +709,7 @@ function QuestBoard({
                                   category={mission.category as MissionCategory}
                                   rewardStars={5}
                                   index={idx + 1}
+                                  missionType={mission.missionId}
                                 />
                               </div>
                             );

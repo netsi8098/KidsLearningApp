@@ -11,6 +11,7 @@ import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import ConfettiCelebration from '../components/ConfettiCelebration';
 import StoryIllustration from '../components/StoryIllustration';
+import { getStoryCover } from '../components/svg/StoryCovers';
 import { stopSpeaking as stopAIVoice, getCurrentAudio } from '../services/ttsService';
 import {
   storiesData,
@@ -619,7 +620,9 @@ export default function StoriesPage() {
                       whileHover={{ scale: 1.03, y: -2 }}
                       whileTap={{ scale: 0.97 }}
                     >
-                      <div className="text-3xl mb-2">{story.emoji}</div>
+                      <div className="w-full h-16 rounded-lg mb-2 overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F3EFFE, #EDE5FF)' }}>
+                        {getStoryCover(story.id) || <span className="text-3xl">{story.emoji}</span>}
+                      </div>
                       <p className="font-bold text-[#2D2D3A] text-sm leading-tight line-clamp-2 mb-2">
                         {story.title}
                       </p>
@@ -670,14 +673,18 @@ export default function StoriesPage() {
                       whileHover={{ scale: 1.03, y: -3 }}
                       whileTap={{ scale: 0.97 }}
                     >
-                      {/* Top color accent */}
+                      {/* Cover illustration */}
                       <div
-                        className="h-20 flex items-center justify-center relative"
+                        className="h-24 flex items-center justify-center relative overflow-hidden"
                         style={{
-                          background: 'linear-gradient(135deg, #F3EFFE 0%, #EDE5FF 100%)',
+                          background: story.category === 'bedtime' ? 'linear-gradient(135deg, #1a1a4e, #2D1B69)' :
+                            story.category === 'animals' ? 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' :
+                            story.category === 'friendship' ? 'linear-gradient(135deg, #FCE4EC, #F8BBD0)' :
+                            story.category === 'adventure' ? 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' :
+                            'linear-gradient(135deg, #E3F2FD, #BBDEFB)',
                         }}
                       >
-                        <span className="text-5xl drop-shadow-md">{story.emoji}</span>
+                        {getStoryCover(story.id) || <span className="text-5xl drop-shadow-md">{story.emoji}</span>}
                         {isCompleted && (
                           <span className="absolute top-2 right-2 text-sm bg-white/80 rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
                             ✅
@@ -790,7 +797,7 @@ export default function StoriesPage() {
 
                         {/* Cover illustration */}
                         <div
-                          className="w-full h-24 rounded-xl mb-3 flex items-center justify-center overflow-hidden"
+                          className="w-full h-28 rounded-xl mb-3 flex items-center justify-center overflow-hidden"
                           style={{
                             background: story.category === 'bedtime' ? 'linear-gradient(135deg, #1a1a4e, #2D1B69)' :
                               story.category === 'animals' ? 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' :
@@ -799,7 +806,7 @@ export default function StoriesPage() {
                               'linear-gradient(135deg, #E3F2FD, #BBDEFB)',
                           }}
                         >
-                          <span className="text-4xl">{story.emoji}</span>
+                          {getStoryCover(story.id) || <span className="text-4xl">{story.emoji}</span>}
                         </div>
 
                         {/* Title */}

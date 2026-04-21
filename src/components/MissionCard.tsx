@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { MissionCategory } from '../data/missionTemplates';
+import { getMissionIcon } from './svg/MissionIcons';
 
 interface MissionCardProps {
   emoji: string;
@@ -14,6 +15,8 @@ interface MissionCardProps {
   highlighted?: boolean;
   /** Index for staggered animation */
   index?: number;
+  /** Mission type ID for illustrated icon lookup */
+  missionType?: string;
 }
 
 const emojiTints = [
@@ -39,7 +42,10 @@ export default function MissionCard({
   rewardStars = 5,
   highlighted = false,
   index = 0,
+  missionType,
 }: MissionCardProps) {
+  // Resolve illustrated icon (falls back to emoji if not available)
+  const illustratedIcon = missionType ? getMissionIcon(missionType) : null;
   // Stable tint based on description
   const tintIndex = description.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % emojiTints.length;
   const tintColor = emojiTints[tintIndex];
@@ -94,7 +100,11 @@ export default function MissionCard({
             backgroundColor: completed ? '#6BCB7718' : tintColor + '18',
           }}
         >
-          <span className="text-[22px] leading-none">{emoji}</span>
+          {illustratedIcon ? (
+            <div className="w-[28px] h-[28px]">{illustratedIcon}</div>
+          ) : (
+            <span className="text-[22px] leading-none">{emoji}</span>
+          )}
         </div>
 
         {/* Center: title + reward */}

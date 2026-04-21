@@ -1020,3 +1020,62 @@ The deployed URL is **not fully green yet**.
 #### Tester recommendation
 
 Before moving to Batch 1 assets, confirm which branch/environment the Azure Static Web Apps URL is actually serving. The user says the push was to `dev`; if production SWA is wired to `main`, the live URL may not reflect this follow-up. If the new build is live, check the auth/onboarding gate interaction with protected deep links.
+
+---
+
+### Claude Batch 1 — Visual Asset Pipeline: SVG Illustrations
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors, 2.66s
+
+#### What was built
+
+Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with hand-crafted SVG illustration components. All 3 new component files follow the same pattern as existing SVG components (AlphabetIllustrations, AnimalCharacters, etc).
+
+**1. Story Cover Illustrations** — `src/components/svg/StoryCovers.tsx`
+- 9 unique SVG cover scenes for all stories in `storiesData`:
+  - Goodnight Moon (night sky, crescent moon, sleepy house)
+  - The Little Duck (pond, duck, frog, lily pads)
+  - My Best Friend (teddy bear + bunny sharing a cookie)
+  - The Magic Garden (magic door, sunflower, butterfly, sparkles)
+  - Rainbow After Rain (rainbow arcs, departing cloud, fox, flowers)
+  - The Brave Little Cat (tree, climbing cat, baby bird in nest)
+  - The Treasure Map (parchment map, X marks spot, compass, gold coins)
+  - The New Kid (school, two kids, waving hand, dinosaur doodle)
+  - The Water Cycle (sun, cloud, rain, evaporation arrows, mountains)
+- Wired into **StoriesPage** at all 3 display points: library grid, featured rail, continue reading rail
+- Falls back to emoji if no cover exists
+
+**2. Mission Card Icons** — `src/components/svg/MissionIcons.tsx`
+- 12 illustrated icons replacing OS emoji for every mission type:
+  - watch-video, do-alphabet, dance-2min, listen-story, emotion-checkin, draw-picture, do-quiz, learn-numbers, explore-animals, try-recipe, bedtime-breathing, world-explorer
+- Added `missionType` prop to **MissionCard** component
+- Wired into **MainMenu** — both "Next Up" and time-section mission cards pass `missionType={mission.missionId}`
+- Falls back to emoji for unknown mission types
+
+**3. Coloring Template Previews** — `src/components/svg/ColoringPreviews.tsx`
+- 12 colorful SVG previews for every coloring template:
+  - cat, fish, letter-a, letter-b, number-1, number-2, star, heart, flower, tree, smiley, surprised
+- Wired into **ColoringPage** template card grid
+- Shows colorful filled-in version instead of bare emoji
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/components/svg/StoryCovers.tsx` | **NEW** — 9 story cover SVGs |
+| `src/components/svg/MissionIcons.tsx` | **NEW** — 12 mission icon SVGs |
+| `src/components/svg/ColoringPreviews.tsx` | **NEW** — 12 coloring preview SVGs |
+| `src/components/MissionCard.tsx` | Added `missionType` prop, SVG icon rendering |
+| `src/pages/MainMenu.tsx` | Pass `missionType` to MissionCard |
+| `src/pages/StoriesPage.tsx` | Import StoryCovers, replace emoji in 3 card types |
+| `src/pages/ColoringPage.tsx` | Import ColoringPreviews, replace emoji in template cards |
+| `docs/codex-claude-handoff.md` | This handoff |
+
+#### Codex verification checklist
+- [ ] Stories library (/stories) — all 9 cards show illustrated covers instead of emoji
+- [ ] Stories featured rail — illustrated covers
+- [ ] Stories continue reading — illustrated thumbnails
+- [ ] Main menu quest cards — illustrated icons instead of emoji (check different mission types)
+- [ ] Coloring page (/coloring) — template cards show colorful SVG previews
+- [ ] No regressions on previously verified pages
+- [ ] Build size reasonable (StoriesPage ~49KB, MainMenu ~85KB)

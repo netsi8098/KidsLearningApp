@@ -9,6 +9,7 @@ import DrawingCanvas from '../components/DrawingCanvas';
 import ArtworkGallery from '../components/ArtworkGallery';
 import NavButton from '../components/NavButton';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
+import { getColoringPreview } from '../components/svg/ColoringPreviews';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -190,7 +191,9 @@ export default function ColoringPage() {
                     whileTap={{ scale: 0.97 }}
                     onClick={() => openTemplate(template)}
                   >
-                    <div className="text-4xl mb-2">{template.emoji}</div>
+                    <div className="w-16 h-16 mx-auto mb-2">
+                      {getColoringPreview(template.id) || <span className="text-4xl block text-center leading-[64px]">{template.emoji}</span>}
+                    </div>
                     <h3 className="font-bold text-sm" style={{ color: '#2D2D3A' }}>{template.title}</h3>
                     <span
                       className="inline-block mt-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold"
