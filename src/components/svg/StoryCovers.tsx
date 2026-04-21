@@ -63,10 +63,10 @@ function CoverGoodnightMoon(_: CoverProps) {
       {/* Window glow */}
       <rect x="88" y="93" width="10" height="10" rx="1" fill="#FFE66D" opacity="0.6" />
       <rect x="102" y="93" width="8" height="10" rx="1" fill="#FFE66D" opacity="0.4" />
-      {/* Zzz */}
-      <text x="125" y="80" fill="#C4AAFF" fontSize="10" fontWeight="bold" opacity="0.5">z</text>
-      <text x="132" y="72" fill="#C4AAFF" fontSize="8" fontWeight="bold" opacity="0.4">z</text>
-      <text x="137" y="66" fill="#C4AAFF" fontSize="6" fontWeight="bold" opacity="0.3">z</text>
+      {/* Sleep sparkles */}
+      <circle cx="127" cy="78" r="2.5" fill="#C4AAFF" opacity="0.4" />
+      <circle cx="134" cy="70" r="2" fill="#C4AAFF" opacity="0.3" />
+      <circle cx="139" cy="64" r="1.5" fill="#C4AAFF" opacity="0.2" />
     </svg>
   );
 }
@@ -394,14 +394,14 @@ function CoverTreasureMap(_: CoverProps) {
         <circle cx="20" cy="65" r="6" fill="none" stroke="#8B6914" strokeWidth="0.8" />
         <line x1="20" y1="59" x2="20" y2="71" stroke="#8B6914" strokeWidth="0.8" />
         <line x1="14" y1="65" x2="26" y2="65" stroke="#8B6914" strokeWidth="0.8" />
-        <text x="18" y="61" fill="#8B6914" fontSize="4" fontWeight="bold">N</text>
+        <polygon points="20,56 20,62 18,62" fill="#FF6B6B" opacity="0.6" />
       </g>
       {/* Gold coins at bottom */}
       <circle cx="80" cy="110" r="8" fill="#FFD93D" stroke="#E6B800" strokeWidth="1" />
       <circle cx="92" cy="115" r="7" fill="#FFD93D" stroke="#E6B800" strokeWidth="1" />
       <circle cx="72" cy="118" r="6" fill="#FFD93D" stroke="#E6B800" strokeWidth="1" />
-      <text x="78" y="113" fill="#8B6914" fontSize="6" fontWeight="bold">$</text>
-      <text x="90" y="118" fill="#8B6914" fontSize="5" fontWeight="bold">$</text>
+      <circle cx="80" cy="110" r="1.5" fill="#FFE66D" opacity="0.5" />
+      <circle cx="92" cy="115" r="1.5" fill="#FFE66D" opacity="0.4" />
       {/* Compass beside map */}
       <circle cx="170" cy="85" r="15" fill="#E8E0D0" stroke="#8B6914" strokeWidth="1.5" />
       <circle cx="170" cy="85" r="12" fill="#F5F0E5" />

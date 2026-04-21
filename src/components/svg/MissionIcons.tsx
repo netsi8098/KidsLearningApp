@@ -225,8 +225,8 @@ function IconBedtime() {
       <circle cx="32" cy="18" r="0.8" fill="#FFE66D" opacity="0.5" />
       <circle cx="26" cy="28" r="1.2" fill="#C4AAFF" opacity="0.5" />
       {/* Zzz */}
-      <text x="28" y="30" fill="#C4AAFF" fontSize="6" fontWeight="bold" opacity="0.6">z</text>
-      <text x="31" y="26" fill="#C4AAFF" fontSize="5" fontWeight="bold" opacity="0.4">z</text>
+      <circle cx="28" cy="28" r="1.5" fill="#C4AAFF" opacity="0.5" />
+      <circle cx="31" cy="24" r="1" fill="#C4AAFF" opacity="0.35" />
     </svg>
   );
 }

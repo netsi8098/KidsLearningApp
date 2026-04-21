@@ -600,7 +600,8 @@ export default function StoriesPage() {
           {continueReadingStories.length > 0 && (
             <div className="mb-5">
               <h3 className="text-[13px] font-extrabold text-[#6B6B7B] uppercase tracking-wider mb-2.5">
-                📖 Pick up where you left off
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{display:'inline-block',verticalAlign:'middle',marginRight:4}}><path d="M2 4C2 4 5 2 8 2C11 2 14 4 14 4V14C14 14 11 12 8 12C5 12 2 14 2 14V4Z" fill="#A78BFA" opacity="0.3" stroke="#A78BFA" strokeWidth="1.2"/><line x1="8" y1="2" x2="8" y2="12" stroke="#A78BFA" strokeWidth="0.8" opacity="0.4"/></svg>
+                Pick up where you left off
               </h3>
               <div className="flex gap-3 overflow-x-auto -mx-4 px-4 pb-3 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
                 {continueReadingStories.map((story, i) => {
@@ -1075,56 +1076,45 @@ export default function StoriesPage() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentPage}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0"
               initial={{
-                x: turnDirection === 'next' ? '60%' : '-60%',
+                x: turnDirection === 'next' ? '50%' : '-50%',
                 opacity: 0,
-                scale: 0.92,
               }}
-              animate={{ x: 0, opacity: 1, scale: 1 }}
+              animate={{ x: 0, opacity: 1 }}
               exit={{
-                x: turnDirection === 'next' ? '-60%' : '60%',
+                x: turnDirection === 'next' ? '-50%' : '50%',
                 opacity: 0,
-                scale: 0.92,
               }}
-              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {/* Physical book page with visible edges and warm paper */}
-              <div className="w-full h-full flex items-center justify-center relative" style={{ padding: '16px 20px' }}>
-                {/* Stacked pages behind (visible edges) */}
-                <div className="absolute" style={{ inset: '14px 16px 18px 22px', background: '#F0E8D8', borderRadius: '4px 12px 12px 4px', boxShadow: '2px 2px 0 #E8DFD0, 4px 4px 0 #E0D5C5' }} />
-
+              {/* Book page — minimal chrome, max illustration */}
+              <div className="w-full h-full relative" style={{ padding: '8px 10px 4px' }}>
                 {/* Main book page */}
                 <div
-                  className="relative w-full h-full rounded-[4px_12px_12px_4px] overflow-hidden flex flex-col"
+                  className="relative w-full h-full rounded-xl overflow-hidden flex flex-col"
                   style={{
                     background: 'linear-gradient(135deg, #FDF8EE 0%, #FAF3E5 40%, #FDF8EE 100%)',
-                    boxShadow: 'inset 0 0 40px rgba(139,90,43,0.06), 0 4px 20px rgba(0,0,0,0.15)',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.12), inset 0 0 30px rgba(139,90,43,0.04)',
                   }}
                 >
-                  {/* Book spine shadow (left edge) */}
-                  <div className="absolute left-0 top-0 bottom-0 w-6" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02), transparent)' }} />
-
-                  {/* Fold/gutter line */}
-                  <div className="absolute left-4 top-4 bottom-4 w-[1px]" style={{ background: 'rgba(0,0,0,0.04)' }} />
-
-                  {/* Illustration — fills most of the book page */}
-                  <div className="flex-1 flex items-stretch justify-center p-2 pt-2 pb-0 overflow-hidden">
+                  {/* Illustration — fills the page edge-to-edge */}
+                  <div className="flex-1 overflow-hidden">
                     {activeStoryId && getStoryPageArt(activeStoryId, currentPage) ? (
                       <motion.div
-                        className="w-full rounded-lg overflow-hidden"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: 'spring', damping: 15 }}
+                        className="w-full h-full"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
                         key={`${activeStoryId}-${currentPage}`}
                       >
                         {getStoryPageArt(activeStoryId, currentPage)}
                       </motion.div>
                     ) : (
-                      <div className="w-full flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #FDF8EE, #FAF3E5)' }}>
                         <motion.span
                           className="select-none"
-                          style={{ fontSize: 'clamp(80px, 20vw, 140px)', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }}
+                          style={{ fontSize: 'clamp(80px, 22vw, 150px)', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }}
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ type: 'spring', damping: 15 }}
@@ -1136,15 +1126,13 @@ export default function StoriesPage() {
                     )}
                   </div>
 
-                  {/* Page number badge — compact bottom strip */}
-                  <div className="flex-shrink-0 flex justify-end px-4 py-1.5">
-                    <div className="text-[11px] font-bold text-[#BBA88A] bg-white/50 px-2 py-0.5 rounded-full">
-                      {currentPage + 1}
-                    </div>
+                  {/* Page number — floating overlay */}
+                  <div className="absolute bottom-2 right-3 text-[10px] font-bold text-[#BBA88A] bg-white/60 px-2 py-0.5 rounded-full">
+                    {currentPage + 1}
                   </div>
 
-                  {/* Page corner fold */}
-                  <div className="absolute top-0 right-0 w-10 h-10" style={{ background: 'linear-gradient(225deg, #EDE5D5 0%, #EDE5D5 50%, transparent 50%)' }} />
+                  {/* Subtle page corner fold */}
+                  <div className="absolute top-0 right-0 w-8 h-8" style={{ background: 'linear-gradient(225deg, #EDE5D5 0%, #EDE5D5 50%, transparent 50%)', opacity: 0.6 }} />
                 </div>
               </div>
             </motion.div>

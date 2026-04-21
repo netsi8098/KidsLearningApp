@@ -1551,6 +1551,574 @@ function CatPage7() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// THE TREASURE MAP — 7 pages (s-6-adv-1)
+// ═══════════════════════════════════════════════════════════
+
+function TreasurePage1() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#FFF3E0" />
+    {/* Attic interior — warm dusty */}
+    <rect x="0" y="0" width="300" height="80" fill="#D7CCC8" opacity="0.3" />
+    <line x1="0" y1="80" x2="300" y2="80" stroke="#BCAAA4" strokeWidth="1" opacity="0.3" />
+    {/* Wooden floor */}
+    <rect x="0" y="80" width="300" height="140" fill="#D7CCC8" opacity="0.15" />
+    {[0, 50, 100, 150, 200, 250].map((x) => <line key={x} x1={x} y1="80" x2={x} y2="220" stroke="#BCAAA4" strokeWidth="0.5" opacity="0.15" />)}
+    {/* Old map on floor */}
+    <g transform="translate(100, 100)">
+      <rect x="0" y="0" width="100" height="70" rx="3" fill="#F5E6C8" stroke="#D4A050" strokeWidth="1" />
+      <path d="M15 20 L35 12 L55 25 L75 15 L90 28" stroke="#8B6914" strokeWidth="1.5" fill="none" strokeDasharray="3 2" />
+      <line x1="78" y1="50" x2="90" y2="62" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="90" y1="50" x2="78" y2="62" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round" />
+    </g>
+    {/* Max — boy looking at map */}
+    <g transform="translate(70, 110)">
+      <circle cx="0" cy="0" r="10" fill="#FFE0B2" />
+      <path d="M-9 -3 Q0 -13 9 -3" fill="#5D4037" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-8" y="12" width="16" height="20" rx="4" fill="#4ECDC4" />
+    </g>
+    {/* Dusty attic items */}
+    <rect x="20" y="45" width="30" height="25" rx="3" fill="#8D6E63" opacity="0.3" />
+    <circle cx="260" cy="55" r="12" fill="#BCAAA4" opacity="0.2" />
+  </svg>);
+}
+
+function TreasurePage2() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Park path */}
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.5" />
+    <path d="M50 200 Q100 170 150 175 Q200 180 250 200" stroke="#D4A050" strokeWidth="8" fill="none" opacity="0.3" />
+    {/* Fountain */}
+    <ellipse cx="200" cy="140" rx="20" ry="8" fill="#90A4AE" opacity="0.3" />
+    <rect x="196" y="115" width="8" height="25" fill="#90A4AE" opacity="0.3" />
+    <path d="M196 115 Q200 100 204 115" stroke="#45B7D1" strokeWidth="1.5" fill="none" opacity="0.4" />
+    {/* Bridge in distance */}
+    <path d="M240 165 Q260 150 280 165" stroke="#8D6E63" strokeWidth="3" fill="none" />
+    {/* Trees */}
+    <g transform="translate(60, 120)" aria-hidden="true"><rect x="-3" y="0" width="6" height="20" rx="2" fill="#5D4037" /><ellipse cx="0" cy="-8" rx="16" ry="14" fill="#2E7D32" /></g>
+    <g transform="translate(130, 110)" aria-hidden="true"><rect x="-3" y="0" width="6" height="22" rx="2" fill="#5D4037" /><ellipse cx="0" cy="-8" rx="14" ry="12" fill="#388E3C" /></g>
+    {/* Max with map */}
+    <g transform="translate(100, 155)">
+      <circle cx="0" cy="0" r="8" fill="#FFE0B2" />
+      <path d="M-7 -2 Q0 -10 7 -2" fill="#5D4037" />
+      <circle cx="-2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <circle cx="2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <rect x="-6" y="9" width="12" height="16" rx="3" fill="#4ECDC4" />
+      <rect x="5" y="11" width="8" height="6" rx="1" fill="#F5E6C8" />
+    </g>
+  </svg>);
+}
+
+function TreasurePage3() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#FFF8F0" />
+    {/* Max's backpack — packing scene */}
+    <rect x="60" y="60" width="180" height="120" rx="8" fill="#F5F5F5" opacity="0.5" />
+    {/* Table */}
+    <rect x="80" y="100" width="140" height="8" rx="2" fill="#8D6E63" opacity="0.4" />
+    {/* Backpack */}
+    <rect x="120" y="60" width="50" height="40" rx="8" fill="#FF8C42" />
+    <rect x="125" y="62" width="40" height="30" rx="6" fill="#FFAB70" opacity="0.4" />
+    <rect x="130" y="55" width="30" height="10" rx="3" fill="#E67E22" />
+    {/* Items on table */}
+    <rect x="95" y="85" width="8" height="16" rx="2" fill="#FFE66D" /> {/* Flashlight */}
+    <circle cx="95" cy="83" r="4" fill="#FFF8DC" opacity="0.6" />
+    <rect x="115" y="88" width="20" height="12" rx="3" fill="#D4A050" /> {/* Snacks */}
+    <circle cx="180" cy="90" r="10" fill="#90A4AE" /> {/* Compass */}
+    <circle cx="180" cy="90" r="7" fill="#F5F0E5" />
+    <polygon points="180,82 181,90 179,90" fill="#FF6B6B" />
+    {/* Max */}
+    <g transform="translate(90, 130)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#5D4037" />
+      <circle cx="-2" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="18" rx="4" fill="#4ECDC4" />
+    </g>
+  </svg>);
+}
+
+function TreasurePage4() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.5" />
+    {/* Fountain */}
+    <ellipse cx="150" cy="130" rx="25" ry="10" fill="#90A4AE" opacity="0.4" />
+    <rect x="146" y="100" width="8" height="30" fill="#90A4AE" opacity="0.3" />
+    <path d="M146 100 Q150 82 154 100" stroke="#45B7D1" strokeWidth="2" fill="none" opacity="0.5" />
+    {/* Max counting steps */}
+    <g transform="translate(100, 150)">
+      <circle cx="0" cy="0" r="8" fill="#FFE0B2" />
+      <path d="M-7 -2 Q0 -10 7 -2" fill="#5D4037" />
+      <circle cx="-2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <circle cx="2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <rect x="-6" y="9" width="12" height="16" rx="3" fill="#4ECDC4" />
+      {/* Compass in hand */}
+      <circle cx="10" cy="14" r="5" fill="#90A4AE" />
+      <circle cx="10" cy="14" r="3" fill="#F5F0E5" />
+    </g>
+    {/* Footprint trail — dotted */}
+    {[130, 145, 160, 175, 190].map((x, i) => (
+      <ellipse key={i} cx={x} cy={155 - i * 2} rx="3" ry="4" fill="#8B6914" opacity={0.15 + i * 0.03} />
+    ))}
+    {/* Arrow pointing north */}
+    <polygon points="80,70 85,60 90,70" fill="#FF6B6B" opacity="0.4" />
+    <line x1="85" y1="70" x2="85" y2="82" stroke="#FF6B6B" strokeWidth="2" opacity="0.3" />
+  </svg>);
+}
+
+function TreasurePage5() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Old bridge */}
+    <path d="M60 120 Q150 90 240 120" stroke="#8D6E63" strokeWidth="6" fill="none" />
+    <rect x="60" y="120" width="4" height="30" fill="#8D6E63" />
+    <rect x="236" y="120" width="4" height="30" fill="#8D6E63" />
+    {/* Water under bridge */}
+    <path d="M30 155 Q80 148 130 155 Q180 162 230 155 Q260 148 290 155" stroke="#45B7D1" strokeWidth="2" fill="none" opacity="0.3" />
+    {/* Wooden box */}
+    <g transform="translate(140, 130)">
+      <rect x="-15" y="-10" width="30" height="22" rx="3" fill="#8D6E63" />
+      <rect x="-13" y="-8" width="26" height="18" rx="2" fill="#A1887F" opacity="0.4" />
+      <line x1="-15" y1="-3" x2="15" y2="-3" stroke="#6D4C41" strokeWidth="1" opacity="0.4" />
+      {/* Leaves on box */}
+      <ellipse cx="-8" cy="-12" rx="5" ry="3" fill="#66BB6A" opacity="0.5" transform="rotate(-20,-8,-12)" />
+      <ellipse cx="10" cy="-11" rx="4" ry="2.5" fill="#4CAF50" opacity="0.4" transform="rotate(15,10,-11)" />
+    </g>
+    {/* Max kneeling beside box */}
+    <g transform="translate(100, 130)">
+      <circle cx="0" cy="0" r="8" fill="#FFE0B2" />
+      <path d="M-7 -2 Q0 -10 7 -2" fill="#5D4037" />
+      <circle cx="-2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <circle cx="2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-6" y="9" width="12" height="12" rx="3" fill="#4ECDC4" />
+    </g>
+    <ellipse cx="150" cy="200" rx="160" ry="25" fill="#66BB6A" opacity="0.4" />
+  </svg>);
+}
+
+function TreasurePage6() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#FFF3E0" />
+    {/* Open box close-up */}
+    <g transform="translate(100, 60)">
+      <rect x="0" y="20" width="100" height="60" rx="4" fill="#8D6E63" />
+      <rect x="3" y="23" width="94" height="54" rx="3" fill="#A1887F" opacity="0.3" />
+      {/* Open lid */}
+      <rect x="0" y="-10" width="100" height="30" rx="4" fill="#8D6E63" transform="rotate(-15, 0, 20)" />
+      {/* Note inside */}
+      <rect x="15" y="35" width="60" height="30" rx="2" fill="#FFF8DC" />
+      <line x1="22" y1="42" x2="68" y2="42" stroke="#D4A050" strokeWidth="0.8" opacity="0.4" />
+      <line x1="22" y1="48" x2="60" y2="48" stroke="#D4A050" strokeWidth="0.8" opacity="0.3" />
+      <line x1="22" y1="54" x2="55" y2="54" stroke="#D4A050" strokeWidth="0.8" opacity="0.3" />
+      {/* Gold coin */}
+      <circle cx="80" cy="50" r="10" fill="#FFD93D" stroke="#E6B800" strokeWidth="1" />
+      <circle cx="80" cy="50" r="6" fill="#FFE66D" opacity="0.5" />
+    </g>
+    {/* Sparkles around the treasure */}
+    {[[80, 50], [220, 60], [160, 40], [130, 130]].map(([x, y], i) => (
+      <circle key={i} cx={x} cy={y} r={2} fill="#FFE66D" opacity={0.4 + i * 0.08} />
+    ))}
+    {/* Max — amazed */}
+    <g transform="translate(70, 140)">
+      <circle cx="0" cy="0" r="10" fill="#FFE0B2" />
+      <path d="M-9 -3 Q0 -13 9 -3" fill="#5D4037" />
+      <ellipse cx="-3" cy="-2" rx="2" ry="2.5" fill="white" />
+      <ellipse cx="3" cy="-2" rx="2" ry="2.5" fill="white" />
+      <circle cx="-3" cy="-2" r="1.2" fill="#2D2D3A" />
+      <circle cx="3" cy="-2" r="1.2" fill="#2D2D3A" />
+      <ellipse cx="0" cy="4" rx="3" ry="4" fill="#2D2D3A" />
+    </g>
+  </svg>);
+}
+
+function TreasurePage7() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.5" />
+    <circle cx="250" cy="35" r="18" fill="#FFE66D" />
+    {/* Max walking home — happy, gold coin in hand */}
+    <g transform="translate(150, 130)">
+      <circle cx="0" cy="0" r="10" fill="#FFE0B2" />
+      <path d="M-9 -3 Q0 -13 9 -3" fill="#5D4037" />
+      <path d="M-4 -2 Q-2 -5 0 -2" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M1 -2 Q3 -5 5 -2" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M-3 3 Q0 6 3 3" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <rect x="-8" y="12" width="16" height="20" rx="4" fill="#4ECDC4" />
+      {/* Backpack */}
+      <rect x="-14" y="14" width="8" height="14" rx="3" fill="#FF8C42" />
+      {/* Gold coin held up */}
+      <line x1="8" y1="16" x2="18" y2="6" stroke="#FFE0B2" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="20" cy="4" r="5" fill="#FFD93D" stroke="#E6B800" strokeWidth="0.8" />
+    </g>
+    {/* Sparkle */}
+    <circle cx="175" cy="125" r="2" fill="#FFE66D" opacity="0.5" />
+    <circle cx="130" cy="118" r="1.5" fill="#FFE66D" opacity="0.4" />
+  </svg>);
+}
+
+// ═══════════════════════════════════════════════════════════
+// THE NEW KID — 7 pages (s-6-fri-1)
+// ═══════════════════════════════════════════════════════════
+
+function NewKidPage1() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#E3F2FD" />
+    {/* Classroom */}
+    <rect x="20" y="20" width="260" height="130" rx="4" fill="#FFECB3" opacity="0.3" />
+    {/* Chalkboard */}
+    <rect x="100" y="30" width="100" height="50" rx="3" fill="#2E7D32" opacity="0.4" />
+    {/* Desks row */}
+    {[60, 140, 220].map((x) => <rect key={x} x={x-15} y="100" width="30" height="15" rx="2" fill="#8D6E63" opacity="0.3" />)}
+    {/* Sam — new kid, nervous, standing at door */}
+    <g transform="translate(45, 100)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#8B6914" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 2 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="18" rx="4" fill="#4ECDC4" />
+      <rect x="-11" y="12" width="6" height="14" rx="3" fill="#FF8C42" />
+    </g>
+    {/* Floor */}
+    <rect x="0" y="150" width="300" height="70" fill="#A8E6CF" opacity="0.2" />
+  </svg>);
+}
+
+function NewKidPage2() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#FFF8F0" />
+    {/* Cafeteria table */}
+    <rect x="80" y="100" width="140" height="8" rx="2" fill="#8D6E63" opacity="0.4" />
+    <rect x="90" y="108" width="4" height="40" fill="#8D6E63" opacity="0.3" />
+    <rect x="206" y="108" width="4" height="40" fill="#8D6E63" opacity="0.3" />
+    {/* Lunch tray */}
+    <rect x="130" y="85" width="35" height="15" rx="3" fill="#E0E0E0" />
+    <circle cx="140" cy="88" r="4" fill="#FF8C42" opacity="0.4" />
+    <rect x="150" y="86" width="10" height="6" rx="1" fill="#FFE66D" opacity="0.4" />
+    {/* Sam alone */}
+    <g transform="translate(150, 70)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#8B6914" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 2 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="14" rx="4" fill="#4ECDC4" />
+    </g>
+    {/* Empty chairs around */}
+    <rect x="100" y="88" width="12" height="12" rx="2" fill="#BDBDBD" opacity="0.2" />
+    <rect x="190" y="88" width="12" height="12" rx="2" fill="#BDBDBD" opacity="0.2" />
+  </svg>);
+}
+
+function NewKidPage3() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#FFF8F0" />
+    <rect x="80" y="110" width="140" height="8" rx="2" fill="#8D6E63" opacity="0.4" />
+    {/* Sam */}
+    <g transform="translate(130, 80)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#8B6914" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="14" rx="4" fill="#4ECDC4" />
+    </g>
+    {/* Emma — walking over, waving */}
+    <g transform="translate(200, 75)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#5D4037" />
+      <circle cx="-10" cy="-4" r="4" fill="#5D4037" />
+      <circle cx="10" cy="-4" r="4" fill="#5D4037" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-3 3 Q0 6 3 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="14" rx="4" fill="#FF8FAB" />
+      {/* Waving hand */}
+      <line x1="7" y1="14" x2="16" y2="4" stroke="#FFE0B2" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="17" cy="3" r="3" fill="#FFE0B2" />
+    </g>
+  </svg>);
+}
+
+function NewKidPage4() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#FFF8F0" />
+    <rect x="80" y="110" width="140" height="8" rx="2" fill="#8D6E63" opacity="0.4" />
+    {/* Sam and Emma sitting together at table */}
+    <g transform="translate(120, 80)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#8B6914" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="14" rx="4" fill="#4ECDC4" />
+    </g>
+    <g transform="translate(180, 80)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#5D4037" />
+      <circle cx="-10" cy="-4" r="4" fill="#5D4037" />
+      <circle cx="10" cy="-4" r="4" fill="#5D4037" />
+      <circle cx="-3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <circle cx="3" cy="-1" r="1.5" fill="#2D2D3A" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="0.8" fill="none" />
+      <rect x="-7" y="10" width="14" height="14" rx="4" fill="#FF8FAB" />
+    </g>
+    {/* Lunch trays */}
+    <rect x="105" y="98" width="25" height="10" rx="2" fill="#E0E0E0" />
+    <rect x="170" y="98" width="25" height="10" rx="2" fill="#E0E0E0" />
+    {/* Sparkles — friendship forming */}
+    <circle cx="150" cy="65" r="2" fill="#FFE66D" opacity="0.4" />
+    <circle cx="155" cy="72" r="1.5" fill="#FFE66D" opacity="0.3" />
+  </svg>);
+}
+
+function NewKidPage5() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.5" />
+    {/* Playground */}
+    <rect x="220" y="130" width="4" height="40" fill="#90A4AE" opacity="0.3" />
+    <rect x="210" y="128" width="24" height="4" rx="2" fill="#90A4AE" opacity="0.3" />
+    {/* Sam drawing */}
+    <g transform="translate(100, 140)">
+      <circle cx="0" cy="0" r="8" fill="#FFE0B2" />
+      <path d="M-7 -2 Q0 -10 7 -2" fill="#8B6914" />
+      <circle cx="-2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <circle cx="2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <rect x="-6" y="9" width="12" height="14" rx="3" fill="#4ECDC4" />
+      {/* Sketchpad */}
+      <rect x="5" y="12" width="12" height="10" rx="1" fill="white" />
+    </g>
+    {/* Emma drawing */}
+    <g transform="translate(190, 140)">
+      <circle cx="0" cy="0" r="8" fill="#FFE0B2" />
+      <path d="M-7 -2 Q0 -10 7 -2" fill="#5D4037" />
+      <circle cx="-2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <circle cx="2" cy="-1" r="1.2" fill="#2D2D3A" />
+      <rect x="-6" y="9" width="12" height="14" rx="3" fill="#FF8FAB" />
+      <rect x="5" y="12" width="12" height="10" rx="1" fill="white" />
+    </g>
+    {/* Dinosaur doodle between them */}
+    <g transform="translate(145, 155)" opacity="0.5" aria-hidden="true">
+      <path d="M-6 5 L-6 -2 L-3 -5 L0 -3 L3 -5 L6 -2 L6 5 L3 8 L-3 8Z" fill="#6BCB77" />
+      <circle cx="-3" cy="-1" r="1" fill="#2D2D3A" />
+    </g>
+  </svg>);
+}
+
+function NewKidPage6() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.5" />
+    {/* Sam and Emma showing each other their drawings */}
+    <g transform="translate(120, 130)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#8B6914" />
+      <path d="M-3 -1 Q-1 -4 1 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M2 -1 Q4 -4 6 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="1" fill="none" />
+      <rect x="-7" y="10" width="14" height="16" rx="4" fill="#4ECDC4" />
+      {/* Holding up T-Rex drawing */}
+      <rect x="8" y="4" width="16" height="12" rx="1" fill="white" />
+      <path d="M12 10 L12 8 L15 6 L18 8 L18 12" stroke="#6BCB77" strokeWidth="1" fill="none" />
+    </g>
+    <g transform="translate(190, 130)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#5D4037" />
+      <circle cx="-10" cy="-4" r="4" fill="#5D4037" />
+      <circle cx="10" cy="-4" r="4" fill="#5D4037" />
+      <path d="M-3 -1 Q-1 -4 1 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M2 -1 Q4 -4 6 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="1" fill="none" />
+      <rect x="-7" y="10" width="14" height="16" rx="4" fill="#FF8FAB" />
+      {/* Holding up Triceratops drawing */}
+      <rect x="-24" y="4" width="16" height="12" rx="1" fill="white" />
+      <path d="M-20 12 L-18 8 L-14 6 L-12 8 Q-10 10 -12 12" stroke="#A78BFA" strokeWidth="1" fill="none" />
+    </g>
+  </svg>);
+}
+
+function NewKidPage7() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.5" />
+    <circle cx="250" cy="35" r="18" fill="#FFE66D" />
+    {/* Sam and Emma walking together — friends */}
+    <g transform="translate(130, 130)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#8B6914" />
+      <path d="M-3 -1 Q-1 -4 1 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M2 -1 Q4 -4 6 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="1" fill="none" />
+      <rect x="-7" y="10" width="14" height="18" rx="4" fill="#4ECDC4" />
+    </g>
+    <g transform="translate(170, 130)">
+      <circle cx="0" cy="0" r="9" fill="#FFE0B2" />
+      <path d="M-8 -3 Q0 -12 8 -3" fill="#5D4037" />
+      <circle cx="-10" cy="-4" r="4" fill="#5D4037" />
+      <circle cx="10" cy="-4" r="4" fill="#5D4037" />
+      <path d="M-3 -1 Q-1 -4 1 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M2 -1 Q4 -4 6 -1" stroke="#2D2D3A" strokeWidth="1.2" fill="none" />
+      <path d="M-2 3 Q0 5 2 3" stroke="#2D2D3A" strokeWidth="1" fill="none" />
+      <rect x="-7" y="10" width="14" height="18" rx="4" fill="#FF8FAB" />
+    </g>
+    {/* Heart above */}
+    <path d="M150 100 C150 96 155 95 156 97 C157 95 162 96 162 100 C162 105 156 108 156 108 C156 108 150 105 150 100Z" fill="#FF8FAB" opacity="0.5" />
+  </svg>);
+}
+
+// ═══════════════════════════════════════════════════════════
+// THE WATER CYCLE — 7 pages (s-6-nat-1)
+// ═══════════════════════════════════════════════════════════
+
+function WaterPage1() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Rain drops — question: where does rain come from? */}
+    {[[50, 30], [100, 40], [150, 25], [200, 35], [250, 28]].map(([x, y], i) => (
+      <path key={i} d={`M${x} ${y} L${(x as number)-1.5} ${(y as number)+8} Q${x} ${(y as number)+11} ${(x as number)+1.5} ${(y as number)+8}Z`} fill="#45B7D1" opacity={0.4 + i * 0.05} />
+    ))}
+    {/* Cloud */}
+    <ellipse cx="150" cy="70" rx="35" ry="16" fill="#B0BEC5" opacity="0.5" />
+    <ellipse cx="135" cy="74" rx="22" ry="12" fill="#90A4AE" opacity="0.4" />
+    <ellipse cx="165" cy="74" rx="22" ry="12" fill="#90A4AE" opacity="0.4" />
+    {/* Meadow */}
+    <ellipse cx="150" cy="200" rx="160" ry="30" fill="#66BB6A" opacity="0.4" />
+    {/* Question mark made of water drops */}
+    <path d="M140 130 Q140 120 150 120 Q160 120 160 130 Q160 135 150 138" stroke="#45B7D1" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.4" />
+    <circle cx="150" cy="148" r="2.5" fill="#45B7D1" opacity="0.4" />
+  </svg>);
+}
+
+function WaterPage2() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Bright sun heating water */}
+    <circle cx="150" cy="35" r="28" fill="#FFE66D" />
+    {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((a) => (
+      <line key={a} x1={150+Math.cos(a*Math.PI/180)*32} y1={35+Math.sin(a*Math.PI/180)*32} x2={150+Math.cos(a*Math.PI/180)*40} y2={35+Math.sin(a*Math.PI/180)*40} stroke="#FFE66D" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+    ))}
+    {/* Ocean / lake */}
+    <ellipse cx="150" cy="180" rx="140" ry="40" fill="#45B7D1" opacity="0.35" />
+    <path d="M20 165 Q60 160 100 165 Q140 170 180 165 Q220 160 260 165 Q280 168 290 165" stroke="#87CEEB" strokeWidth="1.5" fill="none" opacity="0.3" />
+    {/* Heat waves/vapor rising */}
+    {[80, 130, 180, 220].map((x, i) => (
+      <path key={i} d={`M${x} 155 Q${x+5} 140 ${x} 125 Q${x-5} 110 ${x} 95`} stroke="#45B7D1" strokeWidth="1.5" fill="none" strokeDasharray="4 3" opacity={0.2 + i * 0.05} />
+    ))}
+  </svg>);
+}
+
+function WaterPage3() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Vapor arrows going up */}
+    {[80, 150, 220].map((x, i) => (
+      <g key={i}>
+        <path d={`M${x} 180 Q${x+4} 140 ${x} 100 Q${x-4} 60 ${x} 30`} stroke="#45B7D1" strokeWidth="2" fill="none" strokeDasharray="5 3" opacity={0.3 + i * 0.05} />
+        <polygon points={`${x-4},35 ${x},22 ${x+4},35`} fill="#45B7D1" opacity={0.3 + i * 0.05} />
+      </g>
+    ))}
+    {/* Water body at bottom */}
+    <ellipse cx="150" cy="195" rx="130" ry="25" fill="#45B7D1" opacity="0.25" />
+    {/* Tiny water droplets along arrows */}
+    {[[85, 120], [155, 80], [215, 100]].map(([x, y], i) => (
+      <circle key={i} cx={x} cy={y} r={2} fill="#87CEEB" opacity={0.3 + i * 0.05} />
+    ))}
+  </svg>);
+}
+
+function WaterPage4() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Big cloud forming */}
+    <ellipse cx="150" cy="60" rx="50" ry="22" fill="white" opacity="0.9" />
+    <ellipse cx="125" cy="65" rx="35" ry="18" fill="white" opacity="0.85" />
+    <ellipse cx="175" cy="65" rx="35" ry="18" fill="white" opacity="0.85" />
+    <ellipse cx="150" cy="75" rx="45" ry="15" fill="#F5F5F5" opacity="0.7" />
+    {/* Tiny drops forming in cloud */}
+    {[[130, 55], [145, 50], [160, 55], [170, 52], [140, 60]].map(([x, y], i) => (
+      <circle key={i} cx={x} cy={y} r={1.5} fill="#87CEEB" opacity={0.3 + i * 0.05} />
+    ))}
+    {/* Vapor still rising */}
+    <path d="M100 180 Q105 140 100 100" stroke="#45B7D1" strokeWidth="1" fill="none" strokeDasharray="3 3" opacity="0.2" />
+    <path d="M200 180 Q195 140 200 100" stroke="#45B7D1" strokeWidth="1" fill="none" strokeDasharray="3 3" opacity="0.2" />
+    {/* Ground */}
+    <ellipse cx="150" cy="200" rx="140" ry="25" fill="#66BB6A" opacity="0.4" />
+  </svg>);
+}
+
+function WaterPage5() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Heavy dark cloud */}
+    <ellipse cx="150" cy="50" rx="55" ry="25" fill="#90A4AE" opacity="0.7" />
+    <ellipse cx="120" cy="55" rx="40" ry="20" fill="#78909C" opacity="0.6" />
+    <ellipse cx="180" cy="55" rx="40" ry="20" fill="#78909C" opacity="0.6" />
+    {/* Condensation drops inside */}
+    {[[130, 42], [150, 38], [170, 42], [140, 48], [160, 48]].map(([x, y], i) => (
+      <circle key={i} cx={x} cy={y} r={2} fill="#45B7D1" opacity={0.3 + i * 0.05} />
+    ))}
+    <ellipse cx="150" cy="200" rx="140" ry="25" fill="#66BB6A" opacity="0.4" />
+  </svg>);
+}
+
+function WaterPage6() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <rect width="300" height="220" fill="#CFD8DC" opacity="0.2" />
+    {/* Heavy cloud releasing rain */}
+    <ellipse cx="120" cy="40" rx="45" ry="20" fill="#78909C" opacity="0.6" />
+    <ellipse cx="100" cy="44" rx="30" ry="15" fill="#90A4AE" opacity="0.5" />
+    {/* Rain drops */}
+    {[[70, 65], [90, 60], [110, 68], [130, 62], [150, 70], [100, 80], [120, 75], [140, 82]].map(([x, y], i) => (
+      <path key={i} d={`M${x} ${y} L${(x as number)-1} ${(y as number)+8} Q${x} ${(y as number)+11} ${(x as number)+1} ${(y as number)+8}Z`} fill="#45B7D1" opacity={0.3 + (i % 3) * 0.1} />
+    ))}
+    {/* Snow cloud on right */}
+    <ellipse cx="230" cy="45" rx="35" ry="16" fill="#B0BEC5" opacity="0.5" />
+    {/* Snowflakes */}
+    {[[210, 65], [230, 70], [250, 68], [220, 80]].map(([x, y], i) => (
+      <circle key={i} cx={x} cy={y} r={2} fill="white" opacity={0.5 + i * 0.08} />
+    ))}
+    {/* Mountains getting snow */}
+    <polygon points="200,180 240,100 280,180" fill="#78909C" opacity="0.3" />
+    <polygon points="220,115 240,100 260,115" fill="white" opacity="0.4" />
+    {/* Green meadow getting rain */}
+    <ellipse cx="100" cy="200" rx="110" ry="25" fill="#66BB6A" opacity="0.4" />
+  </svg>);
+}
+
+function WaterPage7() {
+  return (<svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
+    <DaySky /><rect width="300" height="220" fill="url(#spa-day)" />
+    {/* Complete cycle visualization */}
+    {/* Sun */}
+    <circle cx="250" cy="30" r="18" fill="#FFE66D" />
+    {/* Ocean */}
+    <ellipse cx="80" cy="190" rx="70" ry="20" fill="#45B7D1" opacity="0.3" />
+    {/* Evaporation up-arrow */}
+    <path d="M80 170 Q85 130 80 90" stroke="#45B7D1" strokeWidth="2" fill="none" strokeDasharray="4 3" opacity="0.4" />
+    <polygon points="76,95 80,82 84,95" fill="#45B7D1" opacity="0.4" />
+    {/* Cloud */}
+    <ellipse cx="150" cy="55" rx="35" ry="15" fill="#B0BEC5" opacity="0.4" />
+    {/* Rain down-arrow */}
+    <path d="M180 70 Q175 110 180 150" stroke="#45B7D1" strokeWidth="2" fill="none" strokeDasharray="4 3" opacity="0.4" />
+    <polygon points="176,145 180,158 184,145" fill="#45B7D1" opacity="0.4" />
+    {/* River flowing back to ocean */}
+    <path d="M190 165 Q160 175 130 180 Q100 185 80 185" stroke="#45B7D1" strokeWidth="3" fill="none" opacity="0.3" />
+    {/* Cycle arrow */}
+    <path d="M60 170 Q40 130 60 90 Q80 50 130 45" stroke="#FF8C42" strokeWidth="2" fill="none" opacity="0.3" />
+    <polygon points="127,42 135,45 128,48" fill="#FF8C42" opacity="0.3" />
+    {/* Green land */}
+    <ellipse cx="220" cy="195" rx="80" ry="20" fill="#66BB6A" opacity="0.4" />
+  </svg>);
+}
+
+// ═══════════════════════════════════════════════════════════
 // PAGE ART MAP
 // ═══════════════════════════════════════════════════════════
 
@@ -1561,6 +2129,9 @@ const pageArtMap: Record<string, (() => ReactNode)[]> = {
   's-4-adv-1': [GardenPage1, GardenPage2, GardenPage3, GardenPage4, GardenPage5, GardenPage6, GardenPage7],
   's-4-nat-1': [RainPage1, RainPage2, RainPage3, RainPage4, RainPage5, RainPage6, RainPage7],
   's-4-ani-1': [CatPage1, CatPage2, CatPage3, CatPage4, CatPage5, CatPage6, CatPage7],
+  's-6-adv-1': [TreasurePage1, TreasurePage2, TreasurePage3, TreasurePage4, TreasurePage5, TreasurePage6, TreasurePage7],
+  's-6-fri-1': [NewKidPage1, NewKidPage2, NewKidPage3, NewKidPage4, NewKidPage5, NewKidPage6, NewKidPage7],
+  's-6-nat-1': [WaterPage1, WaterPage2, WaterPage3, WaterPage4, WaterPage5, WaterPage6, WaterPage7],
 };
 
 /**

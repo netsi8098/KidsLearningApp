@@ -1194,3 +1194,60 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - [ ] /coloring card grid looks cleaner with frosted backdrop
 - [ ] Production console remains clean (no localhost errors)
 - [ ] Mobile viewport: story art fills page well on small screens
+
+---
+
+### Claude Batch 1D — All 9 Stories Complete, Reader Polish, Emoji Cleanup
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors, 2.54s
+
+#### What was built
+
+**1. Ages 6-8 Story Page Art** — 21 new narrative scenes completing ALL 9 stories:
+- **The Treasure Map** (7 pages): attic map discovery, park path with fountain, packing backpack, counting steps from fountain, finding wooden box under bridge, opening treasure with gold coin, Max walking home smiling
+- **The New Kid** (7 pages): Sam nervous at classroom door, eating alone at lunch, Emma walking over waving, sitting together at table, drawing dinosaurs at recess, trading T-Rex/Triceratops pictures, walking home as friends
+- **The Water Cycle** (7 pages): rain question, sun heating ocean, vapor rising up, cloud condensation forming, heavy cloud ready to burst, rain and snow falling, complete cycle diagram
+
+**2. Reader Layout Polish** — `src/pages/StoriesPage.tsx`
+- Removed stacked-pages-behind div and book spine/gutter decorations
+- Illustration area fills edge-to-edge (no padding, no max-width constraint)
+- Page transition simplified: x-slide only, no scale (eliminates clipping risk)
+- Container padding reduced from 16px/20px to 8px/10px/4px
+- Page number is now floating overlay (doesn't consume layout space)
+
+**3. Remaining Emoji Replaced**
+- "📖 Pick up where you left off" → inline SVG book icon
+- Coloring tabs "🖼️ Templates / ✏️ Free Draw / 🎨 Gallery" → custom SVG icons (frame, pencil, palette)
+- Decorative `<text>` in StoryCovers (z/$/N) replaced with circles/shapes
+- Decorative `z` in MissionIcons (bedtime) replaced with circles
+
+**4. AI Voice Fix** (separate commit)
+- Restored localhost TTS fallback for this machine
+- Started Cloudflare tunnel, set `VITE_TTS_URL` GitHub secret
+- Azure SWA workflow passes env vars to build
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/components/svg/StoryPageArt.tsx` | +21 pages (Treasure Map, New Kid, Water Cycle) |
+| `src/pages/StoriesPage.tsx` | Reader layout polish, emoji→icon, page art wiring |
+| `src/pages/ColoringPage.tsx` | Tab emoji→SVG icons |
+| `src/components/svg/StoryCovers.tsx` | Decorative text→shapes |
+| `src/components/svg/MissionIcons.tsx` | Decorative text→shapes |
+| `src/config.ts` | Localhost TTS restored |
+| `src/services/ttsService.ts` | Dev-only proactive check |
+| `.github/workflows/...yml` | VITE_TTS_URL from secrets |
+
+#### Codex verification checklist
+- [ ] All 9 stories have full page art — no emoji fallback on any page
+- [ ] /stories "The Treasure Map" — 7 illustrated pages
+- [ ] /stories "The New Kid" — 7 illustrated pages
+- [ ] /stories "The Water Cycle" — 7 illustrated pages
+- [ ] Story reader art fills the page on mobile (minimal blank paper)
+- [ ] Page transitions clean — no clipping or dimming artifacts
+- [ ] "Pick up where you left off" uses SVG book icon (not 📖)
+- [ ] Coloring tabs use SVG icons (not 🖼️/✏️/🎨)
+- [ ] No decorative text (z/$/N) in DOM innerText
+- [ ] AI voice works on deployed app (via tunnel)
+- [ ] Production console clean

@@ -70,10 +70,10 @@ export default function ColoringPage() {
 
   if (!currentPlayer) return <Navigate to="/" replace />;
 
-  const tabs: { key: TabKey; label: string; emoji: string }[] = [
-    { key: 'templates', label: 'Templates', emoji: '🖼️' },
-    { key: 'free-draw', label: 'Free Draw', emoji: '✏️' },
-    { key: 'gallery', label: 'Gallery', emoji: '🎨' },
+  const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+    { key: 'templates', label: 'Templates', icon: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M2 10L6 7L9 10L13 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><circle cx="10" cy="5" r="1.5" fill="currentColor" opacity="0.5"/></svg> },
+    { key: 'free-draw', label: 'Free Draw', icon: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11 2L14 5L5 14H2V11L11 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg> },
+    { key: 'gallery', label: 'Gallery', icon: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor" opacity="0.3"/><circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.3"/>{[0,60,120,180,240,300].map(a=><circle key={a} cx={8+Math.cos(a*Math.PI/180)*5.5} cy={8+Math.sin(a*Math.PI/180)*5.5} r="1.2" fill="currentColor" opacity="0.5"/>)}</svg> },
   ];
 
   // ===== DRAWING MODE =====
@@ -144,7 +144,7 @@ export default function ColoringPage() {
             }}
             whileTap={{ scale: 0.95 }}
           >
-            {tab.emoji} {tab.label}
+            <span className="flex items-center gap-1.5">{tab.icon} {tab.label}</span>
           </motion.button>
         ))}
       </div>
