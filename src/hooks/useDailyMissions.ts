@@ -63,6 +63,7 @@ export function useDailyMissions(playerId: number | undefined) {
   // Auto-generate missions for today if none exist
   const generateMissions = useCallback(async () => {
     if (!playerId) return;
+    try {
 
     // Check if missions already exist for today
     const existing = await db.dailyMissions
@@ -98,6 +99,9 @@ export function useDailyMissions(playerId: number | undefined) {
       await db.dailyMissions.bulkAdd(records);
     } catch {
       // Silently handle duplicate key errors from race conditions
+    }
+    } catch (err) {
+      console.error('[DailyMissions] Generation error:', err);
     }
   }, [playerId, todayKey]);
 

@@ -81,9 +81,9 @@ export class WelcomePage extends AppPage {
     return this.page.getByText('Choose a player to start');
   }
 
-  /** "+ Create Player" (empty state) or "Add Player" (with existing profiles). */
+  /** "+ Create Player", "Add Player", "New Player", or "Get Started" button. */
   get createPlayerButton(): Locator {
-    return this.page.getByRole('button', { name: /create player|add player/i });
+    return this.page.getByRole('button', { name: /create player|add player|new player|get started/i });
   }
 
   get nameInput(): Locator {

@@ -19,6 +19,8 @@ export default function ColoringPage() {
   const { artworks, saveArtwork, deleteArtwork } = useArtwork(playerId);
 
   const [activeTab, setActiveTab] = useState<TabKey>('templates');
+  const [saveToast, setSaveToast] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [drawingMode, setDrawingMode] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<ColoringTemplate | null>(null);
@@ -57,8 +59,9 @@ export default function ColoringPage() {
       saveArtwork(title, dataUrl, activeTemplate?.id);
       exitDrawing();
       setActiveTab('gallery');
-      // Show success feedback
-      alert('Saved to your Scrapbook!');
+      // In-app toast celebration
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
     },
     [activeTemplate, saveArtwork, exitDrawing]
   );
@@ -228,6 +231,16 @@ export default function ColoringPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Save toast — replaces native alert */}
+      {saveToast && (
+        <div
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full font-display text-sm text-white animate-bounce-in"
+          style={{ background: 'linear-gradient(135deg, #4CAF50, #66BB6A)', boxShadow: '0 4px 20px rgba(76,175,80,0.3)' }}
+        >
+          Saved to your Scrapbook!
+        </div>
+      )}
     </div>
   );
 }

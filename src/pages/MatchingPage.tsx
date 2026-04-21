@@ -399,7 +399,7 @@ export default function MatchingPage() {
                     ❓
                   </div>
 
-                  {/* Card front (face up) */}
+                  {/* Card front (face up) — only render emoji when revealed */}
                   <div
                     className="absolute inset-0 rounded-[16px] flex items-center justify-center text-4xl"
                     style={{
@@ -409,14 +409,18 @@ export default function MatchingPage() {
                       border: card.isMatched ? '2px solid #4ECDC4' : '1px solid #F0EAE0',
                       boxShadow: card.isMatched ? '0 4px 20px rgba(78,205,196,0.25)' : '0 2px 12px rgba(45,45,58,0.06)',
                     }}
+                    aria-hidden={!card.isFlipped && !card.isMatched}
                   >
-                    <motion.span
-                      className={difficulty === 'easy' ? 'text-5xl' : difficulty === 'medium' ? 'text-4xl' : 'text-3xl'}
-                      animate={card.isMatched ? { scale: [1, 1.3, 1] } : {}}
-                      transition={{ duration: 0.4 }}
-                    >
-                      {card.emoji}
-                    </motion.span>
+                    {/* Only render emoji in DOM when card is flipped or matched */}
+                    {(card.isFlipped || card.isMatched) && (
+                      <motion.span
+                        className={difficulty === 'easy' ? 'text-5xl' : difficulty === 'medium' ? 'text-4xl' : 'text-3xl'}
+                        animate={card.isMatched ? { scale: [1, 1.3, 1] } : {}}
+                        transition={{ duration: 0.4 }}
+                      >
+                        {card.emoji}
+                      </motion.span>
+                    )}
                   </div>
                 </motion.div>
               </motion.button>

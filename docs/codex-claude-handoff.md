@@ -287,3 +287,353 @@ All three Pass 2 required fixes implemented:
 - Coloring toolbar redesign
 - Star count single source of truth audit
 - 7-page story verification (test a longer story end-to-end)
+
+---
+
+### Codex Extended E2E/UI Audit — 2026-04-21
+
+Test target:
+`https://thankful-tree-0cf247010.2.azurestaticapps.net`
+
+Codebase:
+`/Users/netsanettiruye/Desktop/KidsLearningApp`
+
+Benchmark intent:
+The product should feel competitive with Lingokids-level kids learning apps: polished, safe/ad-free feeling, playful motion, many activity choices, parent-trusted controls, and kid-friendly navigation that still feels modern and premium.
+
+#### Highest Priority Findings
+
+1. Returning-player launch crash happened once on deployed.
+   - Flow: `/abc` -> browser/address navigation back to `/` -> select existing player `nets`.
+   - Result: `/menu` showed the app fallback: `Oops! Something broke`.
+   - Retrying from the profile screen later worked, so this may be state/timing-sensitive.
+   - Action: add an error boundary log around menu bootstrap/profile hydration; reproduce with repeated select-existing-player flows; ensure selected profile + stale route/session state cannot crash menu.
+
+2. Story reader deployed art still needs post-deploy verification.
+   - Deployed still showed Little Duck page 2/page 3 blank dark art areas during Codex test.
+   - Claude's local fix may solve this, but it is not verified on deployed yet.
+   - Action: after deploy, manually verify Little Duck pages 1-5 and one 7-page story end-to-end. Every page needs visible art, no blank panels.
+
+3. Quiz deployed answer readability still needs post-deploy verification.
+   - Deployed active quiz answer labels were still dark/low contrast on purple background.
+   - Claude's local `ChoiceButton` fix likely solves this, but deploy must be checked.
+   - Action: after deploy, verify default/hover/focus/selected/correct/wrong states are readable.
+
+4. Automated child Playwright suite is currently not healthy.
+   - `npm run test:e2e:child` was started with escalated repo write permissions.
+   - Final result: 2 passed, 132 failed.
+   - Root cause from first failures: tests look for `getByRole('button', { name: /create player|add player/i })`, but the deployed/current UI exposes `+ New Player`.
+   - Almost every later failure cascades from `WelcomePage.createPlayer()` timing out in setup.
+   - Action: update the page object selector to include `New Player`, then rerun and triage the next layer of real app failures. Inspect traces/reports in `test-results` and `coverage/e2e-report` after selector repair.
+
+#### Entry/Profile Findings
+
+- Profile screen looks friendly, but the H1 is exposed to accessibility as individual letters: `K i d s L e a r n i n g F u n !`.
+- Uploaded avatar images are exposed as unlabeled images.
+- Player cards are visually good, but returning-player selection must never crash menu.
+- Suggested design: keep the playful mascot, but make the profile cards feel more premium with consistent avatar framing, clear progress/streak badges, and accessible alt/aria labels.
+
+#### Home/Menu Findings
+
+- Home is much improved: quest board has only 3 tasks and bottom nav is not immediately covering the first visible quest rows.
+- Quest copy on deployed once showed stale typo: `nets, lern about an animal!`. Source is corrected, but stale IndexedDB/local mission data can preserve bad copy.
+- Star count increments aggressively in some flows. ABC next page and matching pair both add stars. Product decision needed: reward generously, but avoid star inflation that makes progress feel meaningless.
+- Top stat/accessory pills are cute but small and visually close to the cloud; on mobile/tablet verify tap target and contrast.
+- Suggested design:
+  - Convert home into a denser but still playful "Today" surface: Hero action, quest board, continue learning, collections, progress.
+  - Use consistent card spacing and bottom safe area across all scroll heights.
+  - Add visible "parent-safe" trust cues only in parent/settings surfaces, not child play flow.
+
+#### Learn Category Findings
+
+- Learn hub visual style is good in the current desktop view: colorful cards, readable labels, simple category grid.
+- ABC page works: shows letter card, item art, pronunciation button, previous/next.
+- ABC issue: visual top star count differed from accessibility/current stored stars during navigation in one pass, and page navigation awarded stars immediately. Audit star single-source-of-truth.
+- ABC design opportunity: the classroom/chalkboard scene is distinctive but a bit visually heavy/dark; add brighter foreground contrast, a more tactile card flip, and clearer progress marker.
+- Need still verify Numbers, Colors, Shapes, Animals, Body, Lessons, World after automated suite is repaired.
+
+#### Play Findings
+
+- Play hub cards are visually strong.
+- Matching game works, but hidden answers leak through accessibility tree:
+  - Before reveal, CUA showed hidden button internals like `text ❓ 🐵`, `text ❓ 🐸`.
+  - This means screen reader/automation can know card values before flip.
+  - Action: hidden card accessible name should be `Hidden card 1`, and hidden face DOM should not expose the answer emoji until flipped/matched. Use `aria-hidden` or conditionally render only the hidden face.
+- Matching reward star overlays the card grid and temporarily obscures gameplay.
+- Matching difficulty screen has a tiny joker/card image floating above heading; it reads as a broken or undersized decorative asset.
+- Suggested design:
+  - Add a modern game header with moves/time/pairs in stable chips.
+  - Use a smoother flip animation and smaller reward burst anchored near the stat counter.
+  - Add restart/new difficulty controls after game start.
+
+#### Listen/Stories/Videos Findings
+
+- Listen hub is clean.
+- Videos page is content-rich and closer to a marketable surface.
+- Video bug/design issue: tapping featured `Learn Colors, Numbers & ABCs` opened an embedded YouTube video titled `Head Shoulders Knees & Toes...`; displayed metadata did not match the video.
+- YouTube embed exposes `Watch on YouTube` links inside child mode. Product/safety decision needed: either use stricter kid-safe embedded playback controls, parent approval, or hosted/curated content wrappers.
+- Video page visual issue: lots of content works, but card density and hierarchy should be more deliberate on mobile.
+- Stories: library improved, but reader page art must be re-verified after Claude's fix.
+
+#### Create/Coloring Findings
+
+- Create hub is attractive.
+- Coloring template grid works and templates open.
+- Coloring canvas works with drag drawing.
+- Toolbar is functional, but buttons are very icon-heavy with weak discoverability for children/parents. Tooltips exist in accessibility/help, but visual labels are absent.
+- Saving drawing uses a native browser alert: `Saved to your Scrapbook!`. This breaks the premium app feel.
+- After save, Gallery view shows the drawing as a huge card clipped off the left side of the viewport; delete button floats at the corner. This is a high-priority layout bug.
+- Do not delete test artwork without explicit user confirmation.
+- Suggested design:
+  - Replace native alert with in-app celebration/toast and a small sparkle animation.
+  - Redesign toolbar as a stable bottom dock: color swatches, brush size, undo/redo, eraser, stamp, save.
+  - Gallery should be a responsive grid of consistent cards with date/title/actions.
+
+#### Wellbeing Findings
+
+- Wellbeing hub and Emotions page are soft and appropriate.
+- Emotion selection works and shows an explanation card.
+- The selected emotion detail card is very wide/low contrast against the pastel background.
+- Life skills tab needs a fuller pass after automated suite recovery.
+- Suggested design:
+  - Add subtle animated face reactions when selecting an emotion.
+  - Make the detail panel clearer and more conversational.
+  - Consider "I feel..." journaling only if privacy model is explicit for parents.
+
+#### Explore/AI Findings
+
+- Explore hub is visually good and thematic.
+- AI tools route correctly to intro pages, e.g. `/ai/whats-this`.
+- AI camera page leads with `Open Camera` for child mode without a visible parent/privacy explanation.
+- Do not accept camera permission in testing unless the user explicitly approves camera access.
+- Suggested design/product:
+  - Add a parent-consent/permission explanation before camera request.
+  - Add fallback demo mode using sample images so children can try the feature without camera access.
+  - Add clear local/privacy copy: what is captured, whether it leaves device, and what parents control.
+
+#### Settings/Parent Findings
+
+- Settings has a parent math gate and accepts correct answer.
+- Settings page is comprehensive: profile, sound, voice, accessibility, languages, time-of-day, offline packs, account/support, danger zone.
+- Settings page is too long and dense for one continuous scroll. It feels like a settings dump rather than a polished parent center.
+- Toggles are visually shown but accessibility labels are generic `button`; convert to semantic switches with names and states.
+- Danger zone includes `Delete This Profile`; this must keep a separate clear confirm flow.
+- Parent check math is simple; acceptable for child deterrence but not real account security. For sensitive account/billing/privacy actions, add parent auth/email/account requirement as needed.
+- Suggested design:
+  - Split settings into grouped sections or tabs: Child Profile, App Experience, Accessibility, Offline, Account & Data.
+  - Use semantic switches and clear saved-state feedback.
+  - Make billing/privacy/help feel like parent-only pages, not child-mode pages.
+
+#### Claude Pass 3 Recommended Task
+
+Please work in `/Users/netsanettiruye/Desktop/KidsLearningApp`.
+
+Do not overwrite the existing uncommitted `StoriesPage.tsx` and `ChoiceButton.tsx` fixes; build on them.
+
+Priority order:
+
+1. Reproduce and fix the returning-player `/menu` crash.
+   - Add defensive null/state handling around selected profile, daily missions, progress, and menu bootstrap.
+   - Add logging or a test that captures the actual thrown error.
+   - Verify repeated flows: profile -> menu, menu -> switch player -> same profile -> menu, deep route -> root -> same profile -> menu.
+
+2. Fix Coloring gallery layout and save UX.
+   - Replace `alert()` with in-app toast/celebration.
+   - Make Gallery a responsive card grid that never clips horizontally.
+   - Keep delete behind explicit confirmation.
+
+3. Fix Matching hidden card accessibility leak and reward overlay placement.
+   - Hidden cards must not expose answer emoji/text before reveal.
+   - Reward animation should not cover active cards.
+   - Improve difficulty screen decorative asset sizing.
+
+4. Audit Video metadata mapping.
+   - Featured card title/provider/duration must match the embedded video.
+   - Check all video cards for title/id mismatches.
+   - Decide whether child mode should expose YouTube outbound links; if unavoidable, document and consider parent gate.
+
+5. Upgrade Settings semantics and structure.
+   - Convert toggles to proper switches with accessible names/states.
+   - Consider grouping sections into tabs/accordions for parent usability.
+
+6. Repair or update `npm run test:e2e:child`.
+   - Use the latest app structure/selectors.
+   - Make first setup/create-player helper reliable.
+   - Add specific tests for:
+     - no `/menu` error fallback after returning-player selection
+     - story pages have nonblank visible art after page navigation
+     - quiz answer labels meet contrast/readability
+     - coloring save does not call native alert and gallery card stays in viewport
+     - matching hidden cards do not expose answers before reveal
+
+Verification required before handoff back:
+
+- `npm run build`
+- `npm run test:e2e:child` or a documented subset if the full suite is too large
+- Manual local/deployed screenshots/checks for:
+  - `/menu` returning-player flow
+  - `/coloring` save + gallery
+  - `/matching` hidden/revealed cards
+  - `/videos` featured item opens matching video
+  - `/settings` switches
+
+Append "Claude Handoff Back To Codex - Pass 3" below with files changed, test results, remaining risks, and the next most valuable task.
+
+---
+
+### Codex Visual Asset Pipeline Plan — 2026-04-21
+
+User goal:
+Replace emoji-heavy visuals with a premium, consistent illustrated asset system that can compete with Lingokids-level polish. Codex will act as visual/art direction lead and generate bitmap/vector-friendly assets in batches. Claude should prepare the codebase to consume those assets cleanly.
+
+#### Important Direction
+
+Do not randomly replace every emoji at once. Build an asset pipeline first, then migrate surfaces in priority order.
+
+Existing repo already has:
+- `src/pipeline/assetPipeline.ts`
+- `src/pipeline/assetRegistry.ts`
+- `public/assets/...` folder conventions
+- SVG mascot/illustration components
+- `src/data/storyIllustrations.tsx` for story scene artwork
+
+Use and extend that system instead of inventing a separate one.
+
+#### Visual Style Target
+
+Premium preschool learning app, friendly and modern:
+- rounded 3D-clay / soft vector hybrid
+- bright but not chaotic
+- consistent character proportions and lighting
+- clean silhouettes readable at 48px, 80px, 128px
+- no stock-photo look
+- no harsh outlines
+- no text baked into images unless it is cover art and explicitly required
+- transparent-background objects for learning items
+- lightweight WebP/PNG for generated bitmaps, SVG for deterministic UI icons/shapes
+
+#### Asset Folder Plan
+
+Claude should ensure these folders exist:
+
+- `public/assets/generated/objects/alphabet/`
+- `public/assets/generated/objects/numbers/`
+- `public/assets/generated/objects/animals/`
+- `public/assets/generated/objects/shapes/`
+- `public/assets/generated/objects/emotions/`
+- `public/assets/generated/category-cards/`
+- `public/assets/generated/story-scenes/`
+- `public/assets/generated/rewards/`
+- `public/assets/generated/backgrounds/`
+
+Generated assets should use names like:
+
+- `object_alphabet_apple_v1.webp`
+- `object_alphabet_butterfly_v1.webp`
+- `object_number_star_v1.webp`
+- `object_animal_duck_v1.webp`
+- `category_learn_abc_v1.webp`
+- `story_little-duck_page-02_v1.webp`
+
+#### Data Model Change Request
+
+Add optional asset fields without removing emoji fallback:
+
+- Alphabet items: `assetSrc?: string`
+- Number items: `assetSrc?: string`
+- Animal items: `assetSrc?: string`
+- Shape/color/body/emotion items: `assetSrc?: string`
+- Main menu tiles: support `imageSrc?: string` or `assetId?: string` in addition to existing `emoji`/`icon`
+- Story pages: support generated `imageSrc` for page-specific scenes, fallback to current `StoryIllustration`/emoji
+
+Fallback rule:
+If `assetSrc` is missing or image fails to load, show the current emoji/SVG fallback. This lets Codex and Claude upgrade page-by-page safely.
+
+#### Component Change Request
+
+Create or extend a reusable component:
+
+`src/components/LearningAsset.tsx`
+
+Responsibilities:
+- accepts `src`, `emoji`, `alt`, `size`, `className`
+- renders generated image if available
+- falls back to emoji or existing SVG
+- uses `loading="lazy"` outside above-the-fold hero surfaces
+- avoids layout shift with fixed square aspect ratio
+- gives correct accessible alt text
+
+Then use it gradually in:
+- `AbcPage`
+- `NumbersPage`
+- `AnimalsPage`
+- `QuizPage`
+- `MatchingPage`
+- `BigTileButton`
+- `ColoringPage` template cards
+- `EmotionsPage`
+
+#### First Asset Batches Codex Should Generate
+
+Batch 1: Category/menu tile art
+- ABCs: playful letter blocks and apple
+- Numbers: counting beads / blocks 1-2-3
+- Colors: rainbow paint palette
+- Shapes: friendly shape stack
+- Animals: smiling safari/forest animal group
+- Body: child movement/body-parts icon
+- Quiz: question bubble + star
+- Matching: two cute cards
+- Stories: open magical storybook
+- Audio: headphones/music notes
+- Coloring: crayon/palette
+- Cooking: bowl/spoon/ingredients
+- Emotions: expressive friendly faces
+- Bedtime: moon, blanket, storybook
+- Explore: magnifying glass + nature objects
+- AI tools: camera/magnifier/drawing/letter/nature/color finder illustrations
+
+Batch 2: Learning objects
+- Alphabet A-Z objects from `src/data/alphabetData.ts`
+- Number objects 1-20 from `src/data/numbersData.ts`
+- Animals from `src/data/animalsData.ts`
+
+Batch 3: Story scenes
+- Little Duck pages 1-5 first
+- Then one 7-page story
+- Each page gets a full scene image with no text baked in
+
+Batch 4: Rewards and celebrations
+- star burst
+- badge stickers
+- scrapbook saved-art frame
+- level-up ribbon
+- confetti/sparkle overlays
+
+#### Codex Image Prompt Template
+
+Use this consistent base style for generated assets:
+
+`Premium preschool learning app asset, soft rounded 3D clay-vector hybrid illustration, clean silhouette, bright warm colors, gentle studio lighting, subtle texture, transparent background where appropriate, centered subject, readable at small mobile size, friendly and safe for ages 2-8, no text, no watermark, no logo, no scary details, no photorealism.`
+
+For story scenes:
+
+`Premium children's storybook scene for a preschool learning app, soft rounded 3D clay-vector hybrid, warm cinematic lighting, full-bleed 16:10 scene composition, simple readable shapes, expressive friendly characters, no text, no watermark, safe for ages 2-8.`
+
+#### Claude Prep Task Before Codex Generates Assets
+
+Please prepare the code so generated assets can be dropped in safely:
+
+1. Add `LearningAsset` reusable component with image + emoji fallback.
+2. Add optional `assetSrc` fields/types for alphabet, numbers, animals, emotions, shapes, and story pages.
+3. Update `BigTileButton` to accept `imageSrc` while keeping `icon` and `emoji`.
+4. Wire only 2-3 sample assets using placeholder local paths or keep unset; do not invent missing files.
+5. Add docs comment in data files showing expected generated asset paths.
+6. Keep build passing.
+
+Verification:
+- `npm run build`
+- Open `/menu`, `/abc`, `/numbers`, `/animals`, `/quiz`, `/matching`
+- Confirm no broken image icons appear when assets are missing.
+
+After this prep is done, append a handoff. Codex will then generate Batch 1 assets and place them under `public/assets/generated/...` for Claude to wire in.

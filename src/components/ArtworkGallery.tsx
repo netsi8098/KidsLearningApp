@@ -38,11 +38,12 @@ export default function ArtworkGallery({ artworks, onDelete }: ArtworkGalleryPro
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.06 }}
         >
-          {/* Artwork image */}
+          {/* Artwork image — constrained to card */}
           <img
             src={artwork.dataUrl}
             alt={artwork.title}
-            className="w-full aspect-square object-contain bg-gray-50"
+            className="w-full aspect-square object-cover bg-gray-50"
+            style={{ maxHeight: '200px' }}
             loading="lazy"
           />
 

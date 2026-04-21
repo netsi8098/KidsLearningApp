@@ -780,10 +780,11 @@ export default function MainMenu() {
     []
   );
 
+  const { showBonus, dismissBonus } = useDailyBonus(currentPlayer?.id);
+
   if (!currentPlayer) return <Navigate to="/" replace />;
 
   const streakDays = liveProfile?.streakDays ?? 0;
-  const { showBonus, dismissBonus } = useDailyBonus(currentPlayer?.id);
 
   function handleSwitchPlayer() {
     setCurrentPlayer(null);
