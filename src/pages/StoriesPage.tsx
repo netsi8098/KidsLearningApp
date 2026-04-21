@@ -460,9 +460,30 @@ export default function StoriesPage() {
   // ===== LIBRARY VIEW =====
   if (viewMode === 'library') {
     return (
-      <div className="min-h-dvh pb-24 md:pb-8 relative" style={{ background: 'linear-gradient(180deg, #3E2723 0%, #5D4037 30%, #4E342E 100%)' }}>
-        {/* Warm bookshelf wood texture background */}
-        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, opacity: 0.15, background: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.03) 40px, rgba(255,255,255,0.03) 42px)' }} />
+      <div className="min-h-dvh pb-24 md:pb-8 relative" style={{ background: 'linear-gradient(180deg, #1A1040 0%, #2D1B69 40%, #1A1040 100%)' }}>
+        {/* Magical reading room atmosphere */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+          {/* Starfield */}
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full animate-sparkle"
+              style={{
+                width: Math.random() * 3 + 1,
+                height: Math.random() * 3 + 1,
+                top: `${Math.random() * 60}%`,
+                left: `${Math.random() * 100}%`,
+                background: '#FFE66D',
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+          {/* Warm glow from bottom */}
+          <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: '40%', background: 'radial-gradient(ellipse at center bottom, rgba(255,140,66,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          {/* Moon glow top-right */}
+          <div style={{ position: 'absolute', top: '5%', right: '8%', width: 60, height: 60, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,230,150,0.15) 0%, transparent 70%)' }} />
+        </div>
 
         {/* Header */}
         <div className="relative z-10 px-4 pt-4 pb-3 md:px-8">
@@ -471,29 +492,26 @@ export default function StoriesPage() {
             <StarCounter />
           </div>
 
-          {/* Bookshelf title — warm and inviting */}
-          <div className="text-center mb-4">
+          {/* Magical library title */}
+          <div className="text-center mb-5">
             <motion.div
-              className="inline-block mb-2"
+              className="inline-block mb-3"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring' }}
             >
-              {/* SVG bookshelf icon */}
-              <svg width="56" height="48" viewBox="0 0 56 48" fill="none">
-                <rect x="4" y="38" width="48" height="6" rx="2" fill="#8D6E63" />
-                <rect x="2" y="36" width="52" height="3" rx="1" fill="#A1887F" />
-                <rect x="10" y="8" width="10" height="28" rx="2" fill="#FF6B6B" />
-                <rect x="22" y="12" width="10" height="24" rx="2" fill="#4ECDC4" />
-                <rect x="34" y="6" width="10" height="30" rx="2" fill="#FFE66D" />
-                <rect x="12" y="10" width="6" height="2" rx="1" fill="white" opacity="0.3" />
-                <rect x="24" y="14" width="6" height="2" rx="1" fill="white" opacity="0.3" />
-                <rect x="36" y="8" width="6" height="2" rx="1" fill="white" opacity="0.3" />
+              {/* Glowing open book SVG */}
+              <svg width="64" height="52" viewBox="0 0 64 52" fill="none">
+                <path d="M8 10C8 10 16 6 32 6C48 6 56 10 56 10V44C56 44 48 40 32 40C16 40 8 44 8 44V10Z" fill="#A78BFA" fillOpacity="0.15" stroke="#C4AAFF" strokeWidth="2" />
+                <line x1="32" y1="6" x2="32" y2="40" stroke="#C4AAFF" strokeWidth="1.5" opacity="0.3" />
+                <circle cx="20" cy="18" r="2" fill="#FFE66D" className="animate-sparkle" />
+                <circle cx="44" cy="16" r="1.5" fill="#FFE66D" className="animate-sparkle" style={{ animationDelay: '0.5s' }} />
+                <circle cx="32" cy="3" r="2.5" fill="#FFE66D" className="animate-sparkle" style={{ animationDelay: '1s' }} />
               </svg>
             </motion.div>
             <motion.h1
-              className="font-display text-2xl text-white mb-1"
-              style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+              className="font-display text-3xl text-white mb-1"
+              style={{ textShadow: '0 2px 16px rgba(167,139,250,0.4)' }}
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
@@ -501,12 +519,13 @@ export default function StoriesPage() {
               Story Time
             </motion.h1>
             <motion.p
-              className="text-sm font-bold text-white/50"
+              className="text-sm font-bold"
+              style={{ color: 'rgba(196,170,255,0.6)' }}
               initial={{ y: 8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              Pick a book from the shelf
+              Pick a story from the magical shelf
             </motion.p>
           </div>
         </div>
@@ -716,14 +735,12 @@ export default function StoriesPage() {
                   return (
                     <motion.button
                       key={story.id}
-                      className="text-left cursor-pointer relative overflow-hidden transition-all duration-200"
+                      className="text-left cursor-pointer relative overflow-visible transition-all duration-200"
                       style={{
-                        background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F6FF 100%)',
-                        borderRadius: '4px 16px 16px 4px',
-                        borderLeft: '8px solid',
-                        borderLeftColor: catData?.emoji?.includes('🌙') ? '#6366F1' : catData?.emoji?.includes('🐾') ? '#6BCB77' : catData?.emoji?.includes('🤝') ? '#FF8FAB' : '#A78BFA',
-                        boxShadow: '4px 4px 16px rgba(0,0,0,0.15), -2px 0 4px rgba(0,0,0,0.08)',
-                        padding: '16px 16px 16px 12px',
+                        background: 'linear-gradient(135deg, #FFFFFF 0%, #FFF8F5 100%)',
+                        borderRadius: '6px 14px 14px 6px',
+                        padding: '0',
+                        boxShadow: '6px 6px 24px rgba(0,0,0,0.25), -1px 0 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)',
                       }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -732,38 +749,80 @@ export default function StoriesPage() {
                       whileTap={{ scale: 0.97 }}
                       onClick={() => openStory(story.id)}
                     >
-                      {/* Status badges */}
-                      <div className="absolute top-3 right-3 flex gap-1">
-                        {isCompleted && (
-                          <span className="bg-[#4CAF50] text-white text-[10px] font-display rounded-full px-2.5 py-1 shadow-sm" title="Completed">
-                            Read!
-                          </span>
-                        )}
-                        {isFavorite && (
-                          <span className="bg-[#FFF0F0] rounded-full w-7 h-7 flex items-center justify-center shadow-sm border border-[#FF6B6B]/20" title="Favorite">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="#FF6B6B"><path d="M7 12S1 8.5 1 5C1 3 3 1.5 5 1.5C6 1.5 6.5 2 7 3C7.5 2 8 1.5 9 1.5C11 1.5 13 3 13 5C13 8.5 7 12 7 12Z"/></svg>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Emoji */}
-                      <div className="text-5xl mb-3 drop-shadow-md">{story.emoji}</div>
-
-                      {/* Title */}
-                      <h3 className="font-extrabold text-[#2D2D3A] text-base leading-tight mb-1.5">
-                        {story.title}
-                      </h3>
-
-                      {/* Category badge */}
-                      <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize"
+                      {/* Book spine (left edge) */}
+                      <div
+                        className="absolute left-0 top-0 bottom-0 w-3 rounded-l-[6px]"
                         style={{
-                          background: '#F3EFFE',
-                          color: '#7C3AED',
+                          background: `linear-gradient(180deg, ${
+                            story.category === 'bedtime' ? '#6366F1' :
+                            story.category === 'animals' ? '#6BCB77' :
+                            story.category === 'friendship' ? '#FF8FAB' :
+                            story.category === 'adventure' ? '#FF8C42' :
+                            story.category === 'nature' ? '#4ECDC4' : '#A78BFA'
+                          }, ${
+                            story.category === 'bedtime' ? '#4F46E5' :
+                            story.category === 'animals' ? '#4CAF50' :
+                            story.category === 'friendship' ? '#F472B6' :
+                            story.category === 'adventure' ? '#E67E22' :
+                            story.category === 'nature' ? '#2DD4BF' : '#8B5CF6'
+                          })`,
+                          boxShadow: 'inset -2px 0 4px rgba(0,0,0,0.1)',
                         }}
-                      >
-                        {catData?.emoji} {story.category}
-                      </span>
+                      />
+
+                      {/* Book content */}
+                      <div className="pl-5 pr-4 py-4">
+                        {/* Status badges */}
+                        <div className="absolute top-3 right-3 flex gap-1">
+                          {isCompleted && (
+                            <span className="bg-[#4CAF50] text-white text-[9px] font-display rounded-full px-2 py-0.5 shadow-sm">
+                              Read
+                            </span>
+                          )}
+                          {isFavorite && (
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="#FF6B6B"><path d="M8 14S1 9.5 1 5C1 3 3.5 1 5.5 1C6.8 1 7.5 2 8 3C8.5 2 9.2 1 10.5 1C12.5 1 15 3 15 5C15 9.5 8 14 8 14Z"/></svg>
+                          )}
+                        </div>
+
+                        {/* Cover illustration */}
+                        <div
+                          className="w-full h-24 rounded-xl mb-3 flex items-center justify-center overflow-hidden"
+                          style={{
+                            background: story.category === 'bedtime' ? 'linear-gradient(135deg, #1a1a4e, #2D1B69)' :
+                              story.category === 'animals' ? 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' :
+                              story.category === 'friendship' ? 'linear-gradient(135deg, #FCE4EC, #F8BBD0)' :
+                              story.category === 'adventure' ? 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' :
+                              'linear-gradient(135deg, #E3F2FD, #BBDEFB)',
+                          }}
+                        >
+                          <span className="text-4xl">{story.emoji}</span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="font-display text-[15px] text-[#2D2D3A] leading-tight mb-1.5">
+                          {story.title}
+                        </h3>
+
+                        {/* Category + pages */}
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold capitalize"
+                            style={{
+                              background: story.category === 'bedtime' ? '#EDE7F6' :
+                                story.category === 'animals' ? '#E8F5E9' :
+                                story.category === 'friendship' ? '#FCE4EC' :
+                                story.category === 'adventure' ? '#FFF3E0' : '#E3F2FD',
+                              color: story.category === 'bedtime' ? '#5E35B1' :
+                                story.category === 'animals' ? '#2E7D32' :
+                                story.category === 'friendship' ? '#C2185B' :
+                                story.category === 'adventure' ? '#E65100' : '#1565C0',
+                            }}
+                          >
+                            {story.category}
+                          </span>
+                          <span className="text-[10px] text-[#9B9BAB] font-bold">{story.pages.length} pages</span>
+                        </div>
+                      </div>
 
                       {/* Page count */}
                       <p className="text-xs text-[#9B9BAB] mt-1.5 font-medium">
@@ -965,8 +1024,13 @@ export default function StoriesPage() {
 
     /* ── READER VIEW ── */
     return (
-      <div className="h-dvh flex flex-col overflow-hidden relative" style={{ background: '#1a1a2e' }}>
-        {/* No AnimatedBackground — the story illustration IS the full-screen background */}
+      <div className="h-dvh flex flex-col overflow-hidden relative" style={{ background: 'linear-gradient(180deg, #1A1040 0%, #2D1B69 50%, #1A1040 100%)' }}>
+        {/* Magical reading room ambient — stars + warm glow */}
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="absolute rounded-full animate-sparkle" style={{ width: 2, height: 2, top: `${10 + Math.random() * 30}%`, left: `${Math.random() * 100}%`, background: '#FFE66D', animationDelay: `${Math.random() * 3}s` }} />
+          ))}
+        </div>
 
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2 relative z-10">
@@ -1018,27 +1082,38 @@ export default function StoriesPage() {
               }}
               transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             >
-              {/* Book page with illustration */}
-              <div
-                className="w-full h-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #FDF8EE 0%, #F5EDD6 50%, #FDF8EE 100%)',
-                  boxShadow: 'inset 0 0 60px rgba(139,90,43,0.08), inset -3px 0 10px rgba(0,0,0,0.03)',
-                }}
-              >
-                {/* Page edge shadow (left side like book binding) */}
-                <div className="absolute left-0 top-0 bottom-0 w-4" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.08), transparent)' }} />
+              {/* Physical book page with visible edges and warm paper */}
+              <div className="w-full h-full flex items-center justify-center relative" style={{ padding: '16px 20px' }}>
+                {/* Stacked pages behind (visible edges) */}
+                <div className="absolute" style={{ inset: '14px 16px 18px 22px', background: '#F0E8D8', borderRadius: '4px 12px 12px 4px', boxShadow: '2px 2px 0 #E8DFD0, 4px 4px 0 #E0D5C5' }} />
 
-                {/* Illustration centered and large */}
-                <div style={{ transform: 'scale(2.5)', transformOrigin: 'center center' }}>
-                  <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
+                {/* Main book page */}
+                <div
+                  className="relative w-full h-full rounded-[4px_12px_12px_4px] overflow-hidden flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(135deg, #FDF8EE 0%, #FAF3E5 40%, #FDF8EE 100%)',
+                    boxShadow: 'inset 0 0 40px rgba(139,90,43,0.06), 0 4px 20px rgba(0,0,0,0.15)',
+                  }}
+                >
+                  {/* Book spine shadow (left edge) */}
+                  <div className="absolute left-0 top-0 bottom-0 w-6" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02), transparent)' }} />
+
+                  {/* Fold/gutter line */}
+                  <div className="absolute left-4 top-4 bottom-4 w-[1px]" style={{ background: 'rgba(0,0,0,0.04)' }} />
+
+                  {/* Illustration */}
+                  <div style={{ transform: 'scale(2.2)', transformOrigin: 'center center' }}>
+                    <StoryIllustration emoji={pageData.emoji} color="#A78BFA" />
+                  </div>
+
+                  {/* Page corner fold */}
+                  <div className="absolute top-0 right-0 w-10 h-10" style={{ background: 'linear-gradient(225deg, #EDE5D5 0%, #EDE5D5 50%, transparent 50%)' }} />
+
+                  {/* Page number badge */}
+                  <div className="absolute bottom-3 right-4 text-[11px] font-bold text-[#BBA88A] bg-white/50 px-2 py-0.5 rounded-full">
+                    {currentPage + 1}
+                  </div>
                 </div>
-
-                {/* Subtle page texture */}
-                <div className="absolute inset-0 pointer-events-none" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'4\' height=\'4\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'1\' cy=\'1\' r=\'0.5\' fill=\'rgba(0,0,0,0.02)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat' }} />
-
-                {/* Page corner fold */}
-                <div className="absolute top-0 right-0 w-12 h-12" style={{ background: 'linear-gradient(225deg, #E8DFD0 0%, #E8DFD0 50%, transparent 50%)' }} />
               </div>
             </motion.div>
           </AnimatePresence>

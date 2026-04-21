@@ -1152,18 +1152,16 @@ export default function MainMenu() {
       </div>
 
       {/* ══════════════════════════════════════════════════════
-          3. BOTTOM TAB BAR — Floating pill with SVG icons
+          3. MAGICAL FLOATING NAVIGATION DOCK
          ══════════════════════════════════════════════════════ */}
-      {/* ══════════════════════════════════════════════════════
-          3. BOTTOM TAB BAR — Colorful kid-friendly design
-         ══════════════════════════════════════════════════════ */}
-      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-3 mb-1" style={{ position: 'relative', zIndex: 2 }}>
+      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-4 mb-2" style={{ position: 'relative', zIndex: 2 }}>
         <div
-          className="max-w-lg mx-auto flex items-center justify-around px-1 py-2 rounded-[28px]"
+          className="max-w-md mx-auto flex items-end justify-around px-3 pt-3 pb-2"
           style={{
-            background: 'white',
-            boxShadow: '0 -2px 20px rgba(0,0,0,0.08), 0 4px 24px rgba(0,0,0,0.06)',
-            border: '1px solid rgba(0,0,0,0.04)',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,1) 100%)',
+            borderRadius: '24px',
+            boxShadow: '0 -4px 30px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+            border: '1px solid rgba(255,255,255,0.6)',
           }}
         >
           {menuTabs.map((tab) => {
@@ -1172,48 +1170,80 @@ export default function MainMenu() {
               home: HomeIcon, learn: LearnIcon, play: PlayIcon,
               create: CreateIcon, listen: ListenIcon, wellbeing: WellbeingIcon, explore: ExploreIcon,
             }[tab.key] ?? HomeIcon;
-            const tabColor = {
-              home: '#FF6B6B', learn: '#4ECDC4', play: '#A78BFA',
-              create: '#FF8C42', listen: '#45B7D1', wellbeing: '#6BCB77', explore: '#FFD93D',
-            }[tab.key] ?? '#FF6B6B';
+
+            /* Each tab gets a unique candy-gradient pair */
+            const tabTheme = {
+              home:      { from: '#FF6B6B', to: '#FF8E8E', glow: '#FF6B6B' },
+              learn:     { from: '#4ECDC4', to: '#6FE0D9', glow: '#4ECDC4' },
+              play:      { from: '#A78BFA', to: '#C4AAFF', glow: '#A78BFA' },
+              create:    { from: '#FF8C42', to: '#FFA76C', glow: '#FF8C42' },
+              listen:    { from: '#45B7D1', to: '#6DCFE3', glow: '#45B7D1' },
+              wellbeing: { from: '#6BCB77', to: '#8DD691', glow: '#6BCB77' },
+              explore:   { from: '#FFD93D', to: '#FFED8A', glow: '#FFD93D' },
+            }[tab.key] ?? { from: '#FF6B6B', to: '#FF8E8E', glow: '#FF6B6B' };
+
             return (
               <motion.button
                 key={tab.key}
-                className="flex flex-col items-center gap-1 cursor-pointer relative"
-                style={{ minWidth: 48 }}
+                className="flex flex-col items-center cursor-pointer relative"
+                style={{ minWidth: 50 }}
                 onClick={() => setActiveTab(tab.key)}
                 whileTap={{ scale: 0.88 }}
               >
-                {/* Icon container — colored circle when active */}
+                {/* Candy-button icon container */}
                 <motion.div
-                  className="flex items-center justify-center rounded-full"
+                  className="flex items-center justify-center rounded-[16px] relative"
                   style={{
-                    width: isActive ? 44 : 36,
-                    height: isActive ? 44 : 36,
-                    background: isActive ? tabColor : 'transparent',
-                    boxShadow: isActive ? `0 4px 12px ${tabColor}40` : 'none',
-                    transition: 'all 0.25s ease',
+                    width: isActive ? 50 : 40,
+                    height: isActive ? 50 : 40,
+                    background: isActive
+                      ? `linear-gradient(135deg, ${tabTheme.from}, ${tabTheme.to})`
+                      : '#F5F0E8',
+                    boxShadow: isActive
+                      ? `0 6px 20px ${tabTheme.glow}40, 0 2px 8px ${tabTheme.glow}20, inset 0 1px 1px rgba(255,255,255,0.3)`
+                      : '0 2px 6px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,0.5)',
+                    transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    marginBottom: isActive ? 4 : 0,
                   }}
-                  animate={isActive ? { scale: [1, 1.08, 1] } : {}}
-                  transition={{ duration: 0.3 }}
+                  animate={isActive ? { y: [0, -3, 0] } : { y: 0 }}
+                  transition={isActive ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
                 >
+                  {/* Highlight shine on active */}
+                  {isActive && (
+                    <div
+                      className="absolute inset-0 rounded-[16px] pointer-events-none"
+                      style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%)', borderRadius: 'inherit' }}
+                    />
+                  )}
                   <NavIcon
-                    size={isActive ? 24 : 20}
+                    size={isActive ? 26 : 20}
                     active={isActive}
-                    color={isActive ? 'white' : undefined}
+                    color={isActive ? 'white' : '#9B9BAB'}
                   />
                 </motion.div>
-                {/* Always-visible label */}
-                <span
-                  className="font-bold leading-none"
+
+                {/* Label — always visible */}
+                <motion.span
+                  className="font-bold mt-1"
                   style={{
-                    fontSize: '9px',
-                    color: isActive ? tabColor : '#9B9BAB',
-                    transition: 'color 0.2s',
+                    fontSize: isActive ? '10px' : '9px',
+                    color: isActive ? tabTheme.from : '#9B9BAB',
+                    transition: 'all 0.2s',
+                    lineHeight: 1,
                   }}
                 >
                   {tab.label}
-                </span>
+                </motion.span>
+
+                {/* Active indicator dot */}
+                {isActive && (
+                  <motion.div
+                    className="absolute -bottom-1 w-4 h-1 rounded-full"
+                    style={{ background: tabTheme.from }}
+                    layoutId="navIndicator"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
               </motion.button>
             );
           })}
