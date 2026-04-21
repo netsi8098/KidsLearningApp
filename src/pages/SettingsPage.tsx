@@ -45,17 +45,23 @@ const recommendedPacks = [
   },
 ];
 
-function ToggleSwitch({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+function ToggleSwitch({ enabled, onToggle, label }: { enabled: boolean; onToggle: () => void; label?: string }) {
   return (
-    <motion.button
-      className={`w-16 h-9 rounded-full flex items-center px-1 cursor-pointer transition-colors ${
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        role="switch"
+        checked={enabled}
+        onChange={onToggle}
+        className="sr-only peer"
+        aria-label={label}
+      />
+      <div className={`w-16 h-9 rounded-full flex items-center px-1 transition-colors ${
         enabled ? 'bg-leaf justify-end' : 'bg-[#E8E0D4] justify-start'
-      }`}
-      onClick={onToggle}
-      whileTap={{ scale: 0.95 }}
-    >
-      <motion.div className="w-7 h-7 bg-white rounded-full shadow-md" layout />
-    </motion.button>
+      }`}>
+        <div className="w-7 h-7 bg-white rounded-full shadow-md transition-all" />
+      </div>
+    </label>
   );
 }
 
@@ -277,7 +283,7 @@ export default function SettingsPage() {
         <motion.div className="text-7xl mb-5 drop-shadow-md" initial={{ scale: 0 }} animate={{ scale: 1 }}>
           {'\u{1F512}'}
         </motion.div>
-        <h2 className="text-2xl font-extrabold text-[#2D2D3A] mb-2">Parent Check</h2>
+        <h2 className="font-display text-2xl text-[#2D2D3A] mb-2">Grown-up Check</h2>
         <p className="text-[15px] font-medium text-[#6B6B7B] mb-6 text-center">
           Solve this to access settings
         </p>
@@ -505,7 +511,7 @@ export default function SettingsPage() {
               <h3 className="font-bold text-[#2D2D3A]">{'\u{1F50A}'} Sound Effects</h3>
               <p className="text-sm text-[#9B9BAB]">Chimes, clicks, celebrations</p>
             </div>
-            <ToggleSwitch enabled={soundEnabled} onToggle={() => setSoundEnabled(!soundEnabled)} />
+            <ToggleSwitch enabled={soundEnabled} onToggle={() => setSoundEnabled(!soundEnabled)} label="Sound Effects" />
           </div>
         </motion.div>
 
@@ -521,7 +527,7 @@ export default function SettingsPage() {
               <h3 className="font-bold text-[#2D2D3A]">{'\u{1F5E3}\u{FE0F}'} Voice (Text-to-Speech)</h3>
               <p className="text-sm text-[#9B9BAB]">Read letters, numbers, words aloud</p>
             </div>
-            <ToggleSwitch enabled={speechEnabled} onToggle={() => setSpeechEnabled(!speechEnabled)} />
+            <ToggleSwitch enabled={speechEnabled} onToggle={() => setSpeechEnabled(!speechEnabled)} label="Text-to-Speech" />
           </div>
 
           {speechEnabled && (
@@ -549,21 +555,21 @@ export default function SettingsPage() {
                 <p className="font-semibold text-sm text-[#2D2D3A]">Reduced Motion</p>
                 <p className="text-xs text-[#9B9BAB]">Simplify animations</p>
               </div>
-              <ToggleSwitch enabled={a11y.reducedMotion} onToggle={a11y.toggleReducedMotion} />
+              <ToggleSwitch enabled={a11y.reducedMotion} onToggle={a11y.toggleReducedMotion} label="Reduced Motion" />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-semibold text-sm text-[#2D2D3A]">Larger Text</p>
                 <p className="text-xs text-[#9B9BAB]">Scale text to 115%</p>
               </div>
-              <ToggleSwitch enabled={a11y.largerText} onToggle={a11y.toggleLargerText} />
+              <ToggleSwitch enabled={a11y.largerText} onToggle={a11y.toggleLargerText} label="Larger Text" />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-semibold text-sm text-[#2D2D3A]">High Contrast</p>
                 <p className="text-xs text-[#9B9BAB]">Darker borders &amp; bolder text</p>
               </div>
-              <ToggleSwitch enabled={a11y.highContrast} onToggle={a11y.toggleHighContrast} />
+              <ToggleSwitch enabled={a11y.highContrast} onToggle={a11y.toggleHighContrast} label="High Contrast" />
             </div>
           </div>
         </motion.div>

@@ -60,7 +60,7 @@ function thumb(id: string): string {
  */
 export const curatedVideos: VideoItem[] = [
   // === LEARNING ===
-  { id: 'ZanHgPprl-0', title: 'Learn Colors, Numbers & ABCs', channel: 'CoComelon', thumbnail: thumb('ZanHgPprl-0'), duration: '15:30', category: 'learning' },
+  { id: 'ZanHgPprl-0', title: 'Head Shoulders Knees & Toes', channel: 'Super Simple Songs', thumbnail: thumb('ZanHgPprl-0'), duration: '3:44', category: 'learning' },
   { id: 'eCbHpeOgPuw', title: 'Learn to Count 1-10', channel: 'Super Simple Songs', thumbnail: thumb('eCbHpeOgPuw'), duration: '3:15', category: 'learning' },
   { id: 'DR-cfDsHCGA', title: 'Learn Shapes for Kids', channel: 'BabyBus', thumbnail: thumb('DR-cfDsHCGA'), duration: '12:45', category: 'learning' },
   { id: '2bLk6gXJNbw', title: 'First Words for Baby', channel: 'Super Simple Songs', thumbnail: thumb('2bLk6gXJNbw'), duration: '20:00', category: 'learning' },

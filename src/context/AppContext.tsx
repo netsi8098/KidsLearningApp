@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { PlayerProfile } from '../db/database';
+import { db, type PlayerProfile } from '../db/database';
 import type { TimeMode } from '../registry/types';
 import { getAutoTimeMode } from '../registry/timeOfDayConfig';
+
+const PLAYER_KEY = 'klf-selected-player-id';
 
 interface AppState {
   currentPlayer: PlayerProfile | null;
@@ -28,7 +30,32 @@ interface AppState {
 const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [currentPlayer, setCurrentPlayer] = useState<PlayerProfile | null>(null);
+  const [currentPlayer, setCurrentPlayerState] = useState<PlayerProfile | null>(null);
+
+  // Persist selected player ID and hydrate on boot
+  const setCurrentPlayer = useCallback((player: PlayerProfile | null) => {
+    setCurrentPlayerState(player);
+    try {
+      if (player?.id) {
+        localStorage.setItem(PLAYER_KEY, String(player.id));
+      } else {
+        localStorage.removeItem(PLAYER_KEY);
+      }
+    } catch { /* ignore storage errors */ }
+  }, []);
+
+  // Hydrate player from localStorage on app start
+  useEffect(() => {
+    const savedId = localStorage.getItem(PLAYER_KEY);
+    if (savedId && !currentPlayer) {
+      const id = parseInt(savedId, 10);
+      if (!isNaN(id)) {
+        db.profiles.get(id).then((profile) => {
+          if (profile) setCurrentPlayerState(profile);
+        }).catch(() => { /* profile not found, stay on player select */ });
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [celebrationVisible, setCelebrationVisible] = useState(false);
   const [starBurstVisible, setStarBurstVisible] = useState(false);
   const [badgeToast, setBadgeToast] = useState<{ emoji: string; name: string } | null>(null);

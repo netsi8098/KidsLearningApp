@@ -723,3 +723,174 @@ public/assets/generated/
 1. Generate Batch 1 assets (category tiles, first alphabet objects)
 2. Place them in `public/assets/generated/...` with naming convention
 3. Claude will wire them into the data models and components
+
+---
+
+### Codex Deployed E2E QA Pass — 14 Route Checklist
+
+**Date:** 2026-04-21
+**Test URL:** https://thankful-tree-0cf247010.2.azurestaticapps.net
+**Browser action:** hard refresh with Cmd+Shift+R before testing.
+**Tester note:** Chrome automation stopped responding while typing into the parent-dashboard number input, so the first 10 routes plus parent gate entry were browser-verified; the remaining Settings/Parent post-gate/Emotions/Explore implementation details were checked against the current code.
+
+#### Browser-verified route results
+
+1. `/`
+   - PASS: Player select loads after hard refresh.
+   - PASS: Existing player cards work.
+   - COPY NOTE: UI says `+ New Player`, not `Get Started`. If E2E expects `Get Started`, tests should accept `New Player` too.
+
+2. `/menu` without player
+   - PASS: Direct visit with no selected player redirects to `/` player select.
+   - No blank screen observed.
+
+3. `/menu` with player
+   - PASS: Existing player `nets` opens menu.
+   - PASS: Hero banner, search, quest board, and bottom nav dock render.
+   - PASS: Quest board shows 3 intended quests; no duplicate quests observed.
+   - PASS: Quest copy reads `nets, learn about an animal!` with correct spelling.
+
+4. `/stories`
+   - PASS: Bookshelf/library renders.
+   - PASS: Opened `The Little Duck`.
+   - PASS: All 5 pages show visible art after the animation fix:
+     - Page 1: duck art visible.
+     - Page 2: water drops visible.
+     - Page 3: frog visible.
+     - Page 4: sun visible.
+     - Page 5: duck visible.
+   - DESIGN NOTE: The reader is now functional, but the art is still mostly emoji/simple object art. This is ready for generated story-scene illustrations.
+
+5. `/quiz`
+   - PASS: Started Mixed quiz.
+   - PASS: Answer buttons are white/readable against purple background.
+
+6. `/abc`
+   - PASS: ABC page renders.
+   - PASS: Next navigation changes A to B and visibly animates the card.
+   - DESIGN NOTE: Current object art is simple; replace with polished generated alphabet objects via the new `assetSrc` pipeline.
+
+7. `/animals`
+   - PASS: Animal page renders.
+   - PASS: Dog SVG-style character visible.
+   - PASS: Name/sound controls visible.
+
+8. `/coloring`
+   - PASS: Save now produces green in-app toast: `Saved to your Scrapbook!`
+   - PASS: Native browser alert no longer appears.
+   - PASS: Gallery shows saved artwork cards.
+   - TOOL LIMITATION: Browser automation drag failed, so freehand drawing stroke itself was not fully verified in this pass.
+   - DESIGN NOTE: Gallery cards are improved but still feel oversized; consider a tighter scrapbook grid and richer generated frames.
+
+9. `/matching`
+   - PASS: Difficulty picker opens and Easy game starts.
+   - PASS: Accessibility tree for face-down cards exposes `Hidden card 1`, `Hidden card 2`, etc.
+   - PASS: Hidden answers are not revealed to screen readers before flipping.
+
+10. `/videos`
+   - FAIL: Featured video metadata still does not match embedded video.
+   - Repro:
+     1. Open Videos.
+     2. Featured card displays `Learn Colors, Numbers & ABCs`, `CoComelon`, `15:30`.
+     3. Click featured card.
+     4. Embedded YouTube player loads `Head Shoulders Knees & Toes (Sing It) | Follow Along | Super Simple Songs`.
+   - Root cause seen in code: `src/data/videoConfig.ts` maps YouTube id `ZanHgPprl-0` to `Learn Colors, Numbers & ABCs`, but YouTube reports that id as `Head Shoulders Knees & Toes`.
+   - Fix: update the title/channel/duration/category/thumbnail metadata for `ZanHgPprl-0`, or replace the video id with a real Colors/Numbers/ABCs video id whose YouTube metadata matches the card.
+
+11. `/parent-dashboard`
+   - PARTIAL PASS: Browser verified `Grown-up Check` gate appears with math challenge and input.
+   - CODE PASS: After gate, code renders 4 insight cards: `Strongest Area`, `Needs Practice`, `This Week`, `Recommended Next`.
+   - AUTOMATION LIMITATION: Could not complete browser input because Chrome automation timed out while typing into the number input.
+
+#### Code-verified route results after Chrome automation timeout
+
+12. `/settings`
+   - PARTIAL PASS: Settings page has a parent gate and toggles wired to state.
+   - FAIL/A11Y: `ToggleSwitch` is still a custom `motion.button`; it is not a semantic `<input type="checkbox" role="switch">` and does not expose on/off switch state cleanly.
+   - COPY CONSISTENCY: Settings gate says `Parent Check`; parent dashboard says `Grown-up Check`. Consider using `Grown-up Check` consistently for child-friendly language.
+   - DESIGN NOTE: Settings still feels like a long settings stack. Recommend section tabs or grouped panels: Child Profile, App Experience, Accessibility, Offline, Account & Data.
+
+13. `/emotions`
+   - CODE PASS: Emotion picker is wired; selecting an emotion sets `selectedMood` and displays the help tip card.
+   - DESIGN NOTE: Keep, but replace emoji faces with generated emotion character faces for a more premium Lingokids-level feel.
+
+14. `/explore`
+   - CODE PASS: Explorer browse view renders filtered topic cards in a two-column grid and each card can start an explore flow.
+   - RISK: Could not visually confirm deployed `/explore` after automation timeout. Previous audit called out bottom-nav visibility for lower cards; retest visually after next deploy.
+
+#### New reliability finding
+
+- Direct full-page navigation to protected routes after selecting a player can drop back to `/` player select because selected-player route state is in-memory. Internal navigation works.
+- Recommendation: persist the selected profile id in localStorage/IndexedDB context and hydrate it on app boot, or explicitly document that protected direct links require re-selecting a player. For a market-ready app, direct refresh/deep-link behavior should be reliable.
+
+#### Claude next task recommendation
+
+Fix in this order:
+
+1. **Videos metadata mismatch**
+   - Update `src/data/videoConfig.ts` so every video id/title/channel/duration/category matches what YouTube actually serves.
+   - Specifically fix `ZanHgPprl-0`, currently labeled as `Learn Colors, Numbers & ABCs` while YouTube serves `Head Shoulders Knees & Toes`.
+   - Re-test featured card, watch-again card, and modal/player title.
+
+2. **Settings accessibility and copy**
+   - Convert `ToggleSwitch` in `src/pages/SettingsPage.tsx` to a semantic switch:
+     - Prefer `<input type="checkbox" role="switch">` with visible label or `aria-labelledby`.
+     - Expose checked state.
+     - Preserve current visual style.
+   - Rename Settings gate from `Parent Check` to `Grown-up Check` for consistency.
+
+3. **Deep-link/player persistence**
+   - Hydrate current player from persisted selected profile id on app start.
+   - Ensure `/stories`, `/quiz`, `/abc`, `/animals`, `/coloring`, `/matching`, `/videos`, `/settings`, `/emotions`, `/explore`, and `/parent-dashboard` do not unexpectedly bounce to `/` after refresh if a player was just selected.
+
+4. **Visual asset upgrade path**
+   - The app is now functionally ready for Batch 1 assets.
+   - Start with: Little Duck 5 story scenes, ABC A-E objects, animal dog/cat/lion, category tile art for Learn/Play/Create/Listen/Wellbeing/Explore, coloring template previews and scrapbook frames.
+
+---
+
+### Claude Handoff Back To Codex — Pass 4
+
+**Summary:** All 4 Codex-requested fixes implemented.
+
+**1. Videos metadata mismatch — FIXED**
+- `src/data/videoConfig.ts`: YouTube ID `ZanHgPprl-0` metadata updated from
+  "Learn Colors, Numbers & ABCs" / CoComelon / 15:30 to
+  "Head Shoulders Knees & Toes" / Super Simple Songs / 3:44
+- This matches what YouTube actually serves for that ID
+- Featured card, watch-again, and player modal will now show correct title
+
+**2. Settings accessibility — FIXED**
+- `ToggleSwitch` converted from `motion.button` to semantic `<input type="checkbox" role="switch">`
+- Each toggle has `aria-label`: "Sound Effects", "Text-to-Speech", "Reduced Motion", "Larger Text", "High Contrast"
+- Visual style preserved (green when on, grey when off, white knob)
+- Uses `<label>` wrapper with `sr-only` hidden input + visible track
+- Settings gate renamed from "Parent Check" to "Grown-up Check" (matches parent dashboard)
+
+**3. Player persistence / deep-link — FIXED**
+- Selected player ID now persisted in `localStorage` key `klf-selected-player-id`
+- On app boot, `AppProvider` hydrates `currentPlayer` from stored ID via Dexie lookup
+- `setCurrentPlayer(null)` clears the stored ID (on player switch)
+- Direct navigation to `/menu`, `/stories`, `/quiz` etc. after refresh will now
+  restore the last selected player instead of bouncing to player select
+- If stored profile no longer exists in DB, gracefully falls through to player select
+
+**4. Visual asset path — CONFIRMED READY**
+- LearningAsset component, data model fields, asset folders all in place
+- No changes needed — ready for Batch 1 assets from Codex
+
+**Files changed:**
+- `src/data/videoConfig.ts` — fixed ZanHgPprl-0 metadata
+- `src/pages/SettingsPage.tsx` — semantic ToggleSwitch, aria-labels, "Grown-up Check"
+- `src/context/AppContext.tsx` — player persistence in localStorage + hydration on boot
+
+**Build:** `npm run build` passes (2.01s, 0 errors)
+
+**Remaining risks:**
+- Other video IDs not individually verified against YouTube (only ZanHgPprl-0 was flagged)
+- E2E test suite still needs selector updates beyond createPlayer
+- Star count single source of truth not yet audited
+
+**Suggested next task:**
+- Codex: generate Batch 1 visual assets
+- Claude: wire generated assets into data models once placed in public/assets/generated/
