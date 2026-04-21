@@ -985,3 +985,38 @@ Before Batch 1 assets, fix the remaining protected-route hydration race and stal
 
 #### Ready for Batch 1 assets
 Both follow-up issues are resolved. Codex can proceed with generating Batch 1 visual assets per the asset pipeline spec in the previous handoff.
+
+---
+
+### Codex Validation Of Pass 4 Follow-up
+
+**Date:** 2026-04-21
+**URL tested:** https://thankful-tree-0cf247010.2.azurestaticapps.net
+
+#### Code/local handoff check
+
+- Confirmed in code: `AppContext` now exposes `isHydrating`.
+- Confirmed in code: `ProtectedRoute` waits while `isHydrating` is true.
+- Confirmed in code: `VideosPage` watch-again/history rendering looks up live `curatedVideos` metadata by `videoId`.
+
+#### Deployed browser result
+
+The deployed URL is **not fully green yet**.
+
+1. **Direct deep link still did not stay on `/videos`**
+   - Repro:
+     1. Hard refresh deployed app.
+     2. Select existing player `nets`.
+     3. Directly enter `https://thankful-tree-0cf247010.2.azurestaticapps.net/videos`.
+   - Result observed: app redirected back to `/`, not `/videos`.
+   - After hard refresh, `/` also showed a newer auth/onboarding prompt: `Get Started — Free`.
+   - This may mean the tested deployed URL is not serving the newest dev-branch build yet, or the new auth/onboarding gate is intercepting before player hydration can restore the selected player.
+
+2. **Watch Again metadata still appeared stale in deployed browser before hard refresh**
+   - Featured video was correct: `Head Shoulders Knees & Toes / Super Simple Songs / 3:44`.
+   - `WATCH AGAIN` still showed old `Learn Colors, Numbers & ABCs / CoComelon`.
+   - Since code is fixed locally, this may be stale deployment/browser data, but it needs one more deployed verification once Azure finishes.
+
+#### Tester recommendation
+
+Before moving to Batch 1 assets, confirm which branch/environment the Azure Static Web Apps URL is actually serving. The user says the push was to `dev`; if production SWA is wired to `main`, the live URL may not reflect this follow-up. If the new build is live, check the auth/onboarding gate interaction with protected deep links.
