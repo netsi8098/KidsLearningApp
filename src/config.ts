@@ -28,27 +28,26 @@ export const config = {
 
 /**
  * Get service URLs as arrays for fallback discovery.
- * Always tries: configured env URL first, then localhost as fallback.
- * This ensures the app works both on the deployed site (via tunnel)
- * AND on the local network (via localhost).
+ * In dev: tries configured URL first, then localhost.
+ * In prod: only uses configured env URL — no localhost probing.
  */
 export function getApiUrls(): string[] {
   const urls: string[] = [];
   if (config.apiUrl) urls.push(config.apiUrl);
-  if (!urls.includes('http://localhost:4000')) urls.push('http://localhost:4000');
+  if (config.isDev && !urls.includes('http://localhost:4000')) urls.push('http://localhost:4000');
   return urls;
 }
 
 export function getTtsUrls(): string[] {
   const urls: string[] = [];
   if (config.ttsUrl) urls.push(config.ttsUrl);
-  if (!urls.includes('http://localhost:5555')) urls.push('http://localhost:5555');
+  if (config.isDev && !urls.includes('http://localhost:5555')) urls.push('http://localhost:5555');
   return urls;
 }
 
 export function getOllamaUrls(): string[] {
   const urls: string[] = [];
   if (config.ollamaUrl) urls.push(config.ollamaUrl);
-  if (!urls.includes('http://localhost:11434')) urls.push('http://localhost:11434');
+  if (config.isDev && !urls.includes('http://localhost:11434')) urls.push('http://localhost:11434');
   return urls;
 }

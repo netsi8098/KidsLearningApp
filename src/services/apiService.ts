@@ -48,8 +48,9 @@ export async function checkBackend(): Promise<boolean> {
     return true;
   }
 
-  // Try the last known URL first
-  const urls = _baseUrl ? [_baseUrl, ...BACKEND_URLS.filter(u => u !== _baseUrl)] : BACKEND_URLS;
+  // Try the last known URL first, but skip stale localhost in production
+  const validBase = _baseUrl && (BACKEND_URLS.includes(_baseUrl) || _baseUrl === BACKEND_URLS[0]) ? _baseUrl : null;
+  const urls = validBase ? [validBase, ...BACKEND_URLS.filter(u => u !== validBase)] : BACKEND_URLS;
 
   for (const url of urls) {
     try {
