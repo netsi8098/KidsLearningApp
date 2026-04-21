@@ -89,12 +89,12 @@ export default function ColoringPage() {
 
   const handleColorChange = useCallback((hex: string) => {
     setActiveColor(hex);
-    setActiveTool('brush');
+    if (activeTool !== 'eraser' && activeTool !== 'fill') setActiveTool('brush');
     setRecentColors((prev) => {
       const next = [hex, ...prev.filter((c) => c !== hex)];
       return next.slice(0, 8);
     });
-  }, []);
+  }, [activeTool]);
 
   const handleBrushChange = useCallback((id: BrushId) => {
     setActiveBrush(id);
@@ -106,11 +106,20 @@ export default function ColoringPage() {
     }
   }, []);
 
-  const handleToolChange = useCallback((tool: ToolId) => {
-    setActiveTool(tool);
-    if (tool === 'brush') setShowBrushDrawer(true);
-    if (tool === 'stamp') setShowStickerPicker(true);
+  // Close all drawers/modals
+  const closeAllDrawers = useCallback(() => {
+    setShowBrushDrawer(false);
+    setShowStickerPicker(false);
   }, []);
+
+  const handleToolChange = useCallback((tool: ToolId) => {
+    // Close any open drawer first, then open the relevant one
+    closeAllDrawers();
+    setActiveTool(tool);
+    // Delay opening so close animation completes
+    if (tool === 'brush') setTimeout(() => setShowBrushDrawer(true), 50);
+    if (tool === 'stamp') setTimeout(() => setShowStickerPicker(true), 50);
+  }, [closeAllDrawers]);
 
   const handleHistoryChange = useCallback((u: boolean, r: boolean) => {
     setCanUndo(u);
@@ -140,7 +149,7 @@ export default function ColoringPage() {
           <motion.button
             className="px-3 py-1 rounded-full text-[10px] font-bold cursor-pointer"
             style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}
-            onClick={() => setShowBrushDrawer(true)}
+            onClick={() => { closeAllDrawers(); setTimeout(() => setShowBrushDrawer(true), 50); }}
             whileTap={{ scale: 0.95 }}
             aria-label="Open brush settings"
           >
@@ -148,8 +157,10 @@ export default function ColoringPage() {
           </motion.button>
         </div>
 
-        {/* Canvas area — centered with framed artboard */}
-        <div className="flex-1 flex items-center justify-center px-3 py-2 overflow-hidden">
+        {/* Canvas area — centered artboard with frame */}
+        <div className="flex-1 flex items-center justify-center px-4 py-2 overflow-hidden">
+          {/* Artboard frame — subtle inset shadow + checkerboard hint */}
+          <div className="relative" style={{ padding: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '16px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2), 0 2px 12px rgba(0,0,0,0.3)' }}>
           <DrawingCanvas
             ref={canvasApiRef}
             templateSvg={activeTemplate?.svgOutline}
@@ -162,33 +173,37 @@ export default function ColoringPage() {
             onHistoryChange={handleHistoryChange}
             onSave={handleSave}
           />
+          </div>
         </div>
 
-        {/* Tool rail */}
-        <div className="flex-shrink-0 flex justify-center px-3 pb-1.5">
-          <ToolRail
-            activeTool={activeTool}
-            onToolChange={handleToolChange}
-            onUndo={() => canvasApiRef.current?.undo()}
-            onRedo={() => canvasApiRef.current?.redo()}
-            onClear={() => canvasApiRef.current?.clear()}
-            onSave={() => canvasApiRef.current?.save()}
-            onClose={exitDrawing}
-            canUndo={canUndo}
-            canRedo={canRedo}
-          />
+        {/* Bottom controls — always above drawers */}
+        <div className="flex-shrink-0 relative z-30">
+          {/* Tool rail */}
+          <div className="flex justify-center px-3 pb-1.5">
+            <ToolRail
+              activeTool={activeTool}
+              onToolChange={handleToolChange}
+              onUndo={() => { closeAllDrawers(); canvasApiRef.current?.undo(); }}
+              onRedo={() => { closeAllDrawers(); canvasApiRef.current?.redo(); }}
+              onClear={() => { closeAllDrawers(); canvasApiRef.current?.clear(); }}
+              onSave={() => { closeAllDrawers(); canvasApiRef.current?.save(); }}
+              onClose={() => { closeAllDrawers(); exitDrawing(); }}
+              canUndo={canUndo}
+              canRedo={canRedo}
+            />
+          </div>
+
+          {/* Color rail */}
+          <div className="px-3 pb-3">
+            <ColorRail
+              activeColor={activeColor}
+              onColorChange={handleColorChange}
+              recentColors={recentColors}
+            />
+          </div>
         </div>
 
-        {/* Color rail */}
-        <div className="flex-shrink-0 px-3 pb-3">
-          <ColorRail
-            activeColor={activeColor}
-            onColorChange={handleColorChange}
-            recentColors={recentColors}
-          />
-        </div>
-
-        {/* Brush drawer */}
+        {/* Brush drawer — z-20 so it slides under the tool rail */}
         <BrushDrawer
           open={showBrushDrawer}
           onClose={() => setShowBrushDrawer(false)}
@@ -201,7 +216,7 @@ export default function ColoringPage() {
           activeColor={activeColor}
         />
 
-        {/* Sticker picker */}
+        {/* Sticker picker — z-20 so it slides under the tool rail */}
         <StickerPicker
           open={showStickerPicker}
           onClose={() => setShowStickerPicker(false)}

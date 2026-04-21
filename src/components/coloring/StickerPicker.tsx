@@ -18,7 +18,7 @@ export default function StickerPicker({ open, onClose, activeSticker, onStickerS
       {open && (
         <>
           <motion.div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-20"
             style={{ background: 'rgba(0,0,0,0.3)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -26,7 +26,7 @@ export default function StickerPicker({ open, onClose, activeSticker, onStickerS
             onClick={onClose}
           />
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl"
+            className="fixed bottom-0 left-0 right-0 z-20 rounded-t-3xl"
             style={{
               background: 'linear-gradient(180deg, #2D2D3A 0%, #1F1F2E 100%)',
               maxWidth: 500,

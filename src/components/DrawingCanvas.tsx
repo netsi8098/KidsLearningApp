@@ -210,6 +210,90 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     img.src = url;
   }, [activeSticker, brushSize, saveState]);
 
+  // Flood fill — scanline algorithm with tolerance
+  const floodFill = useCallback((startX: number, startY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+
+    const sx = Math.round(startX);
+    const sy = Math.round(startY);
+    if (sx < 0 || sx >= w || sy < 0 || sy >= h) return;
+
+    const startIdx = (sy * w + sx) * 4;
+    const startR = data[startIdx];
+    const startG = data[startIdx + 1];
+    const startB = data[startIdx + 2];
+
+    // Parse fill color
+    const fillHex = color;
+    const fillR = parseInt(fillHex.slice(1, 3), 16);
+    const fillG = parseInt(fillHex.slice(3, 5), 16);
+    const fillB = parseInt(fillHex.slice(5, 7), 16);
+    const fillA = Math.round(brushOpacity * 255);
+
+    // Don't fill if clicking same color
+    if (Math.abs(startR - fillR) < 10 && Math.abs(startG - fillG) < 10 && Math.abs(startB - fillB) < 10) return;
+
+    const tolerance = 32;
+    const visited = new Uint8Array(w * h);
+
+    function matches(idx: number): boolean {
+      return (
+        Math.abs(data[idx] - startR) <= tolerance &&
+        Math.abs(data[idx + 1] - startG) <= tolerance &&
+        Math.abs(data[idx + 2] - startB) <= tolerance
+      );
+    }
+
+    function setPixel(idx: number): void {
+      data[idx] = fillR;
+      data[idx + 1] = fillG;
+      data[idx + 2] = fillB;
+      data[idx + 3] = fillA;
+    }
+
+    // Scanline fill
+    const stack: [number, number][] = [[sx, sy]];
+    while (stack.length > 0) {
+      const [cx, cy] = stack.pop()!;
+      let idx = (cy * w + cx) * 4;
+      if (cx < 0 || cx >= w || cy < 0 || cy >= h) continue;
+      const vi = cy * w + cx;
+      if (visited[vi]) continue;
+      if (!matches(idx)) continue;
+
+      // Find left boundary
+      let lx = cx;
+      while (lx > 0 && matches(((cy * w) + lx - 1) * 4) && !visited[cy * w + lx - 1]) lx--;
+
+      // Fill right and check above/below
+      let rx = lx;
+      while (rx < w && matches((cy * w + rx) * 4) && !visited[cy * w + rx]) {
+        idx = (cy * w + rx) * 4;
+        setPixel(idx);
+        visited[cy * w + rx] = 1;
+
+        if (cy > 0 && !visited[(cy - 1) * w + rx] && matches(((cy - 1) * w + rx) * 4)) {
+          stack.push([rx, cy - 1]);
+        }
+        if (cy < h - 1 && !visited[(cy + 1) * w + rx] && matches(((cy + 1) * w + rx) * 4)) {
+          stack.push([rx, cy + 1]);
+        }
+        rx++;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    saveState();
+  }, [color, brushOpacity, saveState]);
+
   // Pointer handlers
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -221,8 +305,7 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     }
 
     if (tool === 'fill') {
-      // TODO: Implement flood fill. For now, save state as placeholder.
-      saveState();
+      floodFill(pos.x, pos.y);
       return;
     }
 
@@ -248,7 +331,7 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     } else if (brush === 'crayon') {
       drawCrayonJitter(ctx, pos.x, pos.y, brushSize, color, brushOpacity);
     }
-  }, [tool, brush, color, brushSize, brushOpacity, getPos, placeSticker, saveState]);
+  }, [tool, brush, color, brushSize, brushOpacity, getPos, placeSticker, floodFill, saveState]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || tool === 'stamp' || tool === 'fill') return;
