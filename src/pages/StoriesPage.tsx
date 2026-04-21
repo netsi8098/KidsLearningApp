@@ -647,6 +647,9 @@ export default function StoriesPage() {
               <h3 className="text-[13px] font-extrabold text-[#6B6B7B] uppercase tracking-wider mb-2.5">
                 Featured Stories
               </h3>
+              <div className="relative">
+                {/* Scroll fade hint on right edge */}
+                <div className="absolute top-0 right-0 bottom-0 w-8 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(26,16,64,0.6))' }} />
               <div className="flex gap-3 overflow-x-auto -mx-4 px-4 pb-3 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
                 {featuredStories.map((story, i) => {
                   const progress = progressMap.get(story.id);
@@ -701,6 +704,7 @@ export default function StoriesPage() {
                     </motion.button>
                   );
                 })}
+              </div>
               </div>
             </div>
           )}
@@ -1123,17 +1127,17 @@ export default function StoriesPage() {
           </AnimatePresence>
         </div>
 
-        {/* Progress dots */}
-        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+        {/* Progress dots — larger, more visible */}
+        <div className="fixed top-14 left-1/2 -translate-x-1/2 z-20 flex gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(8px)' }}>
           {Array.from({ length: totalPages }).map((_, i) => (
             <div
               key={i}
               className="rounded-full transition-all duration-300"
               style={{
-                width: i === currentPage ? 20 : 8,
-                height: 8,
-                background: i === currentPage ? '#FF6B6B' : 'rgba(255,255,255,0.4)',
-                borderRadius: i === currentPage ? 4 : '50%',
+                width: i === currentPage ? 24 : 10,
+                height: 10,
+                background: i === currentPage ? '#FF6B6B' : 'rgba(255,255,255,0.5)',
+                borderRadius: i === currentPage ? 5 : '50%',
               }}
             />
           ))}
