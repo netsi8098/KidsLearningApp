@@ -33,6 +33,12 @@ jobs:
           output_location: "dist" # Built app content directory - optional
           app_build_command: "npm run build"
           ###### End of Repository/Build Configurations ######
+        env:
+          VITE_TTS_URL: ${{ secrets.VITE_TTS_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_OLLAMA_URL: ${{ secrets.VITE_OLLAMA_URL }}
+          VITE_APP_NAME: "Kids Learning Fun"
+          VITE_APP_VERSION: "1.0.0"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
