@@ -200,8 +200,9 @@ function splitIntoPhrases(text: string): string[] {
   return phrases.length > 0 ? phrases : [text];
 }
 
-// Proactive health check on module load — only if TTS URLs are configured
-if (typeof window !== 'undefined' && TTS_URLS.length > 0) {
+// Proactive health check on module load — only in dev to avoid console noise
+// In production, the check happens on-demand when the user first triggers speech
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   setTimeout(() => checkTTSServer(), 1000);
 }
 
