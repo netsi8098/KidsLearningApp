@@ -1062,24 +1062,23 @@ export default function StoriesPage() {
         </div>
 
         {/* Physical book page — fills screen */}
-        <div className="flex-1 relative overflow-hidden" style={{ perspective: '1500px' }}>
+        <div className="flex-1 relative overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentPage}
               className="absolute inset-0 flex items-center justify-center"
-              style={{ backfaceVisibility: 'hidden' }}
               initial={{
-                rotateY: turnDirection === 'next' ? -90 : 90,
+                x: turnDirection === 'next' ? '60%' : '-60%',
                 opacity: 0,
-                transformOrigin: turnDirection === 'next' ? 'left center' : 'right center',
+                scale: 0.92,
               }}
-              animate={{ rotateY: 0, opacity: 1 }}
+              animate={{ x: 0, opacity: 1, scale: 1 }}
               exit={{
-                rotateY: turnDirection === 'next' ? 90 : -90,
+                x: turnDirection === 'next' ? '-60%' : '60%',
                 opacity: 0,
-                transformOrigin: turnDirection === 'next' ? 'right center' : 'left center',
+                scale: 0.92,
               }}
-              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               {/* Physical book page with visible edges and warm paper */}
               <div className="w-full h-full flex items-center justify-center relative" style={{ padding: '16px 20px' }}>

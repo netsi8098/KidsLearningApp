@@ -12,10 +12,10 @@ interface ChoiceButtonProps {
 }
 
 const BUTTON_COLORS = [
-  { bg: '#FF6B6B15', border: '#FF6B6B', text: '#2D2D3A' },  // coral
-  { bg: '#4ECDC415', border: '#4ECDC4', text: '#2D2D3A' },  // teal
-  { bg: '#FFE66D15', border: '#FFE66D', text: '#2D2D3A' },  // yellow
-  { bg: '#A78BFA15', border: '#A78BFA', text: '#2D2D3A' },  // lavender
+  { bg: 'rgba(255,255,255,0.95)', border: '#FF6B6B', text: '#2D2D3A' },  // coral
+  { bg: 'rgba(255,255,255,0.95)', border: '#4ECDC4', text: '#2D2D3A' },  // teal
+  { bg: 'rgba(255,255,255,0.95)', border: '#FFE66D', text: '#2D2D3A' },  // yellow
+  { bg: 'rgba(255,255,255,0.95)', border: '#A78BFA', text: '#2D2D3A' },  // lavender
 ];
 
 export default function ChoiceButton({ label, isCorrect, onAnswer, disabled, questionIndex, colorIndex = 0 }: ChoiceButtonProps) {
@@ -57,7 +57,7 @@ export default function ChoiceButton({ label, isCorrect, onAnswer, disabled, que
           ? '0 4px 16px rgba(76,175,80,0.3)'
           : state === 'wrong'
             ? '0 4px 16px rgba(231,76,60,0.3)'
-            : `0 2px 8px ${color.border}20`,
+            : `0 4px 16px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06)`,
       }}
       onClick={handleClick}
       disabled={disabled}
