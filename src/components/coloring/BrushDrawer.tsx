@@ -1,6 +1,7 @@
 /**
- * BrushDrawer — Slide-up panel showing brush library + size/opacity controls.
- * Inspired by Pixite/Pigment brush picker.
+ * BrushDrawer — Pigment-style horizontal tool shelf.
+ * Shows realistic tool tip icons in a scrollable strip.
+ * Size/opacity sliders below.
  */
 import { motion, AnimatePresence } from 'framer-motion';
 import { brushes, type BrushId } from './coloringTools';
@@ -17,57 +18,81 @@ interface BrushDrawerProps {
   activeColor: string;
 }
 
-/** Render a small stroke preview for a brush type */
-function BrushPreview({ brushId, color }: { brushId: BrushId; color: string }) {
-  const previewWidth = 60;
-  const previewHeight = 24;
+/** Realistic tool tip SVG for each brush */
+function ToolTipIcon({ brushId, color, active }: { brushId: BrushId; color: string; active: boolean }) {
+  const w = 36;
+  const h = 56;
+  const tipColor = active ? color : '#9B9BAB';
+  const bodyColor = active ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)';
 
   return (
-    <svg width={previewWidth} height={previewHeight} viewBox={`0 0 ${previewWidth} ${previewHeight}`} aria-hidden="true">
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" aria-hidden="true">
       {brushId === 'pencil' && (
-        <path d="M4 18 Q15 6 30 12 Q45 18 56 6" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        <>
+          <rect x="14" y="4" width="8" height="36" rx="1" fill="#E6C84A" />
+          <rect x="14" y="4" width="8" height="6" rx="1" fill="#D4A050" />
+          <polygon points="14,40 22,40 18,52" fill={tipColor} />
+          <rect x="16" y="2" width="4" height="4" rx="1" fill="#FFB6C1" opacity="0.5" />
+        </>
       )}
       {brushId === 'crayon' && (
         <>
-          <path d="M4 16 Q15 6 30 12 Q45 18 56 8" stroke={color} strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.8" />
-          {[10, 20, 35, 48].map((x, i) => <rect key={i} x={x} y={10 + (i % 2) * 3} width="2" height="2" fill={color} opacity="0.3" />)}
+          <rect x="10" y="8" width="16" height="32" rx="3" fill={tipColor} opacity="0.85" />
+          <rect x="12" y="10" width="12" height="4" rx="1" fill="white" opacity="0.15" />
+          <polygon points="12,40 24,40 18,52" fill={tipColor} opacity="0.9" />
+          <rect x="10" y="6" width="16" height="4" rx="2" fill={tipColor} opacity="0.6" />
         </>
       )}
       {brushId === 'marker' && (
-        <path d="M4 16 Q15 6 30 12 Q45 18 56 8" stroke={color} strokeWidth="6" fill="none" strokeLinecap="round" opacity="0.85" />
+        <>
+          <rect x="12" y="6" width="12" height="28" rx="2" fill={bodyColor} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+          <rect x="12" y="6" width="12" height="6" rx="2" fill="rgba(255,255,255,0.1)" />
+          <rect x="14" y="34" width="8" height="10" rx="1" fill={tipColor} />
+          <rect x="15" y="44" width="6" height="6" rx="3" fill={tipColor} opacity="0.9" />
+        </>
       )}
       {brushId === 'airbrush' && (
         <>
-          <ellipse cx="30" cy="12" rx="24" ry="8" fill={color} opacity="0.15" />
-          <ellipse cx="30" cy="12" rx="16" ry="5" fill={color} opacity="0.1" />
+          <ellipse cx="18" cy="30" rx="12" ry="16" fill={tipColor} opacity="0.12" />
+          <ellipse cx="18" cy="30" rx="8" ry="10" fill={tipColor} opacity="0.15" />
+          <ellipse cx="18" cy="30" rx="4" ry="5" fill={tipColor} opacity="0.2" />
+          <rect x="16" y="6" width="4" height="16" rx="2" fill="rgba(255,255,255,0.15)" />
+          <circle cx="18" cy="6" r="3" fill="rgba(255,255,255,0.1)" />
         </>
       )}
       {brushId === 'watercolor' && (
         <>
-          <ellipse cx="20" cy="12" rx="14" ry="7" fill={color} opacity="0.12" />
-          <ellipse cx="35" cy="12" rx="16" ry="8" fill={color} opacity="0.1" />
-          <ellipse cx="28" cy="12" rx="10" ry="5" fill={color} opacity="0.08" />
+          <rect x="14" y="4" width="8" height="26" rx="2" fill="#8D6E63" opacity="0.4" />
+          <ellipse cx="18" cy="36" rx="10" ry="6" fill={tipColor} opacity="0.2" />
+          <ellipse cx="18" cy="38" rx="8" ry="8" fill={tipColor} opacity="0.15" />
+          <ellipse cx="18" cy="34" rx="6" ry="4" fill={tipColor} opacity="0.25" />
+          <rect x="16" y="28" width="4" height="10" rx="1" fill="#8D6E63" opacity="0.3" />
         </>
       )}
       {brushId === 'glitter' && (
         <>
-          {[8, 16, 24, 32, 40, 48].map((x, i) => (
-            <circle key={i} cx={x} cy={8 + (i % 3) * 4} r={1 + (i % 2)} fill={color} opacity={0.5 + (i % 3) * 0.15} />
+          {[
+            [12, 14], [24, 10], [18, 24], [10, 32], [26, 28], [14, 42], [22, 38], [18, 48], [8, 20], [28, 18],
+          ].map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r={1 + (i % 3) * 0.5} fill={i % 2 === 0 ? tipColor : '#FFE66D'} opacity={0.4 + (i % 4) * 0.12} />
           ))}
-          {[12, 20, 36, 44].map((x, i) => (
-            <circle key={`s${i}`} cx={x} cy={12 + (i % 2) * 4} r={0.8} fill="#FFE66D" opacity={0.4 + i * 0.1} />
-          ))}
+          <circle cx="18" cy="28" r="2" fill="white" opacity="0.3" />
         </>
       )}
       {brushId === 'rainbow' && (
         <>
           {['#FF6B6B', '#FF8C42', '#FFD93D', '#6BCB77', '#45B7D1', '#A78BFA'].map((c, i) => (
-            <line key={c} x1="4" y1={4 + i * 3} x2="56" y2={4 + i * 3} stroke={c} strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
+            <rect key={c} x="8" y={10 + i * 6} width="20" height="5" rx="2.5" fill={c} opacity="0.7" />
           ))}
         </>
       )}
       {brushId === 'bigsoft' && (
-        <ellipse cx="30" cy="12" rx="26" ry="10" fill={color} opacity="0.2" />
+        <>
+          <rect x="14" y="4" width="8" height="22" rx="2" fill="#8D6E63" opacity="0.3" />
+          <ellipse cx="18" cy="34" rx="14" ry="12" fill={tipColor} opacity="0.15" />
+          <ellipse cx="18" cy="32" rx="10" ry="8" fill={tipColor} opacity="0.12" />
+          <rect x="14" y="24" width="8" height="6" rx="2" fill="#D4A574" opacity="0.3" />
+        </>
       )}
     </svg>
   );
@@ -90,111 +115,101 @@ export default function BrushDrawer({
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — tappable to close */}
           <motion.div
             className="fixed inset-0 z-20"
-            style={{ background: 'rgba(0,0,0,0.3)' }}
+            style={{ background: 'rgba(0,0,0,0.25)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
 
-          {/* Drawer */}
+          {/* Drawer panel */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-20 rounded-t-3xl"
+            className="fixed bottom-0 left-0 right-0 z-20 rounded-t-2xl"
             style={{
-              background: 'linear-gradient(180deg, #2D2D3A 0%, #1F1F2E 100%)',
+              background: 'linear-gradient(180deg, rgba(45,45,58,0.97) 0%, rgba(31,31,46,0.98) 100%)',
+              backdropFilter: 'blur(16px)',
               maxWidth: 500,
               margin: '0 auto',
-              maxHeight: '70vh',
             }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
           >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+            {/* Drag handle */}
+            <div className="flex justify-center pt-2.5 pb-1">
+              <div className="w-8 h-1 rounded-full bg-white/20" />
             </div>
 
-            <div className="px-5 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(70vh - 20px)' }}>
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-bold text-sm">Brushes</h3>
-                <motion.button
-                  className="text-white/40 cursor-pointer"
-                  onClick={onClose}
-                  whileTap={{ scale: 0.9 }}
-                  aria-label="Close brush picker"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                </motion.button>
-              </div>
-
-              {/* Brush grid */}
-              <div className="grid grid-cols-2 gap-2 mb-5">
-                {brushes.map((brush) => (
+            <div className="px-4 pb-5">
+              {/* Tool shelf — horizontal scroll */}
+              <div className="flex gap-1 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                {brushes.map((b) => (
                   <motion.button
-                    key={brush.id}
-                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer text-left"
+                    key={b.id}
+                    className="flex flex-col items-center gap-0.5 flex-shrink-0 cursor-pointer rounded-xl px-1.5 py-1.5"
                     style={{
-                      background: activeBrush === brush.id ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
-                      border: activeBrush === brush.id ? '1.5px solid rgba(255,255,255,0.2)' : '1.5px solid transparent',
+                      background: activeBrush === b.id ? 'rgba(255,255,255,0.1)' : 'transparent',
+                      border: activeBrush === b.id ? '1.5px solid rgba(255,255,255,0.15)' : '1.5px solid transparent',
+                      minWidth: 52,
                     }}
-                    onClick={() => onBrushChange(brush.id)}
-                    whileTap={{ scale: 0.97 }}
-                    aria-label={`${brush.label} brush`}
-                    aria-pressed={activeBrush === brush.id}
+                    onClick={() => onBrushChange(b.id)}
+                    whileTap={{ scale: 0.92 }}
+                    aria-label={`${b.label} brush`}
+                    aria-pressed={activeBrush === b.id}
                   >
-                    <BrushPreview brushId={brush.id} color={activeColor} />
-                    <span className="text-xs font-bold text-white/80">{brush.label}</span>
+                    <ToolTipIcon brushId={b.id} color={activeColor} active={activeBrush === b.id} />
+                    <span className="text-[9px] font-bold" style={{ color: activeBrush === b.id ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)' }}>
+                      {b.label}
+                    </span>
                   </motion.button>
                 ))}
               </div>
 
               {/* Size slider */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Size</span>
-                  <span className="text-[11px] font-bold text-white/60">{brushSize}px</span>
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-white/35 uppercase tracking-wider">Size</span>
+                  <span className="text-[10px] font-bold text-white/50">{brushSize}px</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ background: activeColor }} />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: activeColor }} />
                   <input
                     type="range"
                     min={currentBrush.minSize}
                     max={currentBrush.maxSize}
                     value={brushSize}
                     onChange={(e) => onSizeChange(Number(e.target.value))}
-                    className="flex-1 accent-white h-2 cursor-pointer"
-                    style={{ accentColor: '#FF6B6B' }}
+                    className="flex-1 h-1.5 cursor-pointer appearance-none rounded-full"
+                    style={{ background: `linear-gradient(90deg, ${activeColor}60, ${activeColor})`, accentColor: activeColor }}
                     aria-label="Brush size"
                   />
-                  <div className="w-6 h-6 rounded-full" style={{ background: activeColor }} />
+                  <div className="w-5 h-5 rounded-full" style={{ background: activeColor }} />
                 </div>
               </div>
 
               {/* Opacity slider */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Opacity</span>
-                  <span className="text-[11px] font-bold text-white/60">{Math.round(brushOpacity * 100)}%</span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-white/35 uppercase tracking-wider">Opacity</span>
+                  <span className="text-[10px] font-bold text-white/50">{Math.round(brushOpacity * 100)}%</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded" style={{ background: activeColor, opacity: 0.2 }} />
+                  <div className="w-3.5 h-3.5 rounded" style={{ background: activeColor, opacity: 0.2 }} />
                   <input
                     type="range"
                     min={5}
                     max={100}
                     value={Math.round(brushOpacity * 100)}
                     onChange={(e) => onOpacityChange(Number(e.target.value) / 100)}
-                    className="flex-1 accent-white h-2 cursor-pointer"
-                    style={{ accentColor: '#4ECDC4' }}
+                    className="flex-1 h-1.5 cursor-pointer appearance-none rounded-full"
+                    style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.5))`, accentColor: '#4ECDC4' }}
                     aria-label="Brush opacity"
                   />
-                  <div className="w-4 h-4 rounded" style={{ background: activeColor }} />
+                  <div className="w-3.5 h-3.5 rounded" style={{ background: activeColor }} />
                 </div>
               </div>
             </div>

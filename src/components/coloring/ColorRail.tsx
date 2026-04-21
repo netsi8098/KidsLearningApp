@@ -2,7 +2,6 @@
  * ColorRail — Bottom color palette strip for the coloring studio.
  * Shows 12 kid-friendly colors, recent colors, active color preview.
  */
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { palette, extendedPalette, type PaletteColor } from './coloringTools';
 
@@ -10,10 +9,14 @@ interface ColorRailProps {
   activeColor: string;
   onColorChange: (hex: string) => void;
   recentColors?: string[];
+  /** Controlled expanded state — parent manages open/close */
+  expanded?: boolean;
+  onExpandedChange?: (open: boolean) => void;
 }
 
-export default function ColorRail({ activeColor, onColorChange, recentColors = [] }: ColorRailProps) {
-  const [showMore, setShowMore] = useState(false);
+export default function ColorRail({ activeColor, onColorChange, recentColors = [], expanded = false, onExpandedChange }: ColorRailProps) {
+  const showMore = expanded;
+  const setShowMore = (v: boolean) => onExpandedChange?.(v);
 
   return (
     <div className="relative">

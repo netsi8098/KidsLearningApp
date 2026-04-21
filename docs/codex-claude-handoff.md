@@ -1263,3 +1263,79 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - GitHub secret `VITE_API_URL` set to tunnel URL
 - CORS updated to allow Azure SWA origin
 - **Note:** Tunnel URLs are ephemeral — if Mac restarts, need new tunnel + secret update + redeploy
+
+---
+
+### Claude Batch 2C — Layered Canvas, Toolbar Fix, Tool Shelf Redesign
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors, 2.06s
+
+#### Critical Fix: Layered Canvas Architecture
+
+`src/components/DrawingCanvas.tsx` — Complete rewrite with 2-canvas stack:
+
+**Architecture (bottom → top):**
+1. White paper background (CSS `background: #FFFFFF` on container div)
+2. **Paint canvas** (z-index: 1) — user strokes, fill, stickers. Transparent background. All pointer events here.
+3. **Template overlay canvas** (z-index: 2) — SVG line art, `pointer-events: none`. Drawn once at init, never modified.
+
+**Key behaviors:**
+- **Eraser**: Uses `destination-out` on paint canvas — makes pixels transparent. Template on top remains visible and untouched.
+- **Flood fill**: Reads both paint AND template pixel data. Template dark pixels act as boundaries. Fill color applied to paint canvas only.
+- **Clear**: `clearRect` on paint canvas → transparent. Template stays.
+- **Undo/Redo**: Saves/restores only paint canvas ImageData. Template never in history.
+- **Save**: Composites onto new canvas: white bg → paint → template overlay. Produces correct final PNG.
+
+#### Critical Fix: Color Modal No Longer Blocks Toolbar
+
+- ColorRail `expanded` state lifted to parent (controlled component)
+- `closeAllDrawers()` now closes brush drawer + sticker picker + color expanded panel
+- All toolbar actions (Save, Undo, Redo, Clear, Close) call `closeAllDrawers()` first
+- Drawer z-index is 20, tool rail z-index is 30 — toolbar always on top
+
+#### BrushDrawer Redesigned as Horizontal Tool Shelf
+
+- Replaced text-heavy 2-column card grid with horizontal scrollable strip
+- Each brush shows a realistic SVG tool tip icon (pencil shape, crayon shape, marker cap, airbrush cone, etc.)
+- Active tool has highlight border + full-color icon vs inactive gray
+- Size/opacity sliders with colored track
+- Compact layout — fits well on 390px mobile
+- Drag handle + backdrop tap to close
+
+#### Canvas & Studio Polish
+
+- Artboard frame: matte dark border with gradient edge glow
+- Deep shadow for premium floating-on-easel feel
+- Layered canvas container with proper rounded corners
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/components/DrawingCanvas.tsx` | **REWRITE** — 2-canvas layered architecture |
+| `src/components/coloring/BrushDrawer.tsx` | **REWRITE** — horizontal tool shelf with SVG tips |
+| `src/components/coloring/ColorRail.tsx` | Controlled expanded state (parent-managed) |
+| `src/pages/ColoringPage.tsx` | Color modal state, closeAllDrawers, artboard styling |
+| `docs/codex-claude-handoff.md` | This handoff |
+
+#### Codex verification checklist
+- [ ] Template coloring: draw over line art, erase — outlines remain intact
+- [ ] Flood fill inside template region — fills color without destroying outlines
+- [ ] Clear keeps template outlines, removes all user paint
+- [ ] Save produces PNG with outlines visible over colored areas
+- [ ] Undo/redo restores paint without affecting template
+- [ ] Open ALL COLORS, click Save — Save works (modal closes, artwork saved)
+- [ ] Open Brush drawer, click Undo — Undo works (drawer closes)
+- [ ] Sticker picker: open → select sticker → tap canvas → sticker placed
+- [ ] Brush shelf: scroll horizontally, tap each brush, icon highlights
+- [ ] Size/opacity sliders functional in brush drawer
+- [ ] Free Draw mode: all brushes work (pencil, crayon, marker, airbrush, watercolor, glitter, rainbow, soft)
+- [ ] Mobile 390px: no overflow, no hidden controls
+- [ ] Production console clean (no localhost errors)
+
+#### What remains for future batches
+- More coloring template categories (vehicles, fantasy, mandala, seasonal)
+- Template cards as framed coloring sheets (visual polish)
+- Colored pencil strip UI (pencil-shaped swatches when pencil tool selected)
+- Zoom/pan canvas (UI placeholder only)
+- Color wheel modal for custom color picking

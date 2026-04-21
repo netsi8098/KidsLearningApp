@@ -84,6 +84,7 @@ export default function ColoringPage() {
   const [canRedo, setCanRedo] = useState(false);
   const [showBrushDrawer, setShowBrushDrawer] = useState(false);
   const [showStickerPicker, setShowStickerPicker] = useState(false);
+  const [showColorExpanded, setShowColorExpanded] = useState(false);
   const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
 
@@ -106,10 +107,11 @@ export default function ColoringPage() {
     }
   }, []);
 
-  // Close all drawers/modals
+  // Close all drawers/modals — including color expanded panel
   const closeAllDrawers = useCallback(() => {
     setShowBrushDrawer(false);
     setShowStickerPicker(false);
+    setShowColorExpanded(false);
   }, []);
 
   const handleToolChange = useCallback((tool: ToolId) => {
@@ -157,10 +159,10 @@ export default function ColoringPage() {
           </motion.button>
         </div>
 
-        {/* Canvas area — centered artboard with frame */}
-        <div className="flex-1 flex items-center justify-center px-4 py-2 overflow-hidden">
-          {/* Artboard frame — subtle inset shadow + checkerboard hint */}
-          <div className="relative" style={{ padding: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '16px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2), 0 2px 12px rgba(0,0,0,0.3)' }}>
+        {/* Canvas area — centered artboard on dark easel */}
+        <div className="flex-1 flex items-center justify-center px-3 py-2 overflow-hidden">
+          {/* Artboard frame — matte dark border like a real art board */}
+          <div className="relative" style={{ padding: '5px', background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))', borderRadius: '14px', boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05), 0 6px 30px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)' }}>
           <DrawingCanvas
             ref={canvasApiRef}
             templateSvg={activeTemplate?.svgOutline}
@@ -199,6 +201,11 @@ export default function ColoringPage() {
               activeColor={activeColor}
               onColorChange={handleColorChange}
               recentColors={recentColors}
+              expanded={showColorExpanded}
+              onExpandedChange={(open) => {
+                if (open) { setShowBrushDrawer(false); setShowStickerPicker(false); }
+                setShowColorExpanded(open);
+              }}
             />
           </div>
         </div>

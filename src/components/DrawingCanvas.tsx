@@ -1,12 +1,19 @@
 /**
- * DrawingCanvas — Studio-grade HTML5 Canvas drawing component.
+ * DrawingCanvas — Layered canvas drawing component.
  *
- * Supports multiple brush types, eraser, sticker stamps, undo/redo.
- * All UI chrome (toolbar, color picker, brush drawer) is external —
- * this component exposes its API via the onReady callback.
+ * Architecture (bottom → top):
+ *   1. White paper background (CSS)
+ *   2. Paint canvas — user strokes, fill, stickers (transparent bg)
+ *   3. Template overlay canvas — line art (transparent bg, pointer-events: none)
+ *
+ * Eraser uses destination-out on paint layer only — template is never touched.
+ * Undo/redo snapshots only the paint layer.
+ * Save composites: white bg + paint + template overlay.
+ * Clear resets paint to transparent — template stays.
+ * Flood fill uses combined paint+template for boundary detection, applies to paint only.
  */
 import { useRef, useState, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
-import { type BrushId, type StickerDef, applyBrushStyle, drawGlitterAt, drawCrayonJitter, rainbowColors } from './coloring/coloringTools';
+import { type BrushId, type StickerDef, applyBrushStyle, drawGlitterAt, drawCrayonJitter } from './coloring/coloringTools';
 
 export interface CanvasApi {
   undo: () => void;
@@ -21,93 +28,92 @@ interface DrawingCanvasProps {
   width?: number;
   height?: number;
   templateSvg?: string;
-  /** Active drawing tool */
   tool: 'brush' | 'eraser' | 'fill' | 'stamp';
-  /** Active brush type */
   brush: BrushId;
-  /** Active color */
   color: string;
-  /** Brush size in px */
   brushSize: number;
-  /** Brush opacity 0-1 */
   brushOpacity: number;
-  /** Active sticker for stamp mode */
   activeSticker?: StickerDef | null;
-  /** Called when undo/redo state changes */
   onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
-  /** Called when save is triggered externally */
   onSave?: (dataUrl: string) => void;
 }
 
 const MAX_UNDO = 30;
 
 const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function DrawingCanvas(
-  {
-    width = 350,
-    height = 450,
-    templateSvg,
-    tool,
-    brush,
-    color,
-    brushSize,
-    brushOpacity,
-    activeSticker,
-    onHistoryChange,
-    onSave,
-  },
+  { width = 350, height = 450, templateSvg, tool, brush, color, brushSize, brushOpacity, activeSticker, onHistoryChange, onSave },
   ref
 ) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Paint layer — user strokes, fill, stickers
+  const paintRef = useRef<HTMLCanvasElement>(null);
+  // Template overlay — line art, never modified after init
+  const templateRef = useRef<HTMLCanvasElement>(null);
+  // Interaction container for pointer position calc
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
   const strokeIndexRef = useRef(0);
+  // Cache template ImageData for flood fill boundary detection
+  const templateDataRef = useRef<ImageData | null>(null);
 
   const [undoStack, setUndoStack] = useState<ImageData[]>([]);
   const [redoStack, setRedoStack] = useState<ImageData[]>([]);
 
-  // Notify parent of history changes
   useEffect(() => {
     onHistoryChange?.(undoStack.length > 1, redoStack.length > 0);
   }, [undoStack.length, redoStack.length, onHistoryChange]);
 
-  // Initialize canvas
+  // ── Initialize canvases ──────────────────────────────────
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const paint = paintRef.current;
+    const tmpl = templateRef.current;
+    if (!paint || !tmpl) return;
 
-    canvas.width = width;
-    canvas.height = height;
+    // Set internal resolution
+    paint.width = width;
+    paint.height = height;
+    tmpl.width = width;
+    tmpl.height = height;
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, width, height);
+    // Paint starts fully transparent
+    const pCtx = paint.getContext('2d')!;
+    pCtx.clearRect(0, 0, width, height);
+
+    // Template starts transparent
+    const tCtx = tmpl.getContext('2d')!;
+    tCtx.clearRect(0, 0, width, height);
 
     if (templateSvg) {
       const img = new Image();
       const svgBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(svgBlob);
       img.onload = () => {
-        ctx.drawImage(img, 0, 0, width, height);
+        tCtx.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
-        const initialState = ctx.getImageData(0, 0, width, height);
-        setUndoStack([initialState]);
+        // Cache template data for fill boundary detection
+        templateDataRef.current = tCtx.getImageData(0, 0, width, height);
+        // Save initial empty paint state
+        const initial = pCtx.getImageData(0, 0, width, height);
+        setUndoStack([initial]);
         setRedoStack([]);
       };
       img.src = url;
     } else {
-      const initialState = ctx.getImageData(0, 0, width, height);
-      setUndoStack([initialState]);
+      templateDataRef.current = null;
+      const initial = pCtx.getImageData(0, 0, width, height);
+      setUndoStack([initial]);
       setRedoStack([]);
     }
   }, [width, height, templateSvg]);
 
-  const saveState = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+  // ── History helpers ──────────────────────────────────────
+  const savePaintState = useCallback(() => {
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, paint.width, paint.height);
     setUndoStack((prev) => {
       const next = [...prev, imageData];
       return next.length > MAX_UNDO ? next.slice(next.length - MAX_UNDO) : next;
@@ -117,9 +123,9 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
 
   const handleUndo = useCallback(() => {
     if (undoStack.length <= 1) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
     const current = undoStack[undoStack.length - 1];
     const prev = undoStack[undoStack.length - 2];
@@ -130,9 +136,9 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
 
   const handleRedo = useCallback(() => {
     if (redoStack.length === 0) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
     const next = redoStack[redoStack.length - 1];
     setUndoStack((u) => [...u, next]);
@@ -140,37 +146,40 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     ctx.putImageData(next, 0, 0);
   }, [redoStack]);
 
+  // Clear paint layer only — template stays
   const handleClear = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (templateSvg) {
-      const img = new Image();
-      const svgBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(svgBlob);
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        saveState();
-      };
-      img.src = url;
-    } else {
-      saveState();
-    }
-  }, [templateSvg, saveState]);
+    ctx.clearRect(0, 0, paint.width, paint.height);
+    savePaintState();
+  }, [savePaintState]);
 
+  // Composite save: white bg + paint + template
   const handleSave = useCallback((): string | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const dataUrl = canvas.toDataURL('image/png');
+    const paint = paintRef.current;
+    const tmpl = templateRef.current;
+    if (!paint) return null;
+
+    const comp = document.createElement('canvas');
+    comp.width = width;
+    comp.height = height;
+    const ctx = comp.getContext('2d')!;
+
+    // 1. White background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, width, height);
+    // 2. Paint layer
+    ctx.drawImage(paint, 0, 0);
+    // 3. Template overlay
+    if (tmpl) ctx.drawImage(tmpl, 0, 0);
+
+    const dataUrl = comp.toDataURL('image/png');
     onSave?.(dataUrl);
     return dataUrl;
-  }, [onSave]);
+  }, [width, height, onSave]);
 
-  // Expose API via ref
   useImperativeHandle(ref, () => ({
     undo: handleUndo,
     redo: handleRedo,
@@ -180,24 +189,24 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     get canRedo() { return redoStack.length > 0; },
   }), [handleUndo, handleRedo, handleClear, handleSave, undoStack.length, redoStack.length]);
 
-  const getPos = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
+  // ── Pointer position ────────────────────────────────────
+  const getPos = useCallback((e: React.PointerEvent) => {
+    const paint = paintRef.current;
+    if (!paint) return { x: 0, y: 0 };
+    const rect = paint.getBoundingClientRect();
     return {
-      x: (e.clientX - rect.left) * (canvas.width / rect.width),
-      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+      x: (e.clientX - rect.left) * (paint.width / rect.width),
+      y: (e.clientY - rect.top) * (paint.height / rect.height),
     };
   }, []);
 
-  // Place SVG sticker at position
+  // ── Sticker stamp ───────────────────────────────────────
   const placeSticker = useCallback((x: number, y: number) => {
     if (!activeSticker) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
-
     const size = brushSize * 3 + 20;
     const img = new Image();
     const svgBlob = new Blob([activeSticker.svg], { type: 'image/svg+xml' });
@@ -205,140 +214,129 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     img.onload = () => {
       ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
       URL.revokeObjectURL(url);
-      saveState();
+      savePaintState();
     };
     img.src = url;
-  }, [activeSticker, brushSize, saveState]);
+  }, [activeSticker, brushSize, savePaintState]);
 
-  // Flood fill — scanline algorithm with tolerance
+  // ── Flood fill on paint layer, template as boundary ─────
   const floodFill = useCallback((startX: number, startY: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
 
-    const w = canvas.width;
-    const h = canvas.height;
-    const imageData = ctx.getImageData(0, 0, w, h);
-    const data = imageData.data;
+    const w = paint.width;
+    const h = paint.height;
+    const paintData = ctx.getImageData(0, 0, w, h);
+    const pd = paintData.data;
+    const tmplData = templateDataRef.current?.data;
 
     const sx = Math.round(startX);
     const sy = Math.round(startY);
     if (sx < 0 || sx >= w || sy < 0 || sy >= h) return;
 
-    const startIdx = (sy * w + sx) * 4;
-    const startR = data[startIdx];
-    const startG = data[startIdx + 1];
-    const startB = data[startIdx + 2];
+    // Get the color at the start point on the paint layer
+    const si = (sy * w + sx) * 4;
+    const sR = pd[si], sG = pd[si + 1], sB = pd[si + 2], sA = pd[si + 3];
 
     // Parse fill color
-    const fillHex = color;
-    const fillR = parseInt(fillHex.slice(1, 3), 16);
-    const fillG = parseInt(fillHex.slice(3, 5), 16);
-    const fillB = parseInt(fillHex.slice(5, 7), 16);
-    const fillA = Math.round(brushOpacity * 255);
+    const fR = parseInt(color.slice(1, 3), 16);
+    const fG = parseInt(color.slice(3, 5), 16);
+    const fB = parseInt(color.slice(5, 7), 16);
+    const fA = Math.round(brushOpacity * 255);
 
-    // Don't fill if clicking same color
-    if (Math.abs(startR - fillR) < 10 && Math.abs(startG - fillG) < 10 && Math.abs(startB - fillB) < 10) return;
+    // Skip if already same color
+    if (Math.abs(sR - fR) < 10 && Math.abs(sG - fG) < 10 && Math.abs(sB - fB) < 10 && Math.abs(sA - fA) < 30) return;
 
-    const tolerance = 32;
+    const tolerance = 40;
     const visited = new Uint8Array(w * h);
 
-    function matches(idx: number): boolean {
+    // A pixel is fillable if it matches the start color on paint AND is not a dark template line
+    function canFill(idx: number): boolean {
+      // Check template boundary — dark pixels block fill
+      if (tmplData) {
+        const tR = tmplData[idx], tG = tmplData[idx + 1], tB = tmplData[idx + 2], tA = tmplData[idx + 3];
+        if (tA > 80 && (tR + tG + tB) < 400) return false; // Dark opaque template pixel = boundary
+      }
+      // Check paint layer matches start color
       return (
-        Math.abs(data[idx] - startR) <= tolerance &&
-        Math.abs(data[idx + 1] - startG) <= tolerance &&
-        Math.abs(data[idx + 2] - startB) <= tolerance
+        Math.abs(pd[idx] - sR) <= tolerance &&
+        Math.abs(pd[idx + 1] - sG) <= tolerance &&
+        Math.abs(pd[idx + 2] - sB) <= tolerance &&
+        Math.abs(pd[idx + 3] - sA) <= tolerance
       );
-    }
-
-    function setPixel(idx: number): void {
-      data[idx] = fillR;
-      data[idx + 1] = fillG;
-      data[idx + 2] = fillB;
-      data[idx + 3] = fillA;
     }
 
     // Scanline fill
     const stack: [number, number][] = [[sx, sy]];
     while (stack.length > 0) {
       const [cx, cy] = stack.pop()!;
-      let idx = (cy * w + cx) * 4;
       if (cx < 0 || cx >= w || cy < 0 || cy >= h) continue;
       const vi = cy * w + cx;
       if (visited[vi]) continue;
-      if (!matches(idx)) continue;
+      const idx = vi * 4;
+      if (!canFill(idx)) continue;
 
-      // Find left boundary
       let lx = cx;
-      while (lx > 0 && matches(((cy * w) + lx - 1) * 4) && !visited[cy * w + lx - 1]) lx--;
+      while (lx > 0 && canFill(((cy * w) + lx - 1) * 4) && !visited[cy * w + lx - 1]) lx--;
 
-      // Fill right and check above/below
       let rx = lx;
-      while (rx < w && matches((cy * w + rx) * 4) && !visited[cy * w + rx]) {
-        idx = (cy * w + rx) * 4;
-        setPixel(idx);
+      while (rx < w && canFill((cy * w + rx) * 4) && !visited[cy * w + rx]) {
+        const pi = (cy * w + rx) * 4;
+        pd[pi] = fR;
+        pd[pi + 1] = fG;
+        pd[pi + 2] = fB;
+        pd[pi + 3] = fA;
         visited[cy * w + rx] = 1;
 
-        if (cy > 0 && !visited[(cy - 1) * w + rx] && matches(((cy - 1) * w + rx) * 4)) {
-          stack.push([rx, cy - 1]);
-        }
-        if (cy < h - 1 && !visited[(cy + 1) * w + rx] && matches(((cy + 1) * w + rx) * 4)) {
-          stack.push([rx, cy + 1]);
-        }
+        if (cy > 0 && !visited[(cy - 1) * w + rx]) stack.push([rx, cy - 1]);
+        if (cy < h - 1 && !visited[(cy + 1) * w + rx]) stack.push([rx, cy + 1]);
         rx++;
       }
     }
 
-    ctx.putImageData(imageData, 0, 0);
-    saveState();
-  }, [color, brushOpacity, saveState]);
+    ctx.putImageData(paintData, 0, 0);
+    savePaintState();
+  }, [color, brushOpacity, savePaintState]);
 
-  // Pointer handlers
-  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+  // ── Pointer handlers ────────────────────────────────────
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
     const pos = getPos(e);
 
-    if (tool === 'stamp') {
-      placeSticker(pos.x, pos.y);
-      return;
-    }
-
-    if (tool === 'fill') {
-      floodFill(pos.x, pos.y);
-      return;
-    }
+    if (tool === 'stamp') { placeSticker(pos.x, pos.y); return; }
+    if (tool === 'fill') { floodFill(pos.x, pos.y); return; }
 
     isDrawingRef.current = true;
     lastPosRef.current = pos;
     strokeIndexRef.current = 0;
 
-    // Draw a dot at the starting point
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
 
     if (tool === 'eraser') {
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = 'destination-out';
       ctx.globalAlpha = 1;
-      ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, brushSize * 1.5, 0, Math.PI * 2);
       ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
     } else if (brush === 'glitter') {
       drawGlitterAt(ctx, pos.x, pos.y, brushSize, color, brushOpacity);
     } else if (brush === 'crayon') {
       drawCrayonJitter(ctx, pos.x, pos.y, brushSize, color, brushOpacity);
     }
-  }, [tool, brush, color, brushSize, brushOpacity, getPos, placeSticker, floodFill, saveState]);
+  }, [tool, brush, color, brushSize, brushOpacity, getPos, placeSticker, floodFill]);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDrawingRef.current || tool === 'stamp' || tool === 'fill') return;
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const paint = paintRef.current;
+    if (!paint) return;
+    const ctx = paint.getContext('2d');
     if (!ctx) return;
 
     const pos = getPos(e);
@@ -346,28 +344,25 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     if (!last) return;
 
     if (tool === 'eraser') {
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = 'destination-out';
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = brushSize * 3;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(0,0,0,1)'; // color doesn't matter for destination-out
       ctx.beginPath();
       ctx.moveTo(last.x, last.y);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
     } else if (brush === 'glitter') {
-      // Scatter particles along the stroke
       const dist = Math.hypot(pos.x - last.x, pos.y - last.y);
       const steps = Math.max(1, Math.floor(dist / 3));
       for (let i = 0; i < steps; i++) {
         const t = i / steps;
-        const px = last.x + (pos.x - last.x) * t;
-        const py = last.y + (pos.y - last.y) * t;
-        drawGlitterAt(ctx, px, py, brushSize * 0.6, color, brushOpacity);
+        drawGlitterAt(ctx, last.x + (pos.x - last.x) * t, last.y + (pos.y - last.y) * t, brushSize * 0.6, color, brushOpacity);
       }
     } else if (brush === 'crayon') {
-      // Normal stroke + jitter
       applyBrushStyle(ctx, brush, color, brushSize, brushOpacity);
       ctx.beginPath();
       ctx.moveTo(last.x, last.y);
@@ -382,7 +377,6 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     } else {
-      // Standard brush rendering
       applyBrushStyle(ctx, brush, color, brushSize, brushOpacity);
       ctx.beginPath();
       ctx.moveTo(last.x, last.y);
@@ -390,10 +384,8 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
       ctx.stroke();
     }
 
-    // Reset composite operation
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-
     lastPosRef.current = pos;
   }, [tool, brush, color, brushSize, brushOpacity, getPos]);
 
@@ -401,25 +393,40 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     if (isDrawingRef.current) {
       isDrawingRef.current = false;
       lastPosRef.current = null;
-      saveState();
+      savePaintState();
     }
-  }, [saveState]);
+  }, [savePaintState]);
 
+  // ── Render stacked canvases ─────────────────────────────
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full rounded-xl"
+    <div
+      ref={containerRef}
+      className="relative rounded-xl overflow-hidden"
       style={{
-        touchAction: 'none',
-        aspectRatio: `${width} / ${height}`,
+        width: '100%',
         maxWidth: width,
+        aspectRatio: `${width} / ${height}`,
+        background: '#FFFFFF',
         boxShadow: '0 4px 24px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1)',
       }}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-    />
+    >
+      {/* Paint layer — user strokes */}
+      <canvas
+        ref={paintRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ touchAction: 'none', zIndex: 1 }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      />
+      {/* Template overlay — line art on top, not interactive */}
+      <canvas
+        ref={templateRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: 2 }}
+      />
+    </div>
   );
 });
 
