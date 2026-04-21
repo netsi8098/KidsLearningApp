@@ -9,7 +9,7 @@ import { type ReactNode } from 'react';
 
 function IconWatchVideo() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="4" y="8" width="24" height="18" rx="3" fill="#A78BFA" />
       <rect x="5" y="9" width="22" height="16" rx="2" fill="#1A1040" opacity="0.8" />
       {/* Play triangle */}
@@ -26,7 +26,7 @@ function IconWatchVideo() {
 
 function IconAlphabet() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Letter block A */}
       <rect x="3" y="6" width="18" height="18" rx="3" fill="#FF6B6B" />
       <text x="12" y="20" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold" fontFamily="sans-serif">A</text>
@@ -43,7 +43,7 @@ function IconAlphabet() {
 
 function IconDance() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Body */}
       <circle cx="20" cy="8" r="5" fill="#FFE0B2" />
       <line x1="20" y1="13" x2="20" y2="26" stroke="#FF8FAB" strokeWidth="3" strokeLinecap="round" />
@@ -71,7 +71,7 @@ function IconDance() {
 
 function IconStory() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Open book */}
       <path d="M5 10 C5 10 11 7 20 7 C29 7 35 10 35 10 V32 C35 32 29 29 20 29 C11 29 5 32 5 32 V10Z" fill="#A78BFA" opacity="0.2" />
       <path d="M5 10 C5 10 11 7 20 7 V29 C11 29 5 32 5 32 V10Z" fill="#C4AAFF" opacity="0.3" />
@@ -95,7 +95,7 @@ function IconStory() {
 
 function IconEmotionCheckin() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Big green heart */}
       <path d="M20 35 C20 35 4 25 4 14 C4 8 9 4 14 4 C17 4 19 6 20 8 C21 6 23 4 26 4 C31 4 36 8 36 14 C36 25 20 35 20 35Z" fill="#6BCB77" />
       <path d="M20 32 C20 32 7 23 7 14 C7 9 11 6 15 6 C17 6 19 7.5 20 9.5 C21 7.5 23 6 25 6 C29 6 33 9 33 14 C33 23 20 32 20 32Z" fill="#7DD88A" opacity="0.5" />
@@ -111,7 +111,7 @@ function IconEmotionCheckin() {
 
 function IconDraw() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Palette */}
       <ellipse cx="20" cy="22" rx="16" ry="13" fill="#FFE0B2" />
       <ellipse cx="20" cy="22" rx="14" ry="11" fill="#FFF3E0" />
@@ -134,7 +134,7 @@ function IconDraw() {
 
 function IconQuiz() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Question card */}
       <rect x="6" y="4" width="28" height="32" rx="5" fill="#FF8C42" />
       <rect x="8" y="6" width="24" height="28" rx="4" fill="#FFF3E0" />
@@ -151,7 +151,7 @@ function IconQuiz() {
 
 function IconNumbers() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Number blocks */}
       <rect x="2" y="4" width="16" height="16" rx="3" fill="#4ECDC4" />
       <text x="10" y="16" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="sans-serif">1</text>
@@ -167,7 +167,7 @@ function IconNumbers() {
 
 function IconAnimals() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Paw print */}
       <ellipse cx="20" cy="24" rx="8" ry="7" fill="#8B6914" opacity="0.8" />
       {/* Toe beans */}
@@ -189,7 +189,7 @@ function IconAnimals() {
 
 function IconRecipe() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Cookie */}
       <circle cx="20" cy="20" r="14" fill="#D4A050" />
       <circle cx="20" cy="20" r="12" fill="#E8B960" />
@@ -213,7 +213,7 @@ function IconRecipe() {
 
 function IconBedtime() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Night circle */}
       <circle cx="20" cy="20" r="16" fill="#1A1040" />
       {/* Crescent moon */}
@@ -235,7 +235,7 @@ function IconBedtime() {
 
 function IconExplorer() {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       {/* Globe */}
       <circle cx="20" cy="20" r="15" fill="#45B7D1" />
       <circle cx="20" cy="20" r="13" fill="#87CEEB" opacity="0.4" />

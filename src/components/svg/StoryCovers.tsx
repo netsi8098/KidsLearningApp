@@ -32,7 +32,7 @@ const Sparkle = ({ x, y, size = 6 }: { x: number; y: number; size?: number }) =>
 
 function CoverGoodnightMoon(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cm-night" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#0F0A2E" />
@@ -75,7 +75,7 @@ function CoverGoodnightMoon(_: CoverProps) {
 
 function CoverLittleDuck(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cd-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#87CEEB" />
@@ -123,7 +123,7 @@ function CoverLittleDuck(_: CoverProps) {
 
 function CoverBestFriend(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cf-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#FFF0F5" />
@@ -178,7 +178,7 @@ function CoverBestFriend(_: CoverProps) {
 
 function CoverMagicGarden(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cg-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#E8F5E9" />
@@ -238,7 +238,7 @@ function CoverMagicGarden(_: CoverProps) {
 
 function CoverRainbow(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cr-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#87CEEB" />
@@ -307,7 +307,7 @@ function CoverRainbow(_: CoverProps) {
 
 function CoverBraveCat(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cc-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#87CEEB" />
@@ -367,7 +367,7 @@ function CoverBraveCat(_: CoverProps) {
 
 function CoverTreasureMap(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="ct-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#FFF3E0" />
@@ -417,7 +417,7 @@ function CoverTreasureMap(_: CoverProps) {
 
 function CoverNewKid(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cn-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#E3F2FD" />
@@ -478,7 +478,7 @@ function CoverNewKid(_: CoverProps) {
 
 function CoverWaterCycle(_: CoverProps) {
   return (
-    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="cw-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#87CEEB" />

@@ -200,8 +200,8 @@ function splitIntoPhrases(text: string): string[] {
   return phrases.length > 0 ? phrases : [text];
 }
 
-// Proactive health check on module load — so first speak call is instant
-if (typeof window !== 'undefined') {
+// Proactive health check on module load — only if TTS URLs are configured
+if (typeof window !== 'undefined' && TTS_URLS.length > 0) {
   setTimeout(() => checkTTSServer(), 1000);
 }
 

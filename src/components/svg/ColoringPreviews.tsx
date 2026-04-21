@@ -9,7 +9,7 @@ import { type ReactNode } from 'react';
 
 function PreviewCat() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <ellipse cx="40" cy="50" rx="22" ry="18" fill="#FF8C42" />
       <circle cx="40" cy="33" r="16" fill="#FF8C42" />
       {/* Ears */}
@@ -39,7 +39,7 @@ function PreviewCat() {
 
 function PreviewFish() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <ellipse cx="35" cy="40" rx="24" ry="16" fill="#45B7D1" />
       <polygon points="58,40 74,26 74,54" fill="#4ECDC4" />
       <circle cx="24" cy="36" r="3" fill="white" />
@@ -62,7 +62,7 @@ function PreviewFish() {
 
 function PreviewLetterA() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="10" y="10" width="60" height="60" rx="12" fill="#FF6B6B" opacity="0.15" />
       <path d="M22 65 L40 15 L58 65" fill="none" stroke="#FF6B6B" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       <line x1="28" y1="48" x2="52" y2="48" stroke="#FF6B6B" strokeWidth="4" strokeLinecap="round" />
@@ -75,7 +75,7 @@ function PreviewLetterA() {
 
 function PreviewLetterB() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="10" y="10" width="60" height="60" rx="12" fill="#4ECDC4" opacity="0.15" />
       <line x1="25" y1="15" x2="25" y2="65" stroke="#4ECDC4" strokeWidth="5" strokeLinecap="round" />
       <path d="M25 15 Q55 15 55 30 Q55 40 25 40" stroke="#4ECDC4" strokeWidth="4" fill="none" strokeLinecap="round" />
@@ -88,7 +88,7 @@ function PreviewLetterB() {
 
 function PreviewNumber1() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="10" y="10" width="60" height="60" rx="12" fill="#FFE66D" opacity="0.2" />
       <path d="M34 25 L42 15 L42 62" stroke="#E6A817" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       <line x1="30" y1="62" x2="54" y2="62" stroke="#E6A817" strokeWidth="4" strokeLinecap="round" />
@@ -101,7 +101,7 @@ function PreviewNumber1() {
 
 function PreviewNumber2() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="10" y="10" width="60" height="60" rx="12" fill="#A78BFA" opacity="0.15" />
       <path d="M26 28 Q26 15 40 15 Q54 15 54 28 Q54 40 26 58 L26 64 L54 64" stroke="#A78BFA" strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -112,7 +112,7 @@ function PreviewNumber2() {
 
 function PreviewStar() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <polygon
         points="40,8 48,28 70,30 54,46 58,68 40,56 22,68 26,46 10,30 32,28"
         fill="#FFE66D"
@@ -132,7 +132,7 @@ function PreviewStar() {
 
 function PreviewHeart() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <path d="M40 70 C40 70 8 50 8 28 C8 16 18 8 28 8 C34 8 38 12 40 16 C42 12 46 8 52 8 C62 8 72 16 72 28 C72 50 40 70 40 70Z" fill="#FF6B6B" />
       <path d="M40 62 C40 62 14 46 14 28 C14 19 22 12 30 12 C34 12 38 15 40 18 C42 15 46 12 50 12 C58 12 66 19 66 28 C66 46 40 62 40 62Z" fill="#FF8FAB" opacity="0.4" />
     </svg>
@@ -143,7 +143,7 @@ function PreviewHeart() {
 
 function PreviewFlower() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="38" y="45" width="4" height="25" rx="2" fill="#4CAF50" />
       {/* Leaves */}
       <ellipse cx="32" cy="55" rx="8" ry="4" fill="#66BB6A" transform="rotate(-20, 32, 55)" />
@@ -169,7 +169,7 @@ function PreviewFlower() {
 
 function PreviewTree() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <rect x="35" y="48" width="10" height="22" rx="3" fill="#8B6914" />
       <ellipse cx="40" cy="35" rx="25" ry="22" fill="#4CAF50" />
       <ellipse cx="32" cy="40" rx="16" ry="16" fill="#66BB6A" opacity="0.7" />
@@ -185,7 +185,7 @@ function PreviewTree() {
 
 function PreviewSmiley() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <circle cx="40" cy="40" r="28" fill="#FFE66D" />
       <circle cx="40" cy="40" r="24" fill="#FFF3BD" opacity="0.4" />
       <circle cx="30" cy="34" r="3.5" fill="#2D2D3A" />
@@ -204,7 +204,7 @@ function PreviewSmiley() {
 
 function PreviewSurprised() {
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" aria-hidden="true">
       <circle cx="40" cy="40" r="28" fill="#FFE66D" />
       <circle cx="40" cy="40" r="24" fill="#FFF3BD" opacity="0.4" />
       {/* Big eyes */}

@@ -12,6 +12,7 @@ import MascotLion from '../components/svg/MascotLion';
 import ConfettiCelebration from '../components/ConfettiCelebration';
 import StoryIllustration from '../components/StoryIllustration';
 import { getStoryCover } from '../components/svg/StoryCovers';
+import { getStoryPageArt } from '../components/svg/StoryPageArt';
 import { stopSpeaking as stopAIVoice, getCurrentAudio } from '../services/ttsService';
 import {
   storiesData,
@@ -1106,18 +1107,30 @@ export default function StoriesPage() {
                   {/* Fold/gutter line */}
                   <div className="absolute left-4 top-4 bottom-4 w-[1px]" style={{ background: 'rgba(0,0,0,0.04)' }} />
 
-                  {/* Illustration — large emoji centered on page */}
+                  {/* Illustration — narrative scene or emoji fallback */}
                   <div className="flex items-center justify-center flex-1" style={{ minHeight: '200px' }}>
-                    <motion.span
-                      className="select-none"
-                      style={{ fontSize: 'clamp(80px, 20vw, 140px)', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }}
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: 'spring', damping: 15 }}
-                      key={pageData.emoji}
-                    >
-                      {pageData.emoji}
-                    </motion.span>
+                    {activeStoryId && getStoryPageArt(activeStoryId, currentPage) ? (
+                      <motion.div
+                        className="w-full h-full max-w-[340px] rounded-xl overflow-hidden"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', damping: 15 }}
+                        key={`${activeStoryId}-${currentPage}`}
+                      >
+                        {getStoryPageArt(activeStoryId, currentPage)}
+                      </motion.div>
+                    ) : (
+                      <motion.span
+                        className="select-none"
+                        style={{ fontSize: 'clamp(80px, 20vw, 140px)', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', damping: 15 }}
+                        key={pageData.emoji}
+                      >
+                        {pageData.emoji}
+                      </motion.span>
+                    )}
                   </div>
 
                   {/* Page corner fold */}

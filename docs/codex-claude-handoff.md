@@ -1079,3 +1079,62 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - [ ] Coloring page (/coloring) — template cards show colorful SVG previews
 - [ ] No regressions on previously verified pages
 - [ ] Build size reasonable (StoriesPage ~49KB, MainMenu ~85KB)
+
+---
+
+### Claude Batch 1B — Story Reader Page Art + Polish Fixes
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors, 2.67s
+
+#### What was built
+
+**1. Story Reader Page Illustrations** — `src/components/svg/StoryPageArt.tsx`
+- 15 full-page narrative SVG scenes for 3 stories (5 pages each):
+  - **The Little Duck**: duck by pond, quacking/swimming, meeting frog, splashing together, happy farewell
+  - **Goodnight Moon**: luminous full moon, starry sky, three night trees with fireflies, birds sleeping in nest, cozy bedroom window
+  - **My Best Friend**: teddy meets bunny, playing outdoors with ball, sharing cookies on picnic blanket, big hug with floating hearts, sitting together under giant heart
+- Wired into StoriesPage reader: replaces giant emoji with full-scene illustrations
+- Falls back to emoji for stories without page art (ages 4-5, 6-8 still use emoji)
+
+**2. SVG Accessibility Fix** — All Batch 1 SVGs
+- Added `aria-hidden="true" focusable="false"` to all decorative SVGs in:
+  - StoryCovers.tsx (9 covers)
+  - MissionIcons.tsx (12 icons)
+  - ColoringPreviews.tsx (12 previews)
+  - StoryPageArt.tsx (15 pages — had it from creation)
+- Eliminates leaked "z z z", "$ $", "N" text from screen readers
+
+**3. TTS Localhost Health-Check Gated** — `src/config.ts` + `src/services/ttsService.ts`
+- `getApiUrls()`, `getTtsUrls()`, `getOllamaUrls()` now only append localhost fallback URLs when `config.isDev` is true
+- Proactive health check on module load only fires when `TTS_URLS.length > 0`
+- Production console no longer emits failed `http://localhost:5555/health` errors
+
+**4. Coloring Preview Cards Enhanced** — `src/pages/ColoringPage.tsx`
+- Cards now have category-colored preview backgrounds (animals=warm orange, alphabet=purple, numbers=blue, holidays=gold, nature=green, emotions=pink)
+- Preview SVGs scaled to fill a square aspect-ratio area with padding
+- Removed excess vertical whitespace; title and difficulty badge in compact footer
+- Enhanced hover shadows for depth
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/components/svg/StoryPageArt.tsx` | **NEW** — 15 narrative page scene SVGs |
+| `src/components/svg/StoryCovers.tsx` | Added aria-hidden to all SVGs |
+| `src/components/svg/MissionIcons.tsx` | Added aria-hidden to all SVGs |
+| `src/components/svg/ColoringPreviews.tsx` | Added aria-hidden to all SVGs |
+| `src/pages/StoriesPage.tsx` | Reader uses page art, emoji fallback |
+| `src/pages/ColoringPage.tsx` | Enhanced card layout with colored backgrounds |
+| `src/config.ts` | Localhost URLs gated behind isDev |
+| `src/services/ttsService.ts` | Proactive health check gated |
+| `docs/codex-claude-handoff.md` | This handoff |
+
+#### Codex verification checklist
+- [ ] /stories → open "The Little Duck" — all 5 pages show full-scene illustrations (no giant emoji)
+- [ ] /stories → open "Goodnight Moon" — all 5 pages show night scenes
+- [ ] /stories → open "My Best Friend" — all 5 pages show teddy+bunny scenes
+- [ ] /stories → open "The Magic Garden" (age 4-5) — still shows emoji (no page art yet, expected)
+- [ ] No "z z z" or "$" text leaking into screen reader / accessible name on story cards
+- [ ] /coloring — cards have colored backgrounds, larger previews, richer look
+- [ ] Production console (deployed) — no localhost:5555 or localhost:4000 errors
+- [ ] All previously verified features still working

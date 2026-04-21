@@ -179,36 +179,49 @@ export default function ColoringPage() {
                   <p className="font-medium" style={{ color: '#6B6B7B' }}>No templates found</p>
                 </div>
               ) : (
-                filteredTemplates.map((template, i) => (
+                filteredTemplates.map((template, i) => {
+                  const cardBg = template.category === 'animals' ? '#FFF3E0' :
+                    template.category === 'alphabet' ? '#EDE7F6' :
+                    template.category === 'numbers' ? '#E3F2FD' :
+                    template.category === 'holidays' ? '#FFF8E1' :
+                    template.category === 'nature' ? '#E8F5E9' :
+                    '#FCE4EC';
+                  return (
                   <motion.button
                     key={template.id}
-                    className="rounded-[20px] p-4 text-center cursor-pointer"
-                    style={{ backgroundColor: '#FFFFFF', border: '1px solid #F0EAE0', boxShadow: '0 2px 12px rgba(45,45,58,0.06)' }}
+                    className="rounded-[20px] text-center cursor-pointer overflow-hidden"
+                    style={{ backgroundColor: '#FFFFFF', border: '1px solid #F0EAE0', boxShadow: '0 3px 16px rgba(45,45,58,0.08)' }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.06 }}
-                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileHover={{ scale: 1.03, y: -2, boxShadow: '0 6px 24px rgba(45,45,58,0.12)' }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => openTemplate(template)}
                   >
-                    <div className="w-16 h-16 mx-auto mb-2">
-                      {getColoringPreview(template.id) || <span className="text-4xl block text-center leading-[64px]">{template.emoji}</span>}
+                    {/* Colored preview area */}
+                    <div className="w-full aspect-square flex items-center justify-center p-3" style={{ background: cardBg }}>
+                      <div className="w-full h-full max-w-[80px] max-h-[80px]">
+                        {getColoringPreview(template.id) || <span className="text-5xl block text-center leading-[80px]">{template.emoji}</span>}
+                      </div>
                     </div>
-                    <h3 className="font-bold text-sm" style={{ color: '#2D2D3A' }}>{template.title}</h3>
-                    <span
-                      className="inline-block mt-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold"
-                      style={
-                        template.difficulty === 'easy'
-                          ? { backgroundColor: '#EDFAEF', color: '#6BCB77' }
-                          : template.difficulty === 'medium'
-                          ? { backgroundColor: '#FFFCE8', color: '#E6A817' }
-                          : { backgroundColor: '#FFF0F0', color: '#FF6B6B' }
-                      }
-                    >
-                      {template.difficulty}
-                    </span>
+                    <div className="px-3 py-2.5">
+                      <h3 className="font-bold text-sm" style={{ color: '#2D2D3A' }}>{template.title}</h3>
+                      <span
+                        className="inline-block mt-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold"
+                        style={
+                          template.difficulty === 'easy'
+                            ? { backgroundColor: '#EDFAEF', color: '#6BCB77' }
+                            : template.difficulty === 'medium'
+                            ? { backgroundColor: '#FFFCE8', color: '#E6A817' }
+                            : { backgroundColor: '#FFF0F0', color: '#FF6B6B' }
+                        }
+                      >
+                        {template.difficulty}
+                      </span>
+                    </div>
                   </motion.button>
-                ))
+                  );
+                })
               )}
             </div>
           </motion.div>
