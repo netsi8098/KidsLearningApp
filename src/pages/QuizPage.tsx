@@ -235,7 +235,10 @@ export default function QuizPage() {
         </motion.div>
       )}
 
-      <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full relative z-10">
+      <div
+        className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full relative z-10"
+        style={{ padding: '0 8px' }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={qIndex}

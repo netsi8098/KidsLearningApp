@@ -6,10 +6,16 @@ interface NavButtonProps {
   disabled?: boolean;
 }
 
+const ARIA_LABELS = {
+  back: 'Go back',
+  prev: 'Previous',
+  next: 'Next',
+};
+
 function ArrowIcon({ direction }: { direction: 'back' | 'prev' | 'next' }) {
   const isLeft = direction === 'back' || direction === 'prev';
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ transform: isLeft ? 'none' : 'rotate(180deg)' }}>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ transform: isLeft ? 'none' : 'rotate(180deg)' }} aria-hidden="true">
       <path
         d="M12.5 15L7.5 10L12.5 5"
         stroke="currentColor"
@@ -36,6 +42,7 @@ export default function NavButton({ onClick, direction, disabled = false }: NavB
       disabled={disabled}
       whileHover={{ scale: 1.08, boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
       whileTap={{ scale: 0.92 }}
+      aria-label={ARIA_LABELS[direction]}
     >
       <ArrowIcon direction={direction} />
     </motion.button>

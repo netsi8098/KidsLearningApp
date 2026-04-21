@@ -1024,7 +1024,7 @@ export default function StoriesPage() {
 
     /* ── READER VIEW ── */
     return (
-      <div className="h-dvh flex flex-col overflow-hidden relative" style={{ background: 'linear-gradient(180deg, #1A1040 0%, #2D1B69 50%, #1A1040 100%)' }}>
+      <div className="h-dvh flex flex-col overflow-hidden relative mx-auto" style={{ background: 'linear-gradient(180deg, #1A1040 0%, #2D1B69 50%, #1A1040 100%)', maxWidth: '900px' }}>
         {/* Magical reading room ambient — stars + warm glow */}
         <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
           {[...Array(12)].map((_, i) => (

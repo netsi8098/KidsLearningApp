@@ -882,6 +882,7 @@ export default function MainMenu() {
             }}
             onClick={handleSwitchPlayer}
             whileTap={{ scale: 0.95 }}
+            aria-label="Switch player"
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-lg ring-2 overflow-hidden"
@@ -917,6 +918,7 @@ export default function MainMenu() {
               className="w-9 h-9 glass rounded-full flex items-center justify-center cursor-pointer relative"
               onClick={() => navigate('/inbox')}
               whileTap={{ scale: 0.9 }}
+              aria-label="Notifications"
             >
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M9 2C6.5 2 4.5 4 4.5 6.5V10L3 12H15L13.5 10V6.5C13.5 4 11.5 2 9 2Z" stroke="#6B6B7B" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
@@ -930,8 +932,9 @@ export default function MainMenu() {
               className="w-9 h-9 glass rounded-full flex items-center justify-center cursor-pointer"
               onClick={() => navigate('/settings')}
               whileTap={{ scale: 0.9 }}
+              aria-label="Settings"
             >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="#6B6B7B" strokeWidth="1.5"/><path d="M9 1.5V3M9 15V16.5M1.5 9H3M15 9H16.5M3.4 3.4L4.5 4.5M13.5 13.5L14.6 14.6M3.4 14.6L4.5 13.5M13.5 4.5L14.6 3.4" stroke="#6B6B7B" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="3" stroke="#6B6B7B" strokeWidth="1.5"/><path d="M9 1.5V3M9 15V16.5M1.5 9H3M15 9H16.5M3.4 3.4L4.5 4.5M13.5 13.5L14.6 14.6M3.4 14.6L4.5 13.5M13.5 4.5L14.6 3.4" stroke="#6B6B7B" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </motion.button>
           </div>
         </div>

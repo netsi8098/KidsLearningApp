@@ -565,7 +565,7 @@ export default function ParentDashboard() {
 
   // --- Dashboard ---
   return (
-    <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-24 md:px-8 md:pt-6 md:pb-8" style={{ overflow: 'visible' }}>
+    <div className="min-h-dvh px-4 pt-4 pb-24 md:px-8 md:pt-6 md:pb-8" style={{ overflow: 'visible', background: 'linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6 md:max-w-3xl md:mx-auto">
         <NavButton onClick={() => navigate('/menu')} direction="back" />
