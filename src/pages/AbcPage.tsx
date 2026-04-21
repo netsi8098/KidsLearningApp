@@ -87,11 +87,12 @@ export default function AbcPage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
-            className="text-center"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            transition={{ type: 'spring', damping: 20 }}
+            className="text-center card-flip-enter"
+            initial={{ rotateY: -90, opacity: 0 }}
+            animate={{ rotateY: 0, opacity: 1 }}
+            exit={{ rotateY: 90, opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            style={{ perspective: '600px' }}
           >
             {/* Letter card — chunky 3D block letter */}
             <motion.div

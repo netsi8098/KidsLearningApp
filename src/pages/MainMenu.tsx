@@ -440,7 +440,7 @@ function QuestBoard({
                 fill="none"
                 strokeWidth="4"
                 strokeLinecap="round"
-                style={{ stroke: allMissionsDone ? '#6BCB77' : '#FF6B6B' }}
+                style={{ stroke: allMissionsDone ? '#FFD93D' : progressPct > 50 ? '#6BCB77' : '#FF6B6B' }}
                 strokeDasharray={progressCircumference}
                 initial={{ strokeDashoffset: progressCircumference }}
                 animate={{ strokeDashoffset: progressOffset }}
@@ -903,6 +903,20 @@ export default function MainMenu() {
               </div>
             )}
             <StarCounter />
+            {/* Notification bell */}
+            <motion.button
+              className="w-9 h-9 glass rounded-full flex items-center justify-center cursor-pointer relative"
+              onClick={() => navigate('/inbox')}
+              whileTap={{ scale: 0.9 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M9 2C6.5 2 4.5 4 4.5 6.5V10L3 12H15L13.5 10V6.5C13.5 4 11.5 2 9 2Z" stroke="#6B6B7B" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
+                <path d="M7 14C7 15.1 7.9 16 9 16C10.1 16 11 15.1 11 14" stroke="#6B6B7B" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              {/* Red dot for unread — always show for now */}
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-coral border-2 border-white" />
+            </motion.button>
+            {/* Settings gear */}
             <motion.button
               className="w-9 h-9 glass rounded-full flex items-center justify-center cursor-pointer"
               onClick={() => navigate('/settings')}

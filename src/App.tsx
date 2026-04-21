@@ -9,6 +9,7 @@ import StarBurst from './components/StarBurst';
 import BadgeToast from './components/BadgeToast';
 import IdleMascot from './components/IdleMascot';
 import { NotificationProvider } from './components/NotificationToast';
+import OfflineBanner from './components/OfflineBanner';
 import { startAutoSync, stopAutoSync } from './services/syncService';
 import { initErrorReporting } from './services/errorReporter';
 
@@ -154,6 +155,7 @@ export default function App() {
         <StarBurst />
         <BadgeToast />
         <IdleMascot />
+        <OfflineBanner />
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             {/* Public routes — no player required */}

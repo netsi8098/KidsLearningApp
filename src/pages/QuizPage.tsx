@@ -12,6 +12,7 @@ import StarCounter from '../components/StarCounter';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import ConfettiCelebration from '../components/ConfettiCelebration';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 
 const categories = [
   { key: 'mixed', label: 'Mixed', emoji: '🎲', color: '#FF8C42' },
@@ -26,6 +27,7 @@ export default function QuizPage() {
   const navigate = useNavigate();
   const { currentPlayer } = useApp();
   const { recordActivity } = useProgress(currentPlayer?.id);
+  const sfx = useSoundEffects();
   const { checkAndAwardBadges } = useBadges(currentPlayer?.id);
   const { speak, playCorrect, playTryAgain, playClick } = useAudio();
 
@@ -62,12 +64,14 @@ export default function QuizPage() {
 
       if (correct) {
         playCorrect();
+        sfx.playCorrect();
         const msg = encouragements[Math.floor(Math.random() * encouragements.length)];
         speak(msg);
         setScore((s) => s + 1);
         setStreak((s) => s + 1);
       } else {
         playTryAgain();
+        sfx.playWrong();
         speak(`The answer is ${q.correctAnswer}. Try the next one!`);
         setStreak(0);
       }
