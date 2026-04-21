@@ -1251,3 +1251,15 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - [ ] No decorative text (z/$/N) in DOM innerText
 - [ ] AI voice works on deployed app (via tunnel)
 - [ ] Production console clean
+
+---
+
+### Backend Online + API Tunnel
+
+**Date:** 2026-04-21
+
+- Backend started on localhost:4000 with Neon cloud database
+- Cloudflare tunnel: `https://obituaries-colon-increasing-obligations.trycloudflare.com`
+- GitHub secret `VITE_API_URL` set to tunnel URL
+- CORS updated to allow Azure SWA origin
+- **Note:** Tunnel URLs are ephemeral — if Mac restarts, need new tunnel + secret update + redeploy
