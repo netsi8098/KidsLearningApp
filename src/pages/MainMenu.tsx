@@ -868,11 +868,18 @@ export default function MainMenu() {
       {/* ══════════════════════════════════════════════════════
           1. COMPACT HEADER
          ══════════════════════════════════════════════════════ */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2 md:px-8" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="flex-shrink-0 px-4 pt-3 pb-2 md:px-8" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center justify-between max-w-md mx-auto md:max-w-2xl lg:max-w-4xl">
+          {/* Passport-style profile badge */}
           <motion.button
-            className="flex items-center gap-2.5 glass rounded-full px-3 py-1.5 cursor-pointer"
-            style={{ boxShadow: 'var(--shadow-card)' }}
+            className="flex items-center gap-2.5 rounded-full px-3 py-1.5 cursor-pointer"
+            style={{
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
+              border: '1px solid rgba(255,255,255,0.5)',
+            }}
             onClick={handleSwitchPlayer}
             whileTap={{ scale: 0.95 }}
           >
@@ -894,13 +901,15 @@ export default function MainMenu() {
 
           <div className="flex items-center gap-2">
             {streakDays > 0 && (
-              <div
+              <motion.div
                 className="flex items-center gap-1 rounded-full px-2.5 py-1.5"
-                style={{ background: 'linear-gradient(135deg, #FFE0B2, #FFCC80)' }}
+                style={{ background: 'linear-gradient(135deg, #FFE0B2, #FFCC80)', boxShadow: '0 2px 8px rgba(255,167,38,0.2)' }}
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1C8 1 12 5 12 9C12 11.8 10.2 14 8 14C5.8 14 4 11.8 4 9C4 7 5 5 6 4C6 6 7 7 8 6C8 4 8 1 8 1Z" fill="#FF6B6B" stroke="#EF4444" strokeWidth="0.8"/><path d="M8 8C8 8 10 10 10 11.5C10 12.6 9.1 13.5 8 13.5C6.9 13.5 6 12.6 6 11.5C6 10 8 8 8 8Z" fill="#FFE66D"/></svg>
                 <span className="text-xs font-extrabold text-orange-700">{streakDays}</span>
-              </div>
+              </motion.div>
             )}
             <StarCounter />
             {/* Notification bell */}
@@ -1064,6 +1073,15 @@ export default function MainMenu() {
                     </div>
                   </div>
                 )}
+
+                {/* ─── Soft scenic divider ─── */}
+                <div className="my-2 flex items-center gap-3 px-2">
+                  <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.15), transparent)' }} />
+                  <svg width="20" height="12" viewBox="0 0 20 12" fill="none" opacity="0.2">
+                    <path d="M0 12C3 8 6 6 10 6C14 6 17 8 20 12" fill="#A78BFA" />
+                  </svg>
+                  <div className="flex-1 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.15), transparent)' }} />
+                </div>
 
                 {/* Collections */}
                 {collections.length > 0 && (
