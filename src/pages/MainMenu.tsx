@@ -942,79 +942,100 @@ export default function MainMenu() {
             className="h-full max-w-md mx-auto md:max-w-2xl lg:max-w-4xl flex flex-col"
           >
             {activeTab === 'home' ? (
-              /* ── HOME TAB ── */
+              /* ── HOME TAB — DAILY ADVENTURE HUB ── */
               <div className="flex-1 overflow-y-auto pb-4 scrollbar-hide">
                 {/* Search bar */}
                 <div className="mb-3">
                   <SearchBar />
                 </div>
 
-                {/* Hero greeting with mascot */}
+                {/* ═══ HERO SECTION — "Today's Adventure" ═══ */}
                 <motion.div
-                  className="rounded-3xl overflow-hidden relative mb-4"
+                  className="rounded-[28px] overflow-hidden relative mb-5"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,200,150,0.2), rgba(255,255,255,0.8))',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    boxShadow: '0 4px 20px rgba(255,107,107,0.12)',
+                    background: (() => {
+                      const h = new Date().getHours();
+                      if (h >= 20 || h < 6) return 'linear-gradient(135deg, #1A1040 0%, #2D1B69 50%, #4A1A6B 100%)';
+                      if (h >= 17) return 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 40%, #FFD166 100%)';
+                      if (h >= 12) return 'linear-gradient(135deg, #4ECDC4 0%, #45B7D1 50%, #5CE1E6 100%)';
+                      return 'linear-gradient(135deg, #FFD166 0%, #FF8C42 40%, #FF6B6B 100%)';
+                    })(),
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                    minHeight: '180px',
                   }}
                 >
-                  {/* Animated decorative elements inside greeting card */}
+                  {/* Floating decorative elements */}
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    {/* Drifting cloud */}
-                    <div className="absolute top-2 animate-drift" style={{ animationDuration: '25s' }}>
-                      <svg width="40" height="20" viewBox="0 0 40 20" fill="white" fillOpacity="0.3"><ellipse cx="20" cy="14" rx="18" ry="6"/><ellipse cx="14" cy="10" rx="10" ry="8"/><ellipse cx="26" cy="10" rx="10" ry="8"/></svg>
-                    </div>
-                    {/* Small bird */}
-                    <div className="absolute top-3 right-8 animate-float-gentle" style={{ animationDelay: '1s' }}>
-                      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1 6C3 2 6 4 8 6C10 4 13 2 15 6" stroke="#6B6B7B" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.3"/></svg>
-                    </div>
-                    {/* Sun rays */}
-                    <div className="absolute -top-4 -right-4 animate-sun-rotate" style={{ animationDuration: '40s' }}>
-                      <svg width="50" height="50" viewBox="0 0 50 50" fill="none" opacity="0.15"><circle cx="25" cy="25" r="8" fill="#FFE66D"/><path d="M25 5V12M25 38V45M5 25H12M38 25H45M11 11L16 16M34 34L39 39M11 39L16 34M34 16L39 11" stroke="#FFE66D" strokeWidth="2" strokeLinecap="round"/></svg>
+                    {/* Stars */}
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="absolute rounded-full animate-sparkle" style={{ width: 3, height: 3, top: `${15 + Math.random() * 40}%`, left: `${10 + Math.random() * 80}%`, background: 'rgba(255,255,255,0.6)', animationDelay: `${i * 0.5}s` }} />
+                    ))}
+                    {/* Soft cloud */}
+                    <div className="absolute top-3 right-4 animate-drift" style={{ animationDuration: '30s' }}>
+                      <svg width="48" height="24" viewBox="0 0 48 24" fill="white" fillOpacity="0.2"><ellipse cx="24" cy="16" rx="22" ry="8"/><ellipse cx="16" cy="10" rx="12" ry="10"/><ellipse cx="32" cy="12" rx="12" ry="10"/></svg>
                     </div>
                   </div>
 
-                  <div className="relative z-10 p-4 flex items-center gap-3">
-                    <div className="animate-breathe">
-                      <MascotLion
-                        size={100}
-                        expression={(() => {
-                          const h = new Date().getHours();
-                          if (h >= 20 || h < 6) return 'sleeping';
-                          if (h >= 17) return 'happy';
-                          return 'excited';
-                        })()}
-                        animated
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div
-                        className="rounded-2xl rounded-bl-sm px-4 py-2.5 mb-2"
-                        style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(45,45,58,0.04)' }}
+                  {/* Hero content — immersive adventure card */}
+                  <div className="relative z-10 p-5">
+                    <div className="flex items-start gap-4">
+                      {/* Mascot */}
+                      <motion.div
+                        className="flex-shrink-0"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                       >
-                        <p className="font-display text-base text-[#2D2D3A]">
+                        <MascotLion
+                          size={90}
+                          expression={(() => {
+                            const h = new Date().getHours();
+                            if (h >= 20 || h < 6) return 'sleeping';
+                            if (h >= 17) return 'happy';
+                            return 'excited';
+                          })()}
+                          animated
+                        />
+                      </motion.div>
+
+                      {/* Greeting + CTA */}
+                      <div className="flex-1 min-w-0 pt-1">
+                        <p className="font-display text-white text-lg leading-snug mb-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
                           {(() => {
                             const h = new Date().getHours();
                             const name = currentPlayer.name;
-                            if (h >= 6 && h < 12) return `Good morning, ${name}! Let's learn something new!`;
-                            if (h >= 12 && h < 17) return `Good afternoon, ${name}! Ready for more fun?`;
-                            if (h >= 17 && h < 20) return `Good evening, ${name}! What shall we explore?`;
-                            return `Bedtime learning, ${name}? Let's do something cozy!`;
+                            if (h >= 6 && h < 12) return `Good morning, ${name}!`;
+                            if (h >= 12 && h < 17) return `Hey ${name}!`;
+                            if (h >= 17 && h < 20) return `Good evening, ${name}!`;
+                            return `Bedtime, ${name}!`;
                           })()}
                         </p>
-                      </div>
-                      <motion.button
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold cursor-pointer text-white tap-bounce animate-glow-pulse"
-                        style={{ background: 'linear-gradient(135deg, #FFD166, #FF8C42)', boxShadow: '0 4px 12px rgba(255,209,102,0.4)' }}
-                        onClick={() => { const r = ['/lessons', '/stories', '/discover']; navigate(r[Math.floor(Math.random() * r.length)]); }}
-                        whileTap={{ scale: 0.93 }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L9 5L13 5.5L10 8.5L11 13L7 10.5L3 13L4 8.5L1 5.5L5 5Z" fill="#FFE66D"/></svg>
-                        Today&apos;s Pick
+                        <p className="text-white/70 text-sm font-bold mb-3">
+                          {(() => {
+                            const h = new Date().getHours();
+                            if (h >= 6 && h < 12) return "Let's start today's adventure!";
+                            if (h >= 12 && h < 17) return "Ready for more fun?";
+                            if (h >= 17 && h < 20) return "What shall we explore?";
+                            return "Time for something cozy";
+                          })()}
+                        </p>
+
+                        <motion.button
+                          className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display text-sm cursor-pointer"
+                          style={{
+                            background: 'rgba(255,255,255,0.95)',
+                            color: '#FF6B6B',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                          }}
+                          onClick={() => { const r = ['/lessons', '/stories', '/discover']; navigate(r[Math.floor(Math.random() * r.length)]); }}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 6L15 6.5L11.5 10L12.5 15L8 12.5L3.5 15L4.5 10L1 6.5L6 6Z" fill="#FFD93D" stroke="#F59E0B" strokeWidth="0.5"/></svg>
+                          Start Adventure
                         <span>&#8594;</span>
                       </motion.button>
                     </div>
+                  </div>
                   </div>
                 </motion.div>
 
@@ -1105,25 +1126,59 @@ export default function MainMenu() {
                   </div>
                 </div>
 
-                {/* Quick links row */}
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                {/* ═══ DESTINATION PORTALS ═══ */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   {[
-                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 9H21L16 13.5L18 21L12 17L6 21L8 13.5L3 9H9Z" fill="#FFD93D" stroke="#F59E0B" strokeWidth="1.5"/></svg>, label: 'Rewards', route: '/rewards', bg: '#FFF8E1' },
-                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#A78BFA" strokeWidth="1.8" fill="#F3EFFE"/><path d="M8 8H16M8 12H14" stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round"/></svg>, label: 'Scrapbook', route: '/scrapbook', bg: '#F3EFFE' },
-                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 4V8L12 10L9 8V4Z" stroke="#4ECDC4" strokeWidth="1.8" fill="#EDFAF8"/><circle cx="12" cy="16" r="5" stroke="#4ECDC4" strokeWidth="1.8" fill="#EDFAF8"/></svg>, label: 'Parents', route: '/parent-dashboard', bg: '#EDFAF8' },
-                    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="12" rx="8" ry="7" fill="#FFF0F6" stroke="#FF8FAB" strokeWidth="1.8"/><path d="M9 10C9 10 12 8 15 10" stroke="#FF8FAB" strokeWidth="1.5" strokeLinecap="round"/><path d="M12 10V15" stroke="#FF8FAB" strokeWidth="1.5" strokeLinecap="round"/></svg>, label: 'Assessment', route: '/assessment', bg: '#FFF0F6' },
-                  ].map((item) => (
+                    {
+                      label: 'Rewards',
+                      subtitle: 'Stars & badges',
+                      route: '/rewards',
+                      gradient: 'linear-gradient(135deg, #FFD166, #FF8C42)',
+                      icon: <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 2L17 10H25L19 15L21 24L14 19L7 24L9 15L3 10H11Z" fill="white" fillOpacity="0.9"/></svg>,
+                    },
+                    {
+                      label: 'Scrapbook',
+                      subtitle: 'Your memories',
+                      route: '/scrapbook',
+                      gradient: 'linear-gradient(135deg, #A78BFA, #8B5CF6)',
+                      icon: <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="5" y="4" width="18" height="20" rx="3" stroke="white" strokeWidth="2" fill="white" fillOpacity="0.2"/><path d="M9 10H19M9 14H17" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+                    },
+                    {
+                      label: 'For Parents',
+                      subtitle: 'Dashboard',
+                      route: '/parent-dashboard',
+                      gradient: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)',
+                      icon: <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="white" strokeWidth="2" fill="white" fillOpacity="0.2"/><path d="M6 24C6 20 9.5 17 14 17C18.5 17 22 20 22 24" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>,
+                    },
+                    {
+                      label: 'Check-Up',
+                      subtitle: 'How am I doing?',
+                      route: '/assessment',
+                      gradient: 'linear-gradient(135deg, #FF8FAB, #F472B6)',
+                      icon: <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="10" stroke="white" strokeWidth="2" fill="white" fillOpacity="0.15"/><path d="M10 14L13 17L18 11" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+                    },
+                  ].map((portal) => (
                     <motion.button
-                      key={item.route}
-                      className="flex flex-col items-center gap-1.5 py-3 rounded-2xl cursor-pointer tap-bounce"
-                      style={{ background: item.bg, boxShadow: '0 2px 8px rgba(45,45,58,0.06)', border: '1px solid rgba(45,45,58,0.04)' }}
-                      onClick={() => navigate(item.route)}
-                      whileTap={{ scale: 0.93 }}
+                      key={portal.route}
+                      className="flex items-center gap-3 p-4 rounded-[20px] cursor-pointer text-left"
+                      style={{
+                        background: portal.gradient,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      }}
+                      onClick={() => navigate(portal.route)}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
                     >
-                      {item.icon}
-                      <span className="text-[10px] font-bold text-text-secondary">{item.label}</span>
+                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
+                        {portal.icon}
+                      </div>
+                      <div>
+                        <p className="font-display text-sm text-white">{portal.label}</p>
+                        <p className="text-[10px] text-white/60 font-bold">{portal.subtitle}</p>
+                      </div>
                     </motion.button>
                   ))}
+
                 </div>
               </div>
             ) : (
