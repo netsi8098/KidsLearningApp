@@ -71,6 +71,18 @@ Templates drawn/created by the development team. Full ownership.
 | big-mandala | Star Mandala | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas pattern |
 | snow-window | Snow Window | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas holiday |
 | fruit-bowl | Fruit Bowl | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas food |
+| detailed-butterfly | Detailed Butterfly | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: multi-region wings, decorative patterns |
+| garden-scene | Garden Scene | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: 3 flowers with petals, sun, clouds, grass |
+| detailed-fish | Tropical Fish | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: fish with scale patterns, fins, seaweed |
+| cozy-house | Cozy House | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: house with windows, chimney, garden, tree |
+| princess-crown | Royal Crown | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: ornate crown with gems and decorations |
+| owl-night | Night Owl | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: owl with feather patterns, moon, stars |
+| ice-cream-truck | Ice Cream Truck | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: truck with sign, wheels, road, cone |
+| mermaid-scene | Mermaid | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: mermaid with hair, tail, waves, bubbles |
+| geometric-star | Geometric Star | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: 6-point star mandala with circles |
+| cute-puppy | Cute Puppy | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: puppy face with big eyes, ears, tongue |
+| hot-air-balloon | Hot Air Balloon | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: balloon with stripe patterns, basket, clouds |
+| underwater-castle | Underwater Castle | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: castle underwater with fish, seaweed, bubbles |
 
 ## Adding New Templates
 

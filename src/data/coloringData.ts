@@ -30,7 +30,11 @@ export const coloringCategories: ColoringCategory[] = [
   { key: 'emotions', label: 'Emotions', emoji: '😊' },
 ];
 
+import { premiumTemplates } from './premiumTemplates';
+
+// Premium templates shown first, then originals
 export const coloringTemplates: ColoringTemplate[] = [
+  ...premiumTemplates,
   // ── Animals ──────────────────────────────────────────────
   {
     id: 'cat',
