@@ -31,9 +31,11 @@ export const coloringCategories: ColoringCategory[] = [
 ];
 
 import { premiumTemplates } from './premiumTemplates';
+import { openSourceTemplates } from './openSourceTemplates';
 
-// Premium templates shown first, then originals
+// Best templates first: open-source detailed → premium originals → simple originals
 export const coloringTemplates: ColoringTemplate[] = [
+  ...openSourceTemplates,
   ...premiumTemplates,
   // ── Animals ──────────────────────────────────────────────
   {

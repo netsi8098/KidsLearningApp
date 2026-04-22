@@ -83,6 +83,10 @@ Templates drawn/created by the development team. Full ownership.
 | cute-puppy | Cute Puppy | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: puppy face with big eyes, ears, tongue |
 | hot-air-balloon | Hot Air Balloon | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: balloon with stripe patterns, basket, clouds |
 | underwater-castle | Underwater Castle | Original | Dev team | Own work | Yes | 2026-04-21 | Premium: castle underwater with fish, seaweed, bubbles |
+| oc-skating-panda | Skating Panda | https://openclipart.org/detail/187797 | pianoBrad/Shu | Public Domain (CC0) | Yes | 2026-04-21 | Openclipart. Cleaned: fills→none, strokes→#333. 42 paths, cartoon panda skating |
+| oc-pumpkin | Halloween Pumpkin | https://openclipart.org/detail/187791 | pianoBrad/liftarn | Public Domain (CC0) | Yes | 2026-04-21 | Openclipart. Cleaned: fills→none, strokes→#333. 14 paths, detailed pumpkin |
+| oc-husky | Husky Dog | https://openclipart.org/detail/187790 | pianoBrad/tzunghaor | Public Domain (CC0) | Yes | 2026-04-21 | Openclipart. Cleaned: gray fills→none, strokes→#333. 49 paths, running husky |
+| oc-rose | Rose Flower | https://openclipart.org/detail/184781 | author unknown | Public Domain (CC0) | Yes | 2026-04-21 | Openclipart. Cleaned: single detailed path rose. viewBox 2048x1536 |
 
 ## Adding New Templates
 
