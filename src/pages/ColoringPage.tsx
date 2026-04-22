@@ -88,7 +88,15 @@ export default function ColoringPage() {
   const [showColorExpanded, setShowColorExpanded] = useState(false);
   const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
-  const [zoom, setZoom] = useState(1);
+  // Compute fit-to-screen zoom: canvas is 400x520, fit inside viewport with padding for rails
+  const [zoom, setZoom] = useState(() => {
+    if (typeof window === 'undefined') return 0.8;
+    const availW = window.innerWidth - 60; // 60px for right rail
+    const availH = window.innerHeight - 60; // 60px for top/bottom controls
+    const fitW = availW / 400;
+    const fitH = availH / 520;
+    return Math.min(fitW, fitH, 1); // Don't upscale beyond 1x
+  });
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
 
@@ -144,10 +152,10 @@ export default function ColoringPage() {
   if (drawingMode) {
     const glass = { background: 'rgba(30,30,45,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' } as const;
     return (
-      <div className="fixed inset-0 z-50" style={{ background: '#F0EBE3' }} onClick={() => closeAllDrawers()}>
+      <div className="fixed inset-0 z-50" style={{ background: '#1A1A2E' }} onClick={() => closeAllDrawers()}>
         {/* ── Zoomable canvas viewport ── */}
         <ZoomableViewport zoom={zoom} onZoomChange={setZoom} panX={panX} panY={panY} onPanChange={(x, y) => { setPanX(x); setPanY(y); }}>
-          <div onClick={(e) => e.stopPropagation()} className="p-2">
+          <div onClick={(e) => e.stopPropagation()}>
             <DrawingCanvas
               ref={canvasApiRef}
               width={400}
@@ -224,9 +232,14 @@ export default function ColoringPage() {
           {/* Zoom controls */}
           <ZoomControls
             zoom={zoom}
-            onZoomIn={() => setZoom((z) => Math.min(5, z + 0.5))}
-            onZoomOut={() => setZoom((z) => Math.max(1, z - 0.5))}
-            onReset={() => { setZoom(1); setPanX(0); setPanY(0); }}
+            onZoomIn={() => setZoom((z) => Math.min(5, z + 0.25))}
+            onZoomOut={() => setZoom((z) => Math.max(0.3, z - 0.25))}
+            onReset={() => {
+              const aw = window.innerWidth - 60;
+              const ah = window.innerHeight - 60;
+              setZoom(Math.min(aw / 400, ah / 520, 1));
+              setPanX(0); setPanY(0);
+            }}
           />
         </div>
 

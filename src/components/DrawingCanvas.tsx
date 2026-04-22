@@ -403,9 +403,8 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
       ref={containerRef}
       className="relative rounded-xl overflow-hidden"
       style={{
-        width: '100%',
-        maxWidth: width,
-        aspectRatio: `${width} / ${height}`,
+        width: `${width}px`,
+        height: `${height}px`,
         background: '#FFFFFF',
         boxShadow: '0 4px 24px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1)',
       }}

@@ -29,7 +29,7 @@ export default function ZoomableViewport({
   panX,
   panY,
   onPanChange,
-  minZoom = 1,
+  minZoom = 0.3,
   maxZoom = 5,
 }: ZoomableViewportProps) {
   const containerRef = useRef<HTMLDivElement>(null);
