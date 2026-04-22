@@ -13,6 +13,8 @@ interface AuthModalProps {
   onClose: () => void;
   onAuthSuccess: (user: AuthUser) => void;
   onContinueLocal?: () => void;
+  /** Called when parent taps "Create Child Profile" after signup */
+  onCreateChildProfile?: () => void;
 }
 
 interface AuthUser {
@@ -24,7 +26,7 @@ interface AuthUser {
 
 type AuthView = 'login' | 'signup' | 'forgot' | 'verify';
 
-export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLocal }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLocal, onCreateChildProfile }: AuthModalProps) {
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,6 +71,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
   }, [email, password, onAuthSuccess, onClose, resetForm]);
 
   const handleSignup = useCallback(async () => {
+    if (loading || signupDone) return; // Prevent double-submit
     if (!email.trim() || !password.trim() || !name.trim()) {
       setError('Please fill in all fields');
       return;
@@ -203,6 +206,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
                     setSignupDone(false);
                     setSignupUser(null);
                     onClose();
+                    onCreateChildProfile?.();
                   }}
                 >
                   Create Child Profile

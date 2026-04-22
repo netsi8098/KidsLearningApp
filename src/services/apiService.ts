@@ -186,29 +186,34 @@ interface AuthResponse {
 
 /** Auto-register a device account (creates a household + parent automatically) */
 export async function autoRegister(deviceName: string): Promise<boolean> {
-  if (_token) return true; // Already authenticated
+  if (_token) return true; // Already authenticated (parent or device)
+
+  // If backend is not reachable, skip silently
+  if (!_online && !_baseUrl) return false;
 
   const deviceId = getOrCreateDeviceId();
   const email = `device-${deviceId}@kidslearn.local`;
   const password = `device-${deviceId}-auto`;
 
-  // Try login first (already registered)
+  // Try login first (already registered) — 401 is expected if not yet registered
   const loginRes = await api.post<AuthResponse>('/api/auth/login', { email, password });
   if (loginRes.ok && loginRes.data?.token) {
     setAuthToken(loginRes.data.token);
     return true;
   }
 
-  // Register new account
-  const regRes = await api.post<AuthResponse>('/api/auth/register', {
-    email,
-    password,
-    name: deviceName || 'My Device',
-  });
+  // Only try register if login returned 401 (not registered yet)
+  if (loginRes.status === 401 || loginRes.status === 0) {
+    const regRes = await api.post<AuthResponse>('/api/auth/register', {
+      email,
+      password,
+      name: deviceName || 'My Device',
+    });
 
-  if (regRes.ok && regRes.data?.token) {
-    setAuthToken(regRes.data.token);
-    return true;
+    if (regRes.ok && regRes.data?.token) {
+      setAuthToken(regRes.data.token);
+      return true;
+    }
   }
 
   return false;

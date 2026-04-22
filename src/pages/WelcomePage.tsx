@@ -624,6 +624,7 @@ export default function WelcomePage() {
           // If no profiles exist, parent stays on welcome to create one
         }}
         onContinueLocal={startLocalPlayerSetup}
+        onCreateChildProfile={() => setShowCreate(true)}
       />
     </div>
   );
