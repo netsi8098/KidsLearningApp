@@ -3,7 +3,7 @@
  * Supports Sign Up, Login, and Forgot Password flows.
  * Connects to the backend JWT auth endpoints.
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api, setAuthToken } from '../services/apiService';
 import MascotLion from './svg/MascotLion';
@@ -37,6 +37,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
   const [success, setSuccess] = useState('');
   const [signupDone, setSignupDone] = useState(false);
   const [signupUser, setSignupUser] = useState<AuthUser | null>(null);
+  const submittingRef = useRef(false);
 
   const resetForm = useCallback(() => {
     setEmail('');
@@ -45,6 +46,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
     setError('');
     setSuccess('');
     setLoading(false);
+    submittingRef.current = false;
   }, []);
 
   const handleLogin = useCallback(async () => {
@@ -71,7 +73,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
   }, [email, password, onAuthSuccess, onClose, resetForm]);
 
   const handleSignup = useCallback(async () => {
-    if (loading || signupDone) return; // Prevent double-submit
+    if (submittingRef.current) return; // Prevent double-submit (ref survives closures)
     if (!email.trim() || !password.trim() || !name.trim()) {
       setError('Please fill in all fields');
       return;
@@ -80,6 +82,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
       setError('Password must be at least 8 characters');
       return;
     }
+    submittingRef.current = true;
     setLoading(true);
     setError('');
     try {
@@ -94,6 +97,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
         setLoading(false);
         setSignupUser(user);
         setSignupDone(true);
+        // submittingRef stays true — no more submits allowed until reset
         return;
       } else {
         setError(res.error || 'Could not create account. Email may already be in use.');
@@ -101,8 +105,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
     } catch {
       setError('Parent account service is unavailable right now. You can create a child profile on this device and sign in later.');
     }
+    submittingRef.current = false;
     setLoading(false);
-  }, [email, password, name, onAuthSuccess, onClose, resetForm]);
+  }, [email, password, name]);
 
   const handleForgotPassword = useCallback(async () => {
     if (!email.trim()) {

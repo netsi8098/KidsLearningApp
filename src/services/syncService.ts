@@ -19,6 +19,7 @@ export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 export type EntityType = 'profile' | 'progress' | 'badge' | 'star' | 'gameScore' | 'storyProgress' | 'lessonProgress' | 'audioProgress';
 
 let _syncStatus: SyncStatus = 'idle';
+let _syncCount = 0;
 let _onSyncStatusChange: ((status: SyncStatus) => void) | null = null;
 let _syncInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -176,6 +177,7 @@ async function pullChanges(playerId: number): Promise<number> {
 export async function syncNow(): Promise<{ pushed: number; pulled: number }> {
   if (_syncStatus === 'syncing') return { pushed: 0, pulled: 0 };
 
+  _syncCount++;
   setStatus('syncing');
 
   try {
@@ -186,8 +188,14 @@ export async function syncNow(): Promise<{ pushed: number; pulled: number }> {
       return { pushed: 0, pulled: 0 };
     }
 
-    // 2. Auto-authenticate if needed
+    // 2. Auto-authenticate if needed — skip device auto-register on first sync
+    // to avoid 401 noise while user may be signing up
     if (!isAuthenticated()) {
+      if (_syncCount < 2) {
+        // First sync attempts: don't probe device auth, just skip
+        setStatus('idle');
+        return { pushed: 0, pulled: 0 };
+      }
       const authed = await autoRegister('Kids Learning App');
       if (!authed) {
         setStatus('error');
