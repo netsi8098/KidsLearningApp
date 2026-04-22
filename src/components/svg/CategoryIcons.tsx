@@ -111,13 +111,46 @@ const storyCategoryIcons: Record<string, (props: IconProps) => ReactNode> = {
   nature: NatureIcon,
 };
 
+function VehiclesIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+      <rect x="2" y="6" width="12" height="6" rx="2" fill="#FF8C42" opacity="0.7" />
+      <circle cx="5" cy="13" r="1.5" fill="#2D2D3A" opacity="0.6" />
+      <circle cx="11" cy="13" r="1.5" fill="#2D2D3A" opacity="0.6" />
+      <rect x="4" y="3" width="8" height="4" rx="1.5" fill="#45B7D1" opacity="0.5" />
+    </svg>
+  );
+}
+
+function FantasyIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+      <polygon points="8,1 10,6 16,6 11,9.5 13,15 8,11.5 3,15 5,9.5 0,6 6,6" fill="#A78BFA" opacity="0.6" />
+    </svg>
+  );
+}
+
+function PatternsIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+      <circle cx="8" cy="8" r="6" stroke="#4ECDC4" strokeWidth="1.2" opacity="0.6" fill="none" />
+      <circle cx="8" cy="8" r="3" stroke="#FF8FAB" strokeWidth="1.2" opacity="0.5" fill="none" />
+      <line x1="8" y1="2" x2="8" y2="14" stroke="#FFE66D" strokeWidth="0.8" opacity="0.4" />
+      <line x1="2" y1="8" x2="14" y2="8" stroke="#FFE66D" strokeWidth="0.8" opacity="0.4" />
+    </svg>
+  );
+}
+
 const coloringCategoryIcons: Record<string, (props: IconProps) => ReactNode> = {
   animals: AnimalsIcon,
+  vehicles: VehiclesIcon,
+  nature: NatureIcon,
+  fantasy: FantasyIcon,
   alphabet: AlphabetIcon,
   numbers: NumbersIcon,
   holidays: HolidaysIcon,
-  nature: NatureIcon,
   emotions: EmotionsIcon,
+  patterns: PatternsIcon,
 };
 
 /**
