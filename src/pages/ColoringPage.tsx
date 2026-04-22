@@ -17,6 +17,7 @@ import BrushDrawer from '../components/coloring/BrushDrawer';
 import StickerPicker from '../components/coloring/StickerPicker';
 import { brushes, extendedPalette, type ToolId, type BrushId, type StickerDef } from '../components/coloring/coloringTools';
 import ZoomableViewport, { ZoomControls } from '../components/coloring/ZoomableViewport';
+import ColorWheelModal from '../components/coloring/ColorWheelModal';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -88,17 +89,32 @@ export default function ColoringPage() {
   const [showColorExpanded, setShowColorExpanded] = useState(false);
   const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
-  // Compute fit-to-screen zoom: canvas is 400x520, fit inside viewport with padding for rails
+  // Compute fit-to-screen zoom: canvas is 400x520, fit with tight margins
   const [zoom, setZoom] = useState(() => {
     if (typeof window === 'undefined') return 0.8;
-    const availW = window.innerWidth - 60; // 60px for right rail
-    const availH = window.innerHeight - 60; // 60px for top/bottom controls
+    const availW = window.innerWidth - 52; // right rail ~48px + margin
+    const availH = window.innerHeight - 48; // top/bottom controls ~24px each
     const fitW = availW / 400;
     const fitH = availH / 520;
-    return Math.min(fitW, fitH, 1); // Don't upscale beyond 1x
+    return Math.min(fitW, fitH, 1);
   });
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
+  const [railCollapsed, setRailCollapsed] = useState(false);
+  const [showColorWheel, setShowColorWheel] = useState(false);
+  const [savedColors, setSavedColors] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem(`klf-saved-colors-${currentPlayer?.id}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+  const handleSaveColor = useCallback((hex: string) => {
+    setSavedColors((prev) => {
+      const next = [hex, ...prev.filter((c) => c !== hex)].slice(0, 20);
+      try { localStorage.setItem(`klf-saved-colors-${currentPlayer?.id}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, [currentPlayer?.id]);
 
   const handleColorChange = useCallback((hex: string) => {
     setActiveColor(hex);
@@ -119,11 +135,12 @@ export default function ColoringPage() {
     }
   }, []);
 
-  // Close all drawers/modals — including color expanded panel
+  // Close all drawers/modals
   const closeAllDrawers = useCallback(() => {
     setShowBrushDrawer(false);
     setShowStickerPicker(false);
     setShowColorExpanded(false);
+    setShowColorWheel(false);
   }, []);
 
   const handleToolChange = useCallback((tool: ToolId) => {
@@ -195,6 +212,20 @@ export default function ColoringPage() {
 
         {/* ── Right: Tool rail + size slider + zoom ── */}
         <div className="fixed right-2 top-16 bottom-16 z-30 flex flex-col items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          {/* Collapse/expand toggle */}
+          <motion.button
+            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+            style={glass}
+            onClick={() => setRailCollapsed(!railCollapsed)}
+            whileTap={{ scale: 0.9 }}
+            aria-label={railCollapsed ? 'Show tools' : 'Hide tools'}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
+              {railCollapsed ? <><line x1="4" y1="12" x2="20" y2="12"/><line x1="12" y1="4" x2="12" y2="20"/></> : <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>}
+            </svg>
+          </motion.button>
+
+          {!railCollapsed && <>
           {/* Tool buttons */}
           <div className="flex flex-col gap-1 p-1.5 rounded-2xl" style={glass}>
             {([
@@ -235,17 +266,16 @@ export default function ColoringPage() {
             onZoomIn={() => setZoom((z) => Math.min(5, z + 0.25))}
             onZoomOut={() => setZoom((z) => Math.max(0.3, z - 0.25))}
             onReset={() => {
-              const aw = window.innerWidth - 60;
-              const ah = window.innerHeight - 60;
-              setZoom(Math.min(aw / 400, ah / 520, 1));
+              setZoom(Math.min((window.innerWidth - 52) / 400, (window.innerHeight - 48) / 520, 1));
               setPanX(0); setPanY(0);
             }}
           />
+          </>}
         </div>
 
         {/* ── Bottom: Compact color strip ── */}
         <div className="fixed bottom-2 left-2 right-14 z-30" onClick={(e) => e.stopPropagation()}>
-          <ColorRail activeColor={activeColor} onColorChange={handleColorChange} recentColors={recentColors} expanded={showColorExpanded} onExpandedChange={(open) => { if (open) { setShowBrushDrawer(false); setShowStickerPicker(false); } setShowColorExpanded(open); }} />
+          <ColorRail activeColor={activeColor} onColorChange={handleColorChange} recentColors={recentColors} expanded={showColorExpanded} onExpandedChange={(open) => { if (open) { setShowBrushDrawer(false); setShowStickerPicker(false); setShowColorWheel(false); } setShowColorExpanded(open); }} onColorWheelOpen={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }} />
         </div>
 
         {/* ── Expanded colors (above color strip, below top controls) ── */}
@@ -262,6 +292,7 @@ export default function ColoringPage() {
         {/* ── Drawers ── */}
         <BrushDrawer open={showBrushDrawer} onClose={() => setShowBrushDrawer(false)} activeBrush={activeBrush} onBrushChange={handleBrushChange} brushSize={studioBrushSize} onSizeChange={setStudioBrushSize} brushOpacity={studioOpacity} onOpacityChange={setStudioOpacity} activeColor={activeColor} />
         <StickerPicker open={showStickerPicker} onClose={() => setShowStickerPicker(false)} activeSticker={activeSticker?.id || null} onStickerSelect={(s) => { setActiveSticker(s); setActiveTool('stamp'); }} />
+        <ColorWheelModal open={showColorWheel} onClose={() => setShowColorWheel(false)} activeColor={activeColor} onColorChange={handleColorChange} savedColors={savedColors} onSaveColor={handleSaveColor} recentColors={recentColors} />
       </div>
     );
   }

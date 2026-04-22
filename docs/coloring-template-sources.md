@@ -1,0 +1,70 @@
+# Coloring Template Sources & Licenses
+
+All coloring templates must have verified licenses before inclusion.
+Only public domain, CC0, or explicitly commercial-use-allowed assets.
+
+## License Requirements
+- **Allowed**: Public Domain, CC0, CC-BY (with attribution), own original work
+- **Not allowed**: CC-NC, CC-ND, All Rights Reserved, no-license, scraped content
+- **Never copy** from Pigment, Pixite, Lake, or any commercial coloring app
+
+## Source Registries
+
+### Openclipart (https://openclipart.org)
+All content on Openclipart is released into the **public domain** (CC0).
+Safe for commercial use without attribution (though attribution is nice).
+
+### FreeSVG (https://freesvg.org)
+Most content is **public domain / CC0**. Check individual pages.
+
+### Wikimedia Commons
+Mixed licenses. **Must check each file individually**.
+Only use files explicitly marked CC0 or Public Domain.
+
+### Original Work
+Templates drawn/created by the development team. Full ownership.
+
+---
+
+## Template Registry
+
+| ID | Title | Source | Author | License | Commercial OK | Date Checked | Notes |
+|----|-------|--------|--------|---------|---------------|-------------|-------|
+| cat | Cat | Original | Dev team | Own work | Yes | 2026-04-21 | Simple cat outline |
+| fish | Fish | Original | Dev team | Own work | Yes | 2026-04-21 | Simple fish outline |
+| letter-a | Letter A | Original | Dev team | Own work | Yes | 2026-04-21 | Alphabet |
+| letter-b | Letter B | Original | Dev team | Own work | Yes | 2026-04-21 | Alphabet |
+| number-1 | Number 1 | Original | Dev team | Own work | Yes | 2026-04-21 | Number |
+| number-2 | Number 2 | Original | Dev team | Own work | Yes | 2026-04-21 | Number |
+| star | Star | Original | Dev team | Own work | Yes | 2026-04-21 | Holiday |
+| heart | Heart | Original | Dev team | Own work | Yes | 2026-04-21 | Holiday |
+| flower | Flower | Original | Dev team | Own work | Yes | 2026-04-21 | Nature |
+| tree | Tree | Original | Dev team | Own work | Yes | 2026-04-21 | Nature |
+| smiley | Smiley | Original | Dev team | Own work | Yes | 2026-04-21 | Emotion |
+| surprised | Surprised | Original | Dev team | Own work | Yes | 2026-04-21 | Emotion |
+| bunny-garden | Bunny in Garden | Original | Dev team | Own work | Yes | 2026-04-21 | Animal scene |
+| elephant | Baby Elephant | Original | Dev team | Own work | Yes | 2026-04-21 | Animal scene |
+| butterfly-scene | Butterfly Garden | Original | Dev team | Own work | Yes | 2026-04-21 | Animal scene |
+| turtle | Happy Turtle | Original | Dev team | Own work | Yes | 2026-04-21 | Animal scene |
+| rocket-ship | Rocket Ship | Original | Dev team | Own work | Yes | 2026-04-21 | Vehicle |
+| sailboat | Sailboat | Original | Dev team | Own work | Yes | 2026-04-21 | Vehicle |
+| train | Choo-Choo Train | Original | Dev team | Own work | Yes | 2026-04-21 | Vehicle |
+| treehouse | Treehouse | Original | Dev team | Own work | Yes | 2026-04-21 | Nature scene |
+| rainbow-scene | Rainbow Landscape | Original | Dev team | Own work | Yes | 2026-04-21 | Nature scene |
+| ocean-scene | Under the Sea | Original | Dev team | Own work | Yes | 2026-04-21 | Nature scene |
+| castle | Magic Castle | Original | Dev team | Own work | Yes | 2026-04-21 | Fantasy |
+| unicorn | Unicorn | Original | Dev team | Own work | Yes | 2026-04-21 | Fantasy |
+| dragon | Friendly Dragon | Original | Dev team | Own work | Yes | 2026-04-21 | Fantasy |
+| mandala-simple | Simple Mandala | Original | Dev team | Own work | Yes | 2026-04-21 | Pattern |
+| hearts-pattern | Hearts Pattern | Original | Dev team | Own work | Yes | 2026-04-21 | Pattern |
+| birthday-cake | Birthday Cake | Original | Dev team | Own work | Yes | 2026-04-21 | Holiday |
+| snowman | Snowman | Original | Dev team | Own work | Yes | 2026-04-21 | Holiday |
+
+## Adding New Templates
+
+Before adding any template from an external source:
+1. Visit the source page
+2. Verify the license is listed (CC0, Public Domain, or CC-BY)
+3. Record source URL, author, license, and date in this table
+4. If adapting/redrawing from inspiration, note "Adapted from [source]" and mark as "Adapted/Original"
+5. Never add templates without a license record

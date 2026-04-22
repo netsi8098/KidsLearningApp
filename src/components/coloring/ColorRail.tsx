@@ -9,12 +9,12 @@ interface ColorRailProps {
   activeColor: string;
   onColorChange: (hex: string) => void;
   recentColors?: string[];
-  /** Controlled expanded state — parent manages open/close */
   expanded?: boolean;
   onExpandedChange?: (open: boolean) => void;
+  onColorWheelOpen?: () => void;
 }
 
-export default function ColorRail({ activeColor, onColorChange, recentColors = [], expanded = false, onExpandedChange }: ColorRailProps) {
+export default function ColorRail({ activeColor, onColorChange, recentColors = [], expanded = false, onExpandedChange, onColorWheelOpen }: ColorRailProps) {
   const showMore = expanded;
   const setShowMore = (v: boolean) => onExpandedChange?.(v);
 
@@ -62,7 +62,20 @@ export default function ColorRail({ activeColor, onColorChange, recentColors = [
         </motion.button>
       </div>
 
-      {/* Extended palette is rendered by the parent (ColoringPage) at z-35 */}
+        {/* Color wheel button */}
+        {onColorWheelOpen && (
+          <motion.button
+            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #45B7D1, #A78BFA)', padding: '1.5px' }}
+            onClick={onColorWheelOpen}
+            whileTap={{ scale: 0.9 }}
+            aria-label="Color wheel"
+          >
+            <div className="w-full h-full rounded-md flex items-center justify-center" style={{ background: 'rgba(30,30,45,0.9)' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg>
+            </div>
+          </motion.button>
+        )}
     </div>
   );
 }
