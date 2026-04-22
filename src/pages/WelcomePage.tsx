@@ -604,7 +604,24 @@ export default function WelcomePage() {
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={(user) => {
           console.log('[Auth] Logged in as:', user.email);
-          navigate('/parent-dashboard');
+          setShowAuthModal(false);
+          // If a player is already selected, go to parent dashboard
+          // Otherwise stay on welcome page — parent needs to select/create a player first
+          if (profiles.length > 0) {
+            // Auto-select last played profile and go to dashboard
+            const lastPlayed = profiles[0];
+            if (lastPlayed) {
+              setCurrentPlayer({
+                ...lastPlayed,
+                avatarEmoji: lastPlayed.avatarEmoji || '🦁',
+                totalStars: lastPlayed.totalStars ?? 0,
+                streakDays: lastPlayed.streakDays ?? 0,
+                name: lastPlayed.name || 'Player',
+              });
+            }
+            navigate('/parent-dashboard');
+          }
+          // If no profiles exist, parent stays on welcome to create one
         }}
         onContinueLocal={startLocalPlayerSetup}
       />
