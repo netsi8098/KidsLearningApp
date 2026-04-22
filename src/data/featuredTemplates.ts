@@ -678,40 +678,71 @@ export const featuredTemplates: ColoringTemplate[] = [
     category: 'featured',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 100 Q50 85 100 100 Q150 115 200 100 Q250 85 300 100 Q350 115 400 100" fill="none" stroke="#333" stroke-width="2"/>
-      <circle cx="200" cy="200" r="45" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M175 180 Q165 150 175 140 Q185 135 190 155" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M225 180 Q235 150 225 140 Q215 135 210 155" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M165 190 Q150 175 140 190 Q135 205 150 210" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M235 190 Q250 175 260 190 Q265 205 250 210" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="185" cy="195" r="5" fill="#333"/><circle cx="215" cy="195" r="5" fill="#333"/>
-      <circle cx="187" cy="193" r="2" fill="#fff"/><circle cx="217" cy="193" r="2" fill="#fff"/>
-      <path d="M193 215 Q200 222 207 215" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M175 245 Q200 260 225 245 L220 340 Q200 355 180 340Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M185 290 Q195 285 205 290" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M185 310 Q195 305 205 310" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M185 330 Q195 325 205 330" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M180 340 Q160 380 130 400 Q110 410 100 395 Q105 380 125 365" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M220 340 Q240 380 270 400 Q290 410 300 395 Q295 380 275 365" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M100 395 Q85 405 70 395 Q65 385 80 380" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M300 395 Q315 405 330 395 Q335 385 320 380" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M40 430 Q50 410 60 430 Q70 450 80 430" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M300 440 Q310 420 320 440 Q330 460 340 440" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M150 450 Q160 435 170 450 Q180 465 190 450" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M0 90 Q50 75 100 90 Q150 105 200 90 Q250 75 300 90 Q350 105 400 90" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Mermaid head -->
+      <circle cx="200" cy="170" r="42" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Long flowing hair -->
+      <path d="M160 155 Q140 130 130 160 Q125 190 135 220 Q140 240 130 260" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M165 160 Q150 140 145 170 Q142 200 148 230 Q152 250 145 270" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M240 155 Q260 130 270 160 Q275 190 265 220 Q260 240 270 260" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M235 160 Q250 140 255 170 Q258 200 252 230 Q248 250 255 270" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Crown/tiara -->
+      <path d="M178 130 Q185 115 192 130 Q200 110 208 130 Q215 115 222 130" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Face -->
+      <circle cx="186" cy="165" r="5" fill="#333"/><circle cx="214" cy="165" r="5" fill="#333"/>
+      <circle cx="188" cy="163" r="2" fill="#fff"/><circle cx="216" cy="163" r="2" fill="#fff"/>
+      <path d="M195 182 Q200 188 205 182" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Body -->
+      <path d="M175 212 Q200 225 225 212 L220 310 Q200 325 180 310Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Shell top -->
+      <path d="M180 225 Q190 218 200 225" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M200 225 Q210 218 220 225" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Tail with scale pattern -->
+      <path d="M180 310 Q165 350 145 380 Q130 400 115 405 Q100 408 105 395 Q110 382 125 370" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M220 310 Q235 350 255 380 Q270 400 285 405 Q300 408 295 395 Q290 382 275 370" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Scale lines on tail -->
+      <path d="M175 320 Q190 315 205 320" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M170 335 Q190 328 210 335" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M165 350 Q185 342 205 350" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M160 365 Q178 358 198 365" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M220 335 Q235 328 250 335" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M230 350 Q245 342 260 350" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Tail fins -->
+      <path d="M115 405 Q95 415 80 405 Q70 395 85 388" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M105 395 Q90 405 75 395" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M285 405 Q305 415 320 405 Q330 395 315 388" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M295 395 Q310 405 325 395" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Treasure chest -->
+      <rect x="50" cy="430" y="425" width="60" height="35" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M50 425 Q80 415 110 425" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="80" cy="440" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Coral -->
+      <path d="M320 420 Q325 390 330 400 Q335 380 340 395 Q345 375 350 400 Q355 395 355 420" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M325 420 Q330 400 335 405" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Shells -->
+      <ellipse cx="160" cy="460" rx="12" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M150 460 Q155 455 160 460 Q165 455 170 460" fill="none" stroke="#333" stroke-width="1"/>
+      <ellipse cx="260" cy="455" rx="10" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Fish -->
+      <ellipse cx="60" cy="250" rx="16" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <polygon points="76,250 88,240 88,260" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="52" cy="247" r="3" fill="#333"/>
+      <ellipse cx="340" cy="310" rx="14" ry="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <polygon points="354,310 364,302 364,318" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="333" cy="307" r="2.5" fill="#333"/>
+      <!-- Bubbles -->
       <circle cx="70" cy="180" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
       <circle cx="55" cy="160" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
-      <circle cx="80" cy="150" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
-      <circle cx="340" cy="200" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <ellipse cx="320" cy="300" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
-      <polygon points="338,300 352,290 352,310" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="312" cy="297" r="3" fill="#333"/>
-      <ellipse cx="80" cy="350" rx="14" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <polygon points="66,350 55,343 55,357" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="87" cy="347" r="2.5" fill="#333"/>
-      <path d="M160 130 Q170 120 180 130" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M220 130 Q230 120 240 130" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="340" cy="200" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="350" cy="170" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Seaweed -->
+      <path d="M35 480 Q45 440 35 400 Q25 360 35 330" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M50 480 Q60 445 50 415 Q40 385 50 360" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M360 480 Q370 450 360 420 Q350 390 360 365" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Sand bottom -->
       <path d="M30 480 Q100 468 200 475 Q300 482 370 470" fill="none" stroke="#333" stroke-width="1.5"/>
-      ${[[50,120],[350,130],[60,270],[340,260]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#333" stroke-width="1"/>`).join('')}
+      <circle cx="100" cy="478" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="300" cy="475" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
     </svg>`,
   },
 
@@ -724,40 +755,81 @@ export const featuredTemplates: ColoringTemplate[] = [
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <line x1="30" y1="440" x2="370" y2="440" stroke="#333" stroke-width="2"/>
-      <ellipse cx="200" cy="310" rx="90" ry="65" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <circle cx="130" cy="230" r="45" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M165 265 Q170 290 175 310" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M145 265 Q155 285 160 300" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M110 200 Q95 175 105 165" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M140 195 Q145 168 135 162" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="118" cy="222" r="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="142" cy="222" r="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="120" cy="220" r="4" fill="#333"/><circle cx="144" cy="220" r="4" fill="#333"/>
-      <path d="M125 240 Q130 248 140 240" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M110 245 Q115 252 120 245 Q125 252 130 245 Q135 252 140 245 Q145 252 150 245" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M165 290 Q200 260 235 280" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M170 310 Q200 285 230 300" fill="none" stroke="#333" stroke-width="1.5"/>
-      <rect x="145" y="365" width="22" height="50" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <rect x="185" y="365" width="22" height="50" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <rect x="220" y="365" width="22" height="50" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <rect x="255" y="365" width="22" height="50" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M285 300 Q310 290 320 300 Q335 320 315 330 Q300 335 290 320" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M150 300 Q130 285 140 275 Q160 270 160 285 L155 295" fill="none" stroke="#333" stroke-width="2"/>
-      <rect x="30" y="280" width="18" height="120" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
-      <ellipse cx="39" cy="230" rx="30" ry="40" fill="#fff" stroke="#333" stroke-width="2"/>
-      <ellipse cx="30" cy="240" rx="18" ry="25" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <ellipse cx="48" cy="238" rx="18" ry="25" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <rect x="350" y="300" width="16" height="100" rx="3" fill="#fff" stroke="#333" stroke-width="2"/>
-      <ellipse cx="358" cy="260" rx="28" ry="35" fill="#fff" stroke="#333" stroke-width="2"/>
-      <ellipse cx="348" cy="268" rx="16" ry="22" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <ellipse cx="368" cy="266" rx="16" ry="22" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="200" cy="80" r="30" fill="#fff" stroke="#333" stroke-width="2"/>
-      ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a => `<line x1="${200+28*Math.cos(a*Math.PI/180)}" y1="${80+28*Math.sin(a*Math.PI/180)}" x2="${200+40*Math.cos(a*Math.PI/180)}" y2="${80+40*Math.sin(a*Math.PI/180)}" stroke="#333" stroke-width="2" stroke-linecap="round"/>`).join('')}
-      <ellipse cx="100" cy="80" rx="28" ry="14" fill="#fff" stroke="#333" stroke-width="2"/>
-      <ellipse cx="85" cy="85" rx="18" ry="9" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <ellipse cx="300" cy="60" rx="25" ry="12" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M250 460 L255 440 L265 455 L275 438 L280 458 L270 448Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      ${[60,160,300,350].map(x => `<path d="M${x} 440 Q${x-3} 428 ${x+2} 432 Q${x+5} 425 ${x+7} 440" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      <!-- Sun -->
+      <circle cx="330" cy="60" r="30" fill="#fff" stroke="#333" stroke-width="2"/>
+      <line x1="358.0" y1="60.0" x2="370.0" y2="60.0" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="354.24871130596426" y1="74.0" x2="364.6410161513775" y2="80.0" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="344.0" y1="84.24871130596428" x2="350.0" y2="94.64101615137754" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="330.0" y1="88.0" x2="330.0" y2="100.0" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="316.0" y1="84.24871130596429" x2="310.0" y2="94.64101615137756" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="305.75128869403574" y1="74.0" x2="295.3589838486225" y2="80.0" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="302.0" y1="60.0" x2="290.0" y2="60.00000000000001" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="305.75128869403574" y1="46.0" x2="295.3589838486225" y2="40.0" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="316.0" y1="35.75128869403572" x2="310.0" y2="25.358983848622465" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="330.0" y1="32.0" x2="330.0" y2="20.0" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="344.0" y1="35.75128869403572" x2="350.0" y2="25.358983848622458" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="354.24871130596426" y1="45.999999999999986" x2="364.6410161513775" y2="39.999999999999986" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <!-- Volcano background -->
+      <polygon points="30,440 100,250 170,440" fill="#fff" stroke="#333" stroke-width="2"/>
+      <polygon points="80,300 100,250 120,300" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M85 260 Q100 240 115 260" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Dino body -->
+      <ellipse cx="230" cy="310" rx="80" ry="60" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Dino head -->
+      <circle cx="150" cy="240" r="45" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Neck -->
+      <path d="M185 270 Q195 290 200 310" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M170 275 Q182 295 190 315" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Horns/spikes -->
+      <path d="M128 200 Q118 175 125 168" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M155 198 Q155 172 148 166" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Spine spikes -->
+      <path d="M200 285 L195 265 L210 280 L208 260 L220 278 L220 258 L232 278" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Eyes -->
+      <circle cx="132" cy="232" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="160" cy="232" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="134" cy="230" r="5" fill="#333"/><circle cx="162" cy="230" r="5" fill="#333"/>
+      <circle cx="136" cy="228" r="2" fill="#fff"/><circle cx="164" cy="228" r="2" fill="#fff"/>
+      <!-- Mouth with teeth -->
+      <path d="M120 260 Q135 270 150 260 Q160 270 170 260" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M128 260 L130 268 L134 260" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M142 260 L145 268 L148 260" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M156 260 L158 268 L162 260" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Belly stripes -->
+      <path d="M190 320 Q210 315 230 320 Q250 325 270 320" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M195 340 Q215 335 235 340 Q255 345 270 340" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Legs -->
+      <rect x="180" y="360" width="22" height="55" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <rect x="215" y="360" width="22" height="55" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <rect x="250" y="360" width="22" height="55" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <rect x="278" y="360" width="22" height="55" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Tail -->
+      <path d="M305 310 Q340 300 350 320 Q360 340 370 330" fill="none" stroke="#333" stroke-width="2.5"/>
+      <!-- Palm tree 1 -->
+      <rect x="42" y="300" width="12" height="140" rx="3" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M48 300 Q20 270 15 290" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M48 300 Q75 265 80 285" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M48 300 Q45 265 55 275" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M48 300 Q30 280 25 295" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Palm tree 2 -->
+      <rect x="348" y="320" width="10" height="120" rx="3" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M353 320 Q330 292 325 310" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M353 320 Q378 288 380 308" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M353 320 Q350 288 360 298" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Eggs nest -->
+      <ellipse cx="85" cy="425" rx="25" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="75" cy="415" rx="8" ry="12" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="90" cy="415" rx="8" ry="12" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="82" cy="418" rx="7" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Footprints -->
+      <circle cx="130" cy="450" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="127" cy="442" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="133" cy="442" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="320" cy="455" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="317" cy="447" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="323" cy="447" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Rocks -->
+      <ellipse cx="200" cy="460" rx="20" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="290" cy="465" rx="15" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Vines -->
+      <path d="M50 100 Q55 130 45 160 Q40 180 50 200" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="50" cy="120" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(-20 50 120)"/>
+      <ellipse cx="45" cy="155" rx="7" ry="4" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(15 45 155)"/>
+      <!-- Cloud -->
+      <ellipse cx="180" cy="60" rx="28" ry="14" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="163" cy="65" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="197" cy="65" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Grass -->
+      <path d="M60 440 Q57 428 62 432 Q65 425 67 440" fill="none" stroke="#333" stroke-width="1.5"/><path d="M160 440 Q157 428 162 432 Q165 425 167 440" fill="none" stroke="#333" stroke-width="1.5"/><path d="M230 440 Q227 428 232 432 Q235 425 237 440" fill="none" stroke="#333" stroke-width="1.5"/><path d="M300 440 Q297 428 302 432 Q305 425 307 440" fill="none" stroke="#333" stroke-width="1.5"/><path d="M350 440 Q347 428 352 432 Q355 425 357 440" fill="none" stroke="#333" stroke-width="1.5"/>
     </svg>`,
   },
 
@@ -904,8 +976,8 @@ export const featuredTemplates: ColoringTemplate[] = [
       </g>
       ${[[50,80],[130,60],[280,50],[350,90],[40,350],[360,420],[200,450]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="${3+Math.random()*3|0}" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
       ${[[80,300],[320,150],[60,200],[340,250]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="2" fill="#fff" stroke="#333" stroke-width="1"/>`).join('')}
-      <polygon points="50,420 55,405 65,415 72,400 77,418 70,410Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <polygon points="330,70 335,55 345,65 350,52 355,68 348,60Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M50,420 L55,405 L65,415 L72,400 L77,418 L70,410Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M330,70 L335,55 L345,65 L350,52 L355,68 L348,60Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
       <circle cx="320" cy="460" r="22" fill="#fff" stroke="#333" stroke-width="2"/>
       <circle cx="320" cy="460" r="14" fill="#fff" stroke="#333" stroke-width="1.5"/>
       <path d="M310 450 Q320 445 330 450" fill="none" stroke="#333" stroke-width="1"/>
@@ -1217,7 +1289,7 @@ export const featuredTemplates: ColoringTemplate[] = [
         <polygon points="8,0 14,-3 14,3" fill="#fff" stroke="#333" stroke-width="1"/>
         <path d="M-8 4 Q-5 8 -2 4" fill="none" stroke="#333" stroke-width="1"/>
       </g>
-      <polygon points="200,420 205,408 215,418 220,405 225,417 218,410Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M200,420 L205,408 L215,418 L220,405 L225,417 L218,410Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
     </svg>`,
   },
 
@@ -1254,7 +1326,7 @@ export const featuredTemplates: ColoringTemplate[] = [
       <ellipse cx="350" cy="250" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
       <polygon points="368,250 380,242 380,258" fill="#fff" stroke="#333" stroke-width="1.5"/>
       <circle cx="344" cy="247" r="3" fill="#333"/>
-      <polygon points="250,430 255,418 265,428 270,415 275,427 268,420Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M250,430 L255,418 L265,428 L270,415 L275,427 L268,420Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
       <circle cx="40" cy="170" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
       <circle cx="360" cy="130" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
       <circle cx="200" cy="450" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
