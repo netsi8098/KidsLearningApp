@@ -221,6 +221,11 @@ export default function WelcomePage() {
     setSelectedInterests([]);
   }
 
+  function startLocalPlayerSetup() {
+    setShowAuthModal(false);
+    setShowCreate(true);
+  }
+
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center p-6 md:p-10 relative page-with-bg overflow-hidden">
       {/* Immersive animated background */}
@@ -336,13 +341,13 @@ export default function WelcomePage() {
                 <MascotLion size={120} expression="excited" animated className="mx-auto mb-4" />
                 <p className="font-display text-2xl text-[#2D2D3A] mb-1">Welcome!</p>
                 <p className="text-sm text-[#6B6B7B] mb-6 max-w-xs mx-auto">
-                  Create a free parent account to set up your child&apos;s learning profile
+                  Create a player profile to start learning. Parent sign-in can be added later.
                 </p>
                 <div className="flex flex-col gap-3 max-w-xs mx-auto">
                   <motion.button
                     className="w-full px-8 py-4 rounded-2xl font-display text-lg text-white cursor-pointer animate-glow-pulse"
                     style={{ background: 'linear-gradient(135deg, #4ECDC4 0%, #3DBDB4 100%)', boxShadow: '0 4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(78,205,196,0.3)' }}
-                    onClick={() => setShowAuthModal(true)}
+                    onClick={startLocalPlayerSetup}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -354,7 +359,7 @@ export default function WelcomePage() {
                     onClick={() => setShowAuthModal(true)}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Already have an account? Sign In
+                    Parent Sign In
                   </motion.button>
                   <p className="text-[10px] text-[#9B9BAB] mt-2">
                     Free forever. No credit card needed. COPPA compliant.
@@ -601,6 +606,7 @@ export default function WelcomePage() {
           console.log('[Auth] Logged in as:', user.email);
           navigate('/parent-dashboard');
         }}
+        onContinueLocal={startLocalPlayerSetup}
       />
     </div>
   );
