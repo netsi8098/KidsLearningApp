@@ -1390,3 +1390,82 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - [ ] Free Draw mode works (no template)
 - [ ] Production console clean
 - [ ] 390px mobile: no overflow, no hidden controls
+
+---
+
+### Claude Batch 2E — Color Panel Moved Inline, Save Fix Final
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors
+
+#### Batch 2D Result
+- PASS: Canvas visible at ~340×437 on 390px mobile
+- PASS: Template line art renders correctly on overlay canvas
+- FAIL: Save still blocked by ALL COLORS — fixed z-index approach doesn't work because `fixed` elements escape parent stacking contexts
+
+#### Batch 2E Fix: Inline Color Panel
+
+**Root cause:** ALL COLORS panel used `position: fixed` which escapes any parent z-index hierarchy. Even with the toolbar at z-40 and color panel at z-35, `fixed` elements compete at viewport level and the color grid's buttons intercept pointer events.
+
+**Fix:** Eliminated fixed positioning entirely. The expanded color panel is now an **inline flex-shrink-0 element** in the studio's flex column, rendered between the canvas area and the toolbar. When open, it pushes the canvas up slightly. The toolbar always stays at the absolute bottom. No z-index tricks needed — the panel can never physically overlap the toolbar because they're in the same flex flow.
+
+**Layout (top to bottom):**
+1. Studio header (flex-shrink-0)
+2. Canvas area (flex-1)
+3. **Expanded color panel** (flex-shrink-0, conditional)
+4. Tool rail (flex-shrink-0)
+5. Color rail (flex-shrink-0)
+
+The color grid uses `grid-cols-10` for a compact layout that fits 20 colors in 2 rows.
+
+**Also removed:** duplicate expanded panel from ColorRail.tsx (it was rendering both the old fixed version AND the new inline one).
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/pages/ColoringPage.tsx` | Inline color panel, removed fixed z-index approach |
+| `src/components/coloring/ColorRail.tsx` | Removed expanded panel rendering (parent handles it) |
+
+#### Codex verification checklist
+- [ ] Canvas visible at 390px mobile
+- [ ] Open ALL COLORS → `elementFromPoint` at Save center returns Save button (not color swatch)
+- [ ] Open ALL COLORS → click Save → saves artwork, green toast
+- [ ] ALL COLORS panel doesn't overlap toolbar row
+- [ ] Template eraser preserves outlines
+- [ ] Fill respects template boundaries
+- [ ] Clear keeps template, removes paint
+- [ ] Save composites paint + template correctly
+- [ ] Free Draw works with all brushes
+- [ ] Production console clean
+
+---
+
+### Backlog: Batch 2F — Premium Coloring Template Gallery
+
+**Goal:** Expand coloring templates to Pigment/Pixite gallery quality. The current set of 12 templates feels like a starter pack. Target: 40-60 templates across age groups.
+
+#### Template Categories to Add
+| Category | Examples | Age Group |
+|----------|----------|-----------|
+| Cute Animals | cat, dog, bunny, lion, elephant, turtle, butterfly, bird | All |
+| Vehicles & Adventure | beach car, rocket, train, airplane, boat, bike | 4-5, 6-8 |
+| Nature Scenes | garden, forest, rainbow, flowers, treehouse, ocean, mountains | All |
+| Fantasy & Magic | castle, unicorn, dragon, fairy garden, treasure map, magic door | 4-5, 6-8 |
+| Patterns | simple mandalas, stars, hearts, clouds, geometric shapes | 6-8 |
+| Learning | alphabet scenes, number scenes, shapes, weather, seasons | 2-3, 4-5 |
+| Emotions | happy, surprised, calm, brave, silly faces | All |
+| Holidays/Seasonal | birthday cake, snowman, pumpkin, spring flowers | All |
+
+#### Design Requirements
+- Clean black line art on white background (SVG outlines)
+- Scene-based illustrations (Pigment style), not tiny icons
+- Each template needs: colorful preview SVG + matching outline SVG for canvas
+- Gallery: category filters, strong previews, difficulty badges, visual hierarchy
+- Age-appropriate: 2-3 (big simple shapes), 4-5 (animals/vehicles/scenes), 6-8 (patterns/fantasy/maps)
+- No OS emoji in template cards
+
+#### Implementation Plan
+1. Start with 12-20 high-quality scene-based templates (Batch 2F)
+2. Expand to 40-60 over subsequent batches
+3. Each template in `coloringData.ts` with `svgOutline` + preview in `ColoringPreviews.tsx`
+4. Templates must work with layered canvas (eraser/fill preserve outlines)

@@ -15,7 +15,7 @@ import ToolRail from '../components/coloring/ToolRail';
 import ColorRail from '../components/coloring/ColorRail';
 import BrushDrawer from '../components/coloring/BrushDrawer';
 import StickerPicker from '../components/coloring/StickerPicker';
-import { brushes, type ToolId, type BrushId, type StickerDef } from '../components/coloring/coloringTools';
+import { brushes, extendedPalette, type ToolId, type BrushId, type StickerDef } from '../components/coloring/coloringTools';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -187,8 +187,51 @@ export default function ColoringPage() {
           </div>
         </div>
 
-        {/* Bottom controls — always above drawers */}
-        <div className="flex-shrink-0 relative z-30">
+        {/* Expanded color panel — inline in flex flow, never overlaps toolbar */}
+        {showColorExpanded && (
+          <div className="flex-shrink-0 px-3 pb-1">
+            <div className="rounded-2xl p-3" style={{ background: 'rgba(45,45,58,0.95)', backdropFilter: 'blur(12px)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">All Colors</p>
+                <button className="text-white/40 cursor-pointer" onClick={() => setShowColorExpanded(false)} aria-label="Close color picker">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+              </div>
+              <div className="grid grid-cols-10 gap-1.5">
+                {extendedPalette.map((c) => (
+                  <button
+                    key={c.hex}
+                    className="w-full aspect-square rounded-md cursor-pointer"
+                    style={{
+                      background: c.hex,
+                      border: activeColor === c.hex ? '2px solid white' : c.hex === '#FFFFFF' ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                      boxShadow: activeColor === c.hex ? '0 0 0 1px rgba(255,255,255,0.3)' : 'none',
+                    }}
+                    onClick={() => { handleColorChange(c.hex); setShowColorExpanded(false); }}
+                    aria-label={`${c.label} color`}
+                  />
+                ))}
+              </div>
+              {recentColors.length > 0 && (
+                <div className="flex gap-1.5 mt-2">
+                  <span className="text-[9px] font-bold text-white/25 self-center mr-1">Recent</span>
+                  {recentColors.slice(0, 6).map((hex) => (
+                    <button
+                      key={`r-${hex}`}
+                      className="w-6 h-6 rounded-md cursor-pointer flex-shrink-0"
+                      style={{ background: hex, border: activeColor === hex ? '2px solid white' : '1px solid rgba(255,255,255,0.06)' }}
+                      onClick={() => { handleColorChange(hex); setShowColorExpanded(false); }}
+                      aria-label={`Recent ${hex}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Bottom controls — always at the very bottom, never covered */}
+        <div className="flex-shrink-0">
           {/* Tool rail */}
           <div className="flex justify-center px-3 pb-1.5">
             <ToolRail
