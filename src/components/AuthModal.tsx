@@ -84,13 +84,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
         name: name.trim(),
       });
       if (res.ok && res.data) {
-        setAuthToken(res.data.token);
+        const { token, user } = res.data;
+        if (token) setAuthToken(token);
+        setLoading(false);
         setSuccess('Account created! Welcome to Kids Learning Fun!');
         setTimeout(() => {
-          onAuthSuccess(res.data!.user);
+          onAuthSuccess(user);
           resetForm();
           onClose();
         }, 1500);
+        return; // Don't fall through to setLoading(false) below
       } else {
         setError(res.error || 'Could not create account. Email may already be in use.');
       }

@@ -114,9 +114,18 @@ async function request<T>(
   path: string,
   body?: unknown,
 ): Promise<ApiResponse<T>> {
-  if (!_online || !_baseUrl) {
+  // For auth endpoints, always try even if we think we're offline
+  const isAuthPath = path.startsWith('/api/auth/');
+  if (!isAuthPath && (!_online || !_baseUrl)) {
     const isAvailable = await checkBackend();
     if (!isAvailable || !_baseUrl) {
+      return { ok: false, status: 0, error: 'Parent account service is unavailable right now' };
+    }
+  }
+  // For auth paths, try health check if no base URL yet
+  if (isAuthPath && !_baseUrl) {
+    await checkBackend();
+    if (!_baseUrl) {
       return { ok: false, status: 0, error: 'Parent account service is unavailable right now' };
     }
   }
@@ -145,8 +154,9 @@ async function request<T>(
       ? await res.json()
       : undefined;
 
-    if (res.status === 401) {
-      // Token expired — clear it
+    if (res.status === 401 && !isAuthPath) {
+      // Token expired on a non-auth endpoint — clear it
+      // Don't clear during auth flows (login/register) to avoid race conditions
       setAuthToken(null);
     }
 
