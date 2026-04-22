@@ -115,7 +115,10 @@ async function request<T>(
   body?: unknown,
 ): Promise<ApiResponse<T>> {
   if (!_online || !_baseUrl) {
-    return { ok: false, status: 0, error: 'Backend offline' };
+    const isAvailable = await checkBackend();
+    if (!isAvailable || !_baseUrl) {
+      return { ok: false, status: 0, error: 'Parent account service is unavailable right now' };
+    }
   }
 
   try {

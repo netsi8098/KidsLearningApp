@@ -5,13 +5,14 @@
  */
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api, setAuthToken, isAuthenticated, getAuthToken } from '../services/apiService';
+import { api, setAuthToken } from '../services/apiService';
 import MascotLion from './svg/MascotLion';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAuthSuccess: (user: AuthUser) => void;
+  onContinueLocal?: () => void;
 }
 
 interface AuthUser {
@@ -23,7 +24,7 @@ interface AuthUser {
 
 type AuthView = 'login' | 'signup' | 'forgot' | 'verify';
 
-export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLocal }: AuthModalProps) {
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -60,7 +61,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         setError(res.error || 'Invalid email or password');
       }
     } catch {
-      setError('Could not connect to server. Check your connection.');
+      setError('Parent account service is unavailable right now. You can keep playing on this device.');
     }
     setLoading(false);
   }, [email, password, onAuthSuccess, onClose, resetForm]);
@@ -94,7 +95,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         setError(res.error || 'Could not create account. Email may already be in use.');
       }
     } catch {
-      setError('Could not connect to server.');
+      setError('Parent account service is unavailable right now. You can create a child profile on this device and sign in later.');
     }
     setLoading(false);
   }, [email, password, name, onAuthSuccess, onClose, resetForm]);
@@ -136,10 +137,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         {/* Modal */}
         <motion.div
           className="relative w-full max-w-md rounded-3xl overflow-y-auto"
-          style={{ maxHeight: '90vh' }}
           style={{
             background: 'white',
             boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
+            maxHeight: '90vh',
           }}
           initial={{ scale: 0.9, y: 20 }}
           animate={{ scale: 1, y: 0 }}
@@ -224,6 +225,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 >
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
+                {onContinueLocal && (
+                  <button
+                    className="w-full py-3 rounded-xl font-bold text-[#2D2D3A] bg-[#F7F3EC] border border-[#E8E0D4] cursor-pointer"
+                    onClick={onContinueLocal}
+                    disabled={loading}
+                  >
+                    Continue without account
+                  </button>
+                )}
                 <div className="flex justify-between text-xs">
                   <button
                     className="text-coral font-bold cursor-pointer"
@@ -300,6 +310,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 >
                   {loading ? 'Creating account...' : 'Create Account'}
                 </button>
+                {onContinueLocal && (
+                  <button
+                    className="w-full py-3 rounded-xl font-bold text-[#2D2D3A] bg-[#F7F3EC] border border-[#E8E0D4] cursor-pointer"
+                    onClick={onContinueLocal}
+                    disabled={loading}
+                  >
+                    Continue without account
+                  </button>
+                )}
                 <button
                   className="w-full text-center text-xs text-[#6B6B7B] font-bold cursor-pointer"
                   onClick={() => { resetForm(); setView('login'); }}
