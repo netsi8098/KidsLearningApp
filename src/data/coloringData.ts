@@ -22,11 +22,12 @@ export const coloringCategories: ColoringCategory[] = [
   { key: 'vehicles', label: 'Vehicles', emoji: '🚗' },
   { key: 'nature', label: 'Nature', emoji: '🌸' },
   { key: 'fantasy', label: 'Fantasy', emoji: '🏰' },
+  { key: 'food', label: 'Food', emoji: '🧁' },
+  { key: 'patterns', label: 'Patterns', emoji: '✨' },
+  { key: 'holidays', label: 'Holidays', emoji: '🎄' },
   { key: 'alphabet', label: 'Alphabet', emoji: '🔤' },
   { key: 'numbers', label: 'Numbers', emoji: '🔢' },
-  { key: 'holidays', label: 'Holidays', emoji: '🎄' },
   { key: 'emotions', label: 'Emotions', emoji: '😊' },
-  { key: 'patterns', label: 'Patterns', emoji: '✨' },
 ];
 
 export const coloringTemplates: ColoringTemplate[] = [
@@ -545,6 +546,318 @@ export const coloringTemplates: ColoringTemplate[] = [
       <circle cx="100" cy="105" r="3" fill="#333"/>
       <path d="M78 28 L100 25 L122 28 Q130 20 120 18 L100 15 L80 18 Q70 20 78 28Z" fill="none" stroke="#333" stroke-width="2"/>
       <line x1="0" y1="180" x2="200" y2="180" stroke="#333" stroke-width="1.5"/>
+    </svg>`,
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // BATCH 2H — Full-canvas premium templates (viewBox 400x520)
+  // All original work by dev team
+  // ══════════════════════════════════════════════════════════
+
+  {
+    id: 'beach-car',
+    title: 'Beach Car',
+    emoji: '🏖️',
+    category: 'vehicles',
+    difficulty: 'medium',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <line x1="30" y1="400" x2="370" y2="400" stroke="#333" stroke-width="2"/>
+      <path d="M60 340 L60 290 Q60 270 80 260 L180 240 Q200 235 220 240 L320 260 Q340 265 340 285 L340 340Z" fill="none" stroke="#333" stroke-width="3"/>
+      <path d="M100 260 L120 200 Q130 185 150 185 L250 185 Q270 185 280 200 L300 260" fill="none" stroke="#333" stroke-width="2.5"/>
+      <line x1="200" y1="185" x2="200" y2="260" stroke="#333" stroke-width="2"/>
+      <circle cx="120" cy="360" r="32" fill="none" stroke="#333" stroke-width="3"/>
+      <circle cx="120" cy="360" r="16" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="280" cy="360" r="32" fill="none" stroke="#333" stroke-width="3"/>
+      <circle cx="280" cy="360" r="16" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="80" y="290" width="40" height="20" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="280" y="290" width="40" height="20" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="150" y="150" width="60" height="8" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="320" cy="150" rx="35" ry="60" fill="none" stroke="#333" stroke-width="2.5"/>
+      <line x1="320" y1="90" x2="320" y2="210" stroke="#333" stroke-width="2"/>
+      <line x1="285" y1="150" x2="355" y2="150" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="60" r="40" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M30 470 Q100 450 200 460 Q300 470 370 455" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M30 490 Q120 475 200 485 Q280 495 370 480" fill="none" stroke="#333" stroke-width="1.5"/>
+    </svg>`,
+  },
+  {
+    id: 'coffee-cup',
+    title: 'Cozy Coffee',
+    emoji: '☕',
+    category: 'food',
+    difficulty: 'easy',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <path d="M100 180 L90 420 Q90 450 120 450 L280 450 Q310 450 310 420 L300 180Z" fill="none" stroke="#333" stroke-width="3"/>
+      <path d="M300 220 Q340 220 350 250 Q360 280 340 310 Q320 330 300 320" fill="none" stroke="#333" stroke-width="2.5"/>
+      <ellipse cx="200" cy="180" rx="105" ry="20" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M150 120 Q155 90 145 70" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <path d="M200 110 Q205 80 195 55" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <path d="M250 120 Q255 90 245 70" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <path d="M120 300 Q160 280 200 290 Q240 300 280 285" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M120 340 Q160 320 200 330 Q240 340 280 325" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="200" cy="480" rx="130" ry="10" fill="none" stroke="#333" stroke-width="2"/>
+    </svg>`,
+  },
+  {
+    id: 'cupcake-scene',
+    title: 'Birthday Cupcake',
+    emoji: '🧁',
+    category: 'food',
+    difficulty: 'easy',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <path d="M120 280 L100 440 Q100 460 130 460 L270 460 Q300 460 300 440 L280 280Z" fill="none" stroke="#333" stroke-width="3"/>
+      <path d="M110 280 Q130 260 160 270 Q190 280 200 260 Q210 280 240 270 Q270 260 290 280" fill="none" stroke="#333" stroke-width="2.5"/>
+      <ellipse cx="200" cy="250" rx="100" ry="40" fill="none" stroke="#333" stroke-width="3"/>
+      <path d="M140 250 Q160 220 180 240 Q200 220 220 240 Q240 220 260 250" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="200" y1="210" x2="200" y2="140" stroke="#333" stroke-width="2.5"/>
+      <path d="M192 145 Q200 120 208 145" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="115" r="6" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M130 350 Q165 340 200 345 Q235 350 270 340" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M130 390 Q165 380 200 385 Q235 390 270 380" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="150" cy="80" r="8" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="260" cy="70" r="6" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="320" cy="120" r="5" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="80" cy="130" r="7" fill="none" stroke="#333" stroke-width="1.5"/>
+    </svg>`,
+  },
+  {
+    id: 'space-rocket',
+    title: 'Rocket in Space',
+    emoji: '🚀',
+    category: 'vehicles',
+    difficulty: 'medium',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <path d="M200 40 Q170 100 160 180 L160 350 Q160 380 180 390 L220 390 Q240 380 240 350 L240 180 Q230 100 200 40Z" fill="none" stroke="#333" stroke-width="3"/>
+      <circle cx="200" cy="220" r="30" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="200" cy="220" r="18" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M160 280 L110 360 L160 340" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M240 280 L290 360 L240 340" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M180 390 Q190 430 200 440 Q210 430 220 390" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M170 390 Q185 440 200 460 Q215 440 230 390" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="180" y="300" width="40" height="15" rx="3" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="80" cy="80" r="6" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="320" cy="120" r="8" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="60" cy="250" r="4" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="340" cy="300" r="5" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="100" cy="400" r="7" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="310" cy="450" r="6" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="330" cy="200" rx="25" ry="20" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="325" cy="195" r="4" fill="none" stroke="#333" stroke-width="1"/>
+    </svg>`,
+  },
+  {
+    id: 'flower-bouquet',
+    title: 'Flower Bouquet',
+    emoji: '💐',
+    category: 'nature',
+    difficulty: 'medium',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <path d="M160 300 L140 480 Q140 490 160 490 L240 490 Q260 490 260 480 L240 300" fill="none" stroke="#333" stroke-width="3"/>
+      <path d="M140 340 Q200 320 260 340" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M160 300 Q180 280 200 300 Q220 280 240 300" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="180" r="30" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="200" cy="180" r="15" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="145" cy="200" r="25" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="145" cy="200" r="12" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="255" cy="200" r="25" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="255" cy="200" r="12" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="130" cy="140" r="22" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="270" cy="140" r="22" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="170" cy="110" r="20" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="230" cy="110" r="20" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="95" r="18" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M180 300 L185 240" stroke="#333" stroke-width="2"/>
+      <path d="M220 300 L215 240" stroke="#333" stroke-width="2"/>
+      <path d="M160 300 L150 230" stroke="#333" stroke-width="2"/>
+      <path d="M240 300 L250 230" stroke="#333" stroke-width="2"/>
+      <path d="M200 300 L200 210" stroke="#333" stroke-width="2"/>
+      <ellipse cx="120" cy="250" rx="15" ry="8" fill="none" stroke="#333" stroke-width="2" transform="rotate(-30 120 250)"/>
+      <ellipse cx="280" cy="250" rx="15" ry="8" fill="none" stroke="#333" stroke-width="2" transform="rotate(30 280 250)"/>
+    </svg>`,
+  },
+  {
+    id: 'big-cat',
+    title: 'Sleepy Cat',
+    emoji: '🐱',
+    category: 'animals',
+    difficulty: 'easy',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="200" cy="330" rx="140" ry="90" fill="none" stroke="#333" stroke-width="3"/>
+      <circle cx="200" cy="200" r="80" fill="none" stroke="#333" stroke-width="3"/>
+      <polygon points="135,140 120,60 170,120" fill="none" stroke="#333" stroke-width="2.5"/>
+      <polygon points="265,140 280,60 230,120" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="170" cy="190" r="12" fill="#333"/>
+      <circle cx="230" cy="190" r="12" fill="#333"/>
+      <circle cx="174" cy="186" r="4" fill="white"/>
+      <circle cx="234" cy="186" r="4" fill="white"/>
+      <ellipse cx="200" cy="220" rx="8" ry="6" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M185 232 Q200 248 215 232" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="140" y1="210" x2="80" y2="200" stroke="#333" stroke-width="2"/>
+      <line x1="140" y1="220" x2="80" y2="225" stroke="#333" stroke-width="2"/>
+      <line x1="260" y1="210" x2="320" y2="200" stroke="#333" stroke-width="2"/>
+      <line x1="260" y1="220" x2="320" y2="225" stroke="#333" stroke-width="2"/>
+      <path d="M330 310 Q370 300 360 340 Q350 370 330 350" fill="none" stroke="#333" stroke-width="2.5"/>
+      <ellipse cx="140" cy="400" rx="30" ry="18" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="260" cy="400" rx="30" ry="18" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="200" cy="450" rx="100" ry="10" fill="none" stroke="#333" stroke-width="1.5"/>
+    </svg>`,
+  },
+  {
+    id: 'fairy-castle',
+    title: 'Fairy Castle',
+    emoji: '🏰',
+    category: 'fantasy',
+    difficulty: 'hard',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <rect x="120" y="200" width="160" height="250" fill="none" stroke="#333" stroke-width="3"/>
+      <rect x="60" y="160" width="50" height="290" fill="none" stroke="#333" stroke-width="2.5"/>
+      <rect x="290" y="160" width="50" height="290" fill="none" stroke="#333" stroke-width="2.5"/>
+      <polygon points="60,160 85,100 110,160" fill="none" stroke="#333" stroke-width="2.5"/>
+      <polygon points="290,160 315,100 340,160" fill="none" stroke="#333" stroke-width="2.5"/>
+      <polygon points="120,200 200,120 280,200" fill="none" stroke="#333" stroke-width="2.5"/>
+      <rect x="175" y="360" width="50" height="90" rx="25" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="210" cy="400" r="4" fill="#333"/>
+      <rect x="140" y="230" width="35" height="45" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="225" y="230" width="35" height="45" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="170" r="20" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="200" y1="150" x2="200" y2="190" stroke="#333" stroke-width="1.5"/>
+      <line x1="180" y1="170" x2="220" y2="170" stroke="#333" stroke-width="1.5"/>
+      <rect x="70" y="200" width="30" height="20" rx="3" fill="none" stroke="#333" stroke-width="1.5"/>
+      <rect x="70" y="260" width="30" height="20" rx="3" fill="none" stroke="#333" stroke-width="1.5"/>
+      <rect x="300" y="200" width="30" height="20" rx="3" fill="none" stroke="#333" stroke-width="1.5"/>
+      <rect x="300" y="260" width="30" height="20" rx="3" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M80 100 L80 80 L90 80" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M90 100 L90 85" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M310 100 L310 80 L320 80" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M320 100 L320 85" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="30" y1="450" x2="370" y2="450" stroke="#333" stroke-width="2"/>
+    </svg>`,
+  },
+  {
+    id: 'big-unicorn',
+    title: 'Magical Unicorn',
+    emoji: '🦄',
+    category: 'fantasy',
+    difficulty: 'medium',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="220" cy="280" rx="100" ry="70" fill="none" stroke="#333" stroke-width="3"/>
+      <circle cx="120" cy="200" r="55" fill="none" stroke="#333" stroke-width="3"/>
+      <line x1="110" y1="145" x2="95" y2="60" stroke="#333" stroke-width="3"/>
+      <polygon points="88,65 95,30 105,60" fill="none" stroke="#333" stroke-width="2.5"/>
+      <ellipse cx="85" cy="175" rx="18" ry="28" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="100" cy="195" r="8" fill="#333"/>
+      <circle cx="103" cy="192" r="3" fill="white"/>
+      <path d="M85 220 Q75 225 85 230" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M140 235 Q120 250 135 260" fill="none" stroke="#333" stroke-width="2"/>
+      <rect x="150" y="340" width="22" height="70" rx="6" fill="none" stroke="#333" stroke-width="2.5"/>
+      <rect x="190" y="340" width="22" height="70" rx="6" fill="none" stroke="#333" stroke-width="2.5"/>
+      <rect x="240" y="340" width="22" height="70" rx="6" fill="none" stroke="#333" stroke-width="2.5"/>
+      <rect x="280" y="340" width="22" height="70" rx="6" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M315 270 Q350 260 345 290 Q340 310 315 295" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M155 255 Q140 235 160 230" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="60" cy="120" r="5" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="300" cy="150" r="6" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="350" cy="230" r="4" fill="none" stroke="#333" stroke-width="1"/>
+      <line x1="30" y1="420" x2="370" y2="420" stroke="#333" stroke-width="1.5"/>
+    </svg>`,
+  },
+  {
+    id: 'ocean-deep',
+    title: 'Ocean Adventure',
+    emoji: '🐠',
+    category: 'nature',
+    difficulty: 'medium',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 60 Q100 40 200 60 Q300 80 400 55" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="150" cy="180" rx="60" ry="35" fill="none" stroke="#333" stroke-width="3"/>
+      <polygon points="210,180 250,150 250,210" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="125" cy="170" r="8" fill="#333"/>
+      <path d="M120 195 Q135 205 150 195" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M130 160 Q150 150 170 160" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M130 195 Q150 205 170 195" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="300" cy="300" rx="45" ry="25" fill="none" stroke="#333" stroke-width="2.5"/>
+      <polygon points="345,300 380,280 380,320" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="280" cy="293" r="6" fill="#333"/>
+      <path d="M50 350 Q60 320 70 350 Q80 380 90 350" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M120 370 Q130 340 140 370 Q150 400 160 370" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M250 380 Q260 360 270 380 Q280 400 290 380" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M320 400 Q330 380 340 400 Q350 420 360 400" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="180" cy="460" rx="30" ry="8" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="70" cy="140" r="5" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="320" cy="160" r="8" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="50" cy="260" r="4" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="350" cy="450" r="6" fill="none" stroke="#333" stroke-width="1"/>
+    </svg>`,
+  },
+  {
+    id: 'big-mandala',
+    title: 'Star Mandala',
+    emoji: '✨',
+    category: 'patterns',
+    difficulty: 'hard',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="200" cy="260" r="200" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="200" cy="260" r="160" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="260" r="120" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="260" r="80" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="260" r="40" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="260" r="15" fill="none" stroke="#333" stroke-width="2"/>
+      ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a => `<line x1="200" y1="260" x2="${200 + 200 * Math.cos(a * Math.PI / 180)}" y2="${260 + 200 * Math.sin(a * Math.PI / 180)}" stroke="#333" stroke-width="1.5"/>`).join('')}
+      ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a => `<circle cx="${200 + 100 * Math.cos(a * Math.PI / 180)}" cy="${260 + 100 * Math.sin(a * Math.PI / 180)}" r="12" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      ${[15,45,75,105,135,165,195,225,255,285,315,345].map(a => `<circle cx="${200 + 140 * Math.cos(a * Math.PI / 180)}" cy="${260 + 140 * Math.sin(a * Math.PI / 180)}" r="8" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      ${[0,60,120,180,240,300].map(a => `<ellipse cx="${200 + 60 * Math.cos(a * Math.PI / 180)}" cy="${260 + 60 * Math.sin(a * Math.PI / 180)}" rx="12" ry="6" fill="none" stroke="#333" stroke-width="1.5" transform="rotate(${a} ${200 + 60 * Math.cos(a * Math.PI / 180)} ${260 + 60 * Math.sin(a * Math.PI / 180)})"/>`).join('')}
+    </svg>`,
+  },
+  {
+    id: 'snow-window',
+    title: 'Snow Window',
+    emoji: '❄️',
+    category: 'holidays',
+    difficulty: 'medium',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <rect x="50" y="60" width="300" height="350" rx="8" fill="none" stroke="#333" stroke-width="3"/>
+      <rect x="65" y="75" width="270" height="320" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="200" y1="75" x2="200" y2="395" stroke="#333" stroke-width="2.5"/>
+      <line x1="65" y1="235" x2="335" y2="235" stroke="#333" stroke-width="2.5"/>
+      <rect x="60" y="410" width="280" height="30" rx="4" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="130" cy="155" r="5" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="280" cy="130" r="4" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="100" cy="300" r="6" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="260" cy="350" r="5" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="300" cy="200" r="3" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="150" cy="370" r="4" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="160" cy="480" r="25" fill="none" stroke="#333" stroke-width="2.5"/>
+      <circle cx="160" cy="460" r="18" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="160" cy="445" r="12" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="155" cy="456" r="2" fill="#333"/><circle cx="165" cy="456" r="2" fill="#333"/>
+      <path d="M156 462 Q160 465 164 462" fill="none" stroke="#333" stroke-width="1"/>
+      <line x1="140" y1="460" x2="120" y2="455" stroke="#333" stroke-width="2"/>
+      <line x1="180" y1="460" x2="200" y2="455" stroke="#333" stroke-width="2"/>
+      <rect x="250" y="450" width="80" height="50" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="260" y1="470" x2="320" y2="470" stroke="#333" stroke-width="1"/>
+      <line x1="260" y1="480" x2="310" y2="480" stroke="#333" stroke-width="1"/>
+    </svg>`,
+  },
+  {
+    id: 'fruit-bowl',
+    title: 'Fruit Bowl',
+    emoji: '🍎',
+    category: 'food',
+    difficulty: 'easy',
+    svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <path d="M80 300 Q80 420 200 420 Q320 420 320 300" fill="none" stroke="#333" stroke-width="3"/>
+      <ellipse cx="200" cy="300" rx="125" ry="20" fill="none" stroke="#333" stroke-width="2.5"/>
+      <ellipse cx="200" cy="440" rx="80" ry="10" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="160" cy="240" r="40" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M160 200 Q165 185 175 195" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="250" cy="250" rx="35" ry="30" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M245 220 Q260 205 265 215" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="200" cy="200" rx="30" ry="25" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M200 175 Q205 160 215 170" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M120 260 Q130 280 150 270" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="130" cy="280" rx="20" ry="15" fill="none" stroke="#333" stroke-width="2"/>
+      <ellipse cx="270" cy="275" rx="18" ry="13" fill="none" stroke="#333" stroke-width="2"/>
+      <line x1="60" y1="470" x2="340" y2="470" stroke="#333" stroke-width="2"/>
     </svg>`,
   },
 ];

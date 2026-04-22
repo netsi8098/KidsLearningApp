@@ -59,6 +59,18 @@ Templates drawn/created by the development team. Full ownership.
 | hearts-pattern | Hearts Pattern | Original | Dev team | Own work | Yes | 2026-04-21 | Pattern |
 | birthday-cake | Birthday Cake | Original | Dev team | Own work | Yes | 2026-04-21 | Holiday |
 | snowman | Snowman | Original | Dev team | Own work | Yes | 2026-04-21 | Holiday |
+| beach-car | Beach Car | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas vehicle scene |
+| coffee-cup | Cozy Coffee | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas food |
+| cupcake-scene | Birthday Cupcake | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas food |
+| space-rocket | Rocket in Space | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas vehicle |
+| flower-bouquet | Flower Bouquet | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas nature |
+| big-cat | Sleepy Cat | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas animal |
+| fairy-castle | Fairy Castle | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas fantasy |
+| big-unicorn | Magical Unicorn | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas fantasy |
+| ocean-deep | Ocean Adventure | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas nature |
+| big-mandala | Star Mandala | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas pattern |
+| snow-window | Snow Window | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas holiday |
+| fruit-bowl | Fruit Bowl | Original | Dev team | Own work | Yes | 2026-04-21 | Full-canvas food |
 
 ## Adding New Templates
 

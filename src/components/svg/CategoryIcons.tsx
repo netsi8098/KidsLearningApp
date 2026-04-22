@@ -141,11 +141,22 @@ function PatternsIcon({ size = 16, className }: IconProps) {
   );
 }
 
+function FoodIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+      <path d="M4 10Q8 4 12 10Q12 14 8 14Q4 14 4 10Z" fill="#FF8FAB" opacity="0.6" />
+      <circle cx="8" cy="8" r="2" fill="#FF6B6B" opacity="0.5" />
+      <rect x="7" y="2" width="2" height="4" rx="1" fill="#FFE66D" opacity="0.6" />
+    </svg>
+  );
+}
+
 const coloringCategoryIcons: Record<string, (props: IconProps) => ReactNode> = {
   animals: AnimalsIcon,
   vehicles: VehiclesIcon,
   nature: NatureIcon,
   fantasy: FantasyIcon,
+  food: FoodIcon,
   alphabet: AlphabetIcon,
   numbers: NumbersIcon,
   holidays: HolidaysIcon,
