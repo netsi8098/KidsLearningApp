@@ -273,21 +273,29 @@ export default function ColoringPage() {
           </>}
         </div>
 
-        {/* ── Bottom: Compact color strip ── */}
-        <div className="fixed bottom-2 left-2 right-14 z-30" onClick={(e) => e.stopPropagation()}>
-          <ColorRail activeColor={activeColor} onColorChange={handleColorChange} recentColors={recentColors} expanded={showColorExpanded} onExpandedChange={(open) => { if (open) { setShowBrushDrawer(false); setShowStickerPicker(false); setShowColorWheel(false); } setShowColorExpanded(open); }} onColorWheelOpen={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }} />
-        </div>
-
-        {/* ── Expanded colors (above color strip, below top controls) ── */}
-        {showColorExpanded && (
-          <div className="fixed bottom-14 left-2 right-14 z-30 rounded-2xl p-2.5" style={{ ...glass, background: 'rgba(30,30,45,0.92)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="grid grid-cols-10 gap-1.5">
-              {extendedPalette.map((c) => (
-                <button key={c.hex} className="w-full aspect-square rounded-md cursor-pointer" style={{ background: c.hex, border: activeColor === c.hex ? '2px solid white' : '1px solid rgba(255,255,255,0.06)' }} onClick={() => { handleColorChange(c.hex); setShowColorExpanded(false); }} aria-label={`${c.label} color`} />
-              ))}
+        {/* ── Bottom-left: Compact color control ── */}
+        <div className="fixed bottom-3 left-3 z-30 flex items-center gap-1.5 p-1.5 rounded-2xl" style={glass} onClick={(e) => e.stopPropagation()}>
+          {/* Active color preview */}
+          <motion.button
+            className="w-10 h-10 rounded-xl cursor-pointer border-2"
+            style={{ background: activeColor, borderColor: 'rgba(255,255,255,0.2)', boxShadow: `0 0 8px ${activeColor}40` }}
+            onClick={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }}
+            whileTap={{ scale: 0.9 }}
+            aria-label="Open color picker"
+          />
+          {/* Color wheel button */}
+          <motion.button
+            className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #45B7D1, #A78BFA)', padding: '1.5px' }}
+            onClick={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }}
+            whileTap={{ scale: 0.9 }}
+            aria-label="Color wheel"
+          >
+            <div className="w-full h-full rounded-[9px] flex items-center justify-center" style={{ background: 'rgba(30,30,45,0.85)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
-          </div>
-        )}
+          </motion.button>
+        </div>
 
         {/* ── Drawers ── */}
         <BrushDrawer open={showBrushDrawer} onClose={() => setShowBrushDrawer(false)} activeBrush={activeBrush} onBrushChange={handleBrushChange} brushSize={studioBrushSize} onSizeChange={setStudioBrushSize} brushOpacity={studioOpacity} onOpacityChange={setStudioOpacity} activeColor={activeColor} />
