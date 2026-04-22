@@ -1469,3 +1469,76 @@ The color grid uses `grid-cols-10` for a compact layout that fits 20 colors in 2
 2. Expand to 40-60 over subsequent batches
 3. Each template in `coloringData.ts` with `svgOutline` + preview in `ColoringPreviews.tsx`
 4. Templates must work with layered canvas (eraser/fill preserve outlines)
+
+---
+
+### Claude Batch 2F — Immersive Studio Layout + Gallery + Templates
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors
+
+#### Immersive Studio Layout (Pigment-inspired)
+
+Complete redesign of the studio drawing mode:
+
+- **Fullscreen canvas**: warm paper background (#F0EBE3) fills entire viewport, canvas centered
+- **Canvas size**: 400×520 for larger artwork area
+- **Floating glass controls**: translucent dark glass (rgba(30,30,45,0.75) + blur) over canvas edges
+- **Top-left**: Close button (glass pill)
+- **Top-right**: Undo, Redo, Save (glass pills, Save=green)
+- **Right side**: Vertical tool rail (brush, eraser, fill, sticker, clear) — compact glass column
+- **Bottom**: Compact color strip with scroll, "more" button
+- **Expanded colors**: appears above color strip as glass panel
+- **Drawers**: BrushDrawer and StickerPicker slide up as bottom sheets
+- **Canvas is the hero**: tools float over edges, don't shrink canvas
+- **Tap canvas to close** any open drawers
+
+#### Gallery Polish
+
+- Cards: 4:3 aspect ratio, `object-contain` for correct proportions
+- SVG trash icon + SVG check icon (no emoji)
+- SVG empty state illustration
+- Compact info footer
+
+#### 16 Premium Templates Added
+
+New templates across new categories:
+- **Animals**: Bunny in Garden, Baby Elephant, Butterfly Garden, Happy Turtle
+- **Vehicles**: Rocket Ship, Sailboat, Choo-Choo Train
+- **Nature**: Treehouse, Rainbow Landscape, Under the Sea
+- **Fantasy**: Magic Castle, Unicorn, Friendly Dragon
+- **Patterns**: Simple Mandala, Hearts Pattern
+- **Holidays**: Birthday Cake, Snowman
+
+New categories added: Vehicles, Fantasy, Patterns (with SVG category icons).
+Each template has a matching colorful preview component.
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/pages/ColoringPage.tsx` | Immersive fullscreen studio layout |
+| `src/components/ArtworkGallery.tsx` | 4:3 cards, SVG icons, empty state |
+| `src/data/coloringData.ts` | 16 new templates, 3 new categories |
+| `src/components/svg/ColoringPreviews.tsx` | 16 new preview components |
+| `src/components/svg/CategoryIcons.tsx` | Vehicles, Fantasy, Patterns icons |
+
+#### Codex verification checklist
+- [ ] Canvas fills most of the screen at 390px mobile
+- [ ] Close, Undo, Redo, Save buttons floating in top corners
+- [ ] Vertical tool rail on right side
+- [ ] Color strip at bottom
+- [ ] ALL COLORS opens above color strip, doesn't block Save
+- [ ] Save works with ALL COLORS open
+- [ ] Template eraser preserves outlines
+- [ ] Fill respects template boundaries
+- [ ] New templates appear in gallery with previews
+- [ ] Category filters include Vehicles, Fantasy, Patterns
+- [ ] Gallery cards show 4:3 ratio, no emoji
+- [ ] Production console clean
+
+#### Future Batches (Prioritized)
+- **Batch 2G**: Unlimited Colors — color wheel, HEX input, curated palettes, saved colors
+- **Batch 2H**: 12 Customizable Brushes — realistic rendering, live preview, vertical slider
+- **Batch 2I**: Unique Stylized Fills — gradient, texture, dots, watercolor wash
+- **Batch 2J**: Large Pigment-style Template Gallery — 40-60 templates
+- **Batch 2K**: Zoom/Pan — pinch-to-zoom, drag pan, fit-to-screen, correct coords at any zoom

@@ -136,152 +136,86 @@ export default function ColoringPage() {
     { key: 'gallery', label: 'Gallery', icon: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor" opacity="0.3"/><circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.3"/>{[0,60,120,180,240,300].map(a=><circle key={a} cx={8+Math.cos(a*Math.PI/180)*5.5} cy={8+Math.sin(a*Math.PI/180)*5.5} r="1.2" fill="currentColor" opacity="0.5"/>)}</svg> },
   ];
 
-  // ===== DRAWING STUDIO MODE =====
+  // ===== IMMERSIVE COLORING STUDIO =====
   if (drawingMode) {
+    const glass = { background: 'rgba(30,30,45,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' } as const;
     return (
-      <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'linear-gradient(180deg, #1A1A2E 0%, #16213E 50%, #1A1A2E 100%)' }}>
-        {/* Studio header — title + brush indicator */}
-        <div className="flex-shrink-0 flex items-center justify-between px-3 pt-3 pb-1.5">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: activeColor, boxShadow: `0 0 6px ${activeColor}50` }} />
-            <h3 className="text-xs font-bold text-white/60 truncate">
-              {activeTemplate ? activeTemplate.title : 'Free Draw'}
-            </h3>
-          </div>
-          <motion.button
-            className="px-3 py-1 rounded-full text-[10px] font-bold cursor-pointer"
-            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}
-            onClick={() => { closeAllDrawers(); setTimeout(() => setShowBrushDrawer(true), 50); }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Open brush settings"
-          >
-            {brushes.find((b) => b.id === activeBrush)?.label || 'Brush'} &middot; {studioBrushSize}px
+      <div className="fixed inset-0 z-50" style={{ background: '#F0EBE3' }} onClick={() => closeAllDrawers()}>
+        {/* ── Canvas: fills the screen ── */}
+        <div className="absolute inset-0 flex items-center justify-center p-1" onClick={(e) => e.stopPropagation()}>
+          <DrawingCanvas
+            ref={canvasApiRef}
+            width={400}
+            height={520}
+            templateSvg={activeTemplate?.svgOutline}
+            tool={activeTool}
+            brush={activeBrush}
+            color={activeColor}
+            brushSize={studioBrushSize}
+            brushOpacity={studioOpacity}
+            activeSticker={activeSticker}
+            onHistoryChange={handleHistoryChange}
+            onSave={handleSave}
+          />
+        </div>
+
+        {/* ── Top-left: Close ── */}
+        <div className="fixed top-3 left-3 z-30" onClick={(e) => e.stopPropagation()}>
+          <motion.button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer" style={glass} onClick={() => { closeAllDrawers(); exitDrawing(); }} whileTap={{ scale: 0.9 }} aria-label="Exit studio">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </motion.button>
         </div>
 
-        {/* Canvas area — centered artboard on dark easel */}
-        <div className="flex-1 flex items-center justify-center px-4 py-2 min-h-0">
-          {/* Artboard frame — explicit width so canvas doesn't collapse */}
-          <div
-            className="w-full"
-            style={{
-              maxWidth: 350,
-              padding: '5px',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))',
-              borderRadius: '14px',
-              boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05), 0 6px 30px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
-            }}
-          >
-            <DrawingCanvas
-              ref={canvasApiRef}
-              templateSvg={activeTemplate?.svgOutline}
-              tool={activeTool}
-              brush={activeBrush}
-              color={activeColor}
-              brushSize={studioBrushSize}
-              brushOpacity={studioOpacity}
-              activeSticker={activeSticker}
-              onHistoryChange={handleHistoryChange}
-              onSave={handleSave}
-            />
-          </div>
+        {/* ── Top-right: Undo, Redo, Save ── */}
+        <div className="fixed top-3 right-3 z-30 flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <motion.button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer disabled:opacity-30" style={glass} onClick={() => { closeAllDrawers(); canvasApiRef.current?.undo(); }} disabled={!canUndo} whileTap={{ scale: 0.9 }} aria-label="Undo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>
+          </motion.button>
+          <motion.button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer disabled:opacity-30" style={glass} onClick={() => { closeAllDrawers(); canvasApiRef.current?.redo(); }} disabled={!canRedo} whileTap={{ scale: 0.9 }} aria-label="Redo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 7"/></svg>
+          </motion.button>
+          <motion.button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer" style={{ ...glass, background: 'rgba(107,203,119,0.8)' }} onClick={() => { closeAllDrawers(); canvasApiRef.current?.save(); }} whileTap={{ scale: 0.9 }} aria-label="Save artwork">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          </motion.button>
         </div>
 
-        {/* Expanded color panel — inline in flex flow, never overlaps toolbar */}
+        {/* ── Right: Vertical tool rail ── */}
+        <div className="fixed right-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5 p-1.5 rounded-2xl" style={glass} onClick={(e) => e.stopPropagation()}>
+          {([
+            { id: 'brush' as const, label: 'Brush', d: 'M18 3a3 3 0 0 0-3 3v1l-8 8-3 3h6l8-8V9a3 3 0 0 0-3-3z' },
+            { id: 'eraser' as const, label: 'Eraser', d: 'M20 20H7L3 16c-.6-.6-.6-1.5 0-2.1L14.6 2.3c.6-.6 1.5-.6 2.1 0L21.7 7.3c.6.6.6 1.5 0 2.1L12 19' },
+            { id: 'fill' as const, label: 'Fill', d: 'M2 22l1-1h3l7-7M13 14l-1.5-1.5L16 8l5 5-4.5 4.5' },
+            { id: 'stamp' as const, label: 'Sticker', d: 'M12 2l3 7h7l-5.5 5 2.5 7L12 17l-7 4 2.5-7L2 9h7z' },
+          ] as const).map((t) => (
+            <motion.button key={t.id} className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" style={{ background: activeTool === t.id ? 'rgba(255,255,255,0.2)' : 'transparent' }} onClick={() => handleToolChange(t.id)} whileTap={{ scale: 0.9 }} aria-label={t.label} aria-pressed={activeTool === t.id}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeTool === t.id ? '#FFE66D' : 'rgba(255,255,255,0.6)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={t.d}/></svg>
+            </motion.button>
+          ))}
+          <div className="w-6 h-px mx-auto" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          <motion.button className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" style={{ background: 'transparent' }} onClick={() => { closeAllDrawers(); canvasApiRef.current?.clear(); }} whileTap={{ scale: 0.9 }} aria-label="Clear">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </motion.button>
+        </div>
+
+        {/* ── Bottom: Compact color strip ── */}
+        <div className="fixed bottom-2 left-2 right-14 z-30" onClick={(e) => e.stopPropagation()}>
+          <ColorRail activeColor={activeColor} onColorChange={handleColorChange} recentColors={recentColors} expanded={showColorExpanded} onExpandedChange={(open) => { if (open) { setShowBrushDrawer(false); setShowStickerPicker(false); } setShowColorExpanded(open); }} />
+        </div>
+
+        {/* ── Expanded colors (above color strip, below top controls) ── */}
         {showColorExpanded && (
-          <div className="flex-shrink-0 px-3 pb-1">
-            <div className="rounded-2xl p-3" style={{ background: 'rgba(45,45,58,0.95)', backdropFilter: 'blur(12px)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">All Colors</p>
-                <button className="text-white/40 cursor-pointer" onClick={() => setShowColorExpanded(false)} aria-label="Close color picker">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                </button>
-              </div>
-              <div className="grid grid-cols-10 gap-1.5">
-                {extendedPalette.map((c) => (
-                  <button
-                    key={c.hex}
-                    className="w-full aspect-square rounded-md cursor-pointer"
-                    style={{
-                      background: c.hex,
-                      border: activeColor === c.hex ? '2px solid white' : c.hex === '#FFFFFF' ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.06)',
-                      boxShadow: activeColor === c.hex ? '0 0 0 1px rgba(255,255,255,0.3)' : 'none',
-                    }}
-                    onClick={() => { handleColorChange(c.hex); setShowColorExpanded(false); }}
-                    aria-label={`${c.label} color`}
-                  />
-                ))}
-              </div>
-              {recentColors.length > 0 && (
-                <div className="flex gap-1.5 mt-2">
-                  <span className="text-[9px] font-bold text-white/25 self-center mr-1">Recent</span>
-                  {recentColors.slice(0, 6).map((hex) => (
-                    <button
-                      key={`r-${hex}`}
-                      className="w-6 h-6 rounded-md cursor-pointer flex-shrink-0"
-                      style={{ background: hex, border: activeColor === hex ? '2px solid white' : '1px solid rgba(255,255,255,0.06)' }}
-                      onClick={() => { handleColorChange(hex); setShowColorExpanded(false); }}
-                      aria-label={`Recent ${hex}`}
-                    />
-                  ))}
-                </div>
-              )}
+          <div className="fixed bottom-14 left-2 right-14 z-30 rounded-2xl p-2.5" style={{ ...glass, background: 'rgba(30,30,45,0.92)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="grid grid-cols-10 gap-1.5">
+              {extendedPalette.map((c) => (
+                <button key={c.hex} className="w-full aspect-square rounded-md cursor-pointer" style={{ background: c.hex, border: activeColor === c.hex ? '2px solid white' : '1px solid rgba(255,255,255,0.06)' }} onClick={() => { handleColorChange(c.hex); setShowColorExpanded(false); }} aria-label={`${c.label} color`} />
+              ))}
             </div>
           </div>
         )}
 
-        {/* Bottom controls — always at the very bottom, never covered */}
-        <div className="flex-shrink-0">
-          {/* Tool rail */}
-          <div className="flex justify-center px-3 pb-1.5">
-            <ToolRail
-              activeTool={activeTool}
-              onToolChange={handleToolChange}
-              onUndo={() => { closeAllDrawers(); canvasApiRef.current?.undo(); }}
-              onRedo={() => { closeAllDrawers(); canvasApiRef.current?.redo(); }}
-              onClear={() => { closeAllDrawers(); canvasApiRef.current?.clear(); }}
-              onSave={() => { closeAllDrawers(); canvasApiRef.current?.save(); }}
-              onClose={() => { closeAllDrawers(); exitDrawing(); }}
-              canUndo={canUndo}
-              canRedo={canRedo}
-            />
-          </div>
-
-          {/* Color rail */}
-          <div className="px-3 pb-3">
-            <ColorRail
-              activeColor={activeColor}
-              onColorChange={handleColorChange}
-              recentColors={recentColors}
-              expanded={showColorExpanded}
-              onExpandedChange={(open) => {
-                if (open) { setShowBrushDrawer(false); setShowStickerPicker(false); }
-                setShowColorExpanded(open);
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Brush drawer — z-20 so it slides under the tool rail */}
-        <BrushDrawer
-          open={showBrushDrawer}
-          onClose={() => setShowBrushDrawer(false)}
-          activeBrush={activeBrush}
-          onBrushChange={handleBrushChange}
-          brushSize={studioBrushSize}
-          onSizeChange={setStudioBrushSize}
-          brushOpacity={studioOpacity}
-          onOpacityChange={setStudioOpacity}
-          activeColor={activeColor}
-        />
-
-        {/* Sticker picker — z-20 so it slides under the tool rail */}
-        <StickerPicker
-          open={showStickerPicker}
-          onClose={() => setShowStickerPicker(false)}
-          activeSticker={activeSticker?.id || null}
-          onStickerSelect={(s) => { setActiveSticker(s); setActiveTool('stamp'); }}
-        />
+        {/* ── Drawers ── */}
+        <BrushDrawer open={showBrushDrawer} onClose={() => setShowBrushDrawer(false)} activeBrush={activeBrush} onBrushChange={handleBrushChange} brushSize={studioBrushSize} onSizeChange={setStudioBrushSize} brushOpacity={studioOpacity} onOpacityChange={setStudioOpacity} activeColor={activeColor} />
+        <StickerPicker open={showStickerPicker} onClose={() => setShowStickerPicker(false)} activeSticker={activeSticker?.id || null} onStickerSelect={(s) => { setActiveSticker(s); setActiveTool('stamp'); }} />
       </div>
     );
   }
