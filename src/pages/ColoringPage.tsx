@@ -9,7 +9,7 @@ import DrawingCanvas, { type CanvasApi } from '../components/DrawingCanvas';
 import ArtworkGallery from '../components/ArtworkGallery';
 import NavButton from '../components/NavButton';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
-import { getColoringPreview } from '../components/svg/ColoringPreviews';
+// ColoringPreviews no longer used — cards show real SVG outline directly
 import { getColoringCategoryIcon } from '../components/svg/CategoryIcons';
 import ToolRail from '../components/coloring/ToolRail';
 import ColorRail from '../components/coloring/ColorRail';
@@ -380,32 +380,27 @@ export default function ColoringPage() {
                 </div>
               ) : (
                 filteredTemplates.map((template, i) => {
-                  const cardBg = template.category === 'animals' ? '#FFF3E0' :
-                    template.category === 'alphabet' ? '#EDE7F6' :
-                    template.category === 'numbers' ? '#E3F2FD' :
-                    template.category === 'holidays' ? '#FFF8E1' :
-                    template.category === 'nature' ? '#E8F5E9' :
-                    '#FCE4EC';
                   return (
                   <motion.button
                     key={template.id}
-                    className="rounded-[20px] text-center cursor-pointer overflow-hidden"
-                    style={{ backgroundColor: '#FFFFFF', border: '1px solid #F0EAE0', boxShadow: '0 3px 16px rgba(45,45,58,0.08)' }}
-                    initial={{ opacity: 0, y: 20 }}
+                    className="rounded-[16px] text-left cursor-pointer overflow-hidden"
+                    style={{ backgroundColor: '#FFFFFF', border: '1px solid #F0EAE0', boxShadow: '0 2px 12px rgba(45,45,58,0.06)' }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    whileHover={{ scale: 1.03, y: -2, boxShadow: '0 6px 24px rgba(45,45,58,0.12)' }}
+                    transition={{ delay: Math.min(i * 0.04, 0.3) }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => openTemplate(template)}
                   >
-                    {/* Colored preview area */}
-                    <div className="w-full aspect-square flex items-center justify-center p-3" style={{ background: cardBg }}>
-                      <div className="w-full h-full max-w-[80px] max-h-[80px]">
-                        {getColoringPreview(template.id) || <span className="text-5xl block text-center leading-[80px]">{template.emoji}</span>}
-                      </div>
-                    </div>
-                    <div className="px-3 py-2.5">
-                      <h3 className="font-bold text-sm" style={{ color: '#2D2D3A' }}>{template.title}</h3>
+                    {/* Real SVG outline preview */}
+                    <div
+                      className="w-full bg-white flex items-center justify-center overflow-hidden"
+                      style={{ aspectRatio: '4 / 3', padding: '8px' }}
+                      aria-hidden="true"
+                      dangerouslySetInnerHTML={{ __html: template.svgOutline }}
+                    />
+                    <div className="px-2.5 py-2">
+                      <h3 className="font-bold text-[12px] leading-tight truncate" style={{ color: '#2D2D3A' }}>{template.title}</h3>
                       <span
                         className="inline-block mt-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold"
                         style={
