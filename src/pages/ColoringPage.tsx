@@ -16,6 +16,7 @@ import ColorRail from '../components/coloring/ColorRail';
 import BrushDrawer from '../components/coloring/BrushDrawer';
 import StickerPicker from '../components/coloring/StickerPicker';
 import { brushes, extendedPalette, type ToolId, type BrushId, type StickerDef } from '../components/coloring/coloringTools';
+import ZoomableViewport, { ZoomControls } from '../components/coloring/ZoomableViewport';
 
 type TabKey = 'templates' | 'free-draw' | 'gallery';
 
@@ -87,6 +88,9 @@ export default function ColoringPage() {
   const [showColorExpanded, setShowColorExpanded] = useState(false);
   const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
+  const [zoom, setZoom] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
 
   const handleColorChange = useCallback((hex: string) => {
     setActiveColor(hex);
@@ -141,23 +145,25 @@ export default function ColoringPage() {
     const glass = { background: 'rgba(30,30,45,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' } as const;
     return (
       <div className="fixed inset-0 z-50" style={{ background: '#F0EBE3' }} onClick={() => closeAllDrawers()}>
-        {/* ── Canvas: fills the screen ── */}
-        <div className="absolute inset-0 flex items-center justify-center p-1" onClick={(e) => e.stopPropagation()}>
-          <DrawingCanvas
-            ref={canvasApiRef}
-            width={400}
-            height={520}
-            templateSvg={activeTemplate?.svgOutline}
-            tool={activeTool}
-            brush={activeBrush}
-            color={activeColor}
-            brushSize={studioBrushSize}
-            brushOpacity={studioOpacity}
-            activeSticker={activeSticker}
-            onHistoryChange={handleHistoryChange}
-            onSave={handleSave}
-          />
-        </div>
+        {/* ── Zoomable canvas viewport ── */}
+        <ZoomableViewport zoom={zoom} onZoomChange={setZoom} panX={panX} panY={panY} onPanChange={(x, y) => { setPanX(x); setPanY(y); }}>
+          <div onClick={(e) => e.stopPropagation()} className="p-2">
+            <DrawingCanvas
+              ref={canvasApiRef}
+              width={400}
+              height={520}
+              templateSvg={activeTemplate?.svgOutline}
+              tool={activeTool}
+              brush={activeBrush}
+              color={activeColor}
+              brushSize={studioBrushSize}
+              brushOpacity={studioOpacity}
+              activeSticker={activeSticker}
+              onHistoryChange={handleHistoryChange}
+              onSave={handleSave}
+            />
+          </div>
+        </ZoomableViewport>
 
         {/* ── Top-left: Close ── */}
         <div className="fixed top-3 left-3 z-30" onClick={(e) => e.stopPropagation()}>
@@ -179,22 +185,49 @@ export default function ColoringPage() {
           </motion.button>
         </div>
 
-        {/* ── Right: Vertical tool rail ── */}
-        <div className="fixed right-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5 p-1.5 rounded-2xl" style={glass} onClick={(e) => e.stopPropagation()}>
-          {([
-            { id: 'brush' as const, label: 'Brush', d: 'M18 3a3 3 0 0 0-3 3v1l-8 8-3 3h6l8-8V9a3 3 0 0 0-3-3z' },
-            { id: 'eraser' as const, label: 'Eraser', d: 'M20 20H7L3 16c-.6-.6-.6-1.5 0-2.1L14.6 2.3c.6-.6 1.5-.6 2.1 0L21.7 7.3c.6.6.6 1.5 0 2.1L12 19' },
-            { id: 'fill' as const, label: 'Fill', d: 'M2 22l1-1h3l7-7M13 14l-1.5-1.5L16 8l5 5-4.5 4.5' },
-            { id: 'stamp' as const, label: 'Sticker', d: 'M12 2l3 7h7l-5.5 5 2.5 7L12 17l-7 4 2.5-7L2 9h7z' },
-          ] as const).map((t) => (
-            <motion.button key={t.id} className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" style={{ background: activeTool === t.id ? 'rgba(255,255,255,0.2)' : 'transparent' }} onClick={() => handleToolChange(t.id)} whileTap={{ scale: 0.9 }} aria-label={t.label} aria-pressed={activeTool === t.id}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeTool === t.id ? '#FFE66D' : 'rgba(255,255,255,0.6)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={t.d}/></svg>
+        {/* ── Right: Tool rail + size slider + zoom ── */}
+        <div className="fixed right-2 top-16 bottom-16 z-30 flex flex-col items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          {/* Tool buttons */}
+          <div className="flex flex-col gap-1 p-1.5 rounded-2xl" style={glass}>
+            {([
+              { id: 'brush' as const, label: 'Brush', d: 'M18 3a3 3 0 0 0-3 3v1l-8 8-3 3h6l8-8V9a3 3 0 0 0-3-3z' },
+              { id: 'eraser' as const, label: 'Eraser', d: 'M20 20H7L3 16c-.6-.6-.6-1.5 0-2.1L14.6 2.3c.6-.6 1.5-.6 2.1 0L21.7 7.3c.6.6.6 1.5 0 2.1L12 19' },
+              { id: 'fill' as const, label: 'Fill', d: 'M2 22l1-1h3l7-7M13 14l-1.5-1.5L16 8l5 5-4.5 4.5' },
+              { id: 'stamp' as const, label: 'Sticker', d: 'M12 2l3 7h7l-5.5 5 2.5 7L12 17l-7 4 2.5-7L2 9h7z' },
+            ] as const).map((t) => (
+              <motion.button key={t.id} className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" style={{ background: activeTool === t.id ? 'rgba(255,255,255,0.2)' : 'transparent' }} onClick={() => handleToolChange(t.id)} whileTap={{ scale: 0.9 }} aria-label={t.label} aria-pressed={activeTool === t.id}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeTool === t.id ? '#FFE66D' : 'rgba(255,255,255,0.6)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={t.d}/></svg>
+              </motion.button>
+            ))}
+            <div className="w-6 h-px mx-auto" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <motion.button className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" onClick={() => { closeAllDrawers(); canvasApiRef.current?.clear(); }} whileTap={{ scale: 0.9 }} aria-label="Clear">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
             </motion.button>
-          ))}
-          <div className="w-6 h-px mx-auto" style={{ background: 'rgba(255,255,255,0.1)' }} />
-          <motion.button className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" style={{ background: 'transparent' }} onClick={() => { closeAllDrawers(); canvasApiRef.current?.clear(); }} whileTap={{ scale: 0.9 }} aria-label="Clear">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          </motion.button>
+          </div>
+
+          {/* Vertical size slider */}
+          <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl" style={glass}>
+            <div className="w-3 h-3 rounded-full" style={{ background: activeColor }} />
+            <input
+              type="range"
+              min={1}
+              max={40}
+              value={studioBrushSize}
+              onChange={(e) => setStudioBrushSize(Number(e.target.value))}
+              className="h-20 cursor-pointer"
+              style={{ writingMode: 'vertical-lr', direction: 'rtl', accentColor: activeColor, width: 20 }}
+              aria-label="Brush size"
+            />
+            <div className="w-5 h-5 rounded-full" style={{ background: activeColor }} />
+          </div>
+
+          {/* Zoom controls */}
+          <ZoomControls
+            zoom={zoom}
+            onZoomIn={() => setZoom((z) => Math.min(5, z + 0.5))}
+            onZoomOut={() => setZoom((z) => Math.max(1, z - 0.5))}
+            onReset={() => { setZoom(1); setPanX(0); setPanY(0); }}
+          />
         </div>
 
         {/* ── Bottom: Compact color strip ── */}
