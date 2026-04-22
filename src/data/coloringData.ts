@@ -18,16 +18,15 @@ export interface ColoringTemplate {
 }
 
 export const coloringCategories: ColoringCategory[] = [
+  { key: 'featured', label: 'Featured', emoji: '⭐' },
   { key: 'animals', label: 'Animals', emoji: '🐱' },
-  { key: 'vehicles', label: 'Vehicles', emoji: '🚗' },
-  { key: 'nature', label: 'Nature', emoji: '🌸' },
   { key: 'fantasy', label: 'Fantasy', emoji: '🏰' },
+  { key: 'nature', label: 'Nature', emoji: '🌸' },
+  { key: 'vehicles', label: 'Vehicles', emoji: '🚗' },
   { key: 'food', label: 'Food', emoji: '🧁' },
   { key: 'patterns', label: 'Patterns', emoji: '✨' },
   { key: 'holidays', label: 'Holidays', emoji: '🎄' },
-  { key: 'alphabet', label: 'Alphabet', emoji: '🔤' },
-  { key: 'numbers', label: 'Numbers', emoji: '🔢' },
-  { key: 'emotions', label: 'Emotions', emoji: '😊' },
+  { key: 'alphabet', label: 'Learning', emoji: '🔤' },
 ];
 
 import { featuredTemplates } from './featuredTemplates';
@@ -44,7 +43,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'cat',
     title: 'Cat',
     emoji: '🐱',
-    category: 'animals',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="100" cy="120" rx="50" ry="45" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -66,7 +65,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'fish',
     title: 'Fish',
     emoji: '🐟',
-    category: 'animals',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="90" cy="100" rx="60" ry="35" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -83,7 +82,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'letter-a',
     title: 'Letter A',
     emoji: '🅰️',
-    category: 'alphabet',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <path d="M40,170 L100,30 L160,170" fill="none" stroke="#333" stroke-width="3"/>
@@ -94,7 +93,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'letter-b',
     title: 'Letter B',
     emoji: '🅱️',
-    category: 'alphabet',
+    category: 'preschool',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <line x1="60" y1="30" x2="60" y2="170" stroke="#333" stroke-width="3"/>
@@ -108,7 +107,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'number-1',
     title: 'Number 1',
     emoji: '1️⃣',
-    category: 'numbers',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <path d="M80,60 L110,30 L110,170" fill="none" stroke="#333" stroke-width="3"/>
@@ -119,7 +118,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'number-2',
     title: 'Number 2',
     emoji: '2️⃣',
-    category: 'numbers',
+    category: 'preschool',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <path d="M55,70 Q55,30 100,30 Q145,30 145,70 Q145,100 55,160 L55,170 L145,170" fill="none" stroke="#333" stroke-width="3"/>
@@ -131,7 +130,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'star',
     title: 'Star',
     emoji: '⭐',
-    category: 'holidays',
+    category: 'preschool',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <polygon points="100,20 120,75 180,80 135,118 148,175 100,145 52,175 65,118 20,80 80,75" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -141,7 +140,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'heart',
     title: 'Heart',
     emoji: '❤️',
-    category: 'holidays',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <path d="M100,170 Q20,120 20,70 Q20,30 60,30 Q80,30 100,55 Q120,30 140,30 Q180,30 180,70 Q180,120 100,170Z" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -153,7 +152,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'flower',
     title: 'Flower',
     emoji: '🌸',
-    category: 'nature',
+    category: 'preschool',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <circle cx="100" cy="85" r="15" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -171,7 +170,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'tree',
     title: 'Tree',
     emoji: '🌲',
-    category: 'nature',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <rect x="88" y="135" width="24" height="45" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -184,7 +183,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'smiley',
     title: 'Smiley Face',
     emoji: '😊',
-    category: 'emotions',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <circle cx="100" cy="100" r="75" fill="none" stroke="#333" stroke-width="2.5"/>
@@ -197,7 +196,7 @@ export const coloringTemplates: ColoringTemplate[] = [
     id: 'surprised',
     title: 'Surprised Face',
     emoji: '😮',
-    category: 'emotions',
+    category: 'preschool',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <circle cx="100" cy="100" r="75" fill="none" stroke="#333" stroke-width="2.5"/>

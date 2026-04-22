@@ -30,7 +30,7 @@ export default function ColoringPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('templates');
   const [saveToast, setSaveToast] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('featured');
   const [drawingMode, setDrawingMode] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<ColoringTemplate | null>(null);
 

@@ -151,7 +151,16 @@ function FoodIcon({ size = 16, className }: IconProps) {
   );
 }
 
+function FeaturedIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+      <polygon points="8,1 10,6 15,6 11,9.5 12.5,15 8,11.5 3.5,15 5,9.5 1,6 6,6" fill="#FFD93D" opacity="0.7" stroke="#E6A817" strokeWidth="0.8" />
+    </svg>
+  );
+}
+
 const coloringCategoryIcons: Record<string, (props: IconProps) => ReactNode> = {
+  featured: FeaturedIcon,
   animals: AnimalsIcon,
   vehicles: VehiclesIcon,
   nature: NatureIcon,

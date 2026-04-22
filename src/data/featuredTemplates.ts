@@ -13,7 +13,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-cat-yarn',
     title: 'Cat & Yarn',
     emoji: '',
-    category: 'animals',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Floor -->
@@ -80,7 +80,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-dog-park',
     title: 'Puppy in Park',
     emoji: '',
-    category: 'animals',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Ground & sky -->
@@ -150,7 +150,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-bunny-garden',
     title: 'Bunny Garden',
     emoji: '',
-    category: 'animals',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <line x1="30" y1="420" x2="370" y2="420" stroke="#333" stroke-width="2"/>
@@ -208,7 +208,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-unicorn-rainbow',
     title: 'Unicorn Rainbow',
     emoji: '',
-    category: 'fantasy',
+    category: 'featured',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Rainbow arcs -->
@@ -259,7 +259,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-castle-flags',
     title: 'Fairy Tale Castle',
     emoji: '',
-    category: 'fantasy',
+    category: 'featured',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Ground -->
@@ -309,7 +309,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-flower-mandala',
     title: 'Flower Mandala',
     emoji: '',
-    category: 'patterns',
+    category: 'featured',
     difficulty: 'hard',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Outer circle -->
@@ -354,7 +354,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-dragon-cave',
     title: 'Dragon Cave',
     emoji: '',
-    category: 'fantasy',
+    category: 'featured',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Cave opening -->
@@ -418,7 +418,7 @@ export const featuredTemplates: ColoringTemplate[] = [
     id: 'ft-turtle-ocean',
     title: 'Sea Turtle',
     emoji: '',
-    category: 'animals',
+    category: 'featured',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <!-- Water surface -->
@@ -471,196 +471,202 @@ export const featuredTemplates: ColoringTemplate[] = [
     </svg>`,
   },
 
-  // ── 9. Letter A: Apple, Ant, Airplane ───────────────────
+  // ── 9. Letter A: Apple Tree Scene ────────────────────────
   {
     id: 'ft-letter-a-scene',
-    title: 'A is for...',
+    title: 'A is for Apple',
     emoji: '',
-    category: 'alphabet',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <!-- Big letter A -->
-      <path d="M120 400 L200 100 L280 400" fill="none" stroke="#333" stroke-width="6"/>
-      <line x1="148" y1="300" x2="252" y2="300" stroke="#333" stroke-width="5"/>
-      <!-- Apple sitting on top of A -->
-      <circle cx="200" cy="80" r="35" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M200 45 Q205 30 215 35" fill="none" stroke="#333" stroke-width="2"/>
-      <ellipse cx="210" cy="32" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(15 210 32)"/>
-      <path d="M185 60 Q200 50 215 60" fill="none" stroke="#333" stroke-width="1.5"/>
-      <!-- Ant walking on crossbar -->
-      <g transform="translate(180, 288)">
-        <ellipse cx="0" cy="0" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <circle cx="-10" cy="-2" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <ellipse cx="10" cy="0" rx="6" ry="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <circle cx="-13" cy="-5" r="1.5" fill="#333"/>
-        <line x1="-6" y1="4" x2="-10" y2="12" stroke="#333" stroke-width="1"/>
-        <line x1="0" y1="4" x2="0" y2="14" stroke="#333" stroke-width="1"/>
-        <line x1="6" y1="4" x2="10" y2="12" stroke="#333" stroke-width="1"/>
-        <line x1="-14" y1="-6" x2="-18" y2="-12" stroke="#333" stroke-width="1"/>
-        <line x1="-12" y1="-6" x2="-14" y2="-14" stroke="#333" stroke-width="1"/>
+      <line x1="30" y1="460" x2="370" y2="460" stroke="#333" stroke-width="2"/>
+      <path d="M140 460 L200 160 L260 460" fill="none" stroke="#333" stroke-width="7"/>
+      <line x1="160" y1="350" x2="240" y2="350" stroke="#333" stroke-width="5"/>
+      <rect x="250" y="310" width="14" height="100" rx="3" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="257" cy="275" rx="45" ry="40" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <ellipse cx="240" cy="280" rx="30" ry="28" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="274" cy="278" rx="30" ry="28" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="245" cy="295" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="270" cy="290" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="255" cy="260" r="11" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M257 235 Q262 220 270 225" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="275" cy="222" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(15 275 222)"/>
+      <g transform="translate(175, 340)">
+        <ellipse cx="0" cy="0" rx="9" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="-12" cy="-2" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <ellipse cx="10" cy="0" rx="7" ry="4.5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="-15" cy="-5" r="1.5" fill="#333"/>
+        <line x1="-7" y1="5" x2="-11" y2="12" stroke="#333" stroke-width="1"/>
+        <line x1="0" y1="5" x2="0" y2="14" stroke="#333" stroke-width="1"/>
+        <line x1="7" y1="5" x2="11" y2="12" stroke="#333" stroke-width="1"/>
       </g>
-      <!-- Airplane -->
-      <g transform="translate(310, 150)">
-        <ellipse cx="0" cy="0" rx="35" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M-10 -10 L-5 -30 L15 -10" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M-10 10 L-5 28 L15 10" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M-30 -2 L-42 -12 L-42 -2" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <circle cx="20" cy="-2" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <g transform="translate(80, 200)">
+        <ellipse cx="0" cy="0" rx="30" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M-12 -10 L-8 -28 L8 -10" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M12 -10 L18 -25 L25 -8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <path d="M-25 -3 L-36 -14 L-28 -3" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="18" cy="-2" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <rect x="-5" y="5" width="10" height="12" rx="2" fill="#fff" stroke="#333" stroke-width="1.5"/>
       </g>
-      <!-- Decorative dots -->
-      ${[[50,150],[60,300],[340,350],[50,430],[350,430]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
-      <!-- Ground -->
-      <line x1="30" y1="440" x2="370" y2="440" stroke="#333" stroke-width="2"/>
-      <!-- Grass tufts -->
-      ${[60,120,280,340].map(x => `<path d="M${x} 440 Q${x-4} 425 ${x+2} 430 Q${x+5} 420 ${x+8} 440" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      <rect x="50" y="430" width="30" height="30" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+      <text x="58" y="452" font-size="16" font-weight="bold" fill="none" stroke="#333" stroke-width="1.5" font-family="sans-serif">A</text>
+      <rect x="320" y="430" width="30" height="30" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+      <text x="328" y="452" font-size="16" font-weight="bold" fill="none" stroke="#333" stroke-width="1.5" font-family="sans-serif">a</text>
+      <ellipse cx="60" cy="90" rx="28" ry="14" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="45" cy="95" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="75" cy="95" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="340" cy="70" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="50" cy="380" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="350" cy="360" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      ${[60,140,280,340].map(x => `<path d="M${x} 460 Q${x-3} 448 ${x+2} 452 Q${x+5} 445 ${x+7} 460" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
     </svg>`,
   },
 
-  // ── 10. Letter B: Bear, Balloon, Butterfly ──────────────
+  // ── 10. Letter B: Bear Party Scene ──────────────────────
   {
     id: 'ft-letter-b-scene',
-    title: 'B is for...',
+    title: 'B is for Bear',
     emoji: '',
-    category: 'alphabet',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <!-- Big letter B -->
-      <line x1="100" y1="100" x2="100" y2="420" stroke="#333" stroke-width="6"/>
-      <path d="M100 100 Q200 100 200 170 Q200 240 100 240" fill="none" stroke="#333" stroke-width="5"/>
-      <path d="M100 240 Q210 240 210 330 Q210 420 100 420" fill="none" stroke="#333" stroke-width="5"/>
-      <!-- Bear sitting in bottom loop -->
-      <circle cx="155" cy="350" r="28" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <!-- Bear ears -->
-      <circle cx="135" cy="328" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="175" cy="328" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="135" cy="328" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="175" cy="328" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <!-- Bear face -->
-      <circle cx="145" cy="345" r="4" fill="#333"/>
-      <circle cx="165" cy="345" r="4" fill="#333"/>
-      <ellipse cx="155" cy="358" rx="5" ry="3.5" fill="#333"/>
-      <path d="M150 363 Q155 368 160 363" fill="none" stroke="#333" stroke-width="1.5"/>
-      <!-- Bear body -->
-      <ellipse cx="155" cy="390" rx="20" ry="18" fill="#fff" stroke="#333" stroke-width="2"/>
-      <!-- Balloon string going up -->
-      <path d="M260 130 Q265 200 270 280" fill="none" stroke="#333" stroke-width="1.5"/>
-      <!-- Balloon -->
-      <ellipse cx="260" cy="100" rx="35" ry="42" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M260 142 L255 150 L265 150Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <path d="M245 85 Q260 78 270 90" fill="none" stroke="#333" stroke-width="1.5"/>
-      <!-- Butterfly -->
-      <g transform="translate(300, 250)">
-        <ellipse cx="0" cy="0" rx="2" ry="10" fill="#333"/>
-        <ellipse cx="-14" cy="-5" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
-        <ellipse cx="14" cy="-5" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
-        <ellipse cx="-10" cy="8" rx="10" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <ellipse cx="10" cy="8" rx="10" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <!-- Wing patterns -->
-        <circle cx="-14" cy="-5" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
-        <circle cx="14" cy="-5" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
-        <!-- Antennae -->
-        <line x1="-2" y1="-10" x2="-8" y2="-22" stroke="#333" stroke-width="1.5"/>
-        <line x1="2" y1="-10" x2="8" y2="-22" stroke="#333" stroke-width="1.5"/>
-        <circle cx="-8" cy="-22" r="2.5" fill="#fff" stroke="#333" stroke-width="1"/>
-        <circle cx="8" cy="-22" r="2.5" fill="#fff" stroke="#333" stroke-width="1"/>
+      <line x1="30" y1="460" x2="370" y2="460" stroke="#333" stroke-width="2"/>
+      <line x1="80" y1="80" x2="80" y2="420" stroke="#333" stroke-width="7"/>
+      <path d="M80 80 Q180 80 180 160 Q180 240 80 240" fill="none" stroke="#333" stroke-width="6"/>
+      <path d="M80 240 Q190 240 190 330 Q190 420 80 420" fill="none" stroke="#333" stroke-width="6"/>
+      <g transform="translate(140, 330)">
+        <circle cx="0" cy="0" r="30" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <circle cx="-18" cy="-25" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
+        <circle cx="18" cy="-25" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
+        <circle cx="-18" cy="-25" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="18" cy="-25" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="-8" cy="-5" r="4" fill="#333"/>
+        <circle cx="8" cy="-5" r="4" fill="#333"/>
+        <ellipse cx="0" cy="8" rx="6" ry="4" fill="#333"/>
+        <path d="M-5 14 Q0 20 5 14" fill="none" stroke="#333" stroke-width="1.5"/>
+        <ellipse cx="0" cy="40" rx="22" ry="18" fill="#fff" stroke="#333" stroke-width="2"/>
+        <ellipse cx="-12" cy="55" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <ellipse cx="12" cy="55" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
       </g>
-      <!-- Stars -->
-      ${[[50,60],[340,70],[55,200],[360,400]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
-      <!-- Ground -->
-      <line x1="30" y1="450" x2="370" y2="450" stroke="#333" stroke-width="2"/>
-      <!-- Flowers -->
-      ${[60,330].map(x => `<g><line x1="${x}" y1="450" x2="${x}" y2="425" stroke="#333" stroke-width="1.5"/><circle cx="${x}" cy="420" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="${x}" cy="420" r="4" fill="#fff" stroke="#333" stroke-width="1"/></g>`).join('')}
+      <ellipse cx="280" cy="120" rx="32" ry="40" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M280 160 L276 168 L284 168Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M280 168 Q285 220 275 280" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M268 100 Q280 90 290 105" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="320" cy="100" rx="30" ry="38" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M320 138 L316 146 L324 146Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M320 146 Q325 210 315 300" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M308 82 Q320 72 330 85" fill="none" stroke="#333" stroke-width="1.5"/>
+      <g transform="translate(300, 220)">
+        <ellipse cx="0" cy="0" rx="2" ry="8" fill="#333"/>
+        <ellipse cx="-12" cy="-4" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="2"/>
+        <ellipse cx="12" cy="-4" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="2"/>
+        <ellipse cx="-10" cy="5" rx="9" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <ellipse cx="10" cy="5" rx="9" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="-12" cy="-4" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+        <circle cx="12" cy="-4" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+        <line x1="-2" y1="-8" x2="-7" y2="-18" stroke="#333" stroke-width="1.5"/>
+        <line x1="2" y1="-8" x2="7" y2="-18" stroke="#333" stroke-width="1.5"/>
+        <circle cx="-7" cy="-18" r="2" fill="#fff" stroke="#333" stroke-width="1"/>
+        <circle cx="7" cy="-18" r="2" fill="#fff" stroke="#333" stroke-width="1"/>
+      </g>
+      <g transform="translate(240, 420)">
+        <ellipse cx="0" cy="0" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="2"/>
+        <circle cx="12" cy="0" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="0" cy="-2" r="3" fill="#333"/>
+        <line x1="-10" y1="6" x2="-14" y2="12" stroke="#333" stroke-width="1"/>
+        <line x1="-5" y1="7" x2="-5" y2="14" stroke="#333" stroke-width="1"/>
+        <line x1="0" y1="7" x2="4" y2="14" stroke="#333" stroke-width="1"/>
+        <line x1="5" y1="6" x2="10" y2="12" stroke="#333" stroke-width="1"/>
+      </g>
+      ${[[40,60],[360,50],[50,200],[350,400]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
+      ${[50,330].map(x => `<g><line x1="${x}" y1="460" x2="${x}" y2="438" stroke="#333" stroke-width="1.5"/><circle cx="${x}" cy="432" r="7" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="${x}" cy="432" r="3.5" fill="#fff" stroke="#333" stroke-width="1"/></g>`).join('')}
     </svg>`,
   },
 
-  // ── 11. Number 1: One Sun, One Rocket, One Star ─────────
+  // ── 11. Number 1: One Big Adventure ─────────────────────
   {
     id: 'ft-number-1-scene',
-    title: 'Number 1 World',
+    title: 'Number 1 Adventure',
     emoji: '',
-    category: 'numbers',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <!-- Big number 1 -->
-      <path d="M160 120 L200 80 L200 420" fill="none" stroke="#333" stroke-width="6"/>
-      <line x1="150" y1="420" x2="250" y2="420" stroke="#333" stroke-width="5"/>
-      <!-- ONE big sun -->
-      <circle cx="80" cy="100" r="40" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <circle cx="80" cy="100" r="25" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a => `<line x1="${80+38*Math.cos(a*Math.PI/180)}" y1="${100+38*Math.sin(a*Math.PI/180)}" x2="${80+52*Math.cos(a*Math.PI/180)}" y2="${100+52*Math.sin(a*Math.PI/180)}" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>`).join('')}
-      <!-- Happy sun face -->
-      <circle cx="70" cy="95" r="4" fill="#333"/>
-      <circle cx="90" cy="95" r="4" fill="#333"/>
-      <path d="M70 108 Q80 118 90 108" fill="none" stroke="#333" stroke-width="2"/>
-      <!-- ONE big rocket -->
-      <g transform="translate(310, 250)">
-        <path d="M0 -60 Q-15 -30 -18 0 L-18 50 Q-18 60 -10 65 L10 65 Q18 60 18 50 L18 0 Q15 -30 0 -60Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
-        <circle cx="0" cy="10" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="0" cy="10" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <path d="M-18 30 L-30 55 L-18 45" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M18 30 L30 55 L18 45" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M-10 65 Q-5 80 0 85 Q5 80 10 65" fill="#fff" stroke="#333" stroke-width="2"/>
-        <rect x="-10" y="38" width="20" height="8" rx="2" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <line x1="30" y1="470" x2="370" y2="470" stroke="#333" stroke-width="2"/>
+      <path d="M155 130 L195 80 L195 430" fill="none" stroke="#333" stroke-width="7"/>
+      <line x1="145" y1="430" x2="245" y2="430" stroke="#333" stroke-width="5"/>
+      <circle cx="320" cy="90" r="42" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <circle cx="320" cy="90" r="28" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a => `<line x1="${320+38*Math.cos(a*Math.PI/180)}" y1="${90+38*Math.sin(a*Math.PI/180)}" x2="${320+52*Math.cos(a*Math.PI/180)}" y2="${90+52*Math.sin(a*Math.PI/180)}" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>`).join('')}
+      <circle cx="310" cy="85" r="4" fill="#333"/>
+      <circle cx="330" cy="85" r="4" fill="#333"/>
+      <path d="M310 100 Q320 110 330 100" fill="none" stroke="#333" stroke-width="2"/>
+      <g transform="translate(80, 220)">
+        <path d="M0 -55 Q-14 -25 -16 0 L-16 45 Q-16 55 -8 58 L8 58 Q16 55 16 45 L16 0 Q14 -25 0 -55Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <circle cx="0" cy="5" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
+        <circle cx="0" cy="5" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <path d="M-16 25 L-28 50 L-16 40" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M16 25 L28 50 L16 40" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M-8 58 Q-4 72 0 76 Q4 72 8 58" fill="#fff" stroke="#333" stroke-width="2"/>
+        <rect x="-8" y="32" width="16" height="7" rx="2" fill="#fff" stroke="#333" stroke-width="1.5"/>
       </g>
-      <!-- ONE big star -->
-      <polygon points="80,380 92,415 130,415 100,438 110,475 80,452 50,475 60,438 30,415 68,415" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <!-- "1" labels -->
-      <circle cx="80" cy="60" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
-      <!-- Ground -->
-      <line x1="30" y1="490" x2="370" y2="490" stroke="#333" stroke-width="1.5"/>
+      <circle cx="330" cy="300" r="28" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <circle cx="330" cy="300" r="18" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M310 290 Q320 300 330 290" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M330 290 Q340 300 350 290" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="60" cy="90" rx="30" ry="14" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="45" cy="95" rx="20" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="75" cy="95" rx="18" ry="9" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <line x1="270" y1="380" x2="270" y2="350" stroke="#333" stroke-width="2"/>
+      <polygon points="270,350 295,365 270,380" fill="#fff" stroke="#333" stroke-width="2"/>
+      ${[50,120,280,340].map(x => `<path d="M${x} 470 Q${x-3} 458 ${x+2} 462 Q${x+5} 455 ${x+7} 470" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      ${[[50,380],[350,420],[55,300]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
     </svg>`,
   },
 
-  // ── 12. Number 2: Two Ducks, Two Flowers, Two Balloons ──
+  // ── 12. Number 2: Two of Everything ─────────────────────
   {
     id: 'ft-number-2-scene',
-    title: 'Number 2 World',
+    title: 'Number 2 Fun',
     emoji: '',
-    category: 'numbers',
+    category: 'featured',
     difficulty: 'easy',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <!-- Big number 2 -->
-      <path d="M120 130 Q120 80 175 80 Q230 80 230 130 Q230 180 120 260 L120 280 L230 280" fill="none" stroke="#333" stroke-width="6"/>
-      <!-- TWO ducks on water -->
-      <!-- Water -->
-      <path d="M30 430 Q100 420 200 425 Q300 430 370 420" fill="none" stroke="#333" stroke-width="2"/>
-      <!-- Duck 1 -->
-      <g transform="translate(100, 380)">
-        <ellipse cx="0" cy="10" rx="28" ry="18" fill="#fff" stroke="#333" stroke-width="2.5"/>
-        <circle cx="18" cy="-4" r="14" fill="#fff" stroke="#333" stroke-width="2.5"/>
-        <circle cx="24" cy="-8" r="3" fill="#333"/>
-        <ellipse cx="32" cy="-2" rx="8" ry="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M-20" y1="4" fill="none" stroke="#333" stroke-width="0"/>
-        <path d="M-22 8 Q-16 0 -8 6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <line x1="30" y1="470" x2="370" y2="470" stroke="#333" stroke-width="2"/>
+      <path d="M100 130 Q100 70 160 70 Q220 70 220 130 Q220 185 100 260 L100 280 L220 280" fill="none" stroke="#333" stroke-width="7"/>
+      <path d="M30 380 Q80 370 130 380 Q180 390 230 380 Q280 370 330 380 Q360 385 370 380" fill="none" stroke="#333" stroke-width="2"/>
+      <g transform="translate(80, 350)">
+        <ellipse cx="0" cy="0" rx="28" ry="18" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <circle cx="18" cy="-12" r="14" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <circle cx="24" cy="-16" r="3" fill="#333"/>
+        <ellipse cx="34" cy="-10" rx="8" ry="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M-22 -4 Q-16 -12 -8 -6" fill="#fff" stroke="#333" stroke-width="1.5"/>
       </g>
-      <!-- Duck 2 -->
-      <g transform="translate(280, 375)">
-        <ellipse cx="0" cy="10" rx="26" ry="17" fill="#fff" stroke="#333" stroke-width="2.5"/>
-        <circle cx="-16" cy="-3" r="13" fill="#fff" stroke="#333" stroke-width="2.5"/>
-        <circle cx="-22" cy="-7" r="3" fill="#333"/>
-        <ellipse cx="-30" cy="-1" rx="8" ry="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M20 6 Q14 -2 8 5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <g transform="translate(290, 345)">
+        <ellipse cx="0" cy="0" rx="26" ry="17" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <circle cx="-16" cy="-11" r="13" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <circle cx="-22" cy="-15" r="3" fill="#333"/>
+        <ellipse cx="-32" cy="-9" rx="8" ry="3.5" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M20 -3 Q14 -11 8 -5" fill="#fff" stroke="#333" stroke-width="1.5"/>
       </g>
-      <!-- TWO flowers -->
-      ${[70, 330].map(x => `<g>
-        <line x1="${x}" y1="350" x2="${x}" y2="310" stroke="#333" stroke-width="2"/>
-        <circle cx="${x}" cy="302" r="14" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="${x}" cy="302" r="7" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        ${[0,60,120,180,240,300].map(a => `<ellipse cx="${x + 12*Math.cos(a*Math.PI/180)}" cy="${302 + 12*Math.sin(a*Math.PI/180)}" rx="6" ry="3.5" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(${a} ${x + 12*Math.cos(a*Math.PI/180)} ${302 + 12*Math.sin(a*Math.PI/180)})"/>`).join('')}
-        <ellipse cx="${x-8}" cy="330" rx="8" ry="4" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(-20 ${x-8} 330)"/>
-        <ellipse cx="${x+8}" cy="335" rx="8" ry="4" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(20 ${x+8} 335)"/>
+      ${[60, 310].map((x,i) => `<g>
+        <line x1="${x}" y1="310" x2="${x}" y2="275" stroke="#333" stroke-width="2"/>
+        <circle cx="${x}" cy="267" r="16" fill="#fff" stroke="#333" stroke-width="2"/>
+        <circle cx="${x}" cy="267" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        ${[0,60,120,180,240,300].map(a => `<ellipse cx="${x + 13*Math.cos(a*Math.PI/180)}" cy="${267 + 13*Math.sin(a*Math.PI/180)}" rx="7" ry="4" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(${a} ${x + 13*Math.cos(a*Math.PI/180)} ${267 + 13*Math.sin(a*Math.PI/180)})"/>`).join('')}
+        <ellipse cx="${x-10}" cy="290" rx="9" ry="4" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(${i?20:-20} ${x-10} 290)"/>
+        <ellipse cx="${x+10}" cy="295" rx="9" ry="4" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(${i?-15:15} ${x+10} 295)"/>
       </g>`).join('')}
-      <!-- TWO balloons -->
-      ${[{x:280,y:100,a:-10},{x:340,y:80,a:10}].map(({x,y,a}) => `<g>
-        <ellipse cx="${x}" cy="${y}" rx="28" ry="35" fill="#fff" stroke="#333" stroke-width="2.5" transform="rotate(${a} ${x} ${y})"/>
+      ${[{x:260,y:90},{x:320,y:75}].map(({x,y}) => `<g>
+        <ellipse cx="${x}" cy="${y}" rx="28" ry="35" fill="#fff" stroke="#333" stroke-width="2.5"/>
         <path d="M${x} ${y+35} L${x-4} ${y+42} L${x+4} ${y+42}Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <path d="M${x} ${y+42} Q${x+5} ${y+80} ${x-5} ${y+120}" fill="none" stroke="#333" stroke-width="1.5"/>
+        <path d="M${x} ${y+42} Q${x+5} ${y+85} ${x-5} ${y+130}" fill="none" stroke="#333" stroke-width="1.5"/>
         <path d="M${x-8} ${y-12} Q${x} ${y-20} ${x+6} ${y-8}" fill="none" stroke="#333" stroke-width="1.5"/>
       </g>`).join('')}
-      <!-- Ground -->
-      <line x1="30" y1="460" x2="370" y2="460" stroke="#333" stroke-width="1.5"/>
-      <!-- Grass -->
-      ${[50,150,250,350].map(x => `<path d="M${x} 460 Q${x-3} 448 ${x+2} 452 Q${x+5} 445 ${x+7} 460" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      <ellipse cx="55" cy="70" rx="28" ry="13" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="40" cy="74" rx="18" ry="9" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="350" cy="55" rx="24" ry="11" fill="#fff" stroke="#333" stroke-width="2"/>
+      ${[50,150,250,340].map(x => `<path d="M${x} 470 Q${x-3} 458 ${x+2} 462 Q${x+5} 455 ${x+7} 470" fill="none" stroke="#333" stroke-width="1.5"/>`).join('')}
+      ${[[180,400],[40,420],[360,430]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
     </svg>`,
   },
 ];
