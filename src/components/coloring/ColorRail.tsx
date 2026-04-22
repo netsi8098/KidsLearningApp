@@ -62,46 +62,66 @@ export default function ColorRail({ activeColor, onColorChange, recentColors = [
         </motion.button>
       </div>
 
-      {/* Extended palette modal */}
+      {/* Extended palette — fixed drawer at z-20, below tool rail z-30 */}
       <AnimatePresence>
         {showMore && (
-          <motion.div
-            className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl p-3"
-            style={{ background: 'rgba(45,45,58,0.95)', backdropFilter: 'blur(16px)' }}
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 10, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-bold text-white/50 uppercase tracking-wider">All Colors</p>
-              <motion.button
-                className="text-white/40 text-xs cursor-pointer"
-                onClick={() => setShowMore(false)}
-                whileTap={{ scale: 0.9 }}
-                aria-label="Close color picker"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-              </motion.button>
-            </div>
-            <div className="grid grid-cols-8 gap-1.5">
-              {extendedPalette.map((c) => (
-                <ColorSwatch key={c.hex} color={c} active={activeColor === c.hex} onSelect={(hex) => { onColorChange(hex); setShowMore(false); }} size="sm" />
-              ))}
-            </div>
+          <>
+            {/* Backdrop — closes on tap, z-15 so it's below both toolbar and drawer */}
+            <motion.div
+              className="fixed inset-0"
+              style={{ zIndex: 15 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMore(false)}
+            />
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 rounded-t-2xl p-4"
+              style={{
+                zIndex: 20,
+                background: 'linear-gradient(180deg, rgba(45,45,58,0.97) 0%, rgba(31,31,46,0.98) 100%)',
+                backdropFilter: 'blur(16px)',
+                maxWidth: 500,
+                margin: '0 auto',
+              }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            >
+              <div className="flex justify-center mb-2">
+                <div className="w-8 h-1 rounded-full bg-white/20" />
+              </div>
+              <div className="flex items-center justify-between mb-2.5">
+                <p className="text-[11px] font-bold text-white/50 uppercase tracking-wider">All Colors</p>
+                <motion.button
+                  className="text-white/40 text-xs cursor-pointer"
+                  onClick={() => setShowMore(false)}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Close color picker"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </motion.button>
+              </div>
+              <div className="grid grid-cols-8 gap-2">
+                {extendedPalette.map((c) => (
+                  <ColorSwatch key={c.hex} color={c} active={activeColor === c.hex} onSelect={(hex) => { onColorChange(hex); setShowMore(false); }} size="sm" />
+                ))}
+              </div>
 
-            {/* Recent colors */}
-            {recentColors.length > 0 && (
-              <>
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider mt-2.5 mb-1.5">Recent</p>
-                <div className="flex gap-1.5">
-                  {recentColors.slice(0, 8).map((hex) => (
-                    <ColorSwatch key={`recent-${hex}`} color={{ hex, label: hex }} active={activeColor === hex} onSelect={(h) => { onColorChange(h); setShowMore(false); }} size="sm" />
-                  ))}
-                </div>
-              </>
-            )}
-          </motion.div>
+              {/* Recent colors */}
+              {recentColors.length > 0 && (
+                <>
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider mt-3 mb-1.5">Recent</p>
+                  <div className="flex gap-2">
+                    {recentColors.slice(0, 8).map((hex) => (
+                      <ColorSwatch key={`recent-${hex}`} color={{ hex, label: hex }} active={activeColor === hex} onSelect={(h) => { onColorChange(h); setShowMore(false); }} size="sm" />
+                    ))}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

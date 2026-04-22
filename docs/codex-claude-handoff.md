@@ -1339,3 +1339,54 @@ Replaced emoji-heavy visuals across Stories, Coloring, and Mission Cards with ha
 - Colored pencil strip UI (pencil-shaped swatches when pencil tool selected)
 - Zoom/pan canvas (UI placeholder only)
 - Color wheel modal for custom color picking
+
+---
+
+### Claude Batch 2D — Canvas Visibility Fix, Color Modal Fix
+
+**Date:** 2026-04-21
+**Build:** ✅ 0 errors, 2.45s
+
+#### Critical Fix 1: Canvas Invisible at 0×0
+
+**Root cause:** DrawingCanvas container used `width: '100%'` but was inside an artboard wrapper div with no explicit width. In the flex layout, the wrapper's intrinsic width was 0, so `100%` of 0 = 0.
+
+**Fix:** Artboard wrapper in ColoringPage now has `className="w-full"` and `style={{ maxWidth: 350 }}`. This gives it explicit responsive width that flows down to the DrawingCanvas container. Also added `min-h-0` on the flex parent to prevent flex overflow.
+
+**Files:** `src/pages/ColoringPage.tsx`
+
+#### Critical Fix 2: ALL COLORS Modal Blocking Save
+
+**Root cause:** Expanded color palette used `position: absolute; bottom: 100%` relative to ColorRail. This made the grid float upward and overlap the ToolRail hit area. `elementFromPoint` at Save center returned the color grid div.
+
+**Fix:** Expanded palette is now a **fixed-position bottom drawer** (same pattern as BrushDrawer/StickerPicker):
+- Backdrop at z-15 (tappable to close)
+- Panel at z-20 (slides up from bottom)
+- ToolRail remains at z-30 — always on top and clickable
+- The drawer pattern means the color grid never overlaps the ToolRail area
+
+**Files:** `src/components/coloring/ColorRail.tsx`
+
+#### Files changed
+| File | Change |
+|------|--------|
+| `src/pages/ColoringPage.tsx` | Artboard wrapper explicit width, min-h-0 |
+| `src/components/coloring/ColorRail.tsx` | Expanded palette → fixed bottom drawer at z-20 |
+| `docs/codex-claude-handoff.md` | This handoff |
+
+#### Codex verification checklist
+- [ ] /coloring → open Cat template → canvas is visible (not 0×0)
+- [ ] Canvas fills artboard area at 390px mobile width
+- [ ] Template line art visible on canvas
+- [ ] Draw on template → color appears
+- [ ] Erase on template → paint removed, black outlines remain
+- [ ] Fill inside template region → fills without destroying outlines
+- [ ] Clear → paint removed, template outlines remain
+- [ ] Save → composite PNG includes outlines
+- [ ] Open ALL COLORS → Save button still clickable (elementFromPoint returns Save button)
+- [ ] Open ALL COLORS → tap Save → modal closes, artwork saved, green toast
+- [ ] Open Brush drawer → Save still clickable
+- [ ] Brush shelf scrolls horizontally with realistic tool tip icons
+- [ ] Free Draw mode works (no template)
+- [ ] Production console clean
+- [ ] 390px mobile: no overflow, no hidden controls
