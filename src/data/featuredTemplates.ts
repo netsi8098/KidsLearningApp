@@ -842,43 +842,97 @@ export const featuredTemplates: ColoringTemplate[] = [
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <line x1="30" y1="450" x2="370" y2="450" stroke="#333" stroke-width="2"/>
-      <circle cx="200" cy="140" r="40" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M170 115 Q165 90 175 80 Q185 75 190 95" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M230 115 Q235 90 225 80 Q215 75 210 95" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M160 125 Q140 105 130 120 Q125 140 145 145" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M240 125 Q260 105 270 120 Q275 140 255 145" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="188" cy="135" r="5" fill="#333"/><circle cx="212" cy="135" r="5" fill="#333"/>
-      <circle cx="190" cy="133" r="2" fill="#fff"/><circle cx="214" cy="133" r="2" fill="#fff"/>
-      <path d="M195 155 Q200 160 205 155" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M180 95 Q190 80 200 70 Q210 80 220 95" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M188 82 Q200 60 212 82" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="200" cy="62" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="188" cy="72" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
-      <circle cx="212" cy="72" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
-      <path d="M170 180 Q200 195 230 180 L225 290 Q200 300 175 290Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M175 290 Q150 350 120 420 L200 440 L280 420 Q250 350 225 290" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M140 380 Q170 370 200 375 Q230 370 260 380" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M130 400 Q165 390 200 395 Q235 390 270 400" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M125 420 Q163 410 200 415 Q237 410 275 420" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M190 200 Q195 210 190 220" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M200 200 Q205 210 200 220" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M210 200 Q215 210 210 220" fill="none" stroke="#333" stroke-width="1.5"/>
-      ${[60,340].map(x => `<g>
-        <line x1="${x}" y1="450" x2="${x}" y2="380" stroke="#333" stroke-width="2"/>
-        <circle cx="${x}" cy="370" r="16" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="${x}" cy="370" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        ${[0,60,120,180,240,300].map(a => `<ellipse cx="${x+13*Math.cos(a*Math.PI/180)}" cy="${370+13*Math.sin(a*Math.PI/180)}" rx="7" ry="4" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(${a} ${x+13*Math.cos(a*Math.PI/180)} ${370+13*Math.sin(a*Math.PI/180)})"/>`).join('')}
-        <ellipse cx="${x-10}" cy="410" rx="9" ry="5" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(-20 ${x-10} 410)"/>
-        <ellipse cx="${x+10}" cy="415" rx="9" ry="5" fill="#fff" stroke="#333" stroke-width="1.5" transform="rotate(20 ${x+10} 415)"/>
-      </g>`).join('')}
-      ${[[50,100],[350,90],[55,250],[345,260]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
-      <g transform="translate(320, 180)">
+      <!-- Garden arch -->
+      <path d="M100 450 L100 200 Q100 130 200 130 Q300 130 300 200 L300 450" fill="none" stroke="#333" stroke-width="2.5"/>
+      <path d="M110 450 L110 210 Q110 150 200 150 Q290 150 290 210 L290 450" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Arch flowers -->
+      <circle cx="108.0" cy="200.0" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="107.2504622962932" cy="170.41672167815105" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="105.14230087749232" cy="146.37688898167153" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="102.07055236082016" cy="132.3851921597652" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="98.61081457866456" cy="131.06345728914545" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="95.41138850919164" cy="142.65935689977056" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="93.07179676972449" cy="165.0" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="92.03044241526604" cy="193.8990980076639" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Princess head -->
+      <circle cx="200" cy="220" r="32" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Hair -->
+      <path d="M170 210 Q155 190 150 220 Q148 250 155 270 Q158 280 152 295" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M175 215 Q162 198 158 225 Q156 248 162 265" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M230 210 Q245 190 250 220 Q252 250 245 270 Q242 280 248 295" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M225 215 Q238 198 242 225 Q244 248 238 265" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Crown -->
+      <path d="M178 192 Q183 175 190 190 Q200 170 210 190 Q217 175 222 192" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="190" cy="180" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="200" cy="174" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="210" cy="180" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Face -->
+      <circle cx="190" cy="218" r="4" fill="#333"/><circle cx="210" cy="218" r="4" fill="#333"/>
+      <circle cx="191" cy="216" r="1.5" fill="#fff"/><circle cx="211" cy="216" r="1.5" fill="#fff"/>
+      <path d="M196 232 Q200 237 204 232" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="183" cy="225" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="217" cy="225" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Dress bodice -->
+      <path d="M178 252 Q200 265 222 252 L218 310 Q200 320 182 310Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M188 270 Q200 265 212 270" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="200" cy="280" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Sleeves -->
+      <path d="M178 260 Q160 258 155 270 Q150 285 165 285" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M222 260 Q240 258 245 270 Q250 285 235 285" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Arms -->
+      <path d="M158 285 Q155 300 160 310" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="160" cy="314" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M242 285 Q245 300 240 310" fill="none" stroke="#333" stroke-width="2"/>
+      <circle cx="240" cy="314" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Skirt with panels -->
+      <path d="M182 310 Q155 370 130 440 L200 450 L270 440 Q245 370 218 310" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <line x1="200" y1="310" x2="200" y2="448" stroke="#333" stroke-width="1.5"/>
+      <path d="M182 310 Q170 370 165 440" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M218 310 Q230 370 235 440" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M140 400 Q170 392 200 396 Q230 392 260 400" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M135 420 Q168 412 200 416 Q232 412 265 420" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Bow at waist -->
+      <path d="M190 310 Q175 305 178 315 Q180 322 190 318" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M210 310 Q225 305 222 315 Q220 322 210 318" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="200" cy="312" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Shoes -->
+      <ellipse cx="170" cy="448" rx="12" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="230" cy="448" rx="12" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Garden flowers -->
+      <g>
+        <line x1="55" y1="450" x2="55" y2="410" stroke="#333" stroke-width="1.5"/>
+        <circle cx="55" cy="402" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="55" cy="402" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+        <ellipse cx="47" cy="418" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(-20 47 418)"/>
+        <ellipse cx="63" cy="420" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(20 63 420)"/>
+      </g><g>
+        <line x1="70" y1="450" x2="70" y2="395" stroke="#333" stroke-width="1.5"/>
+        <circle cx="70" cy="387" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="70" cy="387" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+        <ellipse cx="62" cy="403" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(-20 62 403)"/>
+        <ellipse cx="78" cy="405" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(20 78 405)"/>
+      </g><g>
+        <line x1="330" y1="450" x2="330" y2="400" stroke="#333" stroke-width="1.5"/>
+        <circle cx="330" cy="392" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="330" cy="392" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+        <ellipse cx="322" cy="408" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(-20 322 408)"/>
+        <ellipse cx="338" cy="410" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(20 338 410)"/>
+      </g><g>
+        <line x1="345" y1="450" x2="345" y2="412" stroke="#333" stroke-width="1.5"/>
+        <circle cx="345" cy="404" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="345" cy="404" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+        <ellipse cx="337" cy="420" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(-20 337 420)"/>
+        <ellipse cx="353" cy="422" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1" transform="rotate(20 353 422)"/>
+      </g>
+      <!-- Butterfly -->
+      <g transform="translate(320, 200)">
         <ellipse cx="0" cy="0" rx="1.5" ry="7" fill="#333"/>
         <ellipse cx="-10" cy="-4" rx="10" ry="7" fill="#fff" stroke="#333" stroke-width="1.5"/>
         <ellipse cx="10" cy="-4" rx="10" ry="7" fill="#fff" stroke="#333" stroke-width="1.5"/>
         <ellipse cx="-8" cy="5" rx="7" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
         <ellipse cx="8" cy="5" rx="7" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <circle cx="-10" cy="-4" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+        <circle cx="10" cy="-4" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
       </g>
+      <!-- Garden path -->
+      <ellipse cx="200" cy="475" rx="50" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="200" cy="495" rx="40" ry="6" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Stars -->
+      <circle cx="60" cy="80" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="340" cy="70" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
     </svg>`,
   },
 
@@ -946,44 +1000,80 @@ export const featuredTemplates: ColoringTemplate[] = [
     category: 'featured',
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="200" cy="240" r="55" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <circle cx="200" cy="240" r="42" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="200" cy="240" r="30" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <g transform="translate(200, 230)">
-        <circle cx="0" cy="0" r="18" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="-6" cy="-3" r="3" fill="#333"/><circle cx="6" cy="-3" r="3" fill="#333"/>
-        <path d="M-4 5 Q0 9 4 5" fill="none" stroke="#333" stroke-width="1.5"/>
-        <circle cx="-14" cy="-14" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <circle cx="14" cy="-14" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <circle cx="-14" cy="-14" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
-        <circle cx="14" cy="-14" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Moon surface -->
+      <path d="M0 380 Q80 360 160 375 Q240 390 320 370 Q380 360 400 375 L400 520 L0 520Z" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Craters -->
+      <ellipse cx="80" cy="400" rx="25" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="250" cy="410" rx="20" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="350" cy="395" rx="15" ry="6" fill="#fff" stroke="#333" stroke-width="1"/>
+      <ellipse cx="160" cy="430" rx="18" ry="7" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Big astronaut cat -->
+      <circle cx="180" cy="220" r="55" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Helmet glass -->
+      <circle cx="180" cy="215" r="42" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Cat face inside helmet -->
+      <circle cx="180" cy="220" r="30" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Cat ears inside helmet -->
+      <path d="M158 196 Q155 180 165 188" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M202 196 Q205 180 195 188" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Cat eyes -->
+      <circle cx="170" cy="218" r="5" fill="#333"/><circle cx="190" cy="218" r="5" fill="#333"/>
+      <circle cx="171" cy="216" r="2" fill="#fff"/><circle cx="191" cy="216" r="2" fill="#fff"/>
+      <!-- Cat nose/mouth -->
+      <ellipse cx="180" cy="230" rx="3" ry="2" fill="#333"/>
+      <path d="M177 234 Q180 238 183 234" fill="none" stroke="#333" stroke-width="1"/>
+      <!-- Whiskers -->
+      <line x1="165" y1="228" x2="148" y2="225" stroke="#333" stroke-width="1"/>
+      <line x1="165" y1="232" x2="148" y2="234" stroke="#333" stroke-width="1"/>
+      <line x1="195" y1="228" x2="212" y2="225" stroke="#333" stroke-width="1"/>
+      <line x1="195" y1="232" x2="212" y2="234" stroke="#333" stroke-width="1"/>
+      <!-- Helmet reflection -->
+      <path d="M155 195 Q160 188 168 192" fill="none" stroke="#333" stroke-width="1"/>
+      <!-- Space suit body -->
+      <rect x="148" y="275" width="64" height="70" rx="12" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Suit panels -->
+      <rect x="158" y="285" width="44" height="20" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="170" cy="295" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="190" cy="295" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <rect x="165" y="315" width="30" height="12" rx="3" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Arms -->
+      <path d="M148 285 Q125 280 118 295 Q112 310 125 315" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="122" cy="318" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M212 285 Q235 280 242 295 Q248 310 235 315" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="238" cy="318" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Legs -->
+      <rect x="152" y="345" width="22" height="35" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <rect x="186" y="345" width="22" height="35" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Boots -->
+      <ellipse cx="163" cy="382" rx="14" ry="7" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="197" cy="382" rx="14" ry="7" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Flag -->
+      <line x1="120" y1="320" x2="120" y2="370" stroke="#333" stroke-width="2"/>
+      <rect x="120" y="370" width="30" height="20" rx="2" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="135" cy="380" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Rocket -->
+      <g transform="translate(330, 180)">
+        <path d="M0 -50 Q-12 -25 -14 0 L-14 40 Q-14 48 -8 52 L8 52 Q14 48 14 40 L14 0 Q12 -25 0 -50Z" fill="#fff" stroke="#333" stroke-width="2"/>
+        <circle cx="0" cy="5" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <path d="M-14 22 L-24 42 L-14 35" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <path d="M14 22 L24 42 L14 35" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <path d="M-8 52 Q0 62 8 52" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <rect x="-8" y="28" width="16" height="6" rx="2" fill="#fff" stroke="#333" stroke-width="1"/>
       </g>
-      <g transform="translate(90, 150)">
-        <path d="M0 -30 Q-8 -15 -10 0 L-10 25 Q-10 32 -5 35 L5 35 Q10 32 10 25 L10 0 Q8 -15 0 -30Z" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="0" cy="5" r="7" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <path d="M-10 15 L-18 28 L-10 22" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <path d="M10 15 L18 28 L10 22" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <path d="M-5 35 Q0 42 5 35" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Planet -->
+      <circle cx="60" cy="120" r="30" fill="#fff" stroke="#333" stroke-width="2"/>
+      <ellipse cx="60" cy="120" rx="38" ry="8" fill="none" stroke="#333" stroke-width="1.5" transform="rotate(-20 60 120)"/>
+      <circle cx="52" cy="110" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="70" cy="125" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Stars -->
+      <circle cx="280" cy="60" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="100" cy="50" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="350" cy="80" r="3" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="50" cy="200" r="3" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="320" cy="300" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="260" cy="140" r="3" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="40" cy="320" r="3" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="370" cy="260" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Small floating fish with helmet -->
+      <g transform="translate(290, 300)">
+        <circle cx="0" cy="0" r="14" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <ellipse cx="0" cy="2" rx="10" ry="7" fill="#fff" stroke="#333" stroke-width="1.5"/>
+        <polygon points="10,2 18,-4 18,8" fill="#fff" stroke="#333" stroke-width="1"/>
+        <circle cx="-4" cy="0" r="2" fill="#333"/>
       </g>
-      <g transform="translate(310, 330)">
-        <ellipse cx="0" cy="0" rx="25" ry="18" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="-12" cy="-8" r="8" fill="#fff" stroke="#333" stroke-width="2"/>
-        <circle cx="-14" cy="-10" r="3" fill="#333"/>
-        <ellipse cx="15" cy="-2" rx="6" ry="3" fill="#fff" stroke="#333" stroke-width="1.5"/>
-        <path d="M-20 5 Q-25 10 -22 15" fill="none" stroke="#333" stroke-width="1.5"/>
-        <path d="M20 8 Q26 12 22 18" fill="none" stroke="#333" stroke-width="1.5"/>
-        <path d="M-8 15 Q0 20 8 15" fill="none" stroke="#333" stroke-width="1"/>
-      </g>
-      ${[[50,80],[130,60],[280,50],[350,90],[40,350],[360,420],[200,450]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="${3+Math.random()*3|0}" fill="#fff" stroke="#333" stroke-width="1.5"/>`).join('')}
-      ${[[80,300],[320,150],[60,200],[340,250]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="2" fill="#fff" stroke="#333" stroke-width="1"/>`).join('')}
-      <path d="M50,420 L55,405 L65,415 L72,400 L77,418 L70,410Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <path d="M330,70 L335,55 L345,65 L350,52 L355,68 L348,60Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="320" cy="460" r="22" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="320" cy="460" r="14" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <path d="M310 450 Q320 445 330 450" fill="none" stroke="#333" stroke-width="1"/>
-      <path d="M308 460 Q320 465 332 460" fill="none" stroke="#333" stroke-width="1"/>
-      <circle cx="80" cy="440" r="18" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="80" cy="440" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
     </svg>`,
   },
 
@@ -996,39 +1086,73 @@ export const featuredTemplates: ColoringTemplate[] = [
     difficulty: 'medium',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
       <line x1="30" y1="450" x2="370" y2="450" stroke="#333" stroke-width="2"/>
+      <!-- House base -->
       <rect x="80" y="230" width="240" height="220" rx="4" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <polygon points="60,235 200,100 340,235" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M80,235 Q120,225 160,235 Q200,245 240,235 Q280,225 320,235" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M100,235 Q130,228 160,235" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M240,235 Q270,228 300,235" fill="none" stroke="#333" stroke-width="1.5"/>
-      <rect x="165" y="360" width="70" height="90" rx="6" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <circle cx="225" cy="410" r="5" fill="#333"/>
-      <path d="M175 360 Q200 345 225 360" fill="none" stroke="#333" stroke-width="1.5"/>
-      <circle cx="120" cy="290" r="22" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M108 280 Q120 268 132 280" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M108 300 Q120 312 132 300" fill="none" stroke="#333" stroke-width="1.5"/>
-      <line x1="120" y1="268" x2="120" y2="312" stroke="#333" stroke-width="1.5"/>
-      <circle cx="280" cy="290" r="22" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <path d="M268 280 Q280 268 292 280" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M268 300 Q280 312 292 300" fill="none" stroke="#333" stroke-width="1.5"/>
-      <line x1="280" y1="268" x2="280" y2="312" stroke="#333" stroke-width="1.5"/>
-      <circle cx="200" cy="180" r="16" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M100 340 Q140 330 180 340 Q220 350 260 340 Q300 330 340 340" fill="none" stroke="#333" stroke-width="1.5"/>
-      <path d="M100 380 Q140 370 180 380 Q220 390 260 380 Q300 370 340 380" fill="none" stroke="#333" stroke-width="1.5"/>
-      <rect x="260" y="150" width="25" height="80" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M255 150 Q272 130 290 150" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <path d="M260 160 Q272 145 285 160" fill="none" stroke="#333" stroke-width="1"/>
-      <path d="M260 180 Q272 165 285 180" fill="none" stroke="#333" stroke-width="1"/>
-      <circle cx="120" cy="400" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M115 395 Q120 390 125 395" fill="none" stroke="#333" stroke-width="1"/>
-      <circle cx="280" cy="400" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
-      <path d="M275 395 Q280 390 285 395" fill="none" stroke="#333" stroke-width="1"/>
-      ${[50,350].map(x => `<g>
-        <circle cx="${x}" cy="420" r="14" fill="#fff" stroke="#333" stroke-width="2"/>
-        <path d="M${x} 406 Q${x+4} 412 ${x} 418 Q${x-4} 424 ${x} 430" fill="none" stroke="#333" stroke-width="1.5"/>
-        <line x1="${x}" y1="434" x2="${x}" y2="450" stroke="#333" stroke-width="2"/>
-      </g>`).join('')}
-      <ellipse cx="200" cy="490" rx="80" ry="10" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Roof with gumdrop tiles -->
+      <polygon points="60,235 200,90 340,235" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Gumdrop roof tiles row 1 -->
+      <ellipse cx="120" cy="195" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="150" cy="195" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="180" cy="195" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="210" cy="195" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="240" cy="195" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="260" cy="195" rx="14" ry="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Gumdrop roof tiles row 2 -->
+      <ellipse cx="140" cy="170" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="170" cy="170" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="200" cy="170" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="230" cy="170" rx="12" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Gumdrop roof tiles row 3 -->
+      <ellipse cx="165" cy="148" rx="10" ry="7" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="195" cy="148" rx="10" ry="7" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="225" cy="148" rx="10" ry="7" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Frosting drips on roof edge -->
+      <path d="M80 235 Q90 245 100 235 Q110 250 120 235 Q130 248 140 235 Q150 252 160 235 Q170 248 180 235 Q190 252 200 235 Q210 248 220 235 Q230 252 240 235 Q250 248 260 235 Q270 252 280 235 Q290 248 300 235 Q310 252 320 235" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Candy cane columns -->
+      <rect x="95" y="310" width="18" height="140" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M95 320 L113 340 M95 340 L113 360 M95 360 L113 380 M95 380 L113 400 M95 400 L113 420 M95 420 L113 440" fill="none" stroke="#333" stroke-width="1.5"/>
+      <rect x="287" y="310" width="18" height="140" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M287 320 L305 340 M287 340 L305 360 M287 360 L305 380 M287 380 L305 400 M287 400 L305 420 M287 420 L305 440" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Swirl windows -->
+      <circle cx="150" cy="290" r="22" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M150 268 Q160 278 150 288 Q140 298 150 308" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M140 275 Q150 285 140 295" fill="none" stroke="#333" stroke-width="1"/>
+      <circle cx="250" cy="290" r="22" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M250 268 Q260 278 250 288 Q240 298 250 308" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M240 275 Q250 285 240 295" fill="none" stroke="#333" stroke-width="1"/>
+      <!-- Door -->
+      <rect x="170" y="360" width="60" height="90" rx="30" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <circle cx="218" cy="410" r="5" fill="#333"/>
+      <path d="M180 365 Q200 350 220 365" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Frosting drips on door -->
+      <path d="M175 360 Q180 370 185 360 Q190 372 195 360 Q200 370 205 360 Q210 372 215 360 Q220 370 225 360" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Chimney with smoke -->
+      <rect x="260" y="110" width="25" height="80" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M255 115 Q265 105 275 115 Q285 105 290 115" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M268 100 Q272 85 265 75" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M275 90 Q280 75 275 65" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Star on roof top -->
+      <circle cx="200" cy="90" r="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Lollipop path -->
+      <g>
+        <circle cx="50" cy="420" r="14" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M50 406 Q55 413 50 420 Q45 427 50 434" fill="none" stroke="#333" stroke-width="1.5"/>
+        <line x1="50" y1="434" x2="50" y2="450" stroke="#333" stroke-width="2"/>
+      </g><g>
+        <circle cx="350" cy="420" r="14" fill="#fff" stroke="#333" stroke-width="2"/>
+        <path d="M350 406 Q355 413 350 420 Q345 427 350 434" fill="none" stroke="#333" stroke-width="1.5"/>
+        <line x1="350" y1="434" x2="350" y2="450" stroke="#333" stroke-width="2"/>
+      </g>
+      <!-- Cupcake bush left -->
+      <path d="M40 430 Q30 410 45 400 Q60 395 70 405 Q80 395 85 410 Q90 425 75 435 Q60 440 45 435Z" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="55" cy="408" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="70" cy="405" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Cupcake bush right -->
+      <path d="M360 430 Q370 410 355 400 Q340 395 330 405 Q320 395 315 410 Q310 425 325 435 Q340 440 355 435Z" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="345" cy="408" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="330" cy="405" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <!-- Wrapped candies on ground -->
+      <ellipse cx="140" cy="445" rx="12" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M128 445 L118 440 M128 445 L118 450" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M152 445 L162 440 M152 445 L162 450" fill="none" stroke="#333" stroke-width="1.5"/>
+      <ellipse cx="260" cy="442" rx="10" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M250 442 L242 438 M250 442 L242 446" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M270 442 L278 438 M270 442 L278 446" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Frosting border bottom of house -->
+      <path d="M80 380 Q100 390 120 380 Q140 390 160 380" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M240 380 Q260 390 280 380 Q300 390 320 380" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Gumdrop path stones -->
+      <ellipse cx="180" cy="470" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="200" cy="480" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="220" cy="470" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/><ellipse cx="200" cy="490" rx="8" ry="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
     </svg>`,
   },
 
@@ -1301,36 +1425,77 @@ export const featuredTemplates: ColoringTemplate[] = [
     category: 'featured',
     difficulty: 'hard',
     svgOutline: `<svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 70 Q50 55 100 70 Q150 85 200 70 Q250 55 300 70 Q350 85 400 70" fill="none" stroke="#333" stroke-width="2"/>
-      <rect x="120" y="180" width="160" height="220" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <rect x="65" y="140" width="50" height="260" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <rect x="285" y="140" width="50" height="260" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <polygon points="60,145 90,90 120,145" fill="#fff" stroke="#333" stroke-width="2"/>
-      <polygon points="280,145 310,90 340,145" fill="#fff" stroke="#333" stroke-width="2"/>
-      <polygon points="120,185 200,120 280,185" fill="#fff" stroke="#333" stroke-width="2"/>
-      <rect x="175" y="320" width="50" height="80" rx="25" fill="#fff" stroke="#333" stroke-width="2.5"/>
-      <circle cx="215" cy="365" r="4" fill="#333"/>
-      <rect x="140" y="210" width="30" height="35" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
-      <rect x="230" y="210" width="30" height="35" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="200" cy="160" r="16" fill="#fff" stroke="#333" stroke-width="2"/>
-      <rect x="75" y="180" width="28" height="20" rx="3" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <rect x="75" y="240" width="28" height="20" rx="3" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <rect x="295" y="180" width="28" height="20" rx="3" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <rect x="295" y="240" width="28" height="20" rx="3" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <path d="M40 420 Q50 400 60 420 Q70 440 80 420" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M300 430 Q310 410 320 430 Q330 450 340 430" fill="none" stroke="#333" stroke-width="2"/>
-      <path d="M150 420 Q160 405 170 420 Q180 435 190 420" fill="none" stroke="#333" stroke-width="1.5"/>
-      <ellipse cx="55" cy="300" rx="20" ry="12" fill="#fff" stroke="#333" stroke-width="2"/>
-      <polygon points="75,300 90,290 90,310" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="48" cy="297" r="3" fill="#333"/>
-      <ellipse cx="350" cy="250" rx="18" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
-      <polygon points="368,250 380,242 380,258" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="344" cy="247" r="3" fill="#333"/>
-      <path d="M250,430 L255,418 L265,428 L270,415 L275,427 L268,420Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
-      <circle cx="40" cy="170" r="5" fill="#fff" stroke="#333" stroke-width="1"/>
-      <circle cx="360" cy="130" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M0 60 Q50 45 100 60 Q150 75 200 60 Q250 45 300 60 Q350 75 400 60" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Castle main -->
+      <rect x="110" y="180" width="180" height="230" rx="4" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <!-- Left tower -->
+      <rect x="55" y="130" width="55" height="280" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M50 135 Q82 80 115 135" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Right tower -->
+      <rect x="290" y="130" width="55" height="280" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M285 135 Q317 80 350 135" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Center spire -->
+      <polygon points="185,180 200,110 215,180" fill="#fff" stroke="#333" stroke-width="2"/>
+      <!-- Shell door -->
+      <path d="M175 340 Q200 310 225 340 L225 410 Q200 420 175 410Z" fill="#fff" stroke="#333" stroke-width="2.5"/>
+      <path d="M180 345 Q190 335 200 340 Q210 335 220 345" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M182 355 Q192 348 200 352 Q208 348 218 355" fill="none" stroke="#333" stroke-width="1.5"/>
+      <path d="M184 365 Q194 360 200 363 Q206 360 216 365" fill="none" stroke="#333" stroke-width="1.5"/>
+      <circle cx="215" cy="380" r="4" fill="#333"/>
+      <!-- Arched windows -->
+      <rect x="125" y="210" width="28" height="38" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+      <line x1="139" y1="210" x2="139" y2="248" stroke="#333" stroke-width="1.5"/>
+      <rect x="247" y="210" width="28" height="38" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+      <line x1="261" y1="210" x2="261" y2="248" stroke="#333" stroke-width="1.5"/>
+      <!-- Rose window -->
+      <circle cx="200" cy="160" r="20" fill="#fff" stroke="#333" stroke-width="2"/>
+      <circle cx="200" cy="160" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <line x1="210.0" y1="160.0" x2="218.0" y2="160.0" stroke="#333" stroke-width="1.5"/><line x1="207.07106781186548" y1="167.07106781186548" x2="212.72792206135784" y2="172.72792206135784" stroke="#333" stroke-width="1.5"/><line x1="200.0" y1="170.0" x2="200.0" y2="178.0" stroke="#333" stroke-width="1.5"/><line x1="192.92893218813452" y1="167.07106781186548" x2="187.27207793864216" y2="172.72792206135784" stroke="#333" stroke-width="1.5"/><line x1="190.0" y1="160.0" x2="182.0" y2="160.0" stroke="#333" stroke-width="1.5"/><line x1="192.92893218813452" y1="152.92893218813452" x2="187.27207793864216" y2="147.27207793864216" stroke="#333" stroke-width="1.5"/><line x1="200.0" y1="150.0" x2="200.0" y2="142.0" stroke="#333" stroke-width="1.5"/><line x1="207.07106781186548" y1="152.92893218813452" x2="212.72792206135784" y2="147.27207793864216" stroke="#333" stroke-width="1.5"/>
+      <!-- Tower windows -->
+      <circle cx="82" cy="180" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="82" cy="240" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="82" cy="300" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="317" cy="180" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="317" cy="240" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="317" cy="300" r="10" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Flags -->
+      <line x1="82" y1="80" x2="82" y2="50" stroke="#333" stroke-width="2"/>
+      <polygon points="82,50 102,58 82,66" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <line x1="317" y1="80" x2="317" y2="50" stroke="#333" stroke-width="2"/>
+      <polygon points="317,50 337,58 317,66" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Coral left -->
+      <path d="M35 400 Q40 370 45 380 Q50 360 55 375 Q60 355 65 380 Q70 365 70 400" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M42 400 Q47 380 52 385" fill="none" stroke="#333" stroke-width="1"/>
+      <path d="M55 400 Q58 378 63 385" fill="none" stroke="#333" stroke-width="1"/>
+      <!-- Coral right -->
+      <path d="M340 395 Q345 365 350 378 Q355 355 360 372 Q365 350 370 375 Q375 360 378 395" fill="#fff" stroke="#333" stroke-width="2"/>
+      <path d="M347 395 Q352 375 357 380" fill="none" stroke="#333" stroke-width="1"/>
+      <!-- Seaweed -->
+      <path d="M30 480 Q40 440 30 400 Q20 360 30 330" fill="none" stroke="#333" stroke-width="2"/>
+      <path d="M380 480 Q390 445 380 410 Q370 375 380 345" fill="none" stroke="#333" stroke-width="2"/>
+      <!-- Shell decorations on castle -->
+      <ellipse cx="145" cy="280" rx="10" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M137 280 Q141 276 145 280 Q149 276 153 280" fill="none" stroke="#333" stroke-width="1"/>
+      <ellipse cx="255" cy="280" rx="10" ry="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M247 280 Q251 276 255 280 Q259 276 263 280" fill="none" stroke="#333" stroke-width="1"/>
+      <!-- Fish -->
+      <ellipse cx="50" cy="260" rx="16" ry="10" fill="#fff" stroke="#333" stroke-width="2"/>
+      <polygon points="66,260 78,250 78,270" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="42" cy="257" r="3" fill="#333"/>
+      <ellipse cx="360" cy="220" rx="14" ry="8" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <polygon points="374,220 384,213 384,227" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="354" cy="217" r="2.5" fill="#333"/>
+      <!-- Starfish -->
+      <path d="M130 450 L133 438 L140 448 L145 435 L148 448 L142 440Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <path d="M280 455 L283 443 L290 452 L295 440 L298 453 L292 445Z" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <!-- Bubbles -->
+      <circle cx="45" cy="150" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+      <circle cx="35" cy="130" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="365" cy="160" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
+      <circle cx="375" cy="140" r="3" fill="#fff" stroke="#333" stroke-width="1"/>
       <circle cx="200" cy="450" r="4" fill="#fff" stroke="#333" stroke-width="1"/>
-      <path d="M30 475 Q100 465 200 470 Q300 475 370 467" fill="none" stroke="#333" stroke-width="1.5"/>
+      <!-- Sand bottom -->
+      <path d="M30 480 Q100 468 200 475 Q300 482 370 470" fill="none" stroke="#333" stroke-width="1.5"/>
     </svg>`,
   },
 ];
