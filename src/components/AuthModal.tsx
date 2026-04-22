@@ -33,6 +33,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [signupDone, setSignupDone] = useState(false);
+  const [signupUser, setSignupUser] = useState<AuthUser | null>(null);
 
   const resetForm = useCallback(() => {
     setEmail('');
@@ -87,13 +89,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
         const { token, user } = res.data;
         if (token) setAuthToken(token);
         setLoading(false);
-        setSuccess('Account created! Welcome to Kids Learning Fun!');
-        setTimeout(() => {
-          onAuthSuccess(user);
-          resetForm();
-          onClose();
-        }, 1500);
-        return; // Don't fall through to setLoading(false) below
+        setSignupUser(user);
+        setSignupDone(true);
+        return;
       } else {
         setError(res.error || 'Could not create account. Email may already be in use.');
       }
@@ -155,18 +153,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
             className="px-6 pt-6 pb-4 text-center"
             style={{ background: 'linear-gradient(135deg, #FF6B6B15, #FF8C4215)' }}
           >
-            <MascotLion size={60} expression={view === 'signup' ? 'excited' : 'happy'} animated />
+            <MascotLion size={60} expression={signupDone ? 'celebrating' : view === 'signup' ? 'excited' : 'happy'} animated />
             <h2 className="font-display text-xl text-[#2D2D3A] mt-2">
-              {view === 'login' && 'Welcome Back!'}
-              {view === 'signup' && 'Create Account'}
-              {view === 'forgot' && 'Reset Password'}
-              {view === 'verify' && 'Check Your Email'}
+              {signupDone && 'Account Created!'}
+              {!signupDone && view === 'login' && 'Welcome Back!'}
+              {!signupDone && view === 'signup' && 'Create Account'}
+              {!signupDone && view === 'forgot' && 'Reset Password'}
+              {!signupDone && view === 'verify' && 'Check Your Email'}
             </h2>
             <p className="text-sm text-[#6B6B7B] mt-1">
-              {view === 'login' && 'Sign in to manage your children\'s learning'}
-              {view === 'signup' && 'Set up your parent account'}
-              {view === 'forgot' && 'We\'ll send you a reset link'}
-              {view === 'verify' && 'A verification link has been sent'}
+              {signupDone && `Welcome, ${signupUser?.name || 'Parent'}!`}
+              {!signupDone && view === 'login' && 'Sign in to manage your children\'s learning'}
+              {!signupDone && view === 'signup' && 'Set up your parent account'}
+              {!signupDone && view === 'forgot' && 'We\'ll send you a reset link'}
+              {!signupDone && view === 'verify' && 'A verification link has been sent'}
             </p>
           </div>
 
@@ -182,6 +182,35 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
 
           {/* Body */}
           <div className="px-6 pb-6 pt-2">
+            {/* Signup success state */}
+            {signupDone && (
+              <motion.div
+                className="text-center py-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6BCB77, #4ECDC4)' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+                </div>
+                <p className="text-[15px] font-bold text-[#2D2D3A] mb-1">Your account is ready!</p>
+                <p className="text-sm text-[#6B6B7B] mb-6">Now create a profile for your child to start learning and playing.</p>
+                <button
+                  className="w-full py-3.5 rounded-xl font-display text-base text-white cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8E8E)', boxShadow: '0 4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(255,107,107,0.3)' }}
+                  onClick={() => {
+                    if (signupUser) onAuthSuccess(signupUser);
+                    resetForm();
+                    setSignupDone(false);
+                    setSignupUser(null);
+                    onClose();
+                  }}
+                >
+                  Create Child Profile
+                </button>
+              </motion.div>
+            )}
+
+            {!signupDone && <>
             {/* Error/Success messages */}
             {error && (
               <motion.div
@@ -357,6 +386,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, onContinueLo
                 </button>
               </div>
             )}
+            </>}
           </div>
         </motion.div>
       </motion.div>
