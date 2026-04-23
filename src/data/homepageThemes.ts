@@ -94,4 +94,4 @@ export function getThemeById(id: string): HomepageTheme {
 }
 
 /** Default theme for new profiles */
-export const DEFAULT_THEME_ID = 'sunny-meadow';
+export const DEFAULT_THEME_ID = 'river-garden';
