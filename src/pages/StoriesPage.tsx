@@ -144,8 +144,11 @@ export default function StoriesPage() {
       }, 500);
 
       // Poll for speech completion, then auto-advance
+      let advanceStartTime = Date.now();
       const pollForEnd = () => {
         const audio = getCurrentAudio();
+        const elapsed = Date.now() - advanceStartTime;
+
         // Check if AI audio finished
         if (audio && audio.ended) {
           setTimeout(() => {
@@ -154,14 +157,12 @@ export default function StoriesPage() {
             } else if (activeStory) {
               completeStory();
             }
-          }, 1200); // 1.2s pause before turning page
+          }, 1500); // 1.5s pause before turning page
           return;
         }
-        // Check if browser speech finished (no audio element + not speaking)
-        if (!audio && !window.speechSynthesis?.speaking) {
-          // Wait a bit to make sure it actually started
-          const wordCount = pageData.text.split(/\s+/).length;
-          const minTime = wordCount * 250 + 1000; // minimum expected duration
+
+        // Check if browser speech finished (allow 2s for it to start)
+        if (elapsed > 2000 && !audio && !window.speechSynthesis?.speaking) {
           setTimeout(() => {
             if (!window.speechSynthesis?.speaking && !getCurrentAudio()) {
               if (activeStory && currentPage < activeStory.pages.length - 1) {
@@ -170,13 +171,14 @@ export default function StoriesPage() {
                 completeStory();
               }
             }
-          }, Math.max(0, minTime));
+          }, 1500);
           return;
         }
-        autoAdvanceRef.current = setTimeout(pollForEnd, 300);
+
+        autoAdvanceRef.current = setTimeout(pollForEnd, 250);
       };
       // Start polling after speech should have begun
-      autoAdvanceRef.current = setTimeout(pollForEnd, 1500);
+      autoAdvanceRef.current = setTimeout(pollForEnd, 1200);
 
       return () => {
         clearTimeout(readTimer);
@@ -338,50 +340,68 @@ export default function StoriesPage() {
     speak(pageData.text);
 
     // Sync word highlighting with actual audio playback.
-    // Strategy: poll the audio element's currentTime and map it to word index.
-    // If no audio element (browser SpeechSynthesis), use time-based estimation.
     const startTime = Date.now();
     let resolved = false;
+    let lastWordIdx = 0;
+    let audioFound = false;
 
     const syncHighlight = () => {
       if (resolved) return;
 
       const audio = getCurrentAudio();
+      const elapsed = Date.now() - startTime;
 
       if (audio && audio.duration && audio.duration > 0) {
-        // AI voice mode: sync to actual audio progress
+        // AI voice: sync to actual audio currentTime
+        audioFound = true;
         const progress = audio.currentTime / audio.duration;
-        const wordIdx = Math.min(Math.floor(progress * wordCount), wordCount - 1);
-        setSpokenWordIndex(wordIdx);
+        const targetIdx = Math.min(Math.floor(progress * wordCount), wordCount - 1);
+        // Smooth: only advance forward, never jump back
+        if (targetIdx >= lastWordIdx) {
+          lastWordIdx = targetIdx;
+          setSpokenWordIndex(targetIdx);
+        }
 
         if (audio.ended || audio.paused) {
           resolved = true;
-          setIsSpeaking(false);
-          setSpokenWordIndex(-1);
+          setSpokenWordIndex(wordCount - 1);
+          setTimeout(() => { setIsSpeaking(false); setSpokenWordIndex(-1); }, 400);
           return;
         }
+      } else if (audio && !audioFound && elapsed < 3000) {
+        // AI voice still loading — wait without advancing highlight
+        // Keep highlight at word 0 until audio has duration
       } else {
-        // Browser SpeechSynthesis fallback: estimate based on elapsed time
-        const elapsed = Date.now() - startTime;
-        // Estimate ~300ms per word for browser speech
-        const estimatedDuration = wordCount * 300;
+        // Browser SpeechSynthesis fallback: ~450ms per word (natural pace)
+        const msPerWord = 450;
+        const estimatedDuration = wordCount * msPerWord + 600;
         const progress = Math.min(elapsed / estimatedDuration, 1);
-        const wordIdx = Math.min(Math.floor(progress * wordCount), wordCount - 1);
-        setSpokenWordIndex(wordIdx);
+        const targetIdx = Math.min(Math.floor(progress * wordCount), wordCount - 1);
+        if (targetIdx >= lastWordIdx) {
+          lastWordIdx = targetIdx;
+          setSpokenWordIndex(targetIdx);
+        }
 
+        // Check if browser speech actually finished
+        if (elapsed > 1500 && !window.speechSynthesis?.speaking && !getCurrentAudio()) {
+          resolved = true;
+          setSpokenWordIndex(wordCount - 1);
+          setTimeout(() => { setIsSpeaking(false); setSpokenWordIndex(-1); }, 400);
+          return;
+        }
         if (progress >= 1) {
           resolved = true;
-          setIsSpeaking(false);
-          setSpokenWordIndex(-1);
+          setSpokenWordIndex(wordCount - 1);
+          setTimeout(() => { setIsSpeaking(false); setSpokenWordIndex(-1); }, 400);
           return;
         }
       }
 
-      wordTimerRef.current = setTimeout(syncHighlight, 80) as unknown as ReturnType<typeof setInterval>;
+      wordTimerRef.current = setTimeout(syncHighlight, 120) as unknown as ReturnType<typeof setInterval>;
     };
 
     // Start sync after a short delay to let audio begin loading
-    wordTimerRef.current = setTimeout(syncHighlight, 200) as unknown as ReturnType<typeof setInterval>;
+    wordTimerRef.current = setTimeout(syncHighlight, 300) as unknown as ReturnType<typeof setInterval>;
   }, [activeStory, currentPage, speak, stopReading]);
 
   // Toggle favorite
@@ -1237,16 +1257,21 @@ export default function StoriesPage() {
             </motion.button>
 
             <motion.button
-              className={`px-5 py-2.5 rounded-full font-display text-xs cursor-pointer ${autoRead ? 'text-white' : 'text-white/50'}`}
+              className={`flex items-center gap-1.5 px-5 py-2 rounded-full font-display text-sm cursor-pointer ${autoRead ? 'text-white' : 'text-[#6B6B7B]'}`}
               style={
                 autoRead
-                  ? { background: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)', boxShadow: '0 2px 10px rgba(78,205,196,0.2)' }
-                  : { background: 'rgba(255,255,255,0.15)' }
+                  ? { background: 'linear-gradient(135deg, #4ECDC4, #3DBDB4)', boxShadow: '0 4px 14px rgba(78,205,196,0.3)' }
+                  : { background: '#F0EAE0' }
               }
-              aria-label="Auto read" onClick={() => setAutoRead(!autoRead)}
+              aria-label={autoRead ? 'Stop auto read' : 'Start auto read'} onClick={() => setAutoRead(!autoRead)}
               whileTap={{ scale: 0.95 }}
             >
-              Auto
+              {autoRead ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 10l-5-3v6l5-3z" fill="currentColor"/><path d="M5 6h2v12H5zM9 6h2v12H9z" fill="currentColor" opacity="0.5"/></svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5z" fill="currentColor"/><path d="M8 5v14l11-7L8 5z" fill="currentColor" opacity="0.3"/></svg>
+              )}
+              <span>{autoRead ? 'Auto On' : 'Auto'}</span>
             </motion.button>
 
             <span className="text-white/30 text-[10px] font-bold ml-2">
