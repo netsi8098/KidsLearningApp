@@ -11,7 +11,7 @@ import AuthModal from '../components/AuthModal';
 import PremiumLion from '../components/svg/PremiumLion';
 import ThemeScene from '../components/homepage/ThemeScene';
 import ThemePicker from '../components/homepage/ThemePicker';
-import { getThemeById, DEFAULT_THEME_ID } from '../data/homepageThemes';
+import { getThemeById, DEFAULT_THEME_ID, themeHeroImages } from '../data/homepageThemes';
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -244,7 +244,7 @@ export default function WelcomePage() {
       {/* ═══ LAYER 0: Hero background image — the world ═══ */}
       <div className="absolute inset-0">
         <img
-          src="/assets/themes/treehouse-hero.jpg"
+          src={themeHeroImages[activeTheme.id] || '/assets/themes/river-garden-hero.jpg'}
           alt=""
           className="w-full h-full object-cover"
           style={{ objectPosition: 'center 40%' }}
