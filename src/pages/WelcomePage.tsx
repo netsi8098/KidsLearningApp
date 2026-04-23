@@ -9,6 +9,9 @@ import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import AuthModal from '../components/AuthModal';
 import PremiumLion from '../components/svg/PremiumLion';
+import ThemeScene from '../components/homepage/ThemeScene';
+import ThemePicker from '../components/homepage/ThemePicker';
+import { getThemeById, DEFAULT_THEME_ID } from '../data/homepageThemes';
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -155,6 +158,15 @@ export default function WelcomePage() {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [themeId, setThemeId] = useState(() => {
+    try { return localStorage.getItem('klf-homepage-theme') || DEFAULT_THEME_ID; } catch { return DEFAULT_THEME_ID; }
+  });
+  const activeTheme = getThemeById(themeId);
+  const handleThemeSelect = (id: string) => {
+    setThemeId(id);
+    try { localStorage.setItem('klf-homepage-theme', id); } catch {}
+  };
 
   const lastPlayedId = getLastPlayedId(profiles);
   const isLoading = profiles === undefined;
@@ -228,9 +240,9 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center relative page-with-bg overflow-hidden">
-      {/* ═══ LAYER 0: Sky + animated background ═══ */}
-      <AnimatedBackground theme="home" />
+    <div className="min-h-dvh flex flex-col items-center relative overflow-hidden">
+      {/* ═══ LAYER 0: Theme scene — full environment ═══ */}
+      <ThemeScene theme={activeTheme} />
 
       {/* ═══ LAYER 1: Ambient sparkles floating in the sky ═══ */}
       <motion.div className="fixed pointer-events-none" style={{ top: '8%', left: '10%', zIndex: 2 }} animate={{ y: [0, -10, 0], opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 4, repeat: Infinity }}>
@@ -246,7 +258,21 @@ export default function WelcomePage() {
         <svg width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#4ECDC4" opacity="0.5" /></svg>
       </motion.div>
 
-      {/* ═══ LAYER 2: Parent access — top-right ═══ */}
+      {/* ═══ LAYER 2: Top controls ═══ */}
+      {/* Theme picker trigger — top-left */}
+      <motion.button
+        className="fixed top-4 left-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer glass"
+        onClick={() => setShowThemePicker(true)}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9BAB" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 0 0 0 20 10 10 0 0 0 0-20" /><circle cx="12" cy="12" r="3" /></svg>
+        <span className="text-xs font-semibold text-[#9B9BAB]">World</span>
+      </motion.button>
+      {/* Parent access — top-right */}
       <motion.button
         className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer glass"
         onClick={() => setShowAuthModal(true)}
@@ -711,6 +737,14 @@ export default function WelcomePage() {
         }}
         onContinueLocal={startLocalPlayerSetup}
         onCreateChildProfile={() => setShowCreate(true)}
+      />
+
+      {/* Theme picker */}
+      <ThemePicker
+        open={showThemePicker}
+        onClose={() => setShowThemePicker(false)}
+        activeThemeId={themeId}
+        onSelect={handleThemeSelect}
       />
     </div>
   );
