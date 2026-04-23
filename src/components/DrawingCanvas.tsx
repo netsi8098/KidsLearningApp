@@ -85,20 +85,41 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     tCtx.clearRect(0, 0, width, height);
 
     if (templateSvg) {
-      const img = new Image();
-      const svgBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(svgBlob);
-      img.onload = () => {
-        tCtx.drawImage(img, 0, 0, width, height);
-        URL.revokeObjectURL(url);
-        // Cache template data for fill boundary detection
-        templateDataRef.current = tCtx.getImageData(0, 0, width, height);
+      // Create outline-only version for the visible overlay (no white fills blocking paint)
+      const outlineSvg = templateSvg
+        .replace(/fill\s*=\s*"#fff"/gi, 'fill="none"')
+        .replace(/fill\s*=\s*"#ffffff"/gi, 'fill="none"')
+        .replace(/fill\s*=\s*"white"/gi, 'fill="none"');
+
+      // Render outline-only on the visible overlay canvas
+      const outlineImg = new Image();
+      const outlineBlob = new Blob([outlineSvg], { type: 'image/svg+xml' });
+      const outlineUrl = URL.createObjectURL(outlineBlob);
+      outlineImg.onload = () => {
+        tCtx.drawImage(outlineImg, 0, 0, width, height);
+        URL.revokeObjectURL(outlineUrl);
+      };
+      outlineImg.src = outlineUrl;
+
+      // Render full template (with white fills) into a temp canvas for boundary detection
+      const fullImg = new Image();
+      const fullBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
+      const fullUrl = URL.createObjectURL(fullBlob);
+      fullImg.onload = () => {
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = width;
+        tmpCanvas.height = height;
+        const tmpCtx = tmpCanvas.getContext('2d')!;
+        tmpCtx.drawImage(fullImg, 0, 0, width, height);
+        URL.revokeObjectURL(fullUrl);
+        // Cache full template data for fill boundary detection
+        templateDataRef.current = tmpCtx.getImageData(0, 0, width, height);
         // Save initial empty paint state
         const initial = pCtx.getImageData(0, 0, width, height);
         setUndoStack([initial]);
         setRedoStack([]);
       };
-      img.src = url;
+      fullImg.src = fullUrl;
     } else {
       templateDataRef.current = null;
       const initial = pCtx.getImageData(0, 0, width, height);
