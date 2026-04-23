@@ -241,10 +241,49 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-dvh flex flex-col items-center relative overflow-hidden">
-      {/* ═══ LAYER 0: Theme scene — full environment ═══ */}
-      <ThemeScene theme={activeTheme} />
+      {/* ═══ LAYER 0: Hero background image — the world ═══ */}
+      <div className="absolute inset-0">
+        <img
+          src="/assets/themes/treehouse-hero.jpg"
+          alt=""
+          className="w-full h-full object-cover"
+          style={{ objectPosition: 'center 40%' }}
+          aria-hidden="true"
+        />
+        {/* Subtle dark overlay at bottom for text readability */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.25))' }} />
+      </div>
 
-      {/* ═══ LAYER 1: Ambient sparkles floating in the sky ═══ */}
+      {/* Ambient motion overlays on top of image */}
+      {/* Sparkle particles */}
+      {[
+        { t: '8%', l: '15%', d: 0, s: 10 },
+        { t: '12%', l: '70%', d: 1.5, s: 8 },
+        { t: '20%', l: '40%', d: 0.8, s: 6 },
+        { t: '15%', l: '85%', d: 2.5, s: 7 },
+        { t: '25%', l: '25%', d: 3, s: 5 },
+      ].map((p, i) => (
+        <motion.div key={i} className="absolute pointer-events-none" style={{ top: p.t, left: p.l, zIndex: 2 }}
+          animate={{ y: [0, -8, 0], opacity: [0.3, 0.9, 0.3], scale: [0.8, 1.2, 0.8] }}
+          transition={{ duration: 3 + i, repeat: Infinity, delay: p.d }}>
+          <svg width={p.s} height={p.s} viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#FFE66D" /></svg>
+        </motion.div>
+      ))}
+
+      {/* Lantern glow pulses */}
+      <motion.div className="absolute pointer-events-none" style={{ top: '35%', left: '18%', zIndex: 2 }}
+        animate={{ opacity: [0.2, 0.5, 0.2], scale: [0.9, 1.1, 0.9] }}
+        transition={{ duration: 2.5, repeat: Infinity }}>
+        <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'radial-gradient(#FFD93D80, transparent)' }} />
+      </motion.div>
+      <motion.div className="absolute pointer-events-none" style={{ top: '42%', left: '8%', zIndex: 2 }}
+        animate={{ opacity: [0.15, 0.4, 0.15], scale: [0.9, 1.1, 0.9] }}
+        transition={{ duration: 3, repeat: Infinity, delay: 0.8 }}>
+        <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'radial-gradient(#FFB34780, transparent)' }} />
+      </motion.div>
+
+      {/* ═══ (old sparkle layers hidden) ═══ */}
+      {false && <>
       <motion.div className="fixed pointer-events-none" style={{ top: '8%', left: '10%', zIndex: 2 }} animate={{ y: [0, -10, 0], opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 4, repeat: Infinity }}>
         <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#FFE66D" opacity="0.7" /></svg>
       </motion.div>
@@ -257,6 +296,8 @@ export default function WelcomePage() {
       <motion.div className="fixed pointer-events-none" style={{ top: '20%', left: '25%', zIndex: 2 }} animate={{ y: [0, -7, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 4.5, repeat: Infinity, delay: 2 }}>
         <svg width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#4ECDC4" opacity="0.5" /></svg>
       </motion.div>
+
+      </>}
 
       {/* ═══ LAYER 2: Top controls ═══ */}
       {/* Theme picker trigger — top-left */}
@@ -286,97 +327,21 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* ═══ LAYER 3: HERO — large lion on lush island ═══ */}
-      <div className="relative z-10 w-full flex flex-col items-center pt-10 md:pt-14">
+      {/* ═══ LAYER 3: Content overlay on the image world ═══ */}
+      <div className="relative z-10 w-full flex flex-col items-center" style={{ paddingTop: '58%' }}>
+        {/* The image already has the lion, treehouse, title sign.
+            We just add the spacer and live content below. */}
         <motion.div
           className="relative flex flex-col items-center"
-          initial={{ y: 40, opacity: 0 }}
+          initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          transition={{ delay: 0.2 }}
         >
-          {/* Speech bubble — attached above mascot */}
-          <motion.div
-            className="relative rounded-2xl px-6 py-2.5 mb-0 glass"
-            style={{ boxShadow: '0 4px 20px rgba(45,45,58,0.08)' }}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
-          >
-            <p className="font-display text-lg text-[#2D2D3A] text-center">Who&apos;s playing today?</p>
-            <div
-              className="absolute bottom-[-7px] left-1/2 -translate-x-1/2 w-0 h-0"
-              style={{ borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '8px solid rgba(255,255,255,0.75)' }}
-            />
-          </motion.div>
-
-          {/* Premium lion — LARGE and central */}
-          <PremiumLion size={260} />
-
-          {/* Lush island mound — dimensional, not flat */}
-          <svg viewBox="0 0 420 80" className="w-80 md:w-[28rem] -mt-8" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <radialGradient id="stg2-glow" cx="0.5" cy="0.2" r="0.7">
-                <stop offset="0%" stopColor="#C8F7C5" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#6BCB77" stopOpacity="0" />
-              </radialGradient>
-              <radialGradient id="stg2-top" cx="0.5" cy="0.3" r="0.55">
-                <stop offset="0%" stopColor="#A8E6CF" />
-                <stop offset="40%" stopColor="#8FE388" />
-                <stop offset="100%" stopColor="#6BCB77" />
-              </radialGradient>
-              <linearGradient id="stg2-side" x1="210" y1="20" x2="210" y2="75" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#6BCB77" />
-                <stop offset="100%" stopColor="#3A9E4A" />
-              </linearGradient>
-            </defs>
-            {/* Ambient glow */}
-            <ellipse cx="210" cy="30" rx="200" ry="40" fill="url(#stg2-glow)" />
-            {/* Dimensional mound — back shadow */}
-            <ellipse cx="210" cy="50" rx="185" ry="28" fill="#3A9E4A" opacity="0.3" />
-            {/* Mound body */}
-            <ellipse cx="210" cy="42" rx="190" ry="26" fill="url(#stg2-side)" />
-            {/* Mound top surface — lighter, gives 3D roundness */}
-            <ellipse cx="210" cy="36" rx="180" ry="20" fill="url(#stg2-top)" />
-            {/* Top highlight — sheen */}
-            <ellipse cx="200" cy="30" rx="120" ry="12" fill="white" opacity="0.08" />
-            {/* Grass texture on top */}
-            <ellipse cx="210" cy="38" rx="160" ry="14" fill="#8FE388" opacity="0.25" />
-            {/* Flowers */}
-            <motion.g animate={{ y: [0, -2.5, 0] }} transition={{ duration: 2.2, repeat: Infinity }}>
-              <rect x="58" y="26" width="2.5" height="12" rx="1" fill="#59A84B" />
-              <circle cx="59" cy="21" r="6" fill="#FF8FAB" opacity="0.85" /><circle cx="59" cy="21" r="3" fill="#FFE66D" />
-            </motion.g>
-            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.8, repeat: Infinity, delay: 0.5 }}>
-              <rect x="348" y="28" width="2.5" height="10" rx="1" fill="#59A84B" />
-              <circle cx="349" cy="24" r="5.5" fill="#A78BFA" opacity="0.8" /><circle cx="349" cy="24" r="2.5" fill="#FFE66D" />
-            </motion.g>
-            <motion.g animate={{ y: [0, -1.5, 0] }} transition={{ duration: 3, repeat: Infinity, delay: 1 }}>
-              <rect x="138" y="30" width="2" height="8" rx="1" fill="#59A84B" />
-              <circle cx="139" cy="26" r="4" fill="#FF6B6B" /><circle cx="139" cy="26" r="2" fill="#FFE66D" />
-            </motion.g>
-            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: 0.3 }}>
-              <rect x="278" y="29" width="2" height="9" rx="1" fill="#59A84B" />
-              <circle cx="279" cy="25" r="4.5" fill="#4ECDC4" /><circle cx="279" cy="25" r="2" fill="#FFE66D" />
-            </motion.g>
-            {/* Small bushes on edges */}
-            <ellipse cx="85" cy="38" rx="16" ry="10" fill="#57C86D" opacity="0.6" />
-            <ellipse cx="85" cy="36" rx="12" ry="7" fill="#8FE388" opacity="0.4" />
-            <ellipse cx="335" cy="36" rx="14" ry="9" fill="#4CAF50" opacity="0.5" />
-            <ellipse cx="335" cy="34" rx="10" ry="6" fill="#6BCB77" opacity="0.4" />
-          </svg>
+          {/* (lion + stage removed — image provides the hero) */}
         </motion.div>
-
-        {/* ── Title — integrated into island scene ── */}
-        <motion.div
-          className="-mt-2 mb-0.5"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <AnimatedTitle />
-        </motion.div>
+        {/* Subtitle — image already has "Kids Learning Fun!" on the sign */}
         <motion.p
-          className="text-sm font-bold text-[#6B6B7B] mb-5"
+          className="text-sm font-bold text-white/80 mb-4 drop-shadow-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
@@ -385,7 +350,8 @@ export default function WelcomePage() {
         </motion.p>
       </div>
 
-      {/* ═══ LAYER 4: Rich bottom landscape — layered hills with depth ═══ */}
+      {/* ═══ LAYER 4: Bottom landscape removed — image provides the world ═══ */}
+      {false && <>
       <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 1 }}>
         <svg viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice" className="w-full h-24 md:h-32">
           <defs>
@@ -430,6 +396,7 @@ export default function WelcomePage() {
           <motion.circle cx="350" cy="72" r="2.5" fill="#A78BFA" opacity="0.5" animate={{ y: [0, -1.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }} />
         </svg>
       </div>
+      </>}
 
       <AnimatePresence mode="wait">
         {!showCreate ? (
