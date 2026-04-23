@@ -84,6 +84,12 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     const tCtx = tmpl.getContext('2d')!;
     tCtx.clearRect(0, 0, width, height);
 
+    // Always initialize undo stack immediately (don't wait for async image loads)
+    const initial = pCtx.getImageData(0, 0, width, height);
+    setUndoStack([initial]);
+    setRedoStack([]);
+    templateDataRef.current = null;
+
     if (templateSvg) {
       // Create outline-only version for the visible overlay (no white fills blocking paint)
       const outlineSvg = templateSvg
@@ -101,7 +107,7 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
       };
       outlineImg.src = outlineUrl;
 
-      // Render full template (with white fills) into a temp canvas for boundary detection
+      // Render full template into temp canvas for fill boundary detection
       const fullImg = new Image();
       const fullBlob = new Blob([templateSvg], { type: 'image/svg+xml' });
       const fullUrl = URL.createObjectURL(fullBlob);
@@ -112,19 +118,9 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
         const tmpCtx = tmpCanvas.getContext('2d')!;
         tmpCtx.drawImage(fullImg, 0, 0, width, height);
         URL.revokeObjectURL(fullUrl);
-        // Cache full template data for fill boundary detection
         templateDataRef.current = tmpCtx.getImageData(0, 0, width, height);
-        // Save initial empty paint state
-        const initial = pCtx.getImageData(0, 0, width, height);
-        setUndoStack([initial]);
-        setRedoStack([]);
       };
       fullImg.src = fullUrl;
-    } else {
-      templateDataRef.current = null;
-      const initial = pCtx.getImageData(0, 0, width, height);
-      setUndoStack([initial]);
-      setRedoStack([]);
     }
   }, [width, height, templateSvg]);
 
