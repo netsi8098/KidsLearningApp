@@ -120,7 +120,7 @@ export default function MovementPage() {
     return (
       <div className="min-h-dvh bg-[#FFF8F0] px-4 pt-4 pb-8 flex flex-col items-center justify-center">
         <CompletionSummary
-          emoji={activeActivity.emoji}
+          emoji={MovementIllustrationByTitle({ title: activeActivity.title }) ? '🎉' : activeActivity.emoji}
           title="Great Moves!"
           message={`You completed "${activeActivity.title}"! Keep moving and having fun!`}
           starsEarned={1}
@@ -144,7 +144,7 @@ export default function MovementPage() {
         <div className="flex items-center justify-between mb-5">
           <NavButton onClick={handleBackToList} direction="back" />
           <h2 className="text-lg font-extrabold text-[#FF6B6B] truncate mx-2">
-            {activeActivity.emoji} {activeActivity.title}
+            {activeActivity.title}
           </h2>
           <StarCounter />
         </div>
@@ -188,13 +188,17 @@ export default function MovementPage() {
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B6B] to-[#FF8C42] text-white font-extrabold text-sm flex items-center justify-center mx-auto mb-4 shadow-[0_2px_8px_rgba(255,107,107,0.3)]">
                 {currentStep + 1}
               </div>
-              <motion.span
-                className="text-7xl block mb-6"
-                animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                {activeActivity.emoji}
-              </motion.span>
+              <div className="w-full max-w-[200px] mx-auto mb-4">
+                {MovementIllustrationByTitle({ title: activeActivity.title }) || (
+                  <motion.span
+                    className="text-7xl block"
+                    animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    {activeActivity.emoji}
+                  </motion.span>
+                )}
+              </div>
               <p className="text-2xl font-bold text-[#2D2D3A] mb-4 leading-relaxed">
                 {instruction}
               </p>
