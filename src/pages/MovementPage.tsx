@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useAudio } from '../hooks/useAudio';
 import { useMovement } from '../hooks/useMovement';
 import NavButton from '../components/NavButton';
+import { MovementIllustrationByTitle } from '../components/svg/MotionAssetPack';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import EnergyFilter from '../components/EnergyFilter';
 import TimerDisplay from '../components/TimerDisplay';
@@ -358,14 +359,16 @@ export default function MovementPage() {
                 />
               </div>
 
-              {/* Large Emoji with bounce */}
-              <motion.span
-                className="text-5xl block mb-2 relative z-[1]"
-                animate={{ y: [0, -3, 0] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
-              >
-                {activity.emoji}
-              </motion.span>
+              {/* Activity illustration or emoji fallback */}
+              {MovementIllustrationByTitle({ title: activity.title, className: 'w-full mb-1 relative z-[1]' }) || (
+                <motion.span
+                  className="text-5xl block mb-2 relative z-[1]"
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
+                >
+                  {activity.emoji}
+                </motion.span>
+              )}
 
               {/* Title */}
               <h3 className="font-bold text-[#2D2D3A] text-sm mb-2 pr-6 relative z-[1]">
