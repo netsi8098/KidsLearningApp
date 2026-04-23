@@ -241,46 +241,32 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-dvh flex flex-col items-center relative overflow-hidden">
-      {/* ═══ LAYER 0: Hero background image — the world ═══ */}
-      <div className="absolute inset-0">
+      {/* ═══ SCENE IMAGE — fills the viewport, is the world ═══ */}
+      <div className="absolute inset-0 z-0">
         <img
           src={themeHeroImages[activeTheme.id] || '/assets/themes/river-garden-hero.jpg'}
           alt=""
           className="w-full h-full object-cover"
-          style={{ objectPosition: 'center 40%' }}
+          style={{ objectPosition: 'center 30%' }}
           aria-hidden="true"
         />
-        {/* Subtle dark overlay at bottom for text readability */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.25))' }} />
       </div>
 
-      {/* Ambient motion overlays on top of image */}
-      {/* Sparkle particles */}
+      {/* ═══ ANIMATED OVERLAYS — sparkles, glows ═══ */}
       {[
-        { t: '8%', l: '15%', d: 0, s: 10 },
-        { t: '12%', l: '70%', d: 1.5, s: 8 },
-        { t: '20%', l: '40%', d: 0.8, s: 6 },
-        { t: '15%', l: '85%', d: 2.5, s: 7 },
-        { t: '25%', l: '25%', d: 3, s: 5 },
+        { t: '6%', l: '18%', d: 0, s: 10 },
+        { t: '10%', l: '72%', d: 1.5, s: 8 },
+        { t: '18%', l: '42%', d: 0.8, s: 7 },
+        { t: '14%', l: '88%', d: 2.5, s: 6 },
+        { t: '22%', l: '28%', d: 3, s: 5 },
+        { t: '4%', l: '55%', d: 1, s: 9 },
       ].map((p, i) => (
-        <motion.div key={i} className="absolute pointer-events-none" style={{ top: p.t, left: p.l, zIndex: 2 }}
-          animate={{ y: [0, -8, 0], opacity: [0.3, 0.9, 0.3], scale: [0.8, 1.2, 0.8] }}
-          transition={{ duration: 3 + i, repeat: Infinity, delay: p.d }}>
+        <motion.div key={i} className="absolute pointer-events-none" style={{ top: p.t, left: p.l, zIndex: 3 }}
+          animate={{ y: [0, -10, 0], opacity: [0.2, 0.8, 0.2], scale: [0.8, 1.2, 0.8] }}
+          transition={{ duration: 3.5 + i * 0.5, repeat: Infinity, delay: p.d }}>
           <svg width={p.s} height={p.s} viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#FFE66D" /></svg>
         </motion.div>
       ))}
-
-      {/* Lantern glow pulses */}
-      <motion.div className="absolute pointer-events-none" style={{ top: '35%', left: '18%', zIndex: 2 }}
-        animate={{ opacity: [0.2, 0.5, 0.2], scale: [0.9, 1.1, 0.9] }}
-        transition={{ duration: 2.5, repeat: Infinity }}>
-        <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'radial-gradient(#FFD93D80, transparent)' }} />
-      </motion.div>
-      <motion.div className="absolute pointer-events-none" style={{ top: '42%', left: '8%', zIndex: 2 }}
-        animate={{ opacity: [0.15, 0.4, 0.15], scale: [0.9, 1.1, 0.9] }}
-        transition={{ duration: 3, repeat: Infinity, delay: 0.8 }}>
-        <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'radial-gradient(#FFB34780, transparent)' }} />
-      </motion.div>
 
       {/* ═══ (old sparkle layers hidden) ═══ */}
       {false && <>
@@ -327,28 +313,24 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* ═══ LAYER 3: Content overlay on the image world ═══ */}
-      <div className="relative z-10 w-full flex flex-col items-center" style={{ paddingTop: '58%' }}>
-        {/* The image already has the lion, treehouse, title sign.
-            We just add the spacer and live content below. */}
-        <motion.div
-          className="relative flex flex-col items-center"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          {/* (lion + stage removed — image provides the hero) */}
-        </motion.div>
-        {/* Subtitle — image already has "Kids Learning Fun!" on the sign */}
-        <motion.p
-          className="text-sm font-bold text-white/80 mb-4 drop-shadow-md"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-        >
-          Choose a player to start
-        </motion.p>
-      </div>
+      {/* ═══ CONTENT LAYOUT — scene at top, shelf at bottom ═══ */}
+      {/* Spacer: lets the scene art show through */}
+      <div className="relative z-10 w-full" style={{ minHeight: '52vh' }} />
+
+      {/* ═══ FOREGROUND SHELF — where profile cards live ═══ */}
+      <div className="relative z-10 w-full">
+        {/* Shelf blending edge — soft gradient that merges scene into card area */}
+        <div style={{ height: 40, background: 'linear-gradient(transparent, rgba(255,248,240,0.6))' }} />
+        <div className="w-full px-4 md:px-8 pb-6" style={{ background: 'linear-gradient(rgba(255,248,240,0.6), rgba(255,248,240,0.92) 30%, #FFF8F0)' }}>
+          {/* Subtitle */}
+          <motion.p
+            className="text-center text-sm font-bold text-[#6B6B7B] mb-4 pt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            Choose a player to start
+          </motion.p>
 
       {/* ═══ LAYER 4: Bottom landscape removed — image provides the world ═══ */}
       {false && <>
@@ -398,11 +380,11 @@ export default function WelcomePage() {
       </div>
       </>}
 
-      <AnimatePresence mode="wait">
-        {!showCreate ? (
-          <motion.div
-            key="profiles"
-            className="relative z-10 w-full max-w-sm md:max-w-2xl"
+          <AnimatePresence mode="wait">
+            {!showCreate ? (
+              <motion.div
+                key="profiles"
+                className="w-full max-w-lg md:max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -674,7 +656,9 @@ export default function WelcomePage() {
             </AnimatePresence>
           </motion.div>
         )}
-      </AnimatePresence>
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Parent Auth Modal */}
       <AuthModal
