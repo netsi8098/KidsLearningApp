@@ -8,7 +8,7 @@ import AvatarFrame from '../components/AvatarFrame';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import AuthModal from '../components/AuthModal';
-import { WelcomeMeadowScene } from '../components/svg/MotionAssetPack';
+import PremiumLion from '../components/svg/PremiumLion';
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -293,34 +293,51 @@ export default function WelcomePage() {
             />
           </motion.div>
 
-          {/* The mascot */}
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <MascotLion size={200} expression="waving" animated />
-          </motion.div>
+          {/* Premium lion mascot */}
+          <PremiumLion size={220} />
 
-          {/* Mascot ground shadow — gives depth */}
-          <motion.div
-            className="rounded-full"
-            style={{ width: 120, height: 16, background: 'rgba(0,0,0,0.06)', filter: 'blur(4px)', marginTop: -8 }}
-            animate={{ scaleX: [1, 1.05, 1] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-          />
-
-          {/* Stage ground — grounded meadow strip under mascot */}
-          <svg viewBox="0 0 320 36" className="w-64 md:w-80 -mt-2" preserveAspectRatio="xMidYMid meet">
-            <ellipse cx="160" cy="18" rx="158" ry="16" fill="#78D38A" />
-            <ellipse cx="160" cy="20" rx="130" ry="12" fill="#6BCB77" opacity="0.6" />
-            <motion.circle cx="40" cy="12" r="4" fill="#FF6B6B" animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }} />
-            <circle cx="40" cy="12" r="1.5" fill="#FFE66D" />
-            <motion.circle cx="280" cy="14" r="3.5" fill="#4ECDC4" animate={{ y: [0, -2, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: 0.4 }} />
-            <circle cx="280" cy="14" r="1.5" fill="#FFE66D" />
-            <rect x="110" y="10" width="3" height="6" rx="1.5" fill="#DEB887" />
-            <ellipse cx="111.5" cy="10" rx="5" ry="3.5" fill="#FF6B6B" opacity="0.8" />
-            <rect x="200" y="12" width="2.5" height="5" rx="1.2" fill="#DEB887" />
-            <ellipse cx="201" cy="12" rx="4" ry="3" fill="#A78BFA" opacity="0.7" />
+          {/* Stage ground — layered meadow with depth */}
+          <svg viewBox="0 0 360 50" className="w-72 md:w-96 -mt-4" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="stg-grass" x1="180" y1="10" x2="180" y2="48" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#8FE388" />
+                <stop offset="100%" stopColor="#4CAF50" />
+              </linearGradient>
+              <radialGradient id="stg-glow" cx="0.5" cy="0.3" r="0.6">
+                <stop offset="0%" stopColor="#A8E6CF" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#6BCB77" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            {/* Soft glow behind ground */}
+            <ellipse cx="180" cy="25" rx="170" ry="30" fill="url(#stg-glow)" />
+            {/* Back hill */}
+            <ellipse cx="180" cy="30" rx="175" ry="18" fill="url(#stg-grass)" opacity="0.5" />
+            {/* Main ground */}
+            <ellipse cx="180" cy="32" rx="155" ry="16" fill="url(#stg-grass)" />
+            {/* Front highlight */}
+            <ellipse cx="180" cy="34" rx="120" ry="10" fill="#A8E6CF" opacity="0.3" />
+            {/* Flowers with stems */}
+            <motion.g animate={{ y: [0, -2.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
+              <rect x="53" y="18" width="2" height="10" rx="1" fill="#59A84B" />
+              <circle cx="54" cy="15" r="5" fill="#FF8FAB" /><circle cx="54" cy="15" r="2.5" fill="#FFE66D" />
+            </motion.g>
+            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}>
+              <rect x="303" y="20" width="2" height="8" rx="1" fill="#59A84B" />
+              <circle cx="304" cy="17" r="4.5" fill="#A78BFA" /><circle cx="304" cy="17" r="2" fill="#FFE66D" />
+            </motion.g>
+            <motion.g animate={{ y: [0, -1.5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}>
+              <rect x="128" y="22" width="1.5" height="7" rx="0.8" fill="#59A84B" />
+              <circle cx="129" cy="19" r="3.5" fill="#FF6B6B" /><circle cx="129" cy="19" r="1.5" fill="#FFE66D" />
+            </motion.g>
+            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}>
+              <rect x="238" y="21" width="1.5" height="7" rx="0.8" fill="#59A84B" />
+              <circle cx="239" cy="18" r="3.5" fill="#4ECDC4" /><circle cx="239" cy="18" r="1.5" fill="#FFE66D" />
+            </motion.g>
+            {/* Mushroom */}
+            <rect x="165" y="24" width="3" height="6" rx="1.5" fill="#DEB887" />
+            <ellipse cx="166.5" cy="24" rx="6" ry="4" fill="#FF6B6B" opacity="0.8" />
+            <circle cx="164" cy="23" r="1.2" fill="white" opacity="0.6" />
+            <circle cx="169" cy="23.5" r="0.8" fill="white" opacity="0.5" />
           </svg>
         </motion.div>
 
@@ -343,21 +360,49 @@ export default function WelcomePage() {
         </motion.p>
       </div>
 
-      {/* ═══ LAYER 4: Bottom world ground — wraps around to the content ═══ */}
+      {/* ═══ LAYER 4: Rich bottom landscape — layered hills with depth ═══ */}
       <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 1 }}>
-        <svg viewBox="0 0 400 80" preserveAspectRatio="xMidYMax slice" className="w-full h-20 md:h-28">
-          <path d="M0 30C60 20 100 35 160 25C220 15 280 30 340 22C370 18 400 25 400 25V80H0Z" fill="#6BCB77" opacity="0.5" />
-          <path d="M0 40C50 33 110 45 170 38C230 30 290 42 350 35C380 32 400 38 400 38V80H0Z" fill="#5FBA6C" opacity="0.65" />
-          <motion.g animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity }} style={{ transformOrigin: '50px 35px' }}>
-            <path d="M50 35L48 22L52 35" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-            <path d="M53 35L55 20L57 35" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+        <svg viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice" className="w-full h-24 md:h-32">
+          <defs>
+            <linearGradient id="wg-far" x1="200" y1="0" x2="200" y2="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#8FE388" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#5FBA6C" stopOpacity="0.5" />
+            </linearGradient>
+            <linearGradient id="wg-mid" x1="200" y1="20" x2="200" y2="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#6BCB77" />
+              <stop offset="100%" stopColor="#4CAF50" />
+            </linearGradient>
+            <linearGradient id="wg-near" x1="200" y1="40" x2="200" y2="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#57C86D" />
+              <stop offset="100%" stopColor="#3A9E4A" />
+            </linearGradient>
+          </defs>
+          {/* Far hill — lighter, smaller */}
+          <path d="M-20 55C60 35 140 50 200 38C260 50 340 35 420 55V100H-20Z" fill="url(#wg-far)" />
+          {/* Mid hill */}
+          <path d="M-20 65C50 48 120 58 200 48C280 58 350 48 420 65V100H-20Z" fill="url(#wg-mid)" />
+          {/* Near hill — darkest, richest */}
+          <path d="M-20 75C40 62 100 70 180 62C260 70 340 62 420 75V100H-20Z" fill="url(#wg-near)" />
+          {/* Grass tufts with sway */}
+          <motion.g animate={{ rotate: [-3, 3, -3] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }} style={{ transformOrigin: '50px 68px' }}>
+            <path d="M48 68L46 54L50 68" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+            <path d="M52 68L54 52L56 68" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
           </motion.g>
-          <motion.g animate={{ rotate: [1, -2, 1] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.7 }} style={{ transformOrigin: '250px 30px' }}>
-            <path d="M250 30L248 18L252 30" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+          <motion.g animate={{ rotate: [2, -3, 2] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} style={{ transformOrigin: '160px 64px' }}>
+            <path d="M158 64L156 50L160 64" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+            <path d="M163 64L165 48L167 64" stroke="#59A84B" strokeWidth="1.5" fill="none" />
           </motion.g>
-          <motion.g animate={{ rotate: [-1, 3, -1] }} transition={{ duration: 4.2, repeat: Infinity, delay: 1.2 }} style={{ transformOrigin: '350px 28px' }}>
-            <path d="M350 28L348 16L352 28" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+          <motion.g animate={{ rotate: [-2, 4, -2] }} transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} style={{ transformOrigin: '300px 66px' }}>
+            <path d="M298 66L296 52L300 66" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+            <path d="M303 66L305 50L307 66" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
           </motion.g>
+          <motion.g animate={{ rotate: [-1, 2, -1] }} transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }} style={{ transformOrigin: '370px 70px' }}>
+            <path d="M368 70L366 58L370 70" stroke="#59A84B" strokeWidth="1.5" fill="none" />
+          </motion.g>
+          {/* Tiny flowers in near ground */}
+          <motion.circle cx="100" cy="70" r="3" fill="#FF8FAB" opacity="0.6" animate={{ y: [0, -1.5, 0] }} transition={{ duration: 2, repeat: Infinity }} />
+          <motion.circle cx="240" cy="68" r="2.5" fill="#FFE66D" opacity="0.5" animate={{ y: [0, -1, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: 0.8 }} />
+          <motion.circle cx="350" cy="72" r="2.5" fill="#A78BFA" opacity="0.5" animate={{ y: [0, -1.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }} />
         </svg>
       </div>
 
