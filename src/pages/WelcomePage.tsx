@@ -228,61 +228,31 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center p-6 md:p-10 relative page-with-bg overflow-hidden">
-      {/* Immersive animated background */}
+    <div className="min-h-dvh flex flex-col items-center relative page-with-bg overflow-hidden">
+      {/* ═══ LAYER 0: Sky + animated background ═══ */}
       <AnimatedBackground theme="home" />
 
-      {/* Illustrated ground with flowers, mushrooms, grass — sits at bottom, supports the world */}
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 1 }}>
-        <svg viewBox="0 0 400 110" preserveAspectRatio="xMidYMax slice" className="w-full h-28 md:h-36">
-          <path d="M0 55C50 45 80 60 120 50C160 40 200 55 240 47C280 39 320 53 360 45C380 41 400 50 400 50V110H0Z" fill="#6BCB77" opacity="0.6" />
-          <path d="M0 65C40 57 90 70 130 63C170 55 220 67 260 60C300 53 350 65 400 60V110H0Z" fill="#5FBA6C" opacity="0.75" />
-          <motion.circle cx="60" cy="53" r="5" fill="#FF8FAB" animate={{ y: [0, -3, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} />
-          <circle cx="60" cy="53" r="2" fill="#FFE66D" />
-          <motion.circle cx="150" cy="47" r="4" fill="#A78BFA" animate={{ y: [0, -2, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} />
-          <circle cx="150" cy="47" r="1.5" fill="#FFE66D" />
-          <motion.circle cx="280" cy="45" r="5" fill="#FF6B6B" animate={{ y: [0, -3, 0] }} transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
-          <circle cx="280" cy="45" r="2" fill="#FFE66D" />
-          <motion.circle cx="340" cy="50" r="4" fill="#4ECDC4" animate={{ y: [0, -2, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }} />
-          <circle cx="340" cy="50" r="1.5" fill="#FFE66D" />
-          <rect x="95" y="55" width="4" height="8" rx="2" fill="#DEB887" />
-          <ellipse cx="97" cy="55" rx="8" ry="5" fill="#FF6B6B" />
-          <circle cx="93" cy="53" r="1.5" fill="white" opacity="0.7" />
-          <circle cx="100" cy="54" r="1" fill="white" opacity="0.7" />
-          <rect x="215" y="57" width="3" height="6" rx="1.5" fill="#DEB887" />
-          <ellipse cx="216.5" cy="57" rx="6" ry="4" fill="#A78BFA" />
-          <circle cx="214" cy="56" r="1" fill="white" opacity="0.7" />
-          <motion.g animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} style={{ transformOrigin: '30px 60px' }}>
-            <path d="M30 60L28 45L32 60" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-            <path d="M33 60L35 43L37 60" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
-          </motion.g>
-          <motion.g animate={{ rotate: [2, -2, 2] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} style={{ transformOrigin: '180px 53px' }}>
-            <path d="M180 53L178 39L182 53" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-          </motion.g>
-          <motion.g animate={{ rotate: [-1, 3, -1] }} transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 1 }} style={{ transformOrigin: '320px 51px' }}>
-            <path d="M320 51L318 37L322 51" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
-          </motion.g>
-        </svg>
-      </div>
-
-      {/* Floating sparkles — ambient life */}
-      <motion.div className="fixed pointer-events-none" style={{ top: '15%', left: '12%', zIndex: 2 }} animate={{ y: [0, -8, 0], opacity: [0.4, 0.8, 0.4] }} transition={{ duration: 3, repeat: Infinity }}>
-        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="#FFE66D" opacity="0.7" /></svg>
+      {/* ═══ LAYER 1: Ambient sparkles floating in the sky ═══ */}
+      <motion.div className="fixed pointer-events-none" style={{ top: '8%', left: '10%', zIndex: 2 }} animate={{ y: [0, -10, 0], opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 4, repeat: Infinity }}>
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#FFE66D" opacity="0.7" /></svg>
       </motion.div>
-      <motion.div className="fixed pointer-events-none" style={{ top: '25%', right: '15%', zIndex: 2 }} animate={{ y: [0, -6, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}>
-        <svg width="8" height="8" viewBox="0 0 10 10"><path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="#A78BFA" opacity="0.6" /></svg>
+      <motion.div className="fixed pointer-events-none" style={{ top: '14%', right: '12%', zIndex: 2 }} animate={{ y: [0, -8, 0], opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 5, repeat: Infinity, delay: 1.2 }}>
+        <svg width="10" height="10" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#A78BFA" opacity="0.6" /></svg>
       </motion.div>
-      <motion.div className="fixed pointer-events-none" style={{ top: '10%', right: '30%', zIndex: 2 }} animate={{ y: [0, -5, 0], opacity: [0.5, 1, 0.5] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.8 }}>
-        <svg width="6" height="6" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#FF8FAB" opacity="0.5" /></svg>
+      <motion.div className="fixed pointer-events-none" style={{ top: '6%', left: '45%', zIndex: 2 }} animate={{ y: [0, -6, 0], opacity: [0.5, 1, 0.5] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.6 }}>
+        <svg width="7" height="7" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#FF8FAB" opacity="0.5" /></svg>
+      </motion.div>
+      <motion.div className="fixed pointer-events-none" style={{ top: '20%', left: '25%', zIndex: 2 }} animate={{ y: [0, -7, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 4.5, repeat: Infinity, delay: 2 }}>
+        <svg width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#4ECDC4" opacity="0.5" /></svg>
       </motion.div>
 
-      {/* Parent access — shield/lock icon */}
+      {/* ═══ LAYER 2: Parent access — top-right ═══ */}
       <motion.button
         className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer glass"
         onClick={() => setShowAuthModal(true)}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 0.8 }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -290,56 +260,106 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* Mascot + Speech Bubble — grounded hero composition */}
-      <motion.div
-        className="relative z-10 flex flex-col items-center mb-2"
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-      >
+      {/* ═══ LAYER 3: HERO SCENE — mascot on grounded stage ═══ */}
+      <div className="relative z-10 w-full flex flex-col items-center pt-16 md:pt-20">
+        {/* ── Mascot with stage ground ── */}
         <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          className="relative flex flex-col items-center"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
         >
-          <MascotLion size={180} expression="waving" animated />
-        </motion.div>
+          {/* Flanking flowers — left */}
+          <motion.div className="absolute left-[-40px] bottom-[30px] md:left-[-60px]" animate={{ y: [0, -4, 0], rotate: [-3, 3, -3] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+            <svg width="28" height="40" viewBox="0 0 28 40"><rect x="12" y="22" width="4" height="18" rx="2" fill="#59A84B" /><circle cx="14" cy="16" r="10" fill="#FF8FAB" opacity="0.85" /><circle cx="14" cy="16" r="5" fill="#FFE66D" /></svg>
+          </motion.div>
+          {/* Flanking flowers — right */}
+          <motion.div className="absolute right-[-35px] bottom-[35px] md:right-[-55px]" animate={{ y: [0, -3, 0], rotate: [2, -2, 2] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}>
+            <svg width="24" height="36" viewBox="0 0 24 36"><rect x="10" y="20" width="4" height="16" rx="2" fill="#59A84B" /><circle cx="12" cy="14" r="9" fill="#A78BFA" opacity="0.8" /><circle cx="12" cy="14" r="4" fill="#FFE66D" /></svg>
+          </motion.div>
 
-        {/* Speech bubble */}
-        <motion.div
-          className="relative rounded-2xl px-6 py-3 mt-1 mb-3 glass"
-          style={{ boxShadow: '0 4px 20px rgba(45,45,58,0.08)' }}
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
-        >
-          <div
-            className="absolute top-[-7px] left-1/2 -translate-x-1/2 w-0 h-0"
-            style={{
-              borderLeft: '8px solid transparent',
-              borderRight: '8px solid transparent',
-              borderBottom: '8px solid rgba(255,255,255,0.75)',
-            }}
+          {/* Speech bubble — attached above mascot */}
+          <motion.div
+            className="relative rounded-2xl px-6 py-2.5 mb-1 glass"
+            style={{ boxShadow: '0 4px 20px rgba(45,45,58,0.08)' }}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <p className="font-display text-lg text-[#2D2D3A] text-center">Who&apos;s playing today?</p>
+            <div
+              className="absolute bottom-[-7px] left-1/2 -translate-x-1/2 w-0 h-0"
+              style={{ borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '8px solid rgba(255,255,255,0.75)' }}
+            />
+          </motion.div>
+
+          {/* The mascot */}
+          <motion.div
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <MascotLion size={200} expression="waving" animated />
+          </motion.div>
+
+          {/* Mascot ground shadow — gives depth */}
+          <motion.div
+            className="rounded-full"
+            style={{ width: 120, height: 16, background: 'rgba(0,0,0,0.06)', filter: 'blur(4px)', marginTop: -8 }}
+            animate={{ scaleX: [1, 1.05, 1] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
           />
-          <p className="font-display text-lg text-[#2D2D3A] text-center">Who&apos;s playing today?</p>
-        </motion.div>
-      </motion.div>
 
-      {/* Animated Title */}
-      <motion.div
-        className="relative z-10 mb-1"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <AnimatedTitle />
-      </motion.div>
-      <motion.p
-        className="relative z-10 text-sm font-bold text-[#6B6B7B] mb-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        Choose a player to start
-      </motion.p>
+          {/* Stage ground — grounded meadow strip under mascot */}
+          <svg viewBox="0 0 320 36" className="w-64 md:w-80 -mt-2" preserveAspectRatio="xMidYMid meet">
+            <ellipse cx="160" cy="18" rx="158" ry="16" fill="#78D38A" />
+            <ellipse cx="160" cy="20" rx="130" ry="12" fill="#6BCB77" opacity="0.6" />
+            <motion.circle cx="40" cy="12" r="4" fill="#FF6B6B" animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }} />
+            <circle cx="40" cy="12" r="1.5" fill="#FFE66D" />
+            <motion.circle cx="280" cy="14" r="3.5" fill="#4ECDC4" animate={{ y: [0, -2, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: 0.4 }} />
+            <circle cx="280" cy="14" r="1.5" fill="#FFE66D" />
+            <rect x="110" y="10" width="3" height="6" rx="1.5" fill="#DEB887" />
+            <ellipse cx="111.5" cy="10" rx="5" ry="3.5" fill="#FF6B6B" opacity="0.8" />
+            <rect x="200" y="12" width="2.5" height="5" rx="1.2" fill="#DEB887" />
+            <ellipse cx="201" cy="12" rx="4" ry="3" fill="#A78BFA" opacity="0.7" />
+          </svg>
+        </motion.div>
+
+        {/* ── Title — flows from the scene ── */}
+        <motion.div
+          className="mt-3 mb-0.5"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <AnimatedTitle />
+        </motion.div>
+        <motion.p
+          className="text-sm font-bold text-[#6B6B7B] mb-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          Choose a player to start
+        </motion.p>
+      </div>
+
+      {/* ═══ LAYER 4: Bottom world ground — wraps around to the content ═══ */}
+      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 1 }}>
+        <svg viewBox="0 0 400 80" preserveAspectRatio="xMidYMax slice" className="w-full h-20 md:h-28">
+          <path d="M0 30C60 20 100 35 160 25C220 15 280 30 340 22C370 18 400 25 400 25V80H0Z" fill="#6BCB77" opacity="0.5" />
+          <path d="M0 40C50 33 110 45 170 38C230 30 290 42 350 35C380 32 400 38 400 38V80H0Z" fill="#5FBA6C" opacity="0.65" />
+          <motion.g animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity }} style={{ transformOrigin: '50px 35px' }}>
+            <path d="M50 35L48 22L52 35" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+            <path d="M53 35L55 20L57 35" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+          </motion.g>
+          <motion.g animate={{ rotate: [1, -2, 1] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.7 }} style={{ transformOrigin: '250px 30px' }}>
+            <path d="M250 30L248 18L252 30" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+          </motion.g>
+          <motion.g animate={{ rotate: [-1, 3, -1] }} transition={{ duration: 4.2, repeat: Infinity, delay: 1.2 }} style={{ transformOrigin: '350px 28px' }}>
+            <path d="M350 28L348 16L352 28" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+          </motion.g>
+        </svg>
+      </div>
 
       <AnimatePresence mode="wait">
         {!showCreate ? (
