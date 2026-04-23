@@ -232,10 +232,49 @@ export default function WelcomePage() {
       {/* Immersive animated background */}
       <AnimatedBackground theme="home" />
 
-      {/* Grounded meadow scene — anchors the mascot to a believable environment */}
-      <div className="absolute left-0 right-0 pointer-events-none" style={{ zIndex: 5, top: '2%' }}>
-        <WelcomeMeadowScene className="w-full max-w-md mx-auto md:max-w-xl px-4" />
+      {/* Illustrated ground with flowers, mushrooms, grass — sits at bottom, supports the world */}
+      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 1 }}>
+        <svg viewBox="0 0 400 110" preserveAspectRatio="xMidYMax slice" className="w-full h-28 md:h-36">
+          <path d="M0 55C50 45 80 60 120 50C160 40 200 55 240 47C280 39 320 53 360 45C380 41 400 50 400 50V110H0Z" fill="#6BCB77" opacity="0.6" />
+          <path d="M0 65C40 57 90 70 130 63C170 55 220 67 260 60C300 53 350 65 400 60V110H0Z" fill="#5FBA6C" opacity="0.75" />
+          <motion.circle cx="60" cy="53" r="5" fill="#FF8FAB" animate={{ y: [0, -3, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} />
+          <circle cx="60" cy="53" r="2" fill="#FFE66D" />
+          <motion.circle cx="150" cy="47" r="4" fill="#A78BFA" animate={{ y: [0, -2, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} />
+          <circle cx="150" cy="47" r="1.5" fill="#FFE66D" />
+          <motion.circle cx="280" cy="45" r="5" fill="#FF6B6B" animate={{ y: [0, -3, 0] }} transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
+          <circle cx="280" cy="45" r="2" fill="#FFE66D" />
+          <motion.circle cx="340" cy="50" r="4" fill="#4ECDC4" animate={{ y: [0, -2, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }} />
+          <circle cx="340" cy="50" r="1.5" fill="#FFE66D" />
+          <rect x="95" y="55" width="4" height="8" rx="2" fill="#DEB887" />
+          <ellipse cx="97" cy="55" rx="8" ry="5" fill="#FF6B6B" />
+          <circle cx="93" cy="53" r="1.5" fill="white" opacity="0.7" />
+          <circle cx="100" cy="54" r="1" fill="white" opacity="0.7" />
+          <rect x="215" y="57" width="3" height="6" rx="1.5" fill="#DEB887" />
+          <ellipse cx="216.5" cy="57" rx="6" ry="4" fill="#A78BFA" />
+          <circle cx="214" cy="56" r="1" fill="white" opacity="0.7" />
+          <motion.g animate={{ rotate: [-2, 2, -2] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} style={{ transformOrigin: '30px 60px' }}>
+            <path d="M30 60L28 45L32 60" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+            <path d="M33 60L35 43L37 60" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+          </motion.g>
+          <motion.g animate={{ rotate: [2, -2, 2] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} style={{ transformOrigin: '180px 53px' }}>
+            <path d="M180 53L178 39L182 53" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
+          </motion.g>
+          <motion.g animate={{ rotate: [-1, 3, -1] }} transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 1 }} style={{ transformOrigin: '320px 51px' }}>
+            <path d="M320 51L318 37L322 51" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
+          </motion.g>
+        </svg>
       </div>
+
+      {/* Floating sparkles — ambient life */}
+      <motion.div className="fixed pointer-events-none" style={{ top: '15%', left: '12%', zIndex: 2 }} animate={{ y: [0, -8, 0], opacity: [0.4, 0.8, 0.4] }} transition={{ duration: 3, repeat: Infinity }}>
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="#FFE66D" opacity="0.7" /></svg>
+      </motion.div>
+      <motion.div className="fixed pointer-events-none" style={{ top: '25%', right: '15%', zIndex: 2 }} animate={{ y: [0, -6, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}>
+        <svg width="8" height="8" viewBox="0 0 10 10"><path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="#A78BFA" opacity="0.6" /></svg>
+      </motion.div>
+      <motion.div className="fixed pointer-events-none" style={{ top: '10%', right: '30%', zIndex: 2 }} animate={{ y: [0, -5, 0], opacity: [0.5, 1, 0.5] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.8 }}>
+        <svg width="6" height="6" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#FF8FAB" opacity="0.5" /></svg>
+      </motion.div>
 
       {/* Parent access — shield/lock icon */}
       <motion.button
@@ -251,19 +290,26 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* Speech Bubble — sits below the meadow scene */}
+      {/* Mascot + Speech Bubble — grounded hero composition */}
       <motion.div
-        className="relative z-10 flex flex-col items-center mt-40 md:mt-48 mb-2"
-        initial={{ y: 20, opacity: 0 }}
+        className="relative z-10 flex flex-col items-center mb-2"
+        initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
       >
         <motion.div
-          className="relative rounded-2xl px-6 py-3 mb-3 glass"
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <MascotLion size={180} expression="waving" animated />
+        </motion.div>
+
+        {/* Speech bubble */}
+        <motion.div
+          className="relative rounded-2xl px-6 py-3 mt-1 mb-3 glass"
           style={{ boxShadow: '0 4px 20px rgba(45,45,58,0.08)' }}
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.4, type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
         >
           <div
             className="absolute top-[-7px] left-1/2 -translate-x-1/2 w-0 h-0"
