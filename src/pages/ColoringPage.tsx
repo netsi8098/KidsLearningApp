@@ -89,13 +89,17 @@ export default function ColoringPage() {
   const [showColorExpanded, setShowColorExpanded] = useState(false);
   const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
-  // Compute fit-to-screen zoom: canvas is 400x520, fit with tight margins
+  // Canvas resolution adapts to screen size — larger on desktop
+  const canvasW = typeof window !== 'undefined' && window.innerWidth >= 768 ? 600 : 400;
+  const canvasH = Math.round(canvasW * 1.3); // maintain aspect ratio
+
+  // Compute fit-to-screen zoom
   const [zoom, setZoom] = useState(() => {
     if (typeof window === 'undefined') return 0.8;
-    const availW = window.innerWidth - 52; // right rail ~48px + margin
-    const availH = window.innerHeight - 48; // top/bottom controls ~24px each
-    const fitW = availW / 400;
-    const fitH = availH / 520;
+    const availW = window.innerWidth - 60;
+    const availH = window.innerHeight - 56;
+    const fitW = availW / canvasW;
+    const fitH = availH / canvasH;
     return Math.min(fitW, fitH, 1);
   });
   const [panX, setPanX] = useState(0);
@@ -175,8 +179,8 @@ export default function ColoringPage() {
           <div onClick={(e) => e.stopPropagation()}>
             <DrawingCanvas
               ref={canvasApiRef}
-              width={400}
-              height={520}
+              width={canvasW}
+              height={canvasH}
               templateSvg={activeTemplate?.svgOutline}
               tool={activeTool}
               brush={activeBrush}
@@ -266,7 +270,7 @@ export default function ColoringPage() {
             onZoomIn={() => setZoom((z) => Math.min(5, z + 0.25))}
             onZoomOut={() => setZoom((z) => Math.max(0.3, z - 0.25))}
             onReset={() => {
-              setZoom(Math.min((window.innerWidth - 52) / 400, (window.innerHeight - 48) / 520, 1));
+              setZoom(Math.min((window.innerWidth - 60) / canvasW, (window.innerHeight - 56) / canvasH, 1));
               setPanX(0); setPanY(0);
             }}
           />
@@ -307,7 +311,7 @@ export default function ColoringPage() {
 
   // ===== MAIN PAGE =====
   return (
-    <div style={{ maxWidth: "1024px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg">
+    <div style={{ maxWidth: "1280px", margin: "0 auto" }} className="min-h-dvh px-4 pt-4 pb-8 relative page-with-bg md:px-8 lg:px-12">
       <AnimatedBackground theme="create" />
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
@@ -372,7 +376,7 @@ export default function ColoringPage() {
             </div>
 
             {/* Template cards grid — with subtle backdrop to reduce background noise */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 relative z-10 rounded-2xl p-2 -mx-2" style={{ background: 'rgba(255,248,240,0.5)', backdropFilter: 'blur(4px)' }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 relative z-10 rounded-2xl p-2 -mx-2" style={{ background: 'rgba(255,248,240,0.5)', backdropFilter: 'blur(4px)' }}>
               {filteredTemplates.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <p className="text-5xl mb-3"><svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{display:'inline-block'}}><rect x="6" y="6" width="36" height="36" rx="4" stroke="#A78BFA" strokeWidth="2.5" fill="#F3EFFE"/><path d="M12 30L20 22L28 30L36 20" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="16" cy="16" r="3" fill="#FFE66D"/></svg></p>

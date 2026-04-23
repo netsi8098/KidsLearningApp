@@ -124,8 +124,8 @@ export function ExploreIcon({ size = 28, color, active, className }: IconProps) 
       {/* Compass needle */}
       <path d="M16 8L19 16L16 24L13 16Z" fill={active ? '#FF6B6B' : c} fillOpacity="0.6" stroke={c} strokeWidth="1.5" strokeLinejoin="round" />
       <circle cx="16" cy="16" r="2" fill="white" stroke={c} strokeWidth="1.5" />
-      {/* Direction marks */}
-      <text x="14.5" y="7" fontSize="5" fontWeight="bold" fill={c}>N</text>
+      {/* Direction mark — small triangle instead of text to avoid DOM text leak */}
+      <polygon points="16,4 14.5,7.5 17.5,7.5" fill={c} />
     </svg>
   );
 }

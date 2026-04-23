@@ -36,7 +36,7 @@ export default function PrivacySettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [exportRequested, setExportRequested] = useState(false);
 
-  if (!currentPlayer) return <Navigate to="/" replace />;
+  // Public page — no player required
 
   function handleGateSubmit() {
     if (parseInt(gateAnswer) === correctAnswer) {

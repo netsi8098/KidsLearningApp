@@ -52,7 +52,7 @@ export default function HelpCenterPage() {
   const [contactBody, setContactBody] = useState('');
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  if (!currentPlayer) return <Navigate to="/" replace />;
+  // Public page — no player required
 
   function handleFeedback(articleId: string, helpful: boolean) {
     submitFeedback(articleId, helpful);

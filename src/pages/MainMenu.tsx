@@ -367,7 +367,7 @@ function QuestBoard({
   if (missions.length === 0) {
     return (
       <motion.div
-        className="max-w-md mx-auto mb-5 md:max-w-2xl lg:max-w-4xl"
+        className="max-w-lg mx-auto mb-5 md:max-w-3xl lg:max-w-5xl"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
@@ -408,7 +408,7 @@ function QuestBoard({
 
   return (
     <motion.div
-      className="max-w-md mx-auto mb-5 md:max-w-2xl lg:max-w-4xl"
+      className="max-w-lg mx-auto mb-5 md:max-w-3xl lg:max-w-5xl"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.1 }}
@@ -872,7 +872,7 @@ export default function MainMenu() {
           1. COMPACT HEADER
          ══════════════════════════════════════════════════════ */}
       <div className="flex-shrink-0 px-4 pt-3 pb-2 md:px-8" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="flex items-center justify-between max-w-md mx-auto md:max-w-2xl lg:max-w-4xl">
+        <div className="flex items-center justify-between max-w-lg mx-auto md:max-w-3xl lg:max-w-5xl">
           {/* Passport-style profile badge */}
           <motion.button
             className="flex items-center gap-2.5 rounded-full px-3 py-1.5 cursor-pointer"
@@ -954,7 +954,7 @@ export default function MainMenu() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="h-full max-w-md mx-auto md:max-w-2xl lg:max-w-4xl flex flex-col"
+            className="h-full max-w-lg mx-auto md:max-w-3xl lg:max-w-5xl flex flex-col"
           >
             {activeTab === 'home' ? (
               /* ── HOME TAB — DAILY ADVENTURE HUB ── */
@@ -1235,7 +1235,7 @@ export default function MainMenu() {
          ══════════════════════════════════════════════════════ */}
       <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] px-4 mb-2" style={{ position: 'relative', zIndex: 2 }}>
         <div
-          className="max-w-md mx-auto flex items-end justify-around px-3 pt-3 pb-2"
+          className="max-w-lg mx-auto md:max-w-xl flex items-end justify-around px-3 pt-3 pb-2"
           style={{
             background: 'linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,1) 100%)',
             borderRadius: '24px',

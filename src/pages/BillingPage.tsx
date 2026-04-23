@@ -80,7 +80,7 @@ export default function BillingPage() {
   // Billing period toggle
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
 
-  if (!currentPlayer) return <Navigate to="/" replace />;
+  // Public page — no player required
 
   function handleGateSubmit() {
     if (parseInt(gateAnswer) === correctAnswer) {

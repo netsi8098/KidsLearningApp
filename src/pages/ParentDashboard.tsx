@@ -500,8 +500,16 @@ export default function ParentDashboard() {
       });
   }, [progress]);
 
-  // --- Guard: no player ---
-  if (!currentPlayer) return <Navigate to="/" replace />;
+  // --- Guard: no player — show setup prompt instead of redirect ---
+  if (!currentPlayer) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center p-6 text-center" style={{ background: 'linear-gradient(135deg, #FFF8F0, #FFECD2)' }}>
+        <h2 className="font-display text-2xl text-[#2D2D3A] mb-3">Parent Dashboard</h2>
+        <p className="text-[#6B6B7B] font-bold mb-6 max-w-xs">Create a child profile first to see learning progress and insights here.</p>
+        <button className="btn-primary text-lg" onClick={() => navigate('/')}>Go to Welcome</button>
+      </div>
+    );
+  }
 
   // --- Parent gate ---
   function handleGateSubmit() {
