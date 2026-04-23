@@ -286,27 +286,17 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* ═══ LAYER 3: HERO SCENE — mascot on grounded stage ═══ */}
-      <div className="relative z-10 w-full flex flex-col items-center pt-16 md:pt-20">
-        {/* ── Mascot with stage ground ── */}
+      {/* ═══ LAYER 3: HERO — large lion on lush island ═══ */}
+      <div className="relative z-10 w-full flex flex-col items-center pt-10 md:pt-14">
         <motion.div
           className="relative flex flex-col items-center"
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
         >
-          {/* Flanking flowers — left */}
-          <motion.div className="absolute left-[-40px] bottom-[30px] md:left-[-60px]" animate={{ y: [0, -4, 0], rotate: [-3, 3, -3] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
-            <svg width="28" height="40" viewBox="0 0 28 40"><rect x="12" y="22" width="4" height="18" rx="2" fill="#59A84B" /><circle cx="14" cy="16" r="10" fill="#FF8FAB" opacity="0.85" /><circle cx="14" cy="16" r="5" fill="#FFE66D" /></svg>
-          </motion.div>
-          {/* Flanking flowers — right */}
-          <motion.div className="absolute right-[-35px] bottom-[35px] md:right-[-55px]" animate={{ y: [0, -3, 0], rotate: [2, -2, 2] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}>
-            <svg width="24" height="36" viewBox="0 0 24 36"><rect x="10" y="20" width="4" height="16" rx="2" fill="#59A84B" /><circle cx="12" cy="14" r="9" fill="#A78BFA" opacity="0.8" /><circle cx="12" cy="14" r="4" fill="#FFE66D" /></svg>
-          </motion.div>
-
           {/* Speech bubble — attached above mascot */}
           <motion.div
-            className="relative rounded-2xl px-6 py-2.5 mb-1 glass"
+            className="relative rounded-2xl px-6 py-2.5 mb-0 glass"
             style={{ boxShadow: '0 4px 20px rgba(45,45,58,0.08)' }}
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -319,57 +309,66 @@ export default function WelcomePage() {
             />
           </motion.div>
 
-          {/* Premium lion mascot */}
-          <PremiumLion size={220} />
+          {/* Premium lion — LARGE and central */}
+          <PremiumLion size={260} />
 
-          {/* Stage ground — layered meadow with depth */}
-          <svg viewBox="0 0 360 50" className="w-72 md:w-96 -mt-4" preserveAspectRatio="xMidYMid meet">
+          {/* Lush island mound — dimensional, not flat */}
+          <svg viewBox="0 0 420 80" className="w-80 md:w-[28rem] -mt-8" preserveAspectRatio="xMidYMid meet">
             <defs>
-              <linearGradient id="stg-grass" x1="180" y1="10" x2="180" y2="48" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#8FE388" />
-                <stop offset="100%" stopColor="#4CAF50" />
-              </linearGradient>
-              <radialGradient id="stg-glow" cx="0.5" cy="0.3" r="0.6">
-                <stop offset="0%" stopColor="#A8E6CF" stopOpacity="0.4" />
+              <radialGradient id="stg2-glow" cx="0.5" cy="0.2" r="0.7">
+                <stop offset="0%" stopColor="#C8F7C5" stopOpacity="0.5" />
                 <stop offset="100%" stopColor="#6BCB77" stopOpacity="0" />
               </radialGradient>
+              <radialGradient id="stg2-top" cx="0.5" cy="0.3" r="0.55">
+                <stop offset="0%" stopColor="#A8E6CF" />
+                <stop offset="40%" stopColor="#8FE388" />
+                <stop offset="100%" stopColor="#6BCB77" />
+              </radialGradient>
+              <linearGradient id="stg2-side" x1="210" y1="20" x2="210" y2="75" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#6BCB77" />
+                <stop offset="100%" stopColor="#3A9E4A" />
+              </linearGradient>
             </defs>
-            {/* Soft glow behind ground */}
-            <ellipse cx="180" cy="25" rx="170" ry="30" fill="url(#stg-glow)" />
-            {/* Back hill */}
-            <ellipse cx="180" cy="30" rx="175" ry="18" fill="url(#stg-grass)" opacity="0.5" />
-            {/* Main ground */}
-            <ellipse cx="180" cy="32" rx="155" ry="16" fill="url(#stg-grass)" />
-            {/* Front highlight */}
-            <ellipse cx="180" cy="34" rx="120" ry="10" fill="#A8E6CF" opacity="0.3" />
-            {/* Flowers with stems */}
-            <motion.g animate={{ y: [0, -2.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
-              <rect x="53" y="18" width="2" height="10" rx="1" fill="#59A84B" />
-              <circle cx="54" cy="15" r="5" fill="#FF8FAB" /><circle cx="54" cy="15" r="2.5" fill="#FFE66D" />
+            {/* Ambient glow */}
+            <ellipse cx="210" cy="30" rx="200" ry="40" fill="url(#stg2-glow)" />
+            {/* Dimensional mound — back shadow */}
+            <ellipse cx="210" cy="50" rx="185" ry="28" fill="#3A9E4A" opacity="0.3" />
+            {/* Mound body */}
+            <ellipse cx="210" cy="42" rx="190" ry="26" fill="url(#stg2-side)" />
+            {/* Mound top surface — lighter, gives 3D roundness */}
+            <ellipse cx="210" cy="36" rx="180" ry="20" fill="url(#stg2-top)" />
+            {/* Top highlight — sheen */}
+            <ellipse cx="200" cy="30" rx="120" ry="12" fill="white" opacity="0.08" />
+            {/* Grass texture on top */}
+            <ellipse cx="210" cy="38" rx="160" ry="14" fill="#8FE388" opacity="0.25" />
+            {/* Flowers */}
+            <motion.g animate={{ y: [0, -2.5, 0] }} transition={{ duration: 2.2, repeat: Infinity }}>
+              <rect x="58" y="26" width="2.5" height="12" rx="1" fill="#59A84B" />
+              <circle cx="59" cy="21" r="6" fill="#FF8FAB" opacity="0.85" /><circle cx="59" cy="21" r="3" fill="#FFE66D" />
             </motion.g>
-            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}>
-              <rect x="303" y="20" width="2" height="8" rx="1" fill="#59A84B" />
-              <circle cx="304" cy="17" r="4.5" fill="#A78BFA" /><circle cx="304" cy="17" r="2" fill="#FFE66D" />
+            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.8, repeat: Infinity, delay: 0.5 }}>
+              <rect x="348" y="28" width="2.5" height="10" rx="1" fill="#59A84B" />
+              <circle cx="349" cy="24" r="5.5" fill="#A78BFA" opacity="0.8" /><circle cx="349" cy="24" r="2.5" fill="#FFE66D" />
             </motion.g>
-            <motion.g animate={{ y: [0, -1.5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}>
-              <rect x="128" y="22" width="1.5" height="7" rx="0.8" fill="#59A84B" />
-              <circle cx="129" cy="19" r="3.5" fill="#FF6B6B" /><circle cx="129" cy="19" r="1.5" fill="#FFE66D" />
+            <motion.g animate={{ y: [0, -1.5, 0] }} transition={{ duration: 3, repeat: Infinity, delay: 1 }}>
+              <rect x="138" y="30" width="2" height="8" rx="1" fill="#59A84B" />
+              <circle cx="139" cy="26" r="4" fill="#FF6B6B" /><circle cx="139" cy="26" r="2" fill="#FFE66D" />
             </motion.g>
-            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}>
-              <rect x="238" y="21" width="1.5" height="7" rx="0.8" fill="#59A84B" />
-              <circle cx="239" cy="18" r="3.5" fill="#4ECDC4" /><circle cx="239" cy="18" r="1.5" fill="#FFE66D" />
+            <motion.g animate={{ y: [0, -2, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: 0.3 }}>
+              <rect x="278" y="29" width="2" height="9" rx="1" fill="#59A84B" />
+              <circle cx="279" cy="25" r="4.5" fill="#4ECDC4" /><circle cx="279" cy="25" r="2" fill="#FFE66D" />
             </motion.g>
-            {/* Mushroom */}
-            <rect x="165" y="24" width="3" height="6" rx="1.5" fill="#DEB887" />
-            <ellipse cx="166.5" cy="24" rx="6" ry="4" fill="#FF6B6B" opacity="0.8" />
-            <circle cx="164" cy="23" r="1.2" fill="white" opacity="0.6" />
-            <circle cx="169" cy="23.5" r="0.8" fill="white" opacity="0.5" />
+            {/* Small bushes on edges */}
+            <ellipse cx="85" cy="38" rx="16" ry="10" fill="#57C86D" opacity="0.6" />
+            <ellipse cx="85" cy="36" rx="12" ry="7" fill="#8FE388" opacity="0.4" />
+            <ellipse cx="335" cy="36" rx="14" ry="9" fill="#4CAF50" opacity="0.5" />
+            <ellipse cx="335" cy="34" rx="10" ry="6" fill="#6BCB77" opacity="0.4" />
           </svg>
         </motion.div>
 
-        {/* ── Title — flows from the scene ── */}
+        {/* ── Title — integrated into island scene ── */}
         <motion.div
-          className="mt-3 mb-0.5"
+          className="-mt-2 mb-0.5"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
