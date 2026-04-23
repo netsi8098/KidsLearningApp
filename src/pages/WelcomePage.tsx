@@ -8,6 +8,7 @@ import AvatarFrame from '../components/AvatarFrame';
 import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import AuthModal from '../components/AuthModal';
+import { WelcomeMeadowScene } from '../components/svg/MotionAssetPack';
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -231,31 +232,9 @@ export default function WelcomePage() {
       {/* Immersive animated background */}
       <AnimatedBackground theme="home" />
 
-      {/* Extra illustrated ground elements */}
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <svg viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice" className="w-full h-24 md:h-32">
-          {/* Grass patches */}
-          <path d="M0 60C50 50 80 65 120 55C160 45 200 60 240 52C280 44 320 58 360 50C380 46 400 55 400 55V100H0Z" fill="#6BCB77" opacity="0.6" />
-          <path d="M0 70C40 62 90 75 130 68C170 60 220 72 260 65C300 58 350 70 400 65V100H0Z" fill="#5FBA6C" opacity="0.7" />
-          {/* Flowers */}
-          <circle cx="60" cy="58" r="5" fill="#FF8FAB" /><circle cx="60" cy="58" r="2" fill="#FFE66D" />
-          <circle cx="150" cy="52" r="4" fill="#A78BFA" /><circle cx="150" cy="52" r="1.5" fill="#FFE66D" />
-          <circle cx="280" cy="50" r="5" fill="#FF6B6B" /><circle cx="280" cy="50" r="2" fill="#FFE66D" />
-          <circle cx="340" cy="55" r="4" fill="#4ECDC4" /><circle cx="340" cy="55" r="1.5" fill="#FFE66D" />
-          {/* Mushrooms */}
-          <rect x="95" y="60" width="4" height="8" rx="2" fill="#DEB887" />
-          <ellipse cx="97" cy="60" rx="8" ry="5" fill="#FF6B6B" />
-          <circle cx="93" cy="58" r="1.5" fill="white" opacity="0.7" />
-          <circle cx="100" cy="59" r="1" fill="white" opacity="0.7" />
-          <rect x="215" y="62" width="3" height="6" rx="1.5" fill="#DEB887" />
-          <ellipse cx="216.5" cy="62" rx="6" ry="4" fill="#A78BFA" />
-          <circle cx="214" cy="61" r="1" fill="white" opacity="0.7" />
-          {/* Grass blades */}
-          <path d="M30 65L28 50L32 65" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-          <path d="M33 65L35 48L37 65" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
-          <path d="M180 58L178 44L182 58" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-          <path d="M320 56L318 42L322 56" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
-        </svg>
+      {/* Grounded meadow scene — anchors the mascot to a believable environment */}
+      <div className="absolute left-0 right-0 pointer-events-none" style={{ zIndex: 5, top: '2%' }}>
+        <WelcomeMeadowScene className="w-full max-w-md mx-auto md:max-w-xl px-4" />
       </div>
 
       {/* Parent access — shield/lock icon */}
@@ -272,23 +251,19 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* Mascot + Speech Bubble */}
+      {/* Speech Bubble — sits below the meadow scene */}
       <motion.div
-        className="relative z-10 flex flex-col items-center mb-2"
-        initial={{ y: 30, opacity: 0 }}
+        className="relative z-10 flex flex-col items-center mt-40 md:mt-48 mb-2"
+        initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
       >
-        <div className="animate-float-gentle">
-          <MascotLion size={180} expression="waving" animated />
-        </div>
-
-        {/* Speech bubble */}
         <motion.div
-          className="relative rounded-2xl px-6 py-3 mt-2 mb-3 glass"
+          className="relative rounded-2xl px-6 py-3 mb-3 glass"
           style={{ boxShadow: '0 4px 20px rgba(45,45,58,0.08)' }}
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{ delay: 0.4, type: 'spring', stiffness: 300, damping: 20 }}
         >
           <div
             className="absolute top-[-7px] left-1/2 -translate-x-1/2 w-0 h-0"
