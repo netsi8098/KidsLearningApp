@@ -90,6 +90,7 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
     setRedoStack([]);
     templateDataRef.current = null;
 
+
     if (templateSvg) {
       // Create outline-only version for the visible overlay (no white fills blocking paint)
       const outlineSvg = templateSvg
@@ -424,23 +425,24 @@ const DrawingCanvas = forwardRef<CanvasApi, DrawingCanvasProps>(function Drawing
         height: `${height}px`,
         background: '#FFFFFF',
         boxShadow: '0 4px 24px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1)',
+        touchAction: 'none',
       }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
     >
-      {/* Paint layer — user strokes */}
+      {/* Paint layer — user strokes (below template visually) */}
       <canvas
         ref={paintRef}
         className="absolute inset-0 w-full h-full"
-        style={{ touchAction: 'none', zIndex: 1 }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        style={{ touchAction: 'none' }}
       />
       {/* Template overlay — line art on top, not interactive */}
       <canvas
         ref={templateRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ zIndex: 2 }}
+        className="absolute inset-0 w-full h-full"
+        style={{ pointerEvents: 'none' }}
       />
     </div>
   );
