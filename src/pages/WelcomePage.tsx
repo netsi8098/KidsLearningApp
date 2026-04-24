@@ -247,7 +247,7 @@ export default function WelcomePage() {
           src={themeHeroImages[activeTheme.id] || '/assets/themes/river-garden-hero.jpg'}
           alt=""
           className="w-full h-full object-cover"
-          style={{ objectPosition: 'center 30%' }}
+          style={{ objectPosition: 'center center' }}
           aria-hidden="true"
         />
       </div>
@@ -313,24 +313,10 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* ═══ CONTENT LAYOUT — scene at top, shelf at bottom ═══ */}
-      {/* Spacer: lets the scene art show through */}
-      <div className="relative z-10 w-full" style={{ minHeight: '52vh' }} />
-
-      {/* ═══ FOREGROUND SHELF — where profile cards live ═══ */}
-      <div className="relative z-10 w-full">
-        {/* Shelf blending edge — soft gradient that merges scene into card area */}
-        <div style={{ height: 40, background: 'linear-gradient(transparent, rgba(255,248,240,0.6))' }} />
-        <div className="w-full px-4 md:px-8 pb-6" style={{ background: 'linear-gradient(rgba(255,248,240,0.6), rgba(255,248,240,0.92) 30%, #FFF8F0)' }}>
-          {/* Subtitle */}
-          <motion.p
-            className="text-center text-sm font-bold text-[#6B6B7B] mb-4 pt-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            Choose a player to start
-          </motion.p>
+      {/* ═══ FULL-SCENE LAYOUT — everything lives inside the world ═══ */}
+      <div className="relative z-10 w-full min-h-dvh flex flex-col justify-end pb-4 px-4 md:px-8">
+        {/* Cards positioned at bottom of viewport — sitting on the scene's ground/deck */}
+        <div className="w-full max-w-2xl mx-auto">
 
       {/* ═══ LAYER 4: Bottom landscape removed — image provides the world ═══ */}
       {false && <>
@@ -396,11 +382,11 @@ export default function WelcomePage() {
                 ))}
               </div>
             ) : profiles.length === 0 ? (
-              /* Empty State — prompt to sign up first */
-              <motion.div className="text-center py-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <MascotLion size={120} expression="excited" animated className="mx-auto mb-4" />
-                <p className="font-display text-2xl text-[#2D2D3A] mb-1">Welcome!</p>
-                <p className="text-sm text-[#6B6B7B] mb-6 max-w-xs mx-auto">
+              /* Empty State — glass card in the scene */
+              <motion.div className="text-center py-6 px-6 rounded-3xl mx-auto max-w-sm" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <MascotLion size={100} expression="excited" animated className="mx-auto mb-3" />
+                <p className="font-display text-xl text-[#2D2D3A] mb-1">Welcome!</p>
+                <p className="text-xs text-[#6B6B7B] mb-4 max-w-xs mx-auto">
                   Create a player profile to start learning. Parent sign-in can be added later.
                 </p>
                 <div className="flex flex-col gap-3 max-w-xs mx-auto">
