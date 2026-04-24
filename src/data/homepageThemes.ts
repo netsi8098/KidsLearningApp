@@ -96,10 +96,10 @@ export function getThemeById(id: string): HomepageTheme {
 /** Default theme for new profiles */
 export const DEFAULT_THEME_ID = 'river-garden';
 
-/** Map theme IDs to hero image filenames */
+/** Map theme IDs to clean hero image filenames (baked-in UI removed) */
 export const themeHeroImages: Record<string, string> = {
-  'sunny-meadow': '/assets/themes/sunny-meadow-hero.jpg',
-  'sky-islands': '/assets/themes/sky-islands-hero.jpg',
-  'river-garden': '/assets/themes/river-garden-hero.jpg',
-  'treehouse': '/assets/themes/treehouse-hero.jpg',
+  'sunny-meadow': '/assets/themes/sunny-meadow-hero-clean.jpg',
+  'sky-islands': '/assets/themes/sky-islands-hero-clean.jpg',
+  'river-garden': '/assets/themes/river-garden-hero-clean.jpg',
+  'treehouse': '/assets/themes/treehouse-hero-clean.jpg',
 };

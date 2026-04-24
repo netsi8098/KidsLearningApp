@@ -9,8 +9,8 @@ import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import AuthModal from '../components/AuthModal';
 import PremiumLion from '../components/svg/PremiumLion';
-import ThemeScene from '../components/homepage/ThemeScene';
 import ThemePicker from '../components/homepage/ThemePicker';
+import { HomepageWorldOverlay } from '../components/homepage/HomepageLiveWorldOverlays';
 import { getThemeById, DEFAULT_THEME_ID, themeHeroImages } from '../data/homepageThemes';
 
 function timeAgo(date: Date): string {
@@ -240,50 +240,22 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center relative overflow-hidden">
-      {/* ═══ SCENE IMAGE — fills the viewport, is the world ═══ */}
-      <div className="absolute inset-0 z-0">
+    <div className="min-h-dvh flex flex-col relative overflow-hidden" style={{ background: activeTheme.id === 'treehouse' ? '#3E2723' : activeTheme.id === 'sky-islands' ? '#C8B8E8' : activeTheme.id === 'river-garden' ? '#4DB8CC' : '#7BBF5E' }}>
+      {/* ═══ SCENE: image + live animated overlays ═══ */}
+      <div className="relative w-full flex-shrink-0">
         <img
-          src={themeHeroImages[activeTheme.id] || '/assets/themes/river-garden-hero.jpg'}
+          src={themeHeroImages[activeTheme.id] || '/assets/themes/river-garden-hero-clean.jpg'}
           alt=""
-          className="w-full h-full object-cover"
-          style={{ objectPosition: 'center center' }}
+          className="w-full"
           aria-hidden="true"
+        />
+        {/* Live animated overlays — positioned on the scene */}
+        <HomepageWorldOverlay
+          worldId={activeTheme.id === 'treehouse' ? 'treehouse-village' : activeTheme.id === 'sky-islands' ? 'sky-islands' : activeTheme.id === 'sunny-meadow' ? 'sunny-meadow' : 'river-garden'}
+          className="absolute inset-0 pointer-events-none overflow-hidden"
         />
       </div>
 
-      {/* ═══ ANIMATED OVERLAYS — sparkles, glows ═══ */}
-      {[
-        { t: '6%', l: '18%', d: 0, s: 10 },
-        { t: '10%', l: '72%', d: 1.5, s: 8 },
-        { t: '18%', l: '42%', d: 0.8, s: 7 },
-        { t: '14%', l: '88%', d: 2.5, s: 6 },
-        { t: '22%', l: '28%', d: 3, s: 5 },
-        { t: '4%', l: '55%', d: 1, s: 9 },
-      ].map((p, i) => (
-        <motion.div key={i} className="absolute pointer-events-none" style={{ top: p.t, left: p.l, zIndex: 3 }}
-          animate={{ y: [0, -10, 0], opacity: [0.2, 0.8, 0.2], scale: [0.8, 1.2, 0.8] }}
-          transition={{ duration: 3.5 + i * 0.5, repeat: Infinity, delay: p.d }}>
-          <svg width={p.s} height={p.s} viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#FFE66D" /></svg>
-        </motion.div>
-      ))}
-
-      {/* ═══ (old sparkle layers hidden) ═══ */}
-      {false && <>
-      <motion.div className="fixed pointer-events-none" style={{ top: '8%', left: '10%', zIndex: 2 }} animate={{ y: [0, -10, 0], opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 4, repeat: Infinity }}>
-        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#FFE66D" opacity="0.7" /></svg>
-      </motion.div>
-      <motion.div className="fixed pointer-events-none" style={{ top: '14%', right: '12%', zIndex: 2 }} animate={{ y: [0, -8, 0], opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 5, repeat: Infinity, delay: 1.2 }}>
-        <svg width="10" height="10" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#A78BFA" opacity="0.6" /></svg>
-      </motion.div>
-      <motion.div className="fixed pointer-events-none" style={{ top: '6%', left: '45%', zIndex: 2 }} animate={{ y: [0, -6, 0], opacity: [0.5, 1, 0.5] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.6 }}>
-        <svg width="7" height="7" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#FF8FAB" opacity="0.5" /></svg>
-      </motion.div>
-      <motion.div className="fixed pointer-events-none" style={{ top: '20%', left: '25%', zIndex: 2 }} animate={{ y: [0, -7, 0], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 4.5, repeat: Infinity, delay: 2 }}>
-        <svg width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L7.2 4.8L12 6L7.2 7.2L6 12L4.8 7.2L0 6L4.8 4.8Z" fill="#4ECDC4" opacity="0.5" /></svg>
-      </motion.div>
-
-      </>}
 
       {/* ═══ LAYER 2: Top controls ═══ */}
       {/* Theme picker trigger — top-left */}
@@ -313,59 +285,9 @@ export default function WelcomePage() {
         <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
       </motion.button>
 
-      {/* ═══ FULL-SCENE LAYOUT — everything lives inside the world ═══ */}
-      <div className="relative z-10 w-full min-h-dvh flex flex-col justify-end pb-4 px-4 md:px-8">
-        {/* Cards positioned at bottom of viewport — sitting on the scene's ground/deck */}
+      {/* ═══ GROUND ZONE — cards sit on the scene's surface ═══ */}
+      <div className="relative z-10 w-full flex-1 flex flex-col items-center px-4 md:px-8 pt-3 pb-4">
         <div className="w-full max-w-2xl mx-auto">
-
-      {/* ═══ LAYER 4: Bottom landscape removed — image provides the world ═══ */}
-      {false && <>
-      <div className="fixed bottom-0 left-0 right-0 pointer-events-none" style={{ zIndex: 1 }}>
-        <svg viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice" className="w-full h-24 md:h-32">
-          <defs>
-            <linearGradient id="wg-far" x1="200" y1="0" x2="200" y2="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#8FE388" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#5FBA6C" stopOpacity="0.5" />
-            </linearGradient>
-            <linearGradient id="wg-mid" x1="200" y1="20" x2="200" y2="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#6BCB77" />
-              <stop offset="100%" stopColor="#4CAF50" />
-            </linearGradient>
-            <linearGradient id="wg-near" x1="200" y1="40" x2="200" y2="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#57C86D" />
-              <stop offset="100%" stopColor="#3A9E4A" />
-            </linearGradient>
-          </defs>
-          {/* Far hill — lighter, smaller */}
-          <path d="M-20 55C60 35 140 50 200 38C260 50 340 35 420 55V100H-20Z" fill="url(#wg-far)" />
-          {/* Mid hill */}
-          <path d="M-20 65C50 48 120 58 200 48C280 58 350 48 420 65V100H-20Z" fill="url(#wg-mid)" />
-          {/* Near hill — darkest, richest */}
-          <path d="M-20 75C40 62 100 70 180 62C260 70 340 62 420 75V100H-20Z" fill="url(#wg-near)" />
-          {/* Grass tufts with sway */}
-          <motion.g animate={{ rotate: [-3, 3, -3] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }} style={{ transformOrigin: '50px 68px' }}>
-            <path d="M48 68L46 54L50 68" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-            <path d="M52 68L54 52L56 68" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
-          </motion.g>
-          <motion.g animate={{ rotate: [2, -3, 2] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} style={{ transformOrigin: '160px 64px' }}>
-            <path d="M158 64L156 50L160 64" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-            <path d="M163 64L165 48L167 64" stroke="#59A84B" strokeWidth="1.5" fill="none" />
-          </motion.g>
-          <motion.g animate={{ rotate: [-2, 4, -2] }} transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} style={{ transformOrigin: '300px 66px' }}>
-            <path d="M298 66L296 52L300 66" stroke="#6BCB77" strokeWidth="1.5" fill="none" />
-            <path d="M303 66L305 50L307 66" stroke="#4CAF50" strokeWidth="1.5" fill="none" />
-          </motion.g>
-          <motion.g animate={{ rotate: [-1, 2, -1] }} transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }} style={{ transformOrigin: '370px 70px' }}>
-            <path d="M368 70L366 58L370 70" stroke="#59A84B" strokeWidth="1.5" fill="none" />
-          </motion.g>
-          {/* Tiny flowers in near ground */}
-          <motion.circle cx="100" cy="70" r="3" fill="#FF8FAB" opacity="0.6" animate={{ y: [0, -1.5, 0] }} transition={{ duration: 2, repeat: Infinity }} />
-          <motion.circle cx="240" cy="68" r="2.5" fill="#FFE66D" opacity="0.5" animate={{ y: [0, -1, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: 0.8 }} />
-          <motion.circle cx="350" cy="72" r="2.5" fill="#A78BFA" opacity="0.5" animate={{ y: [0, -1.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }} />
-        </svg>
-      </div>
-      </>}
-
           <AnimatePresence mode="wait">
             {!showCreate ? (
               <motion.div
