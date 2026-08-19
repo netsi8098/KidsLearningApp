@@ -16,9 +16,9 @@
  */
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import GeneratedLion from '../../GeneratedLion';
+import type { WorldProps } from './types';
 
-export default function TreehouseWorld({ children }: { children: ReactNode }) {
+export default function TreehouseWorld({ mascot, title, children }: WorldProps) {
   return (
     <div className="min-h-dvh relative overflow-hidden">
       {/* ═══ L0 — SUNSET SKY ═══ */}
@@ -181,10 +181,10 @@ export default function TreehouseWorld({ children }: { children: ReactNode }) {
         />
 
         <div className="relative z-[2]" style={{ marginBottom: '-20px' }}>
-          <GeneratedLion pose="waving" size={170} />
+          {mascot}
         </div>
 
-        <svg viewBox="0 0 280 75" className="w-[52vw] max-w-[280px] relative z-[1]" fill="none">
+        <svg viewBox="0 0 280 75" className="w-[52vw] max-w-[280px] md:max-w-[344px] lg:max-w-[400px] relative z-[1]" fill="none">
           <defs>
             <radialGradient id="th-mound" cx="50%" cy="28%" r="70%">
               <stop offset="0%" stopColor="#7FBF63" />
@@ -199,6 +199,15 @@ export default function TreehouseWorld({ children }: { children: ReactNode }) {
             <circle key={i} cx={cx as number} cy={cy as number} r="3.4" fill={f as string} />
           ))}
         </svg>
+
+        {/* Title straddles the stage's front edge — it belongs to the world,
+            not to a text column floating above it (see reference art). */}
+        <div
+          className="relative z-[3] w-[92vw] max-w-[760px] flex justify-center px-2"
+          style={{ marginTop: 'clamp(-42px, -4.2vw, -18px)' }}
+        >
+          {title}
+        </div>
       </div>
 
       {/* ═══ L5 — FOREGROUND GRASS BANK ═══ */}
