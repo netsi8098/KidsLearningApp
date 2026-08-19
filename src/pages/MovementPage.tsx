@@ -6,6 +6,8 @@ import { useAudio } from '../hooks/useAudio';
 import { useMovement } from '../hooks/useMovement';
 import NavButton from '../components/NavButton';
 import { MovementIllustrationByTitle } from '../components/svg/MotionAssetPack';
+import StepPose from '../components/movement/StepPose';
+import { posesForInstructions } from '../data/movementPoses';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import EnergyFilter from '../components/EnergyFilter';
 import TimerDisplay from '../components/TimerDisplay';
@@ -188,16 +190,15 @@ export default function MovementPage() {
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B6B] to-[#FF8C42] text-white font-extrabold text-sm flex items-center justify-center mx-auto mb-4 shadow-[0_2px_8px_rgba(255,107,107,0.3)]">
                 {currentStep + 1}
               </div>
-              <div className="w-full max-w-[200px] mx-auto mb-4">
-                {MovementIllustrationByTitle({ title: activeActivity.title }) || (
-                  <motion.span
-                    className="text-7xl block"
-                    animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    {activeActivity.emoji}
-                  </motion.span>
-                )}
+              {/* The figure is posed to match THIS instruction. Previously every
+                  step showed the same activity illustration, so "raise your arms
+                  high" and "freeze" looked identical. */}
+              <div className="w-full max-w-[220px] mx-auto mb-4 flex justify-center">
+                <StepPose
+                  action={posesForInstructions(activeActivity.instructions)[currentStep]}
+                  activityId={activeActivity.id}
+                  size={200}
+                />
               </div>
               <p className="text-2xl font-bold text-[#2D2D3A] mb-4 leading-relaxed">
                 {instruction}
