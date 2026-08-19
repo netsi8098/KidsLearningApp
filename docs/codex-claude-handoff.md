@@ -2384,3 +2384,103 @@ outdated deployment on Azure SWA**, never as an absent host. What I will not do
 is assert that a given build is live without a probe confirming it — the earlier
 audits in this document were all measured against a URL that was not serving the
 code being discussed, and that cost several passes of misdirected work.
+
+---
+
+## Pass: Sunny Meadow → flagship world (localhost)
+
+**Date:** 2026-08-19 · **Commit:** `343206e`
+**Working rule adopted:** localhost / local production build is the active dev
+and QA target. Production is tracked separately and is **not** reconciled.
+
+Acting on *"I would rather have 1 excellent live homepage world than 4 weak
+ones"* — Sunny Meadow is now that world, and is promoted to `DEFAULT_THEME_ID`
+so the strongest world is what a new child sees first.
+
+### What was wrong
+
+A gradient with shapes on it: flat empty sky, every ridge the same saturation,
+two clip-art trees sliced by the viewport edge, a mound reading as a green disc
+on a brown slab, and no foreground depth at all.
+
+### Techniques applied (not "more decoration")
+
+| Technique | What it does |
+|---|---|
+| **Atmospheric perspective** | Three ridges, each hazier / lower contrast / more sky-shifted than the one in front. This is what creates distance in flat vector art. |
+| **Depth of field** | Oversized foreground flowers + grass fringe carry real blur, making the midground resolve as in-focus and pushing the hero forward. |
+| **Directed light** | One sun, upper right. Every canopy, mound and bank has a warm rim on the sun side, cool shade opposite. God rays = very low opacity conic sweep, 260s rotation — felt, not seen. |
+| **Varied scale** | Trees at four depths, blossoms at three sizes, flowers at mixed scale. Repetition at one size is what reads as stamped. |
+| **Grounded stage** | Grass tufts along the front lip, rocks, flowers, contact shadow — the mascot stands on ground, not over it. |
+
+### Two flaws caught by looking at the render, not the code
+
+1. The foreground depth accents were drawn **beneath the card shelf**, so the
+   depth-of-field cue never appeared. Now above it, overlapping the card row's
+   outer corners as the reference does.
+2. The rainbow was a washed-out smudge behind the ridges. Raised into clear sky
+   and strengthened — which also fills the dead upper-left.
+
+**Phone legibility fix:** the framing trees sat exactly at the title's height and
+obscured "Kids Learning Fun!". They now frame the card shelf, and the decorative
+mid-distance trees are hidden below `sm`. Legibility beats decoration.
+
+---
+
+## Status by track
+
+### ✅ Localhost verified (this pass)
+
+- Build green · `tsc` clean on touched files
+- **Homepage QA 80/80** — 4 worlds × phone/tablet/desktop, incl. mascot never
+  >22% occluded, parent gate opens, player selection reaches `/menu`
+- **Route sweep 41/41 healthy**
+- Sunny Meadow inspected at 390 / 820 / 1440 — title legible at all three,
+  foreground depth visible, no horizontal overflow
+
+### ⚠️ Production verified — nothing
+
+Unreconciled and deliberately not blocking work. Last probe: the recorded
+hostname returned SWA's own 404 on every path; no deploy runs since 2026-04-23;
+`az` token expired 2026-04-23 so resources could not be enumerated. **Azure SWA
+is the host** — the open question is only whether that hostname is current or
+the deployment is stale. No production claim in this document is verified.
+
+### 🟡 Fallback only — NOT premium
+
+| Surface | State |
+|---|---|
+| **Lion** | One `PremiumLion` SVG pose. All 14 states resolve to it; state reads through body motion only. |
+| **river-garden, treehouse, sky-islands** | Previous quality level — flat ridges, no depth of field, no directed light. Sunny Meadow is now visibly ahead of them. |
+| **Movement figure** | Parametric SVG. Poses correct and readable; art quality placeholder. |
+
+### 🔒 Blocked externally
+
+1. **Push to `main`** — permission classifier denies `git push`. 30 commits waiting.
+2. **Azure reconciliation** — needs `az login` or the correct production URL.
+3. **12 lion pose PNGs** — contract stable, drops in with zero code change.
+4. **15 valid YouTube IDs** — will not guess.
+
+### ▶️ Next recommended task
+
+**Propagate the Sunny Meadow technique set to river-garden** (atmospheric
+perspective, depth of field, directed light, varied scale, grounded stage).
+It is the second-strongest composition and the current runner-up for default.
+
+Deliberately *not* doing next: adding more decoration to the remaining worlds
+without applying the technique set — that is how a scene becomes a sticker
+collage.
+
+### What Codex should visually verify on localhost
+
+```
+npm run build && npx vite preview --port 4173
+```
+
+1. Sunny Meadow at 390 / 820 / 1440 — does it read as one designed world? Is the
+   lion grounded? Do cards sit on the bank? Is motion restrained?
+2. Compare Sunny Meadow against river-garden at 1440 — the quality gap between
+   flagship and fallback should be obvious. If it is not, the technique set is
+   not doing enough and I should be told.
+3. Movement session — every instruction should change the pose.
+4. Colouring studio at 390 and 1440 — palette reachability, artboard size.
