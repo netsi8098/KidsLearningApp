@@ -1,242 +1,310 @@
 /**
- * RiverGardenWorld — Code-built scene matching the River Garden reference composition.
+ * RiverGardenWorld — storybook water garden.
  *
- * Layers (back to front):
- *   0. Sky gradient
- *   1. Distant elements (rainbow, far hills, sun glow, clouds)
- *   2. Mid-ground (trees, bushes)
- *   3. Water surface with shimmer
- *   4. Central island
- *   5. Foreground grassy bank (cards sit here)
- *   6. Animated overlays (fish, bubbles, sparkles, pollen)
- *   7. Content (children prop — UI elements)
+ * Rebuilt with the flagship technique set (atmospheric perspective, depth of
+ * field, directed light, varied scale, grounded stage) plus the thing this world
+ * was missing entirely: **water as a material**. The previous version read as a
+ * green meadow with a teal band — no river, no waterfall, no stepping stones,
+ * none of the reference's defining features.
+ *
+ * Water is built from five stacked cues, because any one alone reads as paint:
+ *   depth gradient · surface shimmer · ripple rings around obstructions ·
+ *   a blurred inverted reflection of the island · drifting life beneath
+ *
+ * Layers: sky · distance · midground+waterfall · water · hero island ·
+ * foreground stones & planting · ambient motion · content.
  */
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
 import SkyLife from '../SkyLife';
 import { useSceneParallax, DEPTH } from '../useSceneParallax';
+import { useMotionPreset } from '../../../motion/useMotionPreset';
+
+/** Sun sits upper-left here, so every highlight leans the opposite way to Meadow. */
+const SUN = { x: 24, y: 12 };
+
+/** Rounded storybook tree — dimensional mass, lit crown, cool underside. */
+function GardenTree({ scale = 1, haze = 0 }: { scale?: number; haze?: number }) {
+  const dark = `hsl(${146 - haze}, ${44 - haze}%, ${26 + haze * 1.1}%)`;
+  const mid = `hsl(${142 - haze}, ${46 - haze}%, ${36 + haze * 1.2}%)`;
+  const lit = `hsl(${128 - haze}, ${52 - haze}%, ${48 + haze * 1.2}%)`;
+  const rim = `hsl(${96 - haze}, ${62 - haze}%, ${64 + haze}%)`;
+
+  return (
+    <svg viewBox="0 0 150 200" className="w-full h-auto" style={{ transform: `scale(${scale})` }} fill="none">
+      <path d="M66 200 L66 116 Q64 104 70 96 L82 96 Q88 104 86 116 L86 200 Z" fill="#6E5238" />
+      <path d="M78 200 L78 116 Q78 105 82 98 L86 98 Q83 106 83 116 L83 200 Z" fill="#8A6A48" />
+      {/* Canopy: three overlapping masses, light biased to the sun side (left) */}
+      <ellipse cx="96" cy="76" rx="40" ry="35" fill={dark} />
+      <ellipse cx="52" cy="68" rx="42" ry="37" fill={mid} />
+      <ellipse cx="74" cy="42" rx="44" ry="37" fill={lit} />
+      <ellipse cx="60" cy="34" rx="28" ry="21" fill={rim} opacity="0.9" />
+      {/* Leaf clumps give the silhouette bite instead of a smooth blob */}
+      {[[38, 52, 13], [102, 58, 12], [74, 20, 11], [30, 78, 10], [110, 82, 9], [88, 34, 9]].map(([cx, cy, r], i) => (
+        <circle key={i} cx={cx} cy={cy} r={r} fill={i % 2 ? lit : mid} opacity={0.85} />
+      ))}
+    </svg>
+  );
+}
 
 export default function RiverGardenWorld({ mascot, title, children }: WorldProps) {
   const par = useSceneParallax();
+  const { isReducedMotion } = useMotionPreset();
+  const spring = { type: 'spring' as const, stiffness: 55, damping: 20, mass: 0.9 };
+
   return (
     <div className="min-h-dvh relative overflow-hidden">
-      {/* ═══ L0 — SKY GRADIENT ═══ */}
+      {/* ═══ L0 — SKY ═══ */}
       <div
         className="absolute inset-0"
         style={{
           background: `linear-gradient(180deg,
-            #7EC8E3 0%,
-            #93D4F0 12%,
-            #B0E0F0 25%,
-            #C8EDD8 42%,
-            #A0D8A0 58%,
-            #6CC06C 72%,
-            #48B8B0 85%,
-            #3AA8A0 100%)`,
+            #4FA8DC 0%, #6BBCE8 10%, #8CD0F0 21%, #ADE0F5 32%,
+            #CBECF6 42%, #E2F4EE 50%, #EDF7E6 56%)`,
         }}
       />
 
-      {/* ═══ L1 — DISTANT ELEMENTS ═══ */}
+      {/* ═══ L1 — DISTANCE ═══ */}
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
         animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
-        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+        transition={spring}
       >
-        <SkyLife birdColor="rgba(46,82,96,0.38)" wispColor="rgba(255,255,255,0.55)" />
-        {/* Sun glow — warm radial light top-center */}
         <div
-          className="absolute top-[-5%] left-[42%] w-[35vw] h-[35vw] max-w-[280px] max-h-[280px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(255,250,205,0.45) 0%, rgba(255,240,170,0.15) 50%, transparent 75%)' }}
+          className="absolute rounded-full"
+          style={{
+            left: `${SUN.x}%`, top: `${SUN.y}%`,
+            width: 'min(15vw, 130px)', height: 'min(15vw, 130px)',
+            transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(255,253,232,0.9) 0%, rgba(255,247,196,0.5) 34%, rgba(255,240,170,0.14) 62%, transparent 78%)',
+          }}
+        />
+        <motion.div
+          className="absolute rounded-full"
+          style={{
+            left: `${SUN.x}%`, top: `${SUN.y}%`,
+            width: 'min(52vw, 480px)', height: 'min(52vw, 480px)',
+            transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(255,250,215,0.3) 0%, rgba(255,242,180,0.1) 46%, transparent 72%)',
+          }}
+          animate={isReducedMotion ? undefined : { scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        {/* Rainbow arc */}
-        <svg className="absolute top-[1%] right-[2%] w-[55%] h-[38%] opacity-35" viewBox="0 0 500 250" fill="none">
+        <SkyLife birdColor="rgba(46,82,96,0.34)" wispColor="rgba(255,255,255,0.62)" />
+
+        {/* Rainbow arcs into the upper right, fully inside the frame */}
+        <svg className="absolute right-[3%] top-[7%] w-[44%] h-[38%]" viewBox="0 0 400 210" fill="none" preserveAspectRatio="xMidYMax meet">
           <defs>
-            <linearGradient id="rg-rb" x1="0" y1="0.5" x2="1" y2="0.5">
-              <stop offset="0%" stopColor="#FF6B6B" />
-              <stop offset="16%" stopColor="#FF8C42" />
-              <stop offset="33%" stopColor="#FFE66D" />
-              <stop offset="50%" stopColor="#6BCB77" />
-              <stop offset="67%" stopColor="#4ECDC4" />
-              <stop offset="83%" stopColor="#45B7D1" />
-              <stop offset="100%" stopColor="#A78BFA" />
+            <linearGradient id="rg-rb" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stopColor="#FF8FA8" /><stop offset="20%" stopColor="#FFB870" />
+              <stop offset="40%" stopColor="#FFE98A" /><stop offset="60%" stopColor="#9BE08C" />
+              <stop offset="80%" stopColor="#7FD0EC" /><stop offset="100%" stopColor="#BFA8F0" />
             </linearGradient>
           </defs>
-          <path d="M40 250 A210 210 0 0 1 460 250" stroke="url(#rg-rb)" strokeWidth="14" strokeLinecap="round" />
-          <path d="M50 250 A200 200 0 0 1 450 250" stroke="url(#rg-rb)" strokeWidth="7" strokeLinecap="round" opacity="0.45" />
+          <g opacity="0.58">
+            <path d="M24 210 A176 176 0 0 1 376 210" stroke="url(#rg-rb)" strokeWidth="16" strokeLinecap="round" />
+            <path d="M40 210 A160 160 0 0 1 360 210" stroke="url(#rg-rb)" strokeWidth="7" strokeLinecap="round" opacity="0.5" />
+          </g>
         </svg>
 
-        {/* Distant hills — layered for depth */}
-        <svg className="absolute top-[28%] left-0 w-full h-[28%]" viewBox="0 0 1000 200" preserveAspectRatio="none">
-          <path d="M0 200 Q80 70 200 120 Q350 40 500 95 Q620 30 750 85 Q880 50 1000 110 L1000 200Z" fill="#7BC77B" opacity="0.3" />
-          <path d="M0 200 Q150 90 300 135 Q480 65 650 115 Q800 80 1000 145 L1000 200Z" fill="#5CB85C" opacity="0.4" />
+        {/* Hazy ridges — distance through desaturation, not just scale */}
+        <svg className="absolute bottom-[46%] left-0 w-full h-[24%]" viewBox="0 0 400 100" preserveAspectRatio="none" fill="none">
+          <path d="M0 100 L0 42 Q52 14 108 36 Q164 58 218 30 Q276 0 330 30 Q366 50 400 34 L400 100 Z" fill="#C2E4DA" opacity="0.6" />
         </svg>
-
-        {/* Clouds — gentle drift */}
-        <motion.div
-          className="absolute top-[4%] left-[5%] w-[22vw] max-w-[140px] h-[5vw] max-h-[48px] rounded-full bg-white/30 blur-lg"
-          animate={{ x: [0, 22, 0] }}
-          transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute top-[8%] right-[12%] w-[18vw] max-w-[120px] h-[4vw] max-h-[40px] rounded-full bg-white/25 blur-lg"
-          animate={{ x: [0, -16, 0] }}
-          transition={{ duration: 34, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
-        />
-        <motion.div
-          className="absolute top-[5%] left-[38%] w-[14vw] max-w-[90px] h-[3.5vw] max-h-[32px] rounded-full bg-white/20 blur-md"
-          animate={{ x: [0, 12, 0] }}
-          transition={{ duration: 38, repeat: Infinity, ease: 'easeInOut', delay: 14 }}
-        />
+        <svg className="absolute bottom-[42%] left-0 w-full h-[22%]" viewBox="0 0 400 92" preserveAspectRatio="none" fill="none">
+          <path d="M0 92 L0 52 Q58 26 120 46 Q184 66 244 42 Q306 18 400 46 L400 92 Z" fill="#A5D9BE" opacity="0.8" />
+          <g fill="#95CFAE" opacity="0.8">
+            {Array.from({ length: 26 }, (_, i) => (
+              <ellipse key={i} cx={10 + i * 15.6} cy={58 + ((i * 5) % 8)} rx={8} ry={6} />
+            ))}
+          </g>
+        </svg>
       </motion.div>
 
-      {/* ═══ L2 — MID-GROUND: TREES + BUSHES ═══ */}
+      {/* ═══ L2 — MIDGROUND: BANKS, TREES, WATERFALL ═══ */}
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
         animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
-        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+        transition={spring}
       >
-        {/* Left tree cluster */}
-        <svg className="absolute bottom-[32%] left-[-4%] w-[30%] h-[38%]" viewBox="0 0 260 340">
-          <defs>
-            <radialGradient id="rg-t1" cx="45%" cy="38%" r="60%">
-              <stop offset="0%" stopColor="#5CB85C" />
-              <stop offset="100%" stopColor="#1B5E20" />
-            </radialGradient>
-            <radialGradient id="rg-t2" cx="50%" cy="35%" r="55%">
-              <stop offset="0%" stopColor="#72C472" />
-              <stop offset="100%" stopColor="#2E7D32" />
-            </radialGradient>
-          </defs>
-          {/* Trunk */}
-          <rect x="108" y="195" width="44" height="145" rx="12" fill="#6D4C41" />
-          <rect x="118" y="198" width="14" height="130" rx="5" fill="#8D6E63" opacity="0.45" />
-          {/* Canopy — overlapping ellipses for dimension */}
-          <ellipse cx="130" cy="175" rx="115" ry="95" fill="url(#rg-t1)" />
-          <ellipse cx="80" cy="135" rx="78" ry="68" fill="url(#rg-t2)" />
-          <ellipse cx="180" cy="148" rx="68" ry="58" fill="#388E3C" />
-          {/* Light patches */}
-          <ellipse cx="100" cy="128" rx="35" ry="24" fill="#81C784" opacity="0.35" />
-          <ellipse cx="160" cy="160" rx="25" ry="18" fill="#A5D6A7" opacity="0.25" />
+        {/* Far bank — its shoreline is a curve that overlaps the water's top
+            edge, so the river meets land instead of ending at a ruled line. */}
+        <svg className="absolute bottom-[36%] left-0 w-full h-[26%]" viewBox="0 0 400 110" preserveAspectRatio="none" fill="none">
+          <path d="M0 110 L0 34 Q66 12 134 30 Q204 48 266 26 Q330 4 400 28 L400 110 Z" fill="#6FBF66" />
+          <path d="M0 42 Q66 20 134 38 Q204 56 266 34 Q330 12 400 36" stroke="#93DA84" strokeWidth="4" fill="none" opacity="0.75" />
+          {/* Shoreline: scalloped edge with a wet lip catching the light */}
+          <path d="M0 110 L0 88 Q40 96 76 88 Q118 79 158 90 Q202 102 244 90 Q290 77 332 89 Q368 99 400 90 L400 110 Z" fill="#5CAF52" />
+          <path d="M0 88 Q40 96 76 88 Q118 79 158 90 Q202 102 244 90 Q290 77 332 89 Q368 99 400 90" stroke="#C9F0D2" strokeWidth="3" fill="none" opacity="0.7" />
         </svg>
 
-        {/* Right tree cluster */}
-        <svg className="absolute bottom-[32%] right-[-4%] w-[28%] h-[36%]" viewBox="0 0 240 320">
-          <rect x="100" y="195" width="40" height="125" rx="10" fill="#6D4C41" />
-          <rect x="108" y="198" width="12" height="115" rx="4" fill="#8D6E63" opacity="0.4" />
-          <ellipse cx="120" cy="175" rx="108" ry="90" fill="#388E3C" />
-          <ellipse cx="70" cy="140" rx="70" ry="60" fill="#43A047" />
-          <ellipse cx="170" cy="152" rx="62" ry="52" fill="#2E7D32" />
-          <ellipse cx="90" cy="132" rx="30" ry="22" fill="#66BB6A" opacity="0.35" />
-        </svg>
+        {/* NOTE — waterfall removed deliberately.
+           Four code attempts (bare sheet, rock walls, irregular outcrop, raised
+           grassy ledge) all read as a pale slab or a brown block stuck to the
+           hillside: a convincing fall needs a believable elevation change, and
+           flat vector shapes at this scale could not sell one. A feature that
+           does not read is worse than its absence, so the river itself carries
+           the water-garden identity via shoreline, shallows, shimmer, lily pads,
+           fish, bubbles and stepping stones.
+           This is the one reference feature that wants real art —
+           see public/assets/worlds/river-garden/ (midground.webp). */}
 
-        {/* Small bushes */}
-        <svg className="absolute bottom-[29%] left-[20%] w-[12%] h-[7%]" viewBox="0 0 100 55">
-          <ellipse cx="50" cy="32" rx="48" ry="26" fill="#43A047" />
-          <ellipse cx="35" cy="25" rx="25" ry="18" fill="#66BB6A" opacity="0.55" />
-        </svg>
-        <svg className="absolute bottom-[30%] right-[18%] w-[10%] h-[6%]" viewBox="0 0 80 48">
-          <ellipse cx="40" cy="26" rx="38" ry="24" fill="#388E3C" />
-          <ellipse cx="52" cy="20" rx="22" ry="16" fill="#4CAF50" opacity="0.45" />
-        </svg>
+        {/* Trees at four depths — hazier ones sit further back */}
+        <div className="absolute bottom-[38%] left-[26%] w-[11vw] max-w-[74px] opacity-70 hidden sm:block">
+          <GardenTree haze={16} />
+        </div>
+        <div className="absolute bottom-[39%] right-[30%] w-[10vw] max-w-[66px] opacity-65 hidden sm:block">
+          <GardenTree haze={20} />
+        </div>
+        <div className="absolute bottom-[8%] sm:bottom-[24%] left-[-3%] sm:left-[19%] md:left-[21%] w-[23vw] sm:w-[22vw] max-w-[160px]">
+          <motion.div
+            style={{ transformOrigin: 'bottom center' }}
+            animate={isReducedMotion ? undefined : { rotate: [-1, 1, -1] }}
+            transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <GardenTree />
+          </motion.div>
+        </div>
+        <div className="absolute bottom-[7%] sm:bottom-[25%] right-[-3%] sm:right-[0%] w-[25vw] sm:w-[29vw] max-w-[205px]">
+          <motion.div
+            style={{ transformOrigin: 'bottom center' }}
+            animate={isReducedMotion ? undefined : { rotate: [1.1, -1.1, 1.1] }}
+            transition={{ duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: 1.4 }}
+          >
+            <GardenTree scale={1} haze={4} />
+          </motion.div>
+        </div>
       </motion.div>
 
-      {/* ═══ L3 — WATER SURFACE ═══ */}
-      <div
-        className="absolute bottom-[18%] left-0 right-0 h-[20%]"
-        style={{
-          background: `linear-gradient(180deg,
-            rgba(77,184,172,0.25) 0%,
-            rgba(56,166,154,0.4) 30%,
-            rgba(38,150,136,0.55) 60%,
-            rgba(26,136,124,0.65) 100%)`,
-        }}
-      >
-        {/* Wide shimmer glow */}
-        <motion.div
-          className="absolute inset-0 bg-cyan-200/8 blur-2xl"
-          animate={{ opacity: [0.15, 0.35, 0.15] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      {/* ═══ L3 — WATER ═══
+          Depth gradient, then surface cues layered on top. */}
+      <div className="absolute bottom-0 left-0 right-0 h-[46%] pointer-events-none overflow-hidden">
+        {/* Water body with a curved shoreline rather than a ruled edge */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 190" preserveAspectRatio="none" fill="none">
+          <defs>
+            <linearGradient id="rg-water" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#7FD4D0" /><stop offset="16%" stopColor="#5FC3C6" />
+              <stop offset="38%" stopColor="#45B3BE" /><stop offset="62%" stopColor="#35A2B4" />
+              <stop offset="100%" stopColor="#2B90A6" />
+            </linearGradient>
+          </defs>
+          <path d="M0 190 L0 34 Q42 20 84 30 Q128 41 172 28 Q220 14 266 27 Q314 41 356 28 Q380 21 400 30 L400 190 Z" fill="url(#rg-water)" />
+          {/* Wet lip where land meets water */}
+          <path d="M0 34 Q42 20 84 30 Q128 41 172 28 Q220 14 266 27 Q314 41 356 28 Q380 21 400 30"
+                stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" fill="none" />
+          {/* Shallows: a lighter band hugging the shoreline */}
+          <path d="M0 44 Q42 30 84 40 Q128 51 172 38 Q220 24 266 37 Q314 51 356 38 Q380 31 400 40 L400 30 Q380 21 356 28 Q314 41 266 27 Q220 14 172 28 Q128 41 84 30 Q42 20 0 34 Z"
+                fill="#9BE2DA" opacity="0.5" />
+        </svg>
+        {/* Sun glitter path — brightest directly under the sun */}
+        <div
+          className="absolute inset-y-0"
+          style={{
+            left: `${SUN.x - 14}%`, width: '30%',
+            background: 'linear-gradient(180deg, rgba(255,255,240,0.34) 0%, rgba(255,255,240,0.08) 60%, transparent 100%)',
+            filter: 'blur(10px)',
+          }}
         />
-        {/* Water surface light streaks */}
-        {[
-          { l: '4%', t: '25%', w: '7%', d: 0 },
-          { l: '22%', t: '45%', w: '5.5%', d: 0.7 },
-          { l: '45%', t: '30%', w: '8%', d: 1.4 },
-          { l: '65%', t: '55%', w: '5%', d: 0.3 },
-          { l: '80%', t: '35%', w: '6%', d: 1.8 },
-          { l: '35%', t: '65%', w: '4.5%', d: 2.2 },
-          { l: '90%', t: '50%', w: '4%', d: 0.9 },
-        ].map((s, i) => (
+        {/* Surface shimmer — short bright dashes drifting sideways */}
+        {Array.from({ length: 16 }, (_, i) => ({
+          l: `${(i * 6.4) % 96}%`, t: `${8 + ((i * 17) % 74)}%`,
+          w: 18 + ((i * 11) % 40), d: (i % 7) * 0.42, dur: 2.6 + (i % 5) * 0.4,
+        })).map((sh, i) => (
           <motion.div
-            key={`ws${i}`}
-            className="absolute h-[1.5px] rounded-full bg-white/45"
-            style={{ left: s.l, top: s.t, width: s.w }}
-            animate={{ x: [0, 14, 0], opacity: [0.1, 0.6, 0.1] }}
-            transition={{ duration: 2.6 + i * 0.25, repeat: Infinity, ease: 'easeInOut', delay: s.d }}
+            key={`sh${i}`}
+            className="absolute rounded-full"
+            style={{ left: sh.l, top: sh.t, width: sh.w, height: 2, background: 'rgba(255,255,255,0.6)' }}
+            animate={isReducedMotion ? undefined : { x: [0, 16, 0], opacity: [0.08, 0.7, 0.08], scaleX: [0.8, 1.15, 0.8] }}
+            transition={{ duration: sh.dur, repeat: Infinity, ease: 'easeInOut', delay: sh.d }}
           />
         ))}
-
-        {/* Waterfall mist — left side */}
-        <motion.div
-          className="absolute left-[2%] top-[-15%] w-[8%] h-[60%] rounded-full bg-white/6 blur-xl"
-          animate={{ opacity: [0.08, 0.25, 0.08], y: [0, 5, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        {/* Lily pads at varied scale, some with a bloom */}
+        {[
+          { l: '12%', t: '46%', s: 1, f: true }, { l: '30%', t: '66%', s: 0.7, f: false },
+          { l: '68%', t: '52%', s: 0.85, f: true }, { l: '84%', t: '72%', s: 0.6, f: false },
+          { l: '48%', t: '78%', s: 0.75, f: false },
+        ].map((lp, i) => (
+          <motion.svg
+            key={`lp${i}`}
+            className="absolute" style={{ left: lp.l, top: lp.t, width: 46 * lp.s }}
+            viewBox="0 0 46 34" fill="none"
+            animate={isReducedMotion ? undefined : { y: [0, -2.5, 0], rotate: [-2, 2, -2] }}
+            transition={{ duration: 5 + i, repeat: Infinity, ease: 'easeInOut', delay: i * 0.7 }}
+          >
+            <path d="M23 4 A17 13 0 1 1 22 4 L23 17 Z" fill="#4CA85C" />
+            <path d="M23 6 A15 11 0 0 1 36 15" stroke="#6FC97C" strokeWidth="2.4" fill="none" opacity="0.8" />
+            {lp.f && <><circle cx="30" cy="10" r="5" fill="#FFB7D5" /><circle cx="30" cy="10" r="2" fill="#FFE66D" /></>}
+          </motion.svg>
+        ))}
       </div>
 
-      {/* ═══ L4 — CENTRAL ISLAND + LION ═══ */}
+      {/* ═══ L4 — HERO ISLAND ═══ */}
       <div className="absolute bottom-[27%] left-1/2 -translate-x-1/2 flex flex-col items-center">
-        {/* Warm ambient glow behind lion — makes the character pop */}
         <motion.div
           className="absolute rounded-full blur-3xl pointer-events-none"
-          style={{ width: '45vw', maxWidth: 240, height: '45vw', maxHeight: 240, top: '5%', background: 'radial-gradient(circle, rgba(255,220,130,0.2) 0%, rgba(255,200,100,0.08) 50%, transparent 75%)' }}
-          animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0.85, 0.6] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            width: '48vw', maxWidth: 280, height: '48vw', maxHeight: 280, top: '2%',
+            background: 'radial-gradient(circle, rgba(255,240,190,0.3) 0%, rgba(190,240,230,0.12) 48%, transparent 74%)',
+          }}
+          animate={isReducedMotion ? undefined : { scale: [1, 1.06, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        {/* Lion — grounded on island center, sized as hero focal point */}
-        {/* Uses GeneratedLion: loads PNG from /assets/lion/ with motion layers, */}
-        {/* falls back to PremiumLion SVG when generated art isn't available yet */}
-        <div className="relative z-[2]" style={{ marginBottom: '-22px' }}>
+        <div className="relative z-[2]" style={{ marginBottom: '-18px' }}>
           {mascot}
         </div>
 
-        {/* Island mound — lion's feet embed into the grass */}
-        <svg viewBox="0 0 280 75" className="w-[52vw] max-w-[280px] md:max-w-[344px] lg:max-w-[400px] relative z-[1]" fill="none">
+        <svg viewBox="0 0 300 108" className="w-[54vw] max-w-[300px] md:max-w-[360px] lg:max-w-[416px] relative z-[1]" fill="none">
           <defs>
-            <radialGradient id="rg-isle" cx="50%" cy="28%" r="70%">
-              <stop offset="0%" stopColor="#8FE388" />
-              <stop offset="60%" stopColor="#5CB85C" />
-              <stop offset="100%" stopColor="#388E3C" />
+            <radialGradient id="rg-grass" cx="38%" cy="24%" r="76%">
+              <stop offset="0%" stopColor="#A6EE96" /><stop offset="48%" stopColor="#6FCE58" />
+              <stop offset="100%" stopColor="#3C9331" />
             </radialGradient>
+            <linearGradient id="rg-rock" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#9E8B76" /><stop offset="100%" stopColor="#6B5B4A" />
+            </linearGradient>
           </defs>
-          {/* Island shadow */}
-          <ellipse cx="140" cy="55" rx="132" ry="24" fill="rgba(27,94,32,0.18)" />
-          {/* Island body */}
-          <ellipse cx="140" cy="42" rx="135" ry="35" fill="url(#rg-isle)" />
-          {/* Grass tufts */}
-          <ellipse cx="50" cy="28" rx="4" ry="10" fill="#A5D6A7" opacity="0.55" />
-          <ellipse cx="230" cy="32" rx="3" ry="9" fill="#A5D6A7" opacity="0.55" />
-          <ellipse cx="95" cy="34" rx="3" ry="7" fill="#C8E6C9" opacity="0.4" />
-          <ellipse cx="185" cy="30" rx="3.5" ry="8" fill="#C8E6C9" opacity="0.4" />
-          {/* Flowers */}
-          <circle cx="38" cy="30" r="5" fill="#FF8FAB" opacity="0.75" />
-          <circle cx="38" cy="30" r="2" fill="#FFE4E8" opacity="0.9" />
-          <circle cx="72" cy="36" r="4" fill="#FFE66D" opacity="0.85" />
-          <circle cx="72" cy="36" r="1.5" fill="#FFF8DC" opacity="0.9" />
-          <circle cx="208" cy="33" r="4.5" fill="#FF8FAB" opacity="0.75" />
-          <circle cx="208" cy="33" r="1.8" fill="#FFE4E8" opacity="0.9" />
-          <circle cx="242" cy="28" r="3.5" fill="#FFE66D" opacity="0.8" />
-          <circle cx="242" cy="28" r="1.5" fill="#FFF8DC" opacity="0.9" />
-          {/* Stepping stones — right side */}
-          <ellipse cx="260" cy="52" rx="14" ry="6" fill="#9E9E9E" opacity="0.35" />
-          <ellipse cx="275" cy="60" rx="10" ry="4.5" fill="#BDBDBD" opacity="0.3" />
+          {/* Reflection: the island mirrored, blurred and faint, sitting in the
+              water. This is the cue that most sells "it is floating in a river". */}
+          <ellipse cx="150" cy="98" rx="126" ry="12" fill="#1F7F8E" opacity="0.34" />
+          <ellipse cx="150" cy="94" rx="104" ry="7" fill="#7FE0C8" opacity="0.16" />
+          {/* Rocky underside */}
+          <path d="M18 40 Q38 74 88 82 Q150 90 212 82 Q262 74 282 40 Q220 62 150 62 Q80 62 18 40 Z" fill="url(#rg-rock)" />
+          <path d="M26 44 Q50 66 98 74 Q150 80 202 74 Q250 66 274 44 Q212 60 150 60 Q88 60 26 44 Z" fill="#B29C84" opacity="0.4" />
+          {/* Grass cap */}
+          <ellipse cx="150" cy="36" rx="140" ry="30" fill="url(#rg-grass)" />
+          <path d="M150 6 Q58 6 14 32" stroke="#CFF7B8" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.65" />
+          <path d="M286 34 Q244 58 184 63" stroke="#2E7A26" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.32" />
+          <g stroke="#5CBF48" strokeWidth="2.2" strokeLinecap="round">
+            {Array.from({ length: 22 }, (_, i) => {
+              const x = 18 + i * 12.2; const h = 5 + ((i * 5) % 7);
+              return <path key={i} d={`M${x} 60 q2 -${h} 4 0`} />;
+            })}
+          </g>
+          {[[62, 30, '#FF8FAB'], [104, 22, '#FFE66D'], [190, 24, '#FFFFFF'], [236, 32, '#C3B1E1'], [150, 18, '#FFFFFF']].map(([cx, cy, f], i) => (
+            <g key={i}>
+              <circle cx={cx as number} cy={cy as number} r="3.6" fill={f as string} />
+              <circle cx={cx as number} cy={cy as number} r="1.4" fill="#FFC531" />
+            </g>
+          ))}
         </svg>
 
-        {/* Title straddles the stage's front edge — it belongs to the world,
-            not to a text column floating above it (see reference art). */}
+        {/* Ripple rings where the island meets the water */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={`rip${i}`}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              bottom: -6, left: '50%', translateX: '-50%',
+              width: '46vw', maxWidth: 250, height: 16,
+              border: '1.5px solid rgba(255,255,255,0.3)',
+            }}
+            animate={isReducedMotion ? undefined : { scale: [0.9, 1.45], opacity: [0.35, 0] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeOut', delay: i * 1.5 }}
+          />
+        ))}
+
         <div
           className="relative z-[3] w-[92vw] max-w-[760px] flex justify-center px-2"
           style={{ marginTop: 'clamp(-42px, -4.2vw, -18px)' }}
@@ -245,166 +313,131 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
         </div>
       </div>
 
-      {/* ═══ L5 — FOREGROUND GRASSY BANK ═══ */}
-      <svg
-        className="absolute bottom-0 left-0 w-full h-[26%]"
-        viewBox="0 0 800 180"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <linearGradient id="rg-bank" x1="400" y1="0" x2="400" y2="180" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#5CB85C" />
-            <stop offset="35%" stopColor="#4CAF50" />
-            <stop offset="100%" stopColor="#388E3C" />
-          </linearGradient>
-        </defs>
-        {/* Bank shape — organic wavy top edge */}
-        <path
-          d="M0 180 L0 35 Q45 18 90 38 Q135 10 180 30 Q225 6 270 24 Q315 14 360 20 Q405 8 450 26 Q495 12 540 32 Q585 16 630 28 Q675 10 720 22 Q760 16 800 30 L800 180Z"
-          fill="url(#rg-bank)"
-        />
-        {/* Grass detail — lighter strokes on top edge */}
-        <path
-          d="M0 38 Q35 20 70 40 Q105 14 140 34 Q175 8 210 28 Q245 12 280 26 Q315 6 350 22 Q385 10 420 28 Q455 14 490 34 Q525 18 560 30 Q595 8 630 26 Q665 14 700 24 Q735 10 770 28 Q790 18 800 32"
-          fill="none"
-          stroke="#81C784"
-          strokeWidth="2.5"
-          opacity="0.45"
-        />
-        {/* Second grass detail row */}
-        <path
-          d="M0 42 Q50 28 100 44 Q150 22 200 38 Q250 16 300 32 Q350 20 400 28 Q450 14 500 34 Q550 20 600 36 Q650 22 700 30 Q750 18 800 36"
-          fill="none"
-          stroke="#66BB6A"
-          strokeWidth="1.5"
-          opacity="0.3"
-        />
-        {/* Flowers scattered on bank */}
-        <circle cx="55" cy="45" r="6" fill="#FF8FAB" opacity="0.7" />
-        <circle cx="55" cy="45" r="2.5" fill="#FFE4E8" opacity="0.9" />
-        <circle cx="165" cy="28" r="5" fill="#FFE66D" opacity="0.8" />
-        <circle cx="165" cy="28" r="2" fill="#FFF8DC" opacity="0.9" />
-        <circle cx="310" cy="34" r="6.5" fill="#FF8FAB" opacity="0.7" />
-        <circle cx="310" cy="34" r="2.5" fill="#FFE4E8" opacity="0.9" />
-        <circle cx="440" cy="24" r="5" fill="#FFE66D" opacity="0.8" />
-        <circle cx="440" cy="24" r="2" fill="#FFF8DC" opacity="0.9" />
-        <circle cx="570" cy="38" r="6" fill="#FF8FAB" opacity="0.65" />
-        <circle cx="570" cy="38" r="2.5" fill="#FFE4E8" opacity="0.85" />
-        <circle cx="690" cy="20" r="5" fill="#FFE66D" opacity="0.85" />
-        <circle cx="690" cy="20" r="2" fill="#FFF8DC" opacity="0.9" />
-        <circle cx="760" cy="36" r="4.5" fill="#C8E6C9" opacity="0.5" />
-        <circle cx="120" cy="60" r="4" fill="#C8E6C9" opacity="0.5" />
-        <circle cx="380" cy="52" r="4.5" fill="#C8E6C9" opacity="0.45" />
-        <circle cx="620" cy="56" r="4" fill="#C8E6C9" opacity="0.45" />
-      </svg>
-
-      {/* ═══ L6 — ANIMATED OVERLAYS ═══ */}
+      {/* ═══ L5 — FOREGROUND: STEPPING STONES + PLANTING ═══ */}
       <motion.div
-        className="absolute inset-0 pointer-events-none overflow-hidden"
+        className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block"
+        style={{ zIndex: 30 }}
         animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
-        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+        transition={spring}
       >
-        {/* Atmospheric light breathing */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-b from-yellow-100/0 via-yellow-100/5 to-cyan-100/0"
-          animate={{ opacity: [0, 0.12, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        {/* Floating glass bubbles — different depths */}
+        {/* Stepping stones crossing the near water, receding in size */}
         {[
-          { l: '14%', t: '20%', s: 38, d: 0 },
-          { l: '76%', t: '22%', s: 44, d: 0.8 },
-          { l: '8%', t: '38%', s: 22, d: 1.6 },
-          { l: '58%', t: '15%', s: 28, d: 2.4 },
-        ].map((b, i) => (
-          <motion.div
-            key={`bb${i}`}
-            className="absolute rounded-full"
-            style={{
-              left: b.l,
-              top: b.t,
-              width: b.s,
-              height: b.s,
-              border: '1.5px solid rgba(255,255,255,0.2)',
-              background: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.12), transparent 60%)',
-            }}
-            animate={{ y: [0, -12, 0], x: [0, i % 2 ? 5 : -5, 0], opacity: [0.25, 0.6, 0.25] }}
-            transition={{ duration: 5.5 + i, repeat: Infinity, ease: 'easeInOut', delay: b.d }}
-          />
+          { l: '64%', b: '20%', w: 40, o: 0.9 }, { l: '72%', b: '15%', w: 52, o: 0.95 },
+          { l: '82%', b: '10%', w: 66, o: 1 }, { l: '93%', b: '5%', w: 80, o: 1 },
+        ].map((st, i) => (
+          <svg key={`st${i}`} className="absolute" style={{ left: st.l, bottom: st.b, width: st.w, opacity: st.o }} viewBox="0 0 80 46" fill="none">
+            <ellipse cx="40" cy="34" rx="36" ry="11" fill="rgba(20,90,100,0.3)" />
+            <ellipse cx="40" cy="26" rx="36" ry="16" fill="#A99781" />
+            <ellipse cx="38" cy="22" rx="29" ry="11" fill="#C4B49D" />
+            <ellipse cx="34" cy="19" rx="15" ry="5" fill="#D8CBB6" opacity="0.8" />
+          </svg>
         ))}
 
-        {/* Drifting fish */}
-        <motion.div
-          className="absolute left-[18%] top-[52%] text-xl"
-          style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.1))' }}
-          animate={{ x: [0, 28, 8, 36, 0], y: [0, -5, 3, -2, 0], rotate: [0, 4, -2, 3, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          🐠
-        </motion.div>
-        <motion.div
-          className="absolute right-[14%] top-[48%] text-lg"
-          style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.1))' }}
-          animate={{ x: [0, -22, -4, -30, 0], y: [0, -3, 4, -1, 0], scaleX: [-1, -1, -1, -1, -1] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-        >
-          🐟
-        </motion.div>
-
-        {/* Sparkle particles — varied sizes/speeds */}
-        {[
-          { l: '10%', t: '14%', s: 2.5, d: 0, dur: 2.2 },
-          { l: '55%', t: '16%', s: 2, d: 0.5, dur: 2.6 },
-          { l: '80%', t: '20%', s: 1.8, d: 1.0, dur: 2.0 },
-          { l: '32%', t: '10%', s: 3, d: 1.4, dur: 2.8 },
-          { l: '42%', t: '44%', s: 1.8, d: 0.3, dur: 2.4 },
-          { l: '70%', t: '52%', s: 2.2, d: 1.8, dur: 2.2 },
-          { l: '6%', t: '46%', s: 1.5, d: 0.7, dur: 1.9 },
-          { l: '88%', t: '36%', s: 1.8, d: 1.2, dur: 2.5 },
-          { l: '26%', t: '56%', s: 2.5, d: 0.2, dur: 2.1 },
-          { l: '62%', t: '60%', s: 1.5, d: 1.6, dur: 2.3 },
-        ].map((p, i) => (
-          <motion.div
-            key={`sp${i}`}
-            className="absolute rounded-full"
-            style={{
-              left: p.l,
-              top: p.t,
-              width: p.s * 2,
-              height: p.s * 2,
-              background: 'white',
-              boxShadow: `0 0 ${p.s * 5}px rgba(255,255,255,0.85)`,
-            }}
-            animate={{ opacity: [0.08, 0.85, 0.08], scale: [0.6, 1.15, 0.6] }}
-            transition={{ duration: p.dur, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
-          />
-        ))}
-
-        {/* Floating pollen / light motes — drift across scene */}
-        {[
-          { x1: -3, x2: 103, t: '22%', d: 0, dur: 20 },
-          { x1: 103, x2: -3, t: '38%', d: 5, dur: 24 },
-          { x1: -3, x2: 103, t: '50%', d: 10, dur: 22 },
-          { x1: 103, x2: -3, t: '16%', d: 3, dur: 26 },
-        ].map((m, i) => (
-          <motion.div
-            key={`mote${i}`}
-            className="absolute h-1 w-1 rounded-full bg-yellow-200/55"
-            style={{ top: m.t, left: `${m.x1}%` }}
-            animate={{ left: [`${m.x1}%`, `${m.x2}%`], y: [0, -18, 8, -12, 0], opacity: [0, 0.5, 0.35, 0.55, 0] }}
-            transition={{ duration: m.dur, repeat: Infinity, ease: 'linear', delay: m.d }}
-          />
-        ))}
-
-        {/* Rainbow glow pulse */}
-        <motion.div
-          className="absolute right-[3%] top-[8%] w-[18vw] max-w-[130px] h-[18vw] max-h-[130px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.06) 0%, rgba(255,107,107,0.03) 45%, transparent 70%)' }}
-          animate={{ scale: [1, 1.2, 1], opacity: [0.25, 0.5, 0.25] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        {/* Blurred reeds + blooms — depth of field */}
+        <div className="absolute bottom-[1%] -left-[3%] w-[20vw] max-w-[230px]" style={{ filter: 'blur(3.5px)', opacity: 0.92 }}>
+          <svg viewBox="0 0 200 170" fill="none">
+            {[30, 52, 74, 96].map((x, i) => (
+              <path key={x} d={`M${x} 170 Q${x - 6} ${110 - i * 10} ${x + 2} ${76 - i * 12}`} stroke="#3E9152" strokeWidth="7" strokeLinecap="round" fill="none" />
+            ))}
+            {[0, 72, 144, 216, 288].map((a) => (
+              <ellipse key={a} cx={62 + Math.cos((a * Math.PI) / 180) * 22} cy={92 + Math.sin((a * Math.PI) / 180) * 22} rx="16" ry="16" fill="#FF9EC4" />
+            ))}
+            <circle cx="62" cy="92" r="11" fill="#FFD24A" />
+          </svg>
+        </div>
+        <div className="absolute bottom-[0%] -right-[2%] w-[19vw] max-w-[215px]" style={{ filter: 'blur(4px)', opacity: 0.9 }}>
+          <svg viewBox="0 0 200 170" fill="none">
+            <ellipse cx="150" cy="150" rx="52" ry="28" fill="#3E9152" />
+            {[0, 72, 144, 216, 288].map((a) => (
+              <ellipse key={a} cx={118 + Math.cos((a * Math.PI) / 180) * 21} cy={104 + Math.sin((a * Math.PI) / 180) * 21} rx="15" ry="15" fill="#C9B2F0" />
+            ))}
+            <circle cx="118" cy="104" r="10" fill="#FFE58A" />
+          </svg>
+        </div>
       </motion.div>
+
+      {/* ═══ L6 — AMBIENT LIFE ═══ */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Fish cruising under the surface */}
+        {[
+          { t: '72%', c: '#FF9A5C', s: 24, dur: 26, dir: 1 },
+          { t: '80%', c: '#5CC8E8', s: 19, dur: 33, dir: -1 },
+          { t: '88%', c: '#FFC94D', s: 15, dur: 29, dir: 1 },
+        ].map((f, i) => (
+          <motion.div
+            key={`fish${i}`}
+            className="absolute"
+            style={{ top: f.t, left: f.dir > 0 ? '-8%' : '104%' }}
+            animate={isReducedMotion ? undefined : { x: f.dir > 0 ? ['0vw', '116vw'] : ['0vw', '-116vw'], y: [0, -8, 6, -4, 0] }}
+            transition={{ duration: f.dur, repeat: Infinity, ease: 'linear', delay: i * 5 }}
+          >
+            <svg width={f.s} height={f.s * 0.6} viewBox="0 0 30 18" fill="none" style={{ transform: f.dir > 0 ? 'none' : 'scaleX(-1)', opacity: 0.62 }}>
+              <ellipse cx="13" cy="9" rx="11" ry="6.5" fill={f.c} />
+              <path d="M24 9 L30 4 L30 14 Z" fill={f.c} />
+              <circle cx="8" cy="7.5" r="1.5" fill="#2D3A44" />
+            </svg>
+          </motion.div>
+        ))}
+
+        {/* Bubbles rising from the riverbed */}
+        {Array.from({ length: 9 }, (_, i) => ({
+          l: `${10 + i * 9.5}%`, s: 4 + (i % 4) * 2, dur: 6 + (i % 5), d: i * 0.9,
+        })).map((b, i) => (
+          <motion.div
+            key={`bub${i}`}
+            className="absolute rounded-full"
+            style={{
+              left: b.l, bottom: '2%', width: b.s, height: b.s,
+              border: '1.5px solid rgba(255,255,255,0.65)',
+              background: 'rgba(255,255,255,0.16)',
+            }}
+            animate={isReducedMotion ? undefined : { y: [0, -190], opacity: [0, 0.75, 0], x: [0, 8, -6, 0] }}
+            transition={{ duration: b.dur, repeat: Infinity, ease: 'easeOut', delay: b.d }}
+          />
+        ))}
+
+        {/* Dragonflies skimming above the water */}
+        {[
+          { t: '54%', l: '22%', dur: 19, dx: 46, dy: -18 },
+          { t: '60%', l: '70%', dur: 23, dx: -40, dy: -22 },
+        ].map((d, i) => (
+          <motion.div
+            key={`df${i}`}
+            className="absolute"
+            style={{ top: d.t, left: d.l }}
+            animate={isReducedMotion ? undefined : { x: [0, d.dx, d.dx * 0.4, 0], y: [0, d.dy, d.dy * 0.5, 0] }}
+            transition={{ duration: d.dur, repeat: Infinity, ease: 'easeInOut', delay: i * 3 }}
+          >
+            <motion.svg
+              width="22" height="14" viewBox="0 0 22 14" fill="none"
+              animate={isReducedMotion ? undefined : { scaleY: [1, 0.6, 1] }}
+              transition={{ duration: 0.22, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ellipse cx="7" cy="5" rx="6" ry="2.6" fill="#9FE0F0" opacity="0.75" />
+              <ellipse cx="7" cy="9" rx="5" ry="2.2" fill="#9FE0F0" opacity="0.6" />
+              <rect x="4" y="6" width="15" height="2.2" rx="1.1" fill="#5AA8C4" />
+            </motion.svg>
+          </motion.div>
+        ))}
+
+        {/* Light motes over the garden */}
+        {Array.from({ length: 10 }, (_, i) => ({
+          l: `${8 + i * 9}%`, t: `${20 + ((i * 15) % 34)}%`,
+          s: 2 + (i % 3), d: i * 0.6, dur: 3 + (i % 4),
+        })).map((p, i) => (
+          <motion.div
+            key={`mo${i}`}
+            className="absolute rounded-full"
+            style={{
+              left: p.l, top: p.t, width: p.s * 2, height: p.s * 2,
+              background: 'rgba(255,252,220,0.95)',
+              boxShadow: `0 0 ${p.s * 5}px rgba(255,246,190,0.8)`,
+            }}
+            animate={isReducedMotion ? undefined : { opacity: [0.1, 0.8, 0.1], y: [0, -18, 0], scale: [0.7, 1.1, 0.7] }}
+            transition={{ duration: p.dur + 2, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
+          />
+        ))}
+      </div>
 
       {/* ═══ L7 — CONTENT ═══ */}
       <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>
