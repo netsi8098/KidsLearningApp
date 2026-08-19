@@ -94,7 +94,7 @@ export function getThemeById(id: string): HomepageTheme {
 }
 
 /** Default theme for new profiles */
-export const DEFAULT_THEME_ID = 'river-garden';
+export const DEFAULT_THEME_ID = 'sunny-meadow';
 
 /* NOTE: the /assets/themes/*-hero*.jpg plates are no longer rendered.
    Despite the "-clean" suffix they were never cleaned — each one still has the
