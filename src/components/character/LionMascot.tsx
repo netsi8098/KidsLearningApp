@@ -74,6 +74,15 @@ export interface LionMascotProps {
   lookAt?: number;
   /** Fires once a transient state (happy/celebrate) has played out. */
   onStateComplete?: () => void;
+  /** Optional phrase used by the articulated mouth system. */
+  speechText?: string;
+  /** Increment to replay the phrase performance. */
+  speechKey?: number;
+  /** Increment when audible speech begins so the mouth follows the voice. */
+  mouthKey?: number;
+  /** Keep the paws planted; internal bones still breathe and transfer weight. */
+  grounded?: boolean;
+  onSpeechComplete?: () => void;
 }
 
 /** States that play once then hand back to idle. */
@@ -214,20 +223,28 @@ export default function LionMascot({
   className,
   lookAt = 0,
   onStateComplete,
+  speechText,
+  speechKey = 0,
+  mouthKey = 0,
+  grounded = false,
+  onSpeechComplete,
 }: LionMascotProps) {
   const { isReducedMotion } = useMotionPreset();
   const [activeState, setActiveState] = useState<MascotState>(state);
 
   // Adopt the requested state, then fall back to idle for transient reactions.
   useEffect(() => {
-    setActiveState(state);
+    const adoptionFrame = requestAnimationFrame(() => setActiveState(state));
     const holdFor = TRANSIENT[state];
-    if (!holdFor) return;
+    if (!holdFor) return () => cancelAnimationFrame(adoptionFrame);
     const timer = setTimeout(() => {
       setActiveState('idle');
       onStateComplete?.();
     }, holdFor);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(adoptionFrame);
+      clearTimeout(timer);
+    };
   }, [state, onStateComplete]);
 
   // A small lean toward whatever the user is pointing at — the character
@@ -239,15 +256,23 @@ export default function LionMascot({
       className={className}
       style={{ width: size, height: size, willChange: 'transform' }}
       variants={STATE_MOTION}
-      animate={isReducedMotion ? 'still' : activeState}
+      animate={isReducedMotion || grounded ? 'still' : activeState}
       initial={false}
     >
       <motion.div
-        animate={{ x: lean, rotate: lean * 0.35 }}
+        animate={{ x: grounded ? 0 : lean, rotate: grounded ? 0 : lean * 0.35 }}
         transition={{ type: 'spring', stiffness: 180, damping: 22 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <GeneratedLion pose={POSE_FOR_STATE[activeState] ?? 'idle'} size={size} />
+        <GeneratedLion
+          pose={POSE_FOR_STATE[activeState] ?? 'idle'}
+          size={size}
+          lookAt={lookAt}
+          speechText={speechText}
+          speechKey={speechKey}
+          mouthKey={mouthKey}
+          onSpeechComplete={onSpeechComplete}
+        />
       </motion.div>
     </motion.div>
   );

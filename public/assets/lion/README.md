@@ -1,9 +1,13 @@
 # Lion mascot pose assets
 
-This folder is the **source of truth for lion art**. Drop pose PNGs in and they
-render automatically — **no code changes required**. `GeneratedLion` probes for
-each file and falls back to the `PremiumLion` SVG for any pose whose file is
-missing, so poses can ship one at a time.
+This folder is the **source of truth for lion art**. `GeneratedLion` resolves
+approved pose PNGs and passes them to the persistent real-time rig. Missing
+emotional poses reuse `idle.png` so the mascot keeps one face, mane, body and
+lighting style instead of changing character or falling back to the retired SVG.
+
+**Current authored poses (2026-08-19):** `idle.png`, `waving.png`,
+`thinking.png`, and `celebrating.png` (all 1223x1286). Other wired states reuse
+`idle.png` until matching art is approved.
 
 ## Required files
 
@@ -48,20 +52,24 @@ Already wired — add the file and it works: `sleepy.png`, `listening.png`,
 - Keep **body scale, lighting direction, mane colour, fur rendering and face
   style identical across every pose** — otherwise the character appears to jump
   size or change style when its state changes.
-- Aim for **< 300 KB** each.
+- Target **< 500 KB** each after visual-quality review. The current four PNGs
+  are approximately 1.3 MB each and remain an explicit optimization backlog.
+  Workbox currently allows up to 5 MB per precached file.
 
 ## How it resolves at runtime
 
 ```
-MascotState  →  POSE_FOR_STATE  →  LionPose  →  /assets/lion/<pose>.png
- (LionMascot.tsx)                                    ↓ missing / 404
-                                              PremiumLion SVG
+MascotState  →  POSE_FOR_STATE  →  LionPose  → approved pose PNG
+ (LionMascot.tsx)                          ↓ pose art not yet approved
+                                      /assets/lion/idle.png
+                                                ↓
+                              ArticulatedLion persistent SkinnedMesh
 ```
 
-`LionMascot` owns **state**; `GeneratedLion` owns **artwork and per-pose motion**
-(breathing, float, sway, blink). Body-level motion — lift, lean, settle,
-look-at — is applied by `LionMascot` on top of whichever artwork renders, so real
-art inherits the existing character performance for free.
+`LionMascot` owns **state**; `GeneratedLion` owns approved artwork resolution;
+`ArticulatedLion` owns the 29-bone weighted mesh, arm/leg IK, face morphs,
+speech timing, gaze, breathing, tail and mane springs. The homepage uses
+`grounded` mode so outer wrappers do not float the paws off their stage.
 
 Callers only ever name a state:
 
@@ -79,9 +87,10 @@ Every state maps to a pose of the same name, except:
 
 ## Adding a new pose
 
-1. Add the key to `LionPose` and a path to `POSE_PATHS` in
-   `src/components/GeneratedLion.tsx`.
-2. Add a motion config to `POSE_MOTION` in the same file (or let it inherit
-   `BASE_MOTION`).
-3. Add the state to `MascotState` and `POSE_FOR_STATE` in
-   `src/components/character/LionMascot.tsx`.
+1. Export the approved PNG with the exact filename above.
+2. Add the pose key to `AVAILABLE_ART_POSES` in
+   `src/components/GeneratedLion.tsx` so runtime resolution is deliberate.
+3. If the state is new, add it to `LionPose`, `MascotState`, `POSE_PATHS` and
+   `POSE_FOR_STATE`. Existing wired states need only the asset and availability
+   update.
+4. Verify idle, speaking, reduced-motion and 390/820/1440 responsive states.

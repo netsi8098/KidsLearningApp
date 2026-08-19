@@ -21,6 +21,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'sounds/*.mp3'],
+      /* One workbox block only. These were previously declared twice, and the
+         second literal silently won — dropping the 5MB cache ceiling back to
+         workbox's 2MB default. Nothing exceeded it yet, but the world plates and
+         lion pose art are exactly that size class and would have been dropped
+         from the offline precache without any error. */
       workbox: {
         // Note: mp4 is deliberately absent from globPatterns. The generated
         // episodes in public/videos are ~5 MB each, and precaching them would
@@ -28,6 +33,7 @@ export default defineConfig({
         // instead, once a child actually plays one.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
       },
       manifest: {
         name: 'Kids Learning Fun',

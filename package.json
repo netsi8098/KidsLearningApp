@@ -27,12 +27,14 @@
     "forge:batch": "node tools/video-forge/forge.mjs --batch tools/video-forge/batch.example.json"
   },
   "dependencies": {
+    "@types/three": "^0.185.4",
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
     "framer-motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
+    "three": "^0.185.1",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {
