@@ -2030,3 +2030,169 @@ title below the stage in every world.
    references. Add more code decoration, or wait for a painted midground plate?
    (Recommend waiting — more code decoration risks the "sticker collage" failure
    mode the brief warns about.)
+
+---
+
+## Pass: P0 Deploy Reality Check · Coloring Ergonomics · Artifact Slimming
+
+**Date:** 2026-08-19 · **Commits:** `ea5dc45`, `531f438`
+
+### ⛔ P0 — production is not stale, it is EMPTY
+
+Codex asked me to confirm the deploy/code path actually being tested. It is not
+serving the app at all.
+
+```
+GET /                       → HTTP 404   (Azure Static Web Apps - 404: Not found)
+GET /index.html             → HTTP 404
+GET /stories                → HTTP 404
+GET /assets/index-*.js      → HTTP 404
+```
+
+**0 of 41 routes healthy in production.** The hostname resolves and Azure answers,
+but the SWA has **zero content deployed** — every path, including the root and
+the JS bundle, returns Azure's stock 404 page.
+
+**Why:** the last deploy run (`ci: retry deploy — Azure SWA upload timeouts`,
+2026-04-23) **failed** after 11 minutes. The last *successful* deploy was earlier
+that same day. There have been **no deploy runs since 2026-04-23** — four months.
+The run logs are past GitHub's retention window (HTTP 410), so the original
+failure cause is unrecoverable.
+
+**Implication for every audit so far:** blank `/stories`, the "narrow desktop
+menu", the coloring findings — all were observed against a dead or months-old
+site. **Do not judge product quality from the live URL until a deploy succeeds.**
+Local production builds (`npm run build && npx vite preview`) are the only valid
+target right now, and both QA harnesses accept `--url` for re-checking prod after.
+
+**Local HEAD is 28 commits ahead of `origin/main`.** I remain unable to push
+(blocked by the permission classifier). One successful push to `main` should
+restore the site *and* ship the SPA-fallback fix.
+
+**Action taken to de-risk that deploy:** the four retired `-hero*.jpg` plates
+were still in `public/`, so Vite copied 2.1 MB into `dist/` on every build and
+Azure uploaded them every time — for files nothing renders. Moved to
+`docs/reference-art/themes/`. **Deploy artifact: 4.8 MB → 2.6 MB, 148 → 128
+files.** Given the failure was upload timeouts, this is worth having in place.
+
+### Coloring studio ergonomics — fixed
+
+Colour switching is the primary action in a colouring app. It required opening a
+modal from a lone swatch stranded in the bottom-left corner — a long pointer trip
+from both the artboard and the tool rail.
+
+- `ColorRail` was **already built and imported but never rendered**. It is now
+  the persistent palette, centred under the artboard: 12 colours in one tap,
+  active swatch checkmarked, full wheel one tap away.
+- Removed a dead "more colours" toggle that flipped state nothing rendered.
+- Moved the wheel button *inside* the rail — it was a sibling of it, so it
+  floated as a stray orphan button below the artboard.
+- Displays ≥1280 px get a genuinely higher-resolution **760 px** artboard rather
+  than an upscaled 600 px one. Resolution is chosen once at mount; changing it
+  mid-session would resize the backing store and discard the drawing.
+- Fit-to-screen now reserves the chrome it actually has (top bar + palette), and
+  is breakpoint-aware because the tool rail sits *beside* the artboard on desktop
+  but *overlays* it on phones.
+- On phones the artboard is nudged clear of the tool rail; it had been centred in
+  the full viewport with its right side sliding underneath.
+
+**Verified functionally** at 1280×900: 12 swatches on the rail, stroke paints
+(1479 non-white px), undo enables, save returns to the library, no runtime
+errors, all touch targets ≥44 px at both breakpoints.
+
+### 1 · What is truly fixed
+
+| Item | Evidence |
+|---|---|
+| SPA deep-link 404 (root cause) | `staticwebapp.config.json` now emitted into `dist/`; verified present post-build |
+| All Tailwind-`fixed` overlays | `.page-with-bg` no longer forces `position: relative`; overlay computes `fixed`, 1440×900, centred |
+| `/privacy` crash with no player | `currentPlayer?.name ?? 'this profile'` |
+| Duplicate title / fake Parent pill | Image plates retired; all four worlds code-built |
+| Homepage composition | Parent pill top-centre, speech bubble, title straddling the stage, horizontal card shelf |
+| Movement instruction mismatch | Semantic pose resolution; 117 real lines, 36% → 1% unmatched |
+| Colouring palette + artboard | Above |
+| Malformed heart path on `/emotions` | Cubic had 4 args where SVG needs 6 |
+| Dead videos reaching children | 15 flagged `unavailable`, withheld from all 5 consumers |
+
+### 2 · What is only fallback (NOT premium — do not treat as done)
+
+| Surface | Current state |
+|---|---|
+| **All 4 worlds** | Every layer code-built SVG/CSS. Serviceable, **not** competitive with the references. |
+| **Lion** | Single `PremiumLion` SVG pose. All 12 states resolve to it; state reads through *body motion only*. |
+| **Movement figure** | Parametric SVG character. Poses are correct and readable, art quality is placeholder. |
+| **Yoga poses** | Downward dog / cobra / child's pose → `bend-down`. An upright figure cannot express floor poses. |
+
+### 3 · What still needs art/assets
+
+- `public/assets/lion/` — **12 required poses**, contract in its README (1024–1400 px square, transparent, no baked motion/shadow/UI, consistent style & lighting).
+- `public/assets/worlds/<theme>/` — `backplate.webp`, `midground.webp`, `stage.png`, `shelf.png`, `foreground.png`. Contract + status table in its README. **Zero plates exist.**
+- `public/assets/movement/` — activity badges and optional per-action step art.
+- **15 valid YouTube IDs** (table in the previous section). No guessed replacements.
+
+### 4 · What still fails QA
+
+| Check | Result |
+|---|---|
+| **Production, all 41 routes** | ❌ **0/41 — site serves nothing** |
+| Local route sweep | ✅ 41/41 |
+| Local homepage QA (4 worlds × 3 viewports) | ✅ 80/80 |
+| child-mobile e2e | ✅ 30/30 |
+| Build / tsc on touched files | ✅ clean |
+| Desktop upper sky density | ⚠️ improved, still below reference |
+| `/videos` thumbnails | ⚠️ dead IDs withheld; rails thinner than designed |
+
+### 5 · Homepage layer system (as built)
+
+| Layer | Implementation | Motion (all code-driven) |
+|---|---|---|
+| L0 sky | CSS gradient per theme | — |
+| L1 distant | SVG + `SkyLife` | cloud drift, bird flocks, wisps, star twinkle · **parallax `far`** |
+| L2 midground | SVG per theme | tree sway, island bob, lantern pulse, balloons · **parallax `mid`** |
+| L3 water/ground | SVG | shimmer streaks, waterfall mist |
+| L4 hero stage | SVG mound + `mascot` slot | ambient glow, character motion |
+| L5 title zone | `WorldTitle` in-scene | per-letter spring entrance; sign sways |
+| L6 card shelf | `ShelfSurface` per theme | contact shadows; cloud billow |
+| L7 foreground | SVG accents | pollen, sparkles, fireflies, leaves · **parallax `fore`** |
+| UI | live DOM | hover lift, press compression, spring stagger |
+
+Parallax is pointer-driven, spring damped, a few px of travel; disabled under
+`prefers-reduced-motion` and on coarse pointers.
+
+### 6 · Mascot states — wired vs used
+
+| State | Wired | Used today | Pose art |
+|---|---|---|---|
+| `waving` | ✅ | homepage arrival | fallback |
+| `attention` | ✅ | homepage card hover (lean) | fallback (idle art by design) |
+| `thinking` | ✅ | homepage create flow | fallback |
+| `idle` | ✅ | resting default | fallback |
+| `excited`, `celebrating`, `encouraging`, `surprised`, `success`, `gentle-error`, `loading`, `reading`, `pointing` | ✅ | **not yet consumed** | fallback |
+| `sleepy`, `listening`, `sad-soft`, `clapping`, `jumping` | ✅ optional | not consumed | fallback |
+
+**Asset contract is stable** — callers name a state, never a filename; resolution
+lives entirely inside the mascot system; missing art falls back per-pose with no
+flash and no empty box. Ready to adopt without further architecture change:
+onboarding (`pointing`/`encouraging`), stories (`reading`), rewards
+(`success`/`celebrating`), loading (`loading`), error/empty (`gentle-error`).
+
+### 7 · What Codex should verify next
+
+1. **Deploy first.** Nothing about production is meaningful until a run succeeds.
+   Then: `npx tsx scripts/route-qa.ts --url <prod>` and
+   `npx tsx scripts/homepage-qa.ts --url <prod>`.
+2. **Visually, on the local build:** homepage at 390/820/1440 — is the lion
+   grounded, do cards read as resting on the shelf, is the title integrated, is
+   motion restrained rather than noisy?
+3. **Colouring studio** at 390 and 1440 — palette reachability and artboard size.
+4. **Movement session** — step through an activity; each instruction should
+   change the pose.
+5. **Judge fallback honestly** — worlds, lion and movement figure are all
+   placeholder art. Assess *architecture and composition*, not finish quality.
+
+### Blocked on me
+
+- **Push to `main`** (permission classifier). 28 commits waiting, including the
+  deep-link fix and the slimmer artifact.
+- **15 YouTube IDs** — will not guess.
+- **All art** — cannot generate images.
