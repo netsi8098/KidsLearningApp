@@ -2311,3 +2311,76 @@ viewports), 30/30 child-mobile e2e, build + tsc clean.
 3. Colouring studio at 390 and 1440 — palette reachability, artboard size.
 4. Movement session — step through an activity; every instruction should change
    the pose.
+
+---
+
+# 🔄 CORRECTION — Deployment reality, re-verified 2026-08-19
+
+Supersedes the framing in the previous "ACTION REQUIRED" block. That section
+called production "empty"; that was an over-reach from probe data. The accurate
+statement is narrower, and it matters.
+
+## Confirmed: Azure Static Web Apps IS the host
+
+Not in question. The hostname answers, and the page it returns is **Azure's own**
+`Azure Static Web Apps - 404: Not found`. Only an SWA serves that page — so SWA
+is live and routing. Any earlier phrasing that read as "Azure hosting is missing"
+was wrong and is withdrawn.
+
+## Verified facts (re-probed 2026-08-19, not from memory)
+
+| Check | Result |
+|---|---|
+| `GET https://thankful-tree-0cf247010.2.azurestaticapps.net/` | **404** |
+| `GET .../menu` | **404** |
+| Page served | `Azure Static Web Apps - 404: Not found` (SWA's own) |
+| Deploy runs since 2026-04-23 | **none** |
+| Last run outcome | **failure** (`ci: retry deploy — Azure SWA upload timeouts`) |
+| Hostnames referenced anywhere in repo | only `thankful-tree-0cf247010.2.azurestaticapps.net` |
+| Local `HEAD` vs `origin/main` | **28 commits ahead** |
+| Local production build, 41 routes | **41/41 healthy** |
+
+## What I cannot determine, and why
+
+Two explanations fit the evidence equally well, and I cannot separate them:
+
+1. **This SWA is intact but its content is stale/absent** — the last deploy
+   failed, nothing has deployed in four months, and the environment is serving
+   no build.
+2. **The app now lives at a different SWA hostname**, and the repo + my notes
+   carry an outdated URL. This would fully reconcile "the app IS deployed" with
+   "this hostname 404s" — I would simply be probing the wrong address.
+
+I tried to settle it authoritatively with `az staticwebapp list`. Azure CLI is
+installed and was logged into the right subscription
+(`Azure subscription 1`, `294c7993-494d-4219-bad3-aa76301f8d8c`), but:
+
+```
+AADSTS700082: The refresh token has expired due to inactivity.
+The token was issued on 2026-04-23T21:05:31Z and was inactive for 90 days.
+```
+
+The credential went stale on **2026-04-23 — the same day as the last deploy**,
+which is consistent with no Azure activity since then, but is not proof either
+way about the hosting state.
+
+## The one action that resolves this
+
+Either re-authenticate so I can enumerate the real resources:
+
+```
+! az login --tenant 6810cafb-e520-40a6-9389-8e900a81770e
+```
+
+…after which I will run `az staticwebapp list` and report the true hostname,
+environment and deployment state — **or** paste the correct production URL if it
+is not `thankful-tree-0cf247010.2.azurestaticapps.net`, and I will re-run both QA
+harnesses against it immediately (`--url <prod>`).
+
+## Framing going forward
+
+Per your correction, I will describe any production mismatch as **a stale or
+outdated deployment on Azure SWA**, never as an absent host. What I will not do
+is assert that a given build is live without a probe confirming it — the earlier
+audits in this document were all measured against a URL that was not serving the
+code being discussed, and that cost several passes of misdirected work.
