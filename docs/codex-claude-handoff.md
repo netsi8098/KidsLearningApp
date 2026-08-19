@@ -1954,3 +1954,79 @@ cannot express them, so those specifically want bespoke art.
 4. **Yoga poses** need bespoke art (see above).
 5. **Untouched:** coloring ergonomics, read-aloud highlight sync — next in your
    stated order.
+
+---
+
+## Open Decisions for Codex
+
+These change what gets built next. Each has a recommendation; unblocking any one
+of them lets that workstream move. Work continues on everything not blocked.
+
+### D1 — Art pipeline (highest impact, currently blocking)
+
+Every asset contract is wired and documented, but **no art exists**: lion poses,
+world plates and movement badges all render code fallbacks. Claude cannot
+generate images.
+
+| Option | Consequence |
+|---|---|
+| **A. You generate from the specs** *(recommended)* | READMEs already define filenames, canvas sizes, safe padding and per-pose direction. Drop files in; they render with zero code change. Fastest route to the premium bar. |
+| B. Assume art may never land | Claude invests heavily in code-built visuals — richer SVG lion with real pose variation, painted-quality world gradients. Removes the dependency, but an SVG lion will not match a rendered 3D mascot. |
+| C. Hybrid — lion art only | The lion is the hero of every screen and gives the largest visual return. Worlds and movement stay code-built. |
+| D. Hold | Claude stops investing in either direction and works non-art items only. |
+
+**Why it matters:** the code fallbacks are deliberately *serviceable, not
+competitive*. Judging the app against Lingokids/Khan Kids while it runs on
+fallbacks measures the wrong thing.
+
+### D2 — Dead video content (blocking; Claude will not invent IDs)
+
+15 of 28 YouTube IDs are dead — every rail affected. Full table above.
+
+| Option | Consequence |
+|---|---|
+| **A. Supply replacement IDs** *(recommended)* | Paste valid IDs against the 15 listed titles; Claude swaps them in and drops the `unavailable` flags. Restores the full catalog. |
+| B. Ship the 13 that work | Delete dead entries and rebalance rails. Immediate and honest, but nursery-rhymes loses 4 including Baby Shark. |
+| C. Wire YouTube Data API | Catalog self-heals and never goes stale. Needs an API key and a kid-safe allowlist; adds a network dependency to a currently offline-first page. |
+| D. Drop the videos rail | Removes the third-party dependency entirely. Largest change to the product surface. |
+
+Current state: dead entries are withheld from children, 13 videos live.
+
+### D3 — Scope of the world treatment
+
+The app has ~43 pages. The world system currently exists only on the welcome
+screen.
+
+| Option | Consequence |
+|---|---|
+| **A. Homepage + key child surfaces** *(recommended)* | Menu, learn hubs, stories, rewards become places in the same world. Parent/admin stay utilitarian. Large but coherent, and matches "different places inside the same world". |
+| B. Homepage only | Other pages keep their current `AnimatedBackground`. Claude moves to coloring and read-aloud as listed. |
+| C. All ~40 child pages | Most complete, several passes, real risk of inconsistency if rushed. |
+
+### D4 — Layout fidelity per world
+
+In the treehouse reference the title **hangs beside the lion**; in river-garden
+it sits **on the island**. The shared slot architecture currently places the
+title below the stage in every world.
+
+| Option | Consequence |
+|---|---|
+| **A. Keep shared architecture** *(recommended for now)* | One code path, consistent, trivial to swap art into. Diverges from the treehouse reference specifically. |
+| B. Bespoke layout per world | Matches each reference closely; four layout paths to maintain, test and keep responsive. Worth doing *after* real art lands, since art will shift the composition anyway. |
+
+### Smaller open questions
+
+1. **Photo avatars** — the references show real child photos in the player
+   cards; the app uses emoji/illustrated avatars. Is photo upload wanted as a
+   first-class avatar option? (`avatarPhoto` already exists in the data model.)
+2. **Yoga poses** — downward dog, cobra and child's pose map to `bend-down`
+   because an upright parametric figure cannot express floor poses. Either
+   accept the approximation, commission 3 bespoke images, or reword the
+   instructions to standing variants.
+3. **Production QA after deploy** — once `main` is pushed, should Claude run
+   `route-qa.ts --url <prod>` and `homepage-qa.ts --url <prod>` against
+   production and report? (Both harnesses accept `--url`.)
+4. **Desktop upper sky** — improved with birds and wisps, still quieter than the
+   references. Add more code decoration, or wait for a painted midground plate?
+   (Recommend waiting — more code decoration risks the "sticker collage" failure
+   mode the brief warns about.)
