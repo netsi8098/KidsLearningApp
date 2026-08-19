@@ -17,8 +17,11 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
+import SkyLife from '../SkyLife';
+import { useSceneParallax, DEPTH } from '../useSceneParallax';
 
 export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps) {
+  const par = useSceneParallax();
   return (
     <div className="min-h-dvh relative overflow-hidden">
       {/* ═══ L0 — SKY GRADIENT ═══ */}
@@ -38,7 +41,12 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
       />
 
       {/* ═══ L1 — DISTANT ELEMENTS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
+        <SkyLife birdColor="rgba(52,74,104,0.40)" wispColor="rgba(255,255,255,0.62)" />
         {/* Sun glow — warm radial light top-right */}
         <motion.div
           className="absolute top-[-8%] right-[8%] w-[40vw] h-[40vw] max-w-[300px] max-h-[300px] rounded-full"
@@ -91,10 +99,14 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
           <path d="M0 90 L0 46 Q42 18 88 40 Q130 60 172 34 Q214 10 258 38 Q300 62 344 32 Q374 14 400 40 L400 90 Z" fill="#9FD9B4" opacity="0.55" />
           <path d="M0 90 L0 60 Q50 38 102 56 Q152 72 200 50 Q250 30 300 54 Q350 74 400 52 L400 90 Z" fill="#7FCB92" opacity="0.7" />
         </svg>
-      </div>
+      </motion.div>
 
       {/* ═══ L2 — MID-GROUND TREES ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Left blossom tree */}
         <motion.div
           className="absolute bottom-[30%] left-[1%] w-[26vw] max-w-[150px]"
@@ -149,7 +161,7 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
             <ellipse cx="32" cy="16" rx="17" ry="12" fill="#6FD46F" />
           </svg>
         ))}
-      </div>
+      </motion.div>
 
       {/* ═══ L3 — ROLLING MEADOW ═══ */}
       <div className="absolute bottom-0 left-0 right-0 h-[40%] pointer-events-none">
@@ -228,7 +240,11 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
       </div>
 
       {/* ═══ L6 — ANIMATED OVERLAYS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Butterflies on looping flight paths */}
         {[
           { t: '24%', l: '12%', c: '#C3B1E1', s: 20, dur: 15, dx: 46, dy: -26 },
@@ -293,7 +309,7 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
             transition={{ duration: m.dur, repeat: Infinity, ease: 'linear', delay: m.d }}
           />
         ))}
-      </div>
+      </motion.div>
 
       {/* ═══ L7 — CONTENT ═══ */}
       <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>

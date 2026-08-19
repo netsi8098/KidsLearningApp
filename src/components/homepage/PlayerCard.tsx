@@ -75,8 +75,8 @@ export function PlayerCard({
       style={{
         background: 'linear-gradient(180deg, #FFFDFB 0%, #FFF6EE 100%)',
         boxShadow: isSelected
-          ? `0 14px 30px rgba(0,0,0,0.22), 0 0 0 3px ${accent}`
-          : '0 10px 24px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.08)',
+          ? `0 14px 30px rgba(0,0,0,0.22), 0 0 0 3px ${accent}, 0 3px 6px -2px rgba(0,0,0,0.4)`
+          : '0 10px 24px rgba(0,0,0,0.18), 0 3px 6px -2px rgba(0,0,0,0.34)',
         border: '1px solid rgba(255,255,255,0.85)',
       }}
       initial={isReducedMotion ? { opacity: 0 } : { opacity: 0, y: 26, scale: 0.94 }}

@@ -85,19 +85,30 @@ export default function WorldTitle({
         </div>
         {/* Carved board */}
         <motion.div
-          className="relative rounded-[22px] px-[5%] py-3"
+          className="relative rounded-[18px] px-6 sm:px-8 py-3"
           style={{
-            background: 'linear-gradient(160deg, #A9773D 0%, #8A6440 100%)',
-            border: '3px solid #6B4E33',
-            boxShadow: '0 10px 26px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.18)',
+            width: 'min(88vw, 480px)',
+            background: 'repeating-linear-gradient(180deg, #A9773D 0px, #A9773D 15px, #9C6C36 15px, #9C6C36 16px, #A37039 16px, #A37039 31px, #96682F 31px, #96682F 32px)',
+            border: '4px solid #6B4E33',
+            boxShadow: '0 12px 28px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.16), inset 0 -3px 8px rgba(0,0,0,0.28)',
             transformOrigin: 'top center',
           }}
           animate={isReducedMotion ? undefined : { rotate: [-0.8, 0.8, -0.8] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         >
-          {/* Plank grain */}
-          <span className="absolute inset-x-3 top-1/2 h-px pointer-events-none" style={{ background: 'rgba(0,0,0,0.14)' }} aria-hidden="true" />
-          <h1 className="text-center m-0" style={{ fontSize: 'clamp(1.9rem, 5.4vw, 3.6rem)' }}>
+          {/* Iron bolts at the corners — reads as fixed timber, not a panel */}
+          {[
+            { top: 6, left: 8 }, { top: 6, right: 8 },
+            { bottom: 6, left: 8 }, { bottom: 6, right: 8 },
+          ].map((pos, i) => (
+            <span
+              key={i}
+              className="absolute rounded-full"
+              style={{ ...pos, width: 6, height: 6, background: '#5A4128', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)' }}
+              aria-hidden="true"
+            />
+          ))}
+          <h1 className="text-center m-0" style={{ fontSize: 'clamp(1.5rem, 3.6vw, 2.5rem)' }}>
             <CandyLetters />
           </h1>
         </motion.div>

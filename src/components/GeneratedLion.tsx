@@ -14,7 +14,26 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PremiumLion from './svg/PremiumLion';
 
-export type LionPose = 'idle' | 'waving' | 'excited' | 'thinking' | 'sleeping' | 'reading';
+export type LionPose =
+  // Required pose set — see public/assets/lion/README.md for the art spec.
+  | 'idle'
+  | 'waving'
+  | 'excited'
+  | 'thinking'
+  | 'celebrating'
+  | 'encouraging'
+  | 'surprised'
+  | 'success'
+  | 'gentle-error'
+  | 'loading'
+  | 'reading'
+  | 'pointing'
+  // Optional expansions — fall back to the SVG until the art lands.
+  | 'sleepy'
+  | 'listening'
+  | 'sad-soft'
+  | 'clapping'
+  | 'jumping';
 
 interface GeneratedLionProps {
   pose?: LionPose;
@@ -24,26 +43,46 @@ interface GeneratedLionProps {
   static?: boolean;
 }
 
+/**
+ * Filenames are the contract with the art folder: one lowercase PNG per pose,
+ * resolved by key. Nothing else in the app hard-codes a lion filename.
+ */
 const POSE_PATHS: Record<LionPose, string> = {
   idle: '/assets/lion/idle.png',
   waving: '/assets/lion/waving.png',
   excited: '/assets/lion/excited.png',
   thinking: '/assets/lion/thinking.png',
-  sleeping: '/assets/lion/sleeping.png',
+  celebrating: '/assets/lion/celebrating.png',
+  encouraging: '/assets/lion/encouraging.png',
+  surprised: '/assets/lion/surprised.png',
+  success: '/assets/lion/success.png',
+  'gentle-error': '/assets/lion/gentle-error.png',
+  loading: '/assets/lion/loading.png',
   reading: '/assets/lion/reading.png',
+  pointing: '/assets/lion/pointing.png',
+  sleepy: '/assets/lion/sleepy.png',
+  listening: '/assets/lion/listening.png',
+  'sad-soft': '/assets/lion/sad-soft.png',
+  clapping: '/assets/lion/clapping.png',
+  jumping: '/assets/lion/jumping.png',
 };
 
-/** Per-pose motion configs — tuned after motion reference study */
-const POSE_MOTION: Record<LionPose, {
+interface PoseMotion {
   breathe: { scaleY: number[]; duration: number };
   float: { y: number[]; duration: number };
   sway: { rotate: number[]; duration: number };
-}> = {
-  idle: {
-    breathe: { scaleY: [1, 1.012, 1], duration: 3.2 },
-    float: { y: [0, -4, 0], duration: 3.5 },
-    sway: { rotate: [0, 0.8, 0, -0.8, 0], duration: 5 },
-  },
+}
+
+/** Calm baseline every pose starts from — the images are stills, code adds life. */
+const BASE_MOTION: PoseMotion = {
+  breathe: { scaleY: [1, 1.012, 1], duration: 3.2 },
+  float: { y: [0, -4, 0], duration: 3.5 },
+  sway: { rotate: [0, 0.8, 0, -0.8, 0], duration: 5 },
+};
+
+/** Per-pose deviations from the baseline, tuned to each pose's energy. */
+const POSE_MOTION: Record<LionPose, PoseMotion> = {
+  idle: BASE_MOTION,
   waving: {
     breathe: { scaleY: [1, 1.01, 1], duration: 3 },
     float: { y: [0, -3, 0], duration: 3.2 },
@@ -59,15 +98,67 @@ const POSE_MOTION: Record<LionPose, {
     float: { y: [0, -2, 0], duration: 4.5 },
     sway: { rotate: [0, 1.5, 0], duration: 6 },
   },
-  sleeping: {
-    breathe: { scaleY: [1, 1.025, 1], duration: 4.5 },
-    float: { y: [0, -2, 0], duration: 5 },
-    sway: { rotate: [0, 0.5, 0], duration: 7 },
+  celebrating: {
+    breathe: { scaleY: [1, 1.025, 1], duration: 1.5 },
+    float: { y: [0, -12, 0], duration: 1.1 },
+    sway: { rotate: [-3, 3, -3], duration: 1 },
+  },
+  encouraging: {
+    breathe: { scaleY: [1, 1.014, 1], duration: 2.6 },
+    float: { y: [0, -5, 0], duration: 2.4 },
+    sway: { rotate: [-1.4, 1.4, -1.4], duration: 2.8 },
+  },
+  surprised: {
+    breathe: { scaleY: [1, 1.03, 1], duration: 1.4 },
+    float: { y: [0, -6, 0], duration: 1.3 },
+    sway: { rotate: [-1, 1, -1], duration: 1.6 },
+  },
+  success: {
+    breathe: { scaleY: [1, 1.016, 1], duration: 2.2 },
+    float: { y: [0, -6, 0], duration: 2 },
+    sway: { rotate: [-1.2, 1.2, -1.2], duration: 2.4 },
+  },
+  'gentle-error': {
+    breathe: { scaleY: [1, 1.01, 1], duration: 3.8 },
+    float: { y: [0, -2, 0], duration: 4 },
+    sway: { rotate: [-0.6, 0.6, -0.6], duration: 5.5 },
+  },
+  loading: {
+    // Deliberately busier than thinking — reads as "working on it".
+    breathe: { scaleY: [1, 1.012, 1], duration: 2 },
+    float: { y: [0, -5, 0, -3, 0], duration: 2.2 },
+    sway: { rotate: [-2.5, 2.5, -2.5], duration: 1.8 },
   },
   reading: {
     breathe: { scaleY: [1, 1.01, 1], duration: 3.5 },
     float: { y: [0, -2, 0], duration: 4 },
     sway: { rotate: [0, 0.6, 0, -0.6, 0], duration: 5.5 },
+  },
+  pointing: {
+    breathe: { scaleY: [1, 1.012, 1], duration: 2.8 },
+    float: { y: [0, -3, 0], duration: 3 },
+    sway: { rotate: [0.5, -0.8, 0.5], duration: 3.4 },
+  },
+  sleepy: {
+    breathe: { scaleY: [1, 1.025, 1], duration: 4.5 },
+    float: { y: [0, -2, 0], duration: 5 },
+    sway: { rotate: [0, 0.5, 0], duration: 7 },
+  },
+  listening: BASE_MOTION,
+  'sad-soft': {
+    breathe: { scaleY: [1, 1.008, 1], duration: 4.2 },
+    float: { y: [0, -1.5, 0], duration: 4.6 },
+    sway: { rotate: [-0.5, 0.5, -0.5], duration: 6 },
+  },
+  clapping: {
+    breathe: { scaleY: [1, 1.02, 1], duration: 1.6 },
+    float: { y: [0, -7, 0], duration: 1.4 },
+    sway: { rotate: [-2, 2, -2], duration: 1.1 },
+  },
+  jumping: {
+    breathe: { scaleY: [1, 1.03, 1], duration: 1.2 },
+    float: { y: [0, -16, 0], duration: 0.9 },
+    sway: { rotate: [-3, 3, -3], duration: 1 },
   },
 };
 
@@ -81,7 +172,7 @@ export default function GeneratedLion({
   const [imageFailed, setImageFailed] = useState(false);
 
   const src = POSE_PATHS[pose];
-  const m = POSE_MOTION[pose];
+  const m = POSE_MOTION[pose] ?? BASE_MOTION;
 
   // Preload image to detect availability
   useEffect(() => {
@@ -98,9 +189,12 @@ export default function GeneratedLion({
     return <PremiumLion size={size} className={className} />;
   }
 
-  // Loading state — show nothing briefly to avoid flash
+  // While probing for generated art, draw the SVG rather than an empty box.
+  // With /assets/lion/ unpopulated this is the steady state, and it means
+  // dropping real pose art in later swaps the artwork without ever flashing
+  // a hole in the scene.
   if (!imageLoaded) {
-    return <div className={className} style={{ width: size, height: size }} />;
+    return <PremiumLion size={size} className={className} />;
   }
 
   if (isStatic) {

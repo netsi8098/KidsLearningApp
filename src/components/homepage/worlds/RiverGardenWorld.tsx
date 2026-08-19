@@ -14,8 +14,11 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
+import SkyLife from '../SkyLife';
+import { useSceneParallax, DEPTH } from '../useSceneParallax';
 
 export default function RiverGardenWorld({ mascot, title, children }: WorldProps) {
+  const par = useSceneParallax();
   return (
     <div className="min-h-dvh relative overflow-hidden">
       {/* ═══ L0 — SKY GRADIENT ═══ */}
@@ -35,7 +38,12 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
       />
 
       {/* ═══ L1 — DISTANT ELEMENTS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
+        <SkyLife birdColor="rgba(46,82,96,0.38)" wispColor="rgba(255,255,255,0.55)" />
         {/* Sun glow — warm radial light top-center */}
         <div
           className="absolute top-[-5%] left-[42%] w-[35vw] h-[35vw] max-w-[280px] max-h-[280px] rounded-full"
@@ -81,10 +89,14 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
           animate={{ x: [0, 12, 0] }}
           transition={{ duration: 38, repeat: Infinity, ease: 'easeInOut', delay: 14 }}
         />
-      </div>
+      </motion.div>
 
       {/* ═══ L2 — MID-GROUND: TREES + BUSHES ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Left tree cluster */}
         <svg className="absolute bottom-[32%] left-[-4%] w-[30%] h-[38%]" viewBox="0 0 260 340">
           <defs>
@@ -128,7 +140,7 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
           <ellipse cx="40" cy="26" rx="38" ry="24" fill="#388E3C" />
           <ellipse cx="52" cy="20" rx="22" ry="16" fill="#4CAF50" opacity="0.45" />
         </svg>
-      </div>
+      </motion.div>
 
       {/* ═══ L3 — WATER SURFACE ═══ */}
       <div
@@ -287,7 +299,11 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
       </svg>
 
       {/* ═══ L6 — ANIMATED OVERLAYS ═══ */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <motion.div
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Atmospheric light breathing */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-b from-yellow-100/0 via-yellow-100/5 to-cyan-100/0"
@@ -388,7 +404,7 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
           animate={{ scale: [1, 1.2, 1], opacity: [0.25, 0.5, 0.25] }}
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         />
-      </div>
+      </motion.div>
 
       {/* ═══ L7 — CONTENT ═══ */}
       <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>

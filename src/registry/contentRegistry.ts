@@ -13,7 +13,7 @@ import { animalsData } from '../data/animalsData';
 import { bodyPartsData } from '../data/bodyPartsData';
 import { lessonsData } from '../data/lessonsData';
 import { storiesData } from '../data/storiesData';
-import { curatedVideos } from '../data/videoConfig';
+import { playableVideos } from '../data/videoConfig';
 import { gamesConfig } from '../data/gamesConfig';
 import { audioEpisodes } from '../data/audioData';
 import { cookingRecipes } from '../data/cookingData';
@@ -125,7 +125,7 @@ function normalizeStories(): ContentItem[] {
 }
 
 function normalizeVideos(): ContentItem[] {
-  return curatedVideos.map((v) => ({
+  return playableVideos.map((v) => ({
     id: `video:${v.id}`,
     sourceId: v.id,
     type: 'video' as ContentType,
