@@ -13,9 +13,9 @@
  */
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import GeneratedLion from '../../GeneratedLion';
+import type { WorldProps } from './types';
 
-export default function RiverGardenWorld({ children }: { children: ReactNode }) {
+export default function RiverGardenWorld({ mascot, title, children }: WorldProps) {
   return (
     <div className="min-h-dvh relative overflow-hidden">
       {/* ═══ L0 — SKY GRADIENT ═══ */}
@@ -188,11 +188,11 @@ export default function RiverGardenWorld({ children }: { children: ReactNode }) 
         {/* Uses GeneratedLion: loads PNG from /assets/lion/ with motion layers, */}
         {/* falls back to PremiumLion SVG when generated art isn't available yet */}
         <div className="relative z-[2]" style={{ marginBottom: '-22px' }}>
-          <GeneratedLion pose="waving" size={170} />
+          {mascot}
         </div>
 
         {/* Island mound — lion's feet embed into the grass */}
-        <svg viewBox="0 0 280 75" className="w-[52vw] max-w-[280px] relative z-[1]" fill="none">
+        <svg viewBox="0 0 280 75" className="w-[52vw] max-w-[280px] md:max-w-[344px] lg:max-w-[400px] relative z-[1]" fill="none">
           <defs>
             <radialGradient id="rg-isle" cx="50%" cy="28%" r="70%">
               <stop offset="0%" stopColor="#8FE388" />
@@ -222,6 +222,15 @@ export default function RiverGardenWorld({ children }: { children: ReactNode }) 
           <ellipse cx="260" cy="52" rx="14" ry="6" fill="#9E9E9E" opacity="0.35" />
           <ellipse cx="275" cy="60" rx="10" ry="4.5" fill="#BDBDBD" opacity="0.3" />
         </svg>
+
+        {/* Title straddles the stage's front edge — it belongs to the world,
+            not to a text column floating above it (see reference art). */}
+        <div
+          className="relative z-[3] w-[92vw] max-w-[760px] flex justify-center px-2"
+          style={{ marginTop: 'clamp(-42px, -4.2vw, -18px)' }}
+        >
+          {title}
+        </div>
       </div>
 
       {/* ═══ L5 — FOREGROUND GRASSY BANK ═══ */}

@@ -5,7 +5,9 @@ import { useApp } from '../context/AppContext';
 import { useProfiles } from '../hooks/useProfile';
 import AvatarPicker from '../components/AvatarPicker';
 import AvatarFrame from '../components/AvatarFrame';
-import MascotLion from '../components/svg/MascotLion';
+import LionMascot, { type MascotState } from '../components/character/LionMascot';
+import { PlayerCard, NewPlayerCard } from '../components/homepage/PlayerCard';
+import WorldTitle, { SpeechBubble } from '../components/homepage/WorldTitle';
 import AuthModal from '../components/AuthModal';
 import ThemePicker from '../components/homepage/ThemePicker';
 import { getThemeById, DEFAULT_THEME_ID } from '../data/homepageThemes';
@@ -16,18 +18,6 @@ import SkyIslandsWorld from '../components/homepage/worlds/SkyIslandsWorld';
 
 /* ── Utility helpers ── */
 
-function timeAgo(date: Date): string {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'yesterday';
-  if (days < 7) return `${days} days ago`;
-  return `${Math.floor(days / 7)}w ago`;
-}
 
 type CreateStep = 'name-avatar' | 'age' | 'interests';
 const ageOptions = [2, 3, 4, 5, 6, 7, 8] as const;
@@ -86,22 +76,7 @@ function getLastPlayedId(profiles: { id?: number; lastPlayedAt: Date }[]): numbe
 
 /* ── Small SVG icons ── */
 
-function StarIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <path d="M8 1L10 6L15 6.5L11.5 10L12.5 15L8 12.5L3.5 15L4.5 10L1 6.5L6 6Z" fill="#FFD93D" stroke="#F59E0B" strokeWidth="0.8" />
-    </svg>
-  );
-}
 
-function FlameIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <path d="M8 1C8 1 12 5 12 9C12 11.8 10.2 14 8 14C5.8 14 4 11.8 4 9C4 7 5 5 6 4C6 6 7 7 8 6C8 4 8 1 8 1Z" fill="#FF6B6B" stroke="#EF4444" strokeWidth="0.8" />
-      <path d="M8 8C8 8 10 10 10 11.5C10 12.6 9.1 13.5 8 13.5C6.9 13.5 6 12.6 6 11.5C6 10 8 8 8 8Z" fill="#FFE66D" />
-    </svg>
-  );
-}
 
 function ShieldLockIcon() {
   return (
@@ -117,28 +92,6 @@ function ShieldLockIcon() {
 
 const TITLE_COLORS = ['#FF6B6B', '#FF8C42', '#FFE66D', '#6BCB77', '#4ECDC4', '#45B7D1', '#A78BFA', '#FF8FAB'];
 
-function AnimatedTitle() {
-  const text = 'Kids Learning Fun!';
-  return (
-    <h1 className="text-center" style={{ fontSize: 'clamp(2.2rem, 8vw, 3.2rem)', lineHeight: 1.1 }}>
-      {text.split('').map((char, i) => (
-        <span
-          key={i}
-          className="font-display animate-letter-bounce inline-block"
-          style={{
-            animationDelay: `${i * 0.04}s`,
-            display: char === ' ' ? 'inline' : 'inline-block',
-            color: TITLE_COLORS[i % TITLE_COLORS.length],
-            textShadow: '0 2px 0 rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.18), 0 0 20px rgba(0,0,0,0.08)',
-            WebkitTextStroke: '0.5px rgba(0,0,0,0.06)',
-          }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
-    </h1>
-  );
-}
 
 /* ═══════════════════════════════════════════════
    WELCOME PAGE
@@ -167,6 +120,8 @@ export default function WelcomePage() {
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [mascotState, setMascotState] = useState<MascotState>('welcome');
   const [themeId, setThemeId] = useState(() => {
     try { return localStorage.getItem('klf-homepage-theme') || DEFAULT_THEME_ID; } catch { return DEFAULT_THEME_ID; }
   });
@@ -249,48 +204,38 @@ export default function WelcomePage() {
   /* ── Shared UI sections ── */
 
   const topControls = (
-    <div className="flex justify-between items-start px-4 pt-4 flex-shrink-0">
+    <div className="relative flex-shrink-0 px-4 pt-4 z-30">
+      {/* Parent gate sits top-centre in every reference frame */}
       <motion.button
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer"
-        style={{ background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
-        onClick={() => setShowThemePicker(true)}
-        initial={{ opacity: 0, y: -10 }}
+        className="absolute left-1/2 -translate-x-1/2 top-4 flex items-center gap-1.5 px-4 py-2 rounded-full cursor-pointer"
+        style={{
+          background: 'rgba(255,255,255,0.92)',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+        }}
+        onClick={() => setShowAuthModal(true)}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
-        whileHover={{ scale: 1.05 }}
+        transition={{ delay: 0.5, type: 'spring', stiffness: 260, damping: 22 }}
+        whileHover={{ scale: 1.06, y: 1 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <ShieldLockIcon />
+        <span className="text-[13px] font-extrabold" style={{ color: '#6B5BA8' }}>Parent</span>
+      </motion.button>
+
+      <motion.button
+        className="flex items-center gap-1.5 px-3 py-2 rounded-full cursor-pointer"
+        style={{ background: 'rgba(0,0,0,0.24)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+        onClick={() => setShowThemePicker(true)}
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.65, type: 'spring', stiffness: 260, damping: 22 }}
+        whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 0 0 0 20 10 10 0 0 0 0-20" /><circle cx="12" cy="12" r="3" /></svg>
         <span className="text-xs font-semibold text-white/90">World</span>
       </motion.button>
-      <motion.button
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer"
-        style={{ background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
-        onClick={() => setShowAuthModal(true)}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <ShieldLockIcon />
-        <span className="text-xs font-semibold text-white/90">Parent</span>
-      </motion.button>
-    </div>
-  );
-
-  const titleSection = (
-    <div className="flex-shrink-0 text-center px-4 pt-2">
-      <AnimatedTitle />
-      <motion.p
-        className="text-white/80 text-sm font-bold mt-1"
-        style={{ textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-      >
-        Who's playing today?
-      </motion.p>
     </div>
   );
 
@@ -335,69 +280,43 @@ export default function WelcomePage() {
               </div>
             </motion.div>
           ) : (
-            /* ── Profile Cards ── */
-            <div className="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
-              {profiles.map((profile, i) => {
-                const accent = getAccentColor(i);
-                const isLastPlayed = profile.id === lastPlayedId && profiles.length > 1;
-                const isSelected = profile.id === selectedProfileId;
-                return (
-                  <motion.button
-                    key={profile.id}
-                    className={`relative w-full rounded-3xl p-4 flex items-center gap-4 cursor-pointer transition-all tap-bounce ${isSelected ? 'animate-pop' : ''}`}
-                    style={{
-                      background: 'rgba(255,255,255,0.82)',
-                      backdropFilter: 'blur(12px)',
-                      borderLeft: `4px solid ${accent}`,
-                      boxShadow: isLastPlayed
-                        ? `0 4px 24px rgba(0,0,0,0.15), 0 0 0 2px ${accent}40`
-                        : '0 2px 12px rgba(0,0,0,0.1)',
-                    }}
-                    onClick={() => handleSelectProfile(profile)}
-                    initial={{ x: -40, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
-                    whileHover={{ scale: 1.02, boxShadow: '0 8px 28px rgba(0,0,0,0.15)' }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <div className="flex-shrink-0 w-[76px] h-[76px] rounded-full flex items-center justify-center overflow-hidden" style={{ border: `4px solid ${accent}`, background: `${accent}15` }}>
-                      <AvatarFrame emoji={profile.avatarEmoji} photo={profile.avatarPhoto} size="md" />
-                    </div>
-                    <div className="text-left flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <p className="font-display text-[#2D2D3A]" style={{ whiteSpace: 'nowrap', fontSize: '16px' }}>{profile.name}</p>
-                        {profile.age && <span className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white" style={{ backgroundColor: accent }}>Age {profile.age}</span>}
-                      </div>
-                      <div className="flex items-center gap-3 mb-1.5">
-                        <span className="flex items-center gap-1 text-sm font-bold text-amber-600"><StarIcon size={14} />{profile.totalStars}</span>
-                        {profile.streakDays > 0 && <span className="flex items-center gap-1 text-sm font-bold text-orange-500"><FlameIcon size={14} />{profile.streakDays}d</span>}
-                      </div>
-                      {profile.lastPlayedAt && <p className="text-[11px] text-[#9B9BAB]">{timeAgo(new Date(profile.lastPlayedAt))}</p>}
-                    </div>
-                    {isLastPlayed && (
-                      <div className="absolute top-2 right-3">
-                        <span className="text-[10px] font-bold text-white uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: '#4CAF7D' }}>Recent</span>
-                      </div>
-                    )}
-                  </motion.button>
-                );
-              })}
-              <motion.button
-                className="w-full rounded-3xl p-5 font-display text-lg cursor-pointer border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[100px] transition-all"
-                style={profiles.length >= 6
-                  ? { opacity: 0.4, cursor: 'not-allowed', borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }
-                  : { borderColor: 'rgba(78,205,196,0.6)', color: '#4ECDC4', background: 'rgba(78,205,196,0.08)' }
-                }
-                onClick={() => { if (profiles.length < 6) setShowCreate(true); }}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: profiles.length * 0.1 }}
-                whileHover={{ scale: profiles.length < 6 ? 1.02 : 1 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-2xl animate-float-gentle">+</span>
-                New Player
-              </motion.button>
+            /* ── Player shelf: a row of cards resting on the world's
+                  foreground surface, matching the reference composition.
+                  Mobile keeps it a row too, scrolled horizontally, so the
+                  scene behind stays visible instead of being buried. ── */
+            <div
+              className="flex gap-3 md:gap-4 overflow-x-auto md:overflow-visible md:justify-center pb-2 -mx-1 px-1 snap-x snap-mandatory md:snap-none"
+              style={{ scrollbarWidth: 'none' }}
+            >
+              {profiles.map((profile, i) => (
+                <div
+                  key={profile.id}
+                  className="snap-center flex-shrink-0 w-[132px] sm:w-[146px] md:w-auto md:flex-1 md:max-w-[178px]"
+                >
+                  <PlayerCard
+                    name={profile.name}
+                    age={profile.age}
+                    stars={profile.totalStars}
+                    streakDays={profile.streakDays}
+                    avatarEmoji={profile.avatarEmoji}
+                    avatarPhoto={profile.avatarPhoto}
+                    accent={getAccentColor(i)}
+                    isRecent={profile.id === lastPlayedId && profiles.length > 1}
+                    isSelected={profile.id === selectedProfileId}
+                    progress={Math.min(1, (profile.totalStars ?? 0) / 100)}
+                    index={i}
+                    onSelect={() => handleSelectProfile(profile)}
+                    onFocusChange={(focused) => setHoveredCard(focused ? i : null)}
+                  />
+                </div>
+              ))}
+              <div className="snap-center flex-shrink-0 w-[132px] sm:w-[146px] md:w-auto md:flex-1 md:max-w-[178px]">
+                <NewPlayerCard
+                  disabled={profiles.length >= 6}
+                  index={profiles.length}
+                  onClick={() => setShowCreate(true)}
+                />
+              </div>
             </div>
           )}
         </motion.div>
@@ -481,15 +400,51 @@ export default function WelcomePage() {
      double-rendered against the real UI. */
   const World = WORLD_BY_THEME[activeTheme.id] ?? RiverGardenWorld;
 
+  /* The character acknowledges the interface: it leans toward whichever card
+     the user is pointing at and settles back to its welcome loop otherwise. */
+  const cardCount = profiles.length + 1;
+  const lookAt =
+    hoveredCard == null || cardCount <= 1
+      ? 0
+      : (hoveredCard / (cardCount - 1)) * 2 - 1;
+
+  const mascot = (
+    <div className="relative flex items-end justify-center">
+      {/* The hero scales up with the viewport instead of staying phone-sized
+          on desktop — the scene grows, it doesn't just get wider margins. */}
+      <div
+        className="[--m:1] md:[--m:1.22] lg:[--m:1.45]"
+        style={{ transform: 'scale(var(--m))', transformOrigin: 'bottom center' }}
+      >
+        <LionMascot
+          state={showCreate ? 'thinking' : hoveredCard != null ? 'attention' : mascotState}
+          size={168}
+          lookAt={lookAt}
+          onStateComplete={() => setMascotState('idle')}
+        />
+      </div>
+      {/* Greeting bubble, anchored beside the mascot's shoulder */}
+      <div className="absolute left-[82%] bottom-[58%] hidden sm:block">
+        <SpeechBubble />
+      </div>
+    </div>
+  );
+
+  const title = (
+    <WorldTitle
+      variant={activeTheme.id === 'treehouse' ? 'sign' : 'mound'}
+      subtitle={profiles.length === 0 ? 'Create a player to begin' : 'Choose a player to start your adventure'}
+    />
+  );
+
   return (
     <>
-      <World>
+      <World mascot={mascot} title={title}>
         {topControls}
-        {titleSection}
-        <div className="flex-1 min-h-[32px]" />
-        {/* Cards sit on the foreground bank (bottom ~26% of every scene) */}
-        <div className="relative z-20 px-4 pb-8 pt-2">
-          <div className="max-w-2xl mx-auto w-full">{cardContent}</div>
+        <div className="flex-1 min-h-[8px]" />
+        {/* Card shelf rides the world's foreground bank */}
+        <div className="relative z-20 px-3 md:px-6 pb-6 md:pb-8 pt-2">
+          <div className="mx-auto w-full max-w-[1180px]">{cardContent}</div>
         </div>
       </World>
 

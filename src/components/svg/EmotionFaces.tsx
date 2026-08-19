@@ -222,7 +222,7 @@ function GratefulFace() {
       <ellipse cx="46" cy="80" rx="6" ry="5" fill="#FFD5B8" stroke="#E8A87C" strokeWidth="1.5" />
       <ellipse cx="54" cy="80" rx="6" ry="5" fill="#FFD5B8" stroke="#E8A87C" strokeWidth="1.5" />
       {/* Floating heart */}
-      <path d="M50 10S44 4 44 8C44 12 50 16 50 16S56 12 56 8C56 4 50 10Z" fill="#FF6B6B" className="animate-float-gentle" />
+      <path d="M50 16C50 16 44 12 44 8C44 5 47 4 50 7C53 4 56 5 56 8C56 12 50 16 50 16Z" fill="#FF6B6B" className="animate-float-gentle" />
     </>
   );
 }
