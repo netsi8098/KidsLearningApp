@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { usePrivacy } from '../hooks/usePrivacy';
 import NavButton from '../components/NavButton';
@@ -285,7 +285,7 @@ export default function PrivacySettingsPage() {
               <p className="text-4xl text-center mb-3">⚠️</p>
               <h3 className="font-bold text-lg text-[#2D2D3A] text-center mb-2">Delete All Data?</h3>
               <p className="text-sm text-[#6B6B7B] text-center mb-4">
-                This will permanently delete all learning progress, stars, badges, and personal data for {currentPlayer.name}. This action cannot be undone.
+                This will permanently delete all learning progress, stars, badges, and personal data for {currentPlayer?.name ?? 'this profile'}. This action cannot be undone.
               </p>
               <div className="flex gap-3">
                 <motion.button
