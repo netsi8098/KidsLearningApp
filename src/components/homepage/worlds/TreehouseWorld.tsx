@@ -17,8 +17,11 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
+import SkyLife from '../SkyLife';
+import { useSceneParallax, DEPTH } from '../useSceneParallax';
 
 export default function TreehouseWorld({ mascot, title, children }: WorldProps) {
+  const par = useSceneParallax();
   return (
     <div className="min-h-dvh relative overflow-hidden">
       {/* ═══ L0 — SUNSET SKY ═══ */}
@@ -39,7 +42,12 @@ export default function TreehouseWorld({ mascot, title, children }: WorldProps) 
       />
 
       {/* ═══ L1 — DISTANT ELEMENTS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
+        <SkyLife birdColor="rgba(58,42,30,0.55)" wispColor="rgba(246,211,180,0.5)" opacity={0.9} />
         {/* Setting sun glow */}
         <motion.div
           className="absolute top-[26%] left-[50%] -translate-x-1/2 w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] rounded-full"
@@ -72,10 +80,14 @@ export default function TreehouseWorld({ mascot, title, children }: WorldProps) 
         <svg className="absolute bottom-[36%] left-0 w-full h-[20%]" viewBox="0 0 400 80" preserveAspectRatio="none" fill="none">
           <path d="M0 80 L0 52 L18 30 L34 52 L52 24 L70 52 L88 34 L108 52 L128 22 L148 52 L170 36 L190 52 L212 26 L232 52 L254 32 L276 52 L298 20 L318 52 L340 34 L360 52 L382 28 L400 52 L400 80 Z" fill="#4A3A28" opacity="0.55" />
         </svg>
-      </div>
+      </motion.div>
 
       {/* ═══ L2 — THE GREAT TREE + TREEHOUSE ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         <motion.div
           className="absolute bottom-[26%] left-[-2%] w-[58vw] max-w-[330px]"
           style={{ transformOrigin: 'bottom center' }}
@@ -145,7 +157,7 @@ export default function TreehouseWorld({ mascot, title, children }: WorldProps) 
             />
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* ═══ L3 — BALLOONS ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -234,7 +246,11 @@ export default function TreehouseWorld({ mascot, title, children }: WorldProps) 
       </div>
 
       {/* ═══ L6 — ANIMATED OVERLAYS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Fireflies — the signature dusk motif */}
         {[
           { t: '38%', l: '18%', dur: 14, dx: 40, dy: -28 },
@@ -297,7 +313,7 @@ export default function TreehouseWorld({ mascot, title, children }: WorldProps) 
             transition={{ duration: p.dur, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
           />
         ))}
-      </div>
+      </motion.div>
 
       {/* ═══ L7 — CONTENT ═══ */}
       <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>

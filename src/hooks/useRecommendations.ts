@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { lessonsData } from '../data/lessonsData';
 import { storiesData } from '../data/storiesData';
-import { curatedVideos } from '../data/videoConfig';
+import { playableVideos } from '../data/videoConfig';
 
 export interface Recommendation {
   type: 'lesson' | 'story' | 'video' | 'activity';
@@ -198,7 +198,7 @@ export function useRecommendations(playerId: number | undefined) {
     audioProgress.filter((ap) => ap.completed).map((ap) => ap.episodeId),
   );
 
-  for (const video of curatedVideos) {
+  for (const video of playableVideos) {
     const categoryAffinity =
       (categoryEngagement[video.category] ?? 0) / maxEngagement;
     const ageHint = videoAgeHints[video.category] ?? [];

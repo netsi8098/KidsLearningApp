@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { storiesData } from '../data/storiesData';
 import { lessonsData } from '../data/lessonsData';
-import { curatedVideos } from '../data/videoConfig';
+import { playableVideos } from '../data/videoConfig';
 import { SearchIcon } from './svg/CommonIcons';
 
 interface SearchResult {
@@ -44,7 +44,7 @@ export default function SearchBar() {
     }
 
     // Search videos
-    for (const v of curatedVideos) {
+    for (const v of playableVideos) {
       if (v.title.toLowerCase().includes(q)) {
         matches.push({ id: v.id, title: v.title, type: 'video', route: '/videos', color: '#4ECDC4' });
       }

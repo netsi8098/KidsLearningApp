@@ -17,8 +17,11 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
+import SkyLife from '../SkyLife';
+import { useSceneParallax, DEPTH } from '../useSceneParallax';
 
 export default function SkyIslandsWorld({ mascot, title, children }: WorldProps) {
+  const par = useSceneParallax();
   return (
     <div className="min-h-dvh relative overflow-hidden">
       {/* ═══ L0 — SKY GRADIENT ═══ */}
@@ -38,7 +41,12 @@ export default function SkyIslandsWorld({ mascot, title, children }: WorldProps)
       />
 
       {/* ═══ L1 — DISTANT ELEMENTS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
+        <SkyLife birds={false} wispColor="rgba(237,234,253,0.6)" />
         {/* Soft light bloom top-center */}
         <motion.div
           className="absolute top-[-6%] left-[46%] -translate-x-1/2 w-[46vw] h-[46vw] max-w-[330px] max-h-[330px] rounded-full"
@@ -125,10 +133,14 @@ export default function SkyIslandsWorld({ mascot, title, children }: WorldProps)
             </svg>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* ═══ L2 — SIDE FLOATING ISLANDS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Left island with castle */}
         <motion.div
           className="absolute left-[-3%] bottom-[40%] w-[30vw] max-w-[170px]"
@@ -174,7 +186,7 @@ export default function SkyIslandsWorld({ mascot, title, children }: WorldProps)
             <rect x="110" y="62" width="4" height="9" fill="#7E6044" />
           </svg>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* ═══ L3 — BALLOON + ROCKET ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -268,7 +280,11 @@ export default function SkyIslandsWorld({ mascot, title, children }: WorldProps)
       </div>
 
       {/* ═══ L6 — ANIMATED OVERLAYS ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
+        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+      >
         {/* Sparkles */}
         {[
           { l: '16%', t: '44%', s: 2.4, d: 0, dur: 2.2 },
@@ -304,7 +320,7 @@ export default function SkyIslandsWorld({ mascot, title, children }: WorldProps)
             transition={{ duration: m.dur, repeat: Infinity, ease: 'linear', delay: m.d }}
           />
         ))}
-      </div>
+      </motion.div>
 
       {/* ═══ L7 — CONTENT ═══ */}
       <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>

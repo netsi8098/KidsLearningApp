@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { VideoItem } from '../data/videoConfig';
-import { curatedVideos } from '../data/videoConfig';
+import { playableVideos } from '../data/videoConfig';
 import MascotLion from './svg/MascotLion';
 
 interface VideoPlayerProps {
@@ -17,7 +17,7 @@ export default function VideoPlayer({ video, onClose, onPlayRelated, onFavorite,
 
   if (!video) return null;
 
-  const related = curatedVideos
+  const related = playableVideos
     .filter((v) => v.category === video.category && v.id !== video.id)
     .slice(0, 4);
 

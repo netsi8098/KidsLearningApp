@@ -8,6 +8,7 @@ import AvatarFrame from '../components/AvatarFrame';
 import LionMascot, { type MascotState } from '../components/character/LionMascot';
 import { PlayerCard, NewPlayerCard } from '../components/homepage/PlayerCard';
 import WorldTitle, { SpeechBubble } from '../components/homepage/WorldTitle';
+import ShelfSurface from '../components/homepage/ShelfSurface';
 import AuthModal from '../components/AuthModal';
 import ThemePicker from '../components/homepage/ThemePicker';
 import { getThemeById, DEFAULT_THEME_ID } from '../data/homepageThemes';
@@ -121,7 +122,7 @@ export default function WelcomePage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [mascotState, setMascotState] = useState<MascotState>('welcome');
+  const [mascotState, setMascotState] = useState<MascotState>('waving');
   const [themeId, setThemeId] = useState(() => {
     try { return localStorage.getItem('klf-homepage-theme') || DEFAULT_THEME_ID; } catch { return DEFAULT_THEME_ID; }
   });
@@ -442,9 +443,13 @@ export default function WelcomePage() {
       <World mascot={mascot} title={title}>
         {topControls}
         <div className="flex-1 min-h-[8px]" />
-        {/* Card shelf rides the world's foreground bank */}
-        <div className="relative z-20 px-3 md:px-6 pb-6 md:pb-8 pt-2">
-          <div className="mx-auto w-full max-w-[1180px]">{cardContent}</div>
+        {/* Card shelf: cards rest ON a world-native ledge, with the surface
+            drawn behind them so they read as objects in the scene. */}
+        <div className="relative z-20 pt-2">
+          <ShelfSurface themeId={activeTheme.id} />
+          <div className="relative z-10 px-3 md:px-6 pb-6 md:pb-8">
+            <div className="mx-auto w-full max-w-[1180px]">{cardContent}</div>
+          </div>
         </div>
       </World>
 

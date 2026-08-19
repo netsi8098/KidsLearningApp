@@ -21,18 +21,50 @@
  */
 import { useEffect, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
-import PremiumLion from '../svg/PremiumLion';
+import GeneratedLion, { type LionPose } from '../GeneratedLion';
 import { useMotionPreset } from '../../motion/useMotionPreset';
+
+/**
+ * Character state → drawn pose. Callers only ever name a state; the filename
+ * lives in GeneratedLion. Dropping art into /assets/lion/ changes what renders
+ * without touching a single caller, and any pose whose PNG is absent falls back
+ * to the PremiumLion SVG. See public/assets/lion/README.md for the art spec.
+ */
+const POSE_FOR_STATE: Record<MascotState, LionPose> = {
+  idle: 'idle',
+  waving: 'waving',
+  excited: 'excited',
+  thinking: 'thinking',
+  celebrating: 'celebrating',
+  encouraging: 'encouraging',
+  surprised: 'surprised',
+  success: 'success',
+  'gentle-error': 'gentle-error',
+  loading: 'loading',
+  reading: 'reading',
+  pointing: 'pointing',
+  // Attention is a lean, not a different drawing — it reuses the idle pose.
+  attention: 'idle',
+  sleepy: 'sleepy',
+};
 
 export type MascotState =
   | 'idle'
-  | 'welcome'
-  | 'attention'
+  | 'waving'
+  | 'excited'
   | 'thinking'
-  | 'happy'
-  | 'celebrate'
-  | 'encourage'
-  | 'sleep';
+  | 'celebrating'
+  | 'encouraging'
+  | 'surprised'
+  | 'success'
+  | 'gentle-error'
+  | 'loading'
+  | 'reading'
+  | 'pointing'
+  /** Interaction state: the character leans toward what the user is targeting. */
+  | 'attention'
+  /** Bedtime / idle-timeout. */
+  | 'sleepy';
 
 export interface LionMascotProps {
   state?: MascotState;
@@ -46,8 +78,9 @@ export interface LionMascotProps {
 
 /** States that play once then hand back to idle. */
 const TRANSIENT: Partial<Record<MascotState, number>> = {
-  happy: 900,
-  celebrate: 1400,
+  success: 1100,
+  celebrating: 1600,
+  surprised: 900,
 };
 
 /**
@@ -65,7 +98,7 @@ const STATE_MOTION: Variants = {
       rotate: { duration: 6.5, repeat: Infinity, ease: 'easeInOut' },
     },
   },
-  welcome: {
+  waving: {
     y: [0, -8, 0],
     rotate: [-1.5, 2, -1.5],
     scale: 1,
@@ -91,18 +124,18 @@ const STATE_MOTION: Variants = {
       rotate: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
     },
   },
-  happy: {
+  success: {
     y: [0, -18, 0, -8, 0],
     scale: [1, 1.06, 1, 1.03, 1],
     transition: { duration: 0.9, ease: 'easeOut' },
   },
-  celebrate: {
+  celebrating: {
     y: [0, -30, 0, -14, 0],
     rotate: [0, -7, 7, -3, 0],
     scale: [1, 1.12, 1, 1.05, 1],
     transition: { duration: 1.4, ease: 'easeOut' },
   },
-  encourage: {
+  encouraging: {
     y: [0, -7, 0],
     rotate: [-2, 2, -2],
     scale: 1,
@@ -111,7 +144,7 @@ const STATE_MOTION: Variants = {
       rotate: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' },
     },
   },
-  sleep: {
+  sleepy: {
     y: [0, -2, 0],
     rotate: 4,
     scale: [1, 1.015, 1],
@@ -119,6 +152,56 @@ const STATE_MOTION: Variants = {
       y: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
       scale: { duration: 5, repeat: Infinity, ease: 'easeInOut' },
       rotate: { duration: 0.6 },
+    },
+  },
+  excited: {
+    y: [0, -12, 0],
+    rotate: [-2, 2, -2],
+    scale: 1.02,
+    transition: {
+      y: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' },
+      rotate: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+  surprised: {
+    y: [0, -14, -6, -10, 0],
+    scale: [1, 1.08, 1.02, 1.05, 1],
+    transition: { duration: 0.9, ease: 'easeOut' },
+  },
+  loading: {
+    y: [0, -6, 0, -4, 0],
+    rotate: [-2.5, 2.5, -2.5],
+    scale: 1,
+    transition: {
+      y: { duration: 2.2, repeat: Infinity, ease: 'easeInOut' },
+      rotate: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+  'gentle-error': {
+    y: [0, -3, 0],
+    rotate: [-1, 1, -1],
+    scale: 1,
+    transition: {
+      y: { duration: 3.8, repeat: Infinity, ease: 'easeInOut' },
+      rotate: { duration: 4.4, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+  reading: {
+    y: [0, -3, 0],
+    rotate: [0, 0.7, 0, -0.7, 0],
+    scale: 1,
+    transition: {
+      y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+      rotate: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+  pointing: {
+    y: [0, -4, 0],
+    rotate: [0.6, -0.9, 0.6],
+    scale: 1,
+    transition: {
+      y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+      rotate: { duration: 3.4, repeat: Infinity, ease: 'easeInOut' },
     },
   },
   /** Reduced motion: the character still *reads* as present, it just holds still. */
@@ -164,7 +247,7 @@ export default function LionMascot({
         transition={{ type: 'spring', stiffness: 180, damping: 22 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <PremiumLion size={size} />
+        <GeneratedLion pose={POSE_FOR_STATE[activeState] ?? 'idle'} size={size} />
       </motion.div>
     </motion.div>
   );
