@@ -1,8 +1,41 @@
 # Homepage world assets
 
-Each homepage world is a **layered live composition**, never a wallpaper. Today
-every layer is drawn in code; painted plates dropped in here take over a layer
-**individually**, and any plate that is absent leaves the code layer visible.
+Each homepage world is a **layered live composition**, never a wallpaper. The
+painted plates establish the visual world and composition; the lion, title,
+speech, controls, cards, parallax and ambient motion remain live layers.
+
+## Approved visual references
+
+These four user-provided images are the source of truth for composition. They
+are references, not files to render directly: their baked lion, title, speech
+bubble, Parent control and sample player cards must not be copied into a
+backplate.
+
+| World | Reference file on the design workstation | Required composition |
+|---|---|---|
+| Sunny Rainbow Meadow | `/Users/netsanettiruye/Downloads/ChatGPT Image Apr 23, 2026 at 03_18_20 PM.png` | Lion on central flowered grass stage; title directly below; cards resting in the meadow foreground; rainbow left; flowering tree right |
+| Sky Islands Adventure | `/Users/netsanettiruye/Downloads/ChatGPT Image Apr 23, 2026 at 03_18_40 PM.png` | Lion on central floating island; side islands/castles; balloon left; rocket and rainbow right; cards on a cloud shelf |
+| River Garden | `/Users/netsanettiruye/Downloads/ChatGPT Image Apr 23, 2026 at 03_18_35 PM.png` | Lion on central garden island; waterfall left; curved river and stepping stones right; title integrated into the island; cards on the near riverbank |
+| Treehouse Village | `/Users/netsanettiruye/Downloads/ChatGPT Image Apr 23, 2026 at 03_18_28 PM.png` | Treehouse left; live lion standing on the real wooden patio; hanging wooden title sign; cards resting on that same patio; lantern-lit sunset |
+
+### Treehouse motion reference
+
+- Primary reviewed clip: `/Users/netsanettiruye/Downloads/vidu-video-3263005378019917.mp4`
+- Alternate export: `/Users/netsanettiruye/Downloads/vidu-video-3263005378019917 (1).mp4`
+- Duration/source format: approximately 5.08 seconds, 1920x1080, 24 fps.
+- Use it to judge motion language only: warm living idle, independent gaze and
+  blinks, head and torso follow-through during the paw wave, a soft settle,
+  secondary mane/tail/ear response, and continuous movement between actions.
+- Do **not** render this video in the app, extract frames, swap poses, or copy
+  its baked sample UI. The existing real-time `LionMascot` rig must reproduce
+  the motion principles while the live React controls remain interactive.
+- The reference composition is stable during the performance: treehouse on the
+  left, lion center-left on the patio, large title sign to the right, speech
+  above the lion, and one horizontal player-card row on the lower patio.
+
+When a responsive crop cannot retain every landmark, preserve this order:
+lion contact surface, title, player controls, primary world landmark, ambient
+details. Never invent a large replacement shelf that covers the supplied scene.
 
 ## Directory
 
@@ -44,12 +77,13 @@ One image never fits all — the renderer composes responsively per breakpoint.
 
 | World | backplate | midground | stage | shelf | foreground |
 |---|---|---|---|---|---|
-| sunny-meadow | code | code | code | code | code |
-| sky-islands | code | code | code | code | code |
-| treehouse | code | code | code | code | code |
-| river-garden | code | code | code | code | code |
+| sunny-meadow | painted WebP | code overlays | transparent PNG | subtle code contact veil | painted into backplate |
+| sky-islands | painted WebP | code overlays | transparent WebP | live cloud shelf | painted into backplate |
+| treehouse | painted WebP | code overlays | real patio in backplate | real patio in backplate | painted into backplate |
+| river-garden | painted WebP | code overlays | transparent WebP | live riverbank ledge | painted into backplate |
 
-**No painted plates exist yet — every layer is code-built and is the fallback.**
+The code-built layers remain fallbacks and motion overlays; they are not the
+primary art direction when an approved painted plate exists.
 
 ## How a plate is adopted
 

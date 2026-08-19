@@ -2597,3 +2597,388 @@ npm run build && npx vite preview --port 4173
    not, the technique set is not earning its keep and I want to know before it is
    applied to two more worlds.
 3. River Garden water — does it read as water, or as a blue-green area?
+## Codex Handoff to Claude - Sunny Meadow Flagship Hybrid Pass (2026-08-19)
+
+### Implemented directly by Codex
+
+- Rebuilt Sunny Meadow as a hybrid live scene: a clean painted environment plate supplies illustration quality while all product UI remains live HTML/React.
+- Added a transparent premium 3D lion and a separate transparent painted grass stage. The lion remains an interactive `LionMascot`, not a character baked into the background.
+- Preserved the code-built scene as an automatic fallback when the painted assets are unavailable.
+- Replaced the oversized zero-profile glass dialog with the normal compact `NewPlayerCard` and a secondary Parent Sign In action.
+- Fixed the Parent button icon contrast.
+- Added a real Sunny Meadow thumbnail to the World picker.
+- Fixed mascot pointer interception caused by stacking order. Tapping/clicking the lion now changes `waving` to `celebrating`; keyboard activation also works.
+- Adjusted hero/stage placement independently at phone, tablet, and desktop breakpoints so the mascot is grounded and the live title/profile controls do not cover its face.
+- Removed the flat green Sunny Meadow shelf band that competed with the painted foreground; retained a subtle contact veil for text/card readability.
+
+### New visual assets
+
+- `public/assets/worlds/sunny-meadow/backplate.webp` - clean 1672x941 illustrated environment, no text, UI, profile cards, or mascot.
+- `public/assets/worlds/sunny-meadow/stage.png` - transparent painted grass platform.
+- `public/assets/lion/waving.png`
+- `public/assets/lion/idle.png`
+- `public/assets/lion/thinking.png`
+- `public/assets/lion/celebrating.png`
+
+The four lion files currently share the first approved waving character art so the real asset pipeline is active. Generate genuinely distinct, character-consistent poses next instead of changing callers or returning to the SVG fallback.
+
+### Code changed
+
+- `src/components/homepage/worlds/SunnyMeadowWorld.tsx`
+- `src/pages/WelcomePage.tsx`
+- `src/components/homepage/PlayerCard.tsx`
+- `src/data/homepageThemes.ts`
+- `src/components/homepage/ThemePicker.tsx`
+- `src/components/homepage/ShelfSurface.tsx`
+
+### Verification completed by Codex
+
+- `npm run build`: PASS.
+- Visual browser checks: PASS at 390x844 phone, 820x1180 tablet, and 1440x900 desktop.
+- World picker opens and displays the real Sunny Meadow preview: PASS.
+- Mascot interaction changes alt text from `Lion waving` to `Lion celebrating`: PASS.
+- Browser console errors/warnings during the verified flow: none.
+- Existing unrelated build warnings remain: duplicate `workbox` key in `vite.config.ts`, and a main JavaScript chunk above 500 KB.
+
+### Non-negotiable continuation rules
+
+1. Do not use a full reference screenshot as a wallpaper. Reference screenshots contain fake title/buttons/cards and must never duplicate live UI.
+2. Every world needs separate clean environment, foreground/stage, character, and optional effect layers.
+3. Keep title, subtitle, Parent/World controls, player cards, New Player action, focus states, and accessibility as live DOM.
+4. Treat Sunny Meadow as the visual and architectural baseline. Build one world at a time and verify phone/tablet/desktop before proceeding.
+5. Use motion to clarify state and add life: restrained environment loops, deterministic mascot reactions, and `prefers-reduced-motion` support. Do not autoplay full-scene videos as the primary UI.
+6. Preserve existing fallback rendering and the current working player/onboarding flow.
+
+### Recommended next pass
+
+Create distinct transparent lion poses (`idle`, `thinking`, `celebrating`, then `reading` and `sleeping`) with locked character identity. After that, build River Garden using the same clean layered pipeline rather than polishing the old full-screen screenshot background.
+## Codex Handoff - Existing Lion Articulation Pass (2026-08-19)
+
+### Scope and art constraint
+
+Codex animated the currently approved `public/assets/lion/waving.png`; the lion was not regenerated, redesigned, recolored, or replaced by the visually different fallback SVG. The source is a single flattened PNG, so the implementation uses a non-destructive 2.5D cutout rig: multiple clipped samples of that same image are composed into independently moving anatomical layers.
+
+### Implemented
+
+- Added `src/components/character/ArticulatedLion.tsx`.
+- The live rig contains 20 source-image layers and 20 matching clip regions.
+- Independent animation groups now cover: torso, two legs, two contact paws, upper waving arm, raised paw/wrist, tail base, tail tuft, head, three mane sections, two ears, two eye regions, two eyebrow regions, cheeks, and jaw/mouth.
+- Motion uses anticipation, overlap, follow-through, weight transfer, asynchronous timing, squash/stretch, and transform-only Framer Motion animation.
+- Idle behavior includes breathing, subtle weight shifts, gaze changes, double-blink timing, independent ear twitches, tail swish, tuft lag, mane drift, and soft contact-shadow response.
+- Greeting behavior for `Who's playing today?` includes forward attention, ear perk, downward eye movement toward the player shelf, head tilt, brow/cheek expression, multi-joint welcome wave, happy tail action, mane lag, and a viseme-driven mouth timeline.
+- Welcome page runs the visual greeting once without forced audio. Activating the lion with pointer or keyboard replays the performance and browser voice after a valid user gesture.
+- After approximately 2.45 seconds the character returns to its living idle state.
+- Existing `LionMascot` and `GeneratedLion` APIs were extended rather than bypassed. Pages still select semantic mascot states.
+- `useMotionPreset().isReducedMotion` holds the articulated parts still and skips the speech-motion timeline when reduced motion is active.
+
+### Files changed
+
+- `src/components/character/ArticulatedLion.tsx` (new)
+- `src/components/character/LionMascot.tsx`
+- `src/components/GeneratedLion.tsx`
+- `src/pages/WelcomePage.tsx`
+
+### Verification
+
+- `npm run build`: PASS.
+- Browser visual QA: PASS at 390x844 and 1440x900.
+- Browser DOM inspection: 20 independent image layers / 20 clip paths.
+- Lion activation enters a semantic `speaking` state: PASS.
+- Speaking performance returns to `Lion idle`: PASS.
+- Full Vitest run: 723 passing, 29 failing. The failures are existing unrelated stale expectations/mocks in MissionCard, StarCounter, audio, recommendations, and sync tests; no lion-rig test failure appeared.
+- Repository-wide `npm run typecheck` remains red from existing project errors plus inability to write the incremental build cache under the restricted environment. The production Vite build succeeds.
+
+### Important technical boundary
+
+This is the highest-fidelity articulation possible without altering the approved flattened image. Truly deformable elbows/knees, individual toes/paw pads, perfect eye rotation, and studio-grade phoneme shapes ultimately require the same lion supplied as layered PSD/Spine/Rive artwork or a consistent turn/pose sheet. Do not replace this rig with whole-image bobbing while waiting for layered source art; upgrade its layer inputs behind the existing component contract.
+
+## Codex Handoff - True Skeletal Lion Rig Supersedes Cutout Rig (2026-08-19)
+
+### Important correction
+
+The 20-layer clipped-image implementation described immediately above has been removed and superseded. Do not restore it or build new motion on top of it. The approved lion now renders as one persistent, bone-deformed mesh; there is no sprite swapping, frame sequence, GIF, or independently clipped picture-layer animation in the primary implementation.
+
+### Current architecture
+
+- `src/components/character/ArticulatedLion.tsx` creates one dense `THREE.SkinnedMesh` with the approved lion art applied once as its texture.
+- The plane has 64x68 segments (roughly 4,400 weighted vertices) and four morph targets.
+- The 28-bone hierarchy covers root, torso, head, jaw, left/right eyes, left/right brows, left/right ears, three mane controls, three raised-arm/paw controls, two four-joint leg/paw chains, and a four-part tail/tuft chain.
+- Vertex skin weights are assigned to the anatomical controls so limbs and facial regions deform continuously instead of switching images.
+- Both legs use analytic two-bone IK. Paw targets remain planted during idle and the greeting; hips, knees, ankles, and paws counter-rotate to preserve contact while the torso transfers weight.
+- Blink, jaw opening, mouth width, and brow lift are geometry morph targets. The speaking timeline drives viseme-like jaw/width combinations for `Who's playing today?`.
+- Tail, ears, mane, and head use damped spring motion for inertia, lag, overshoot, and follow-through.
+- A single `requestAnimationFrame` loop drives continuous idle, greeting choreography, IK, morphs, springs, and rendering. The renderer uses one draw call and caps device pixel ratio at 2.
+- The greeting follows the supplied storyboard: notice/lean, ear perk, gaze toward player cards, friendly head tilt, timed speech shapes, articulated welcome wave, happy tail swish, then a smooth return to breathing/blinking idle.
+- `prefers-reduced-motion` disables the performance loops and holds a stable pose.
+- A single static PNG appears only as a failure fallback when WebGL or texture initialization fails. That fallback is not animated.
+
+### Integration and dependencies
+
+- Added `three` and `@types/three` to `package.json` and `package-lock.json`.
+- `GeneratedLion` and `LionMascot` continue to own the semantic pose contract; callers do not manipulate bones directly.
+- `WelcomePage` passes gaze, speech text/key, and completion state through the existing mascot abstraction.
+- Runtime markers for QA: `data-rig="skinned-mesh"`, `data-bones="28"`, and exactly one canvas.
+
+### Verification completed by Codex
+
+- Focused ESLint on `ArticulatedLion.tsx`: PASS.
+- `git diff --check`: PASS.
+- Fresh `npm run build`: PASS.
+- Browser inspection at the local app: one skeletal rig, 28 bones, one canvas: PASS.
+- Full `Who's playing today?` animation completes and returns to semantic `Lion idle`: PASS.
+- Bind pose, mid-performance deformation, and settled idle were visually checked on the phone viewport without mesh tearing or a blank canvas.
+- Existing unrelated build warnings remain: duplicate `workbox` key in `vite.config.ts` and large JavaScript chunks. `WelcomePage` is now about 628 KB minified / 161 KB gzip because Three.js is in that lazy route chunk.
+
+### Honest boundary and next step
+
+This is a real-time skeletal game-style rig, but it deforms a front-facing textured plane. It provides genuine bones, joint chains, IK, facial morphs, and procedural secondary physics while preserving the exact approved artwork. It is not a volumetric 3D model and cannot produce a convincing full side turn or camera orbit. Those capabilities require a modeled, UV-textured 3D lion (GLB/VRM) with an authored skeleton and facial blend shapes. If that asset is commissioned later, keep the existing `LionMascot` API and replace only the internal renderer.
+
+## Codex Handoff - Vidu Motion-Quality Tuning (2026-08-19)
+
+### References and constraint
+
+Codex inspected both supplied five-second Vidu MP4 files at 24 FPS as motion-quality references only. They are not copied, embedded, played, converted to frames, or shipped with the app. The existing one-mesh/28-bone runtime lion remains the implementation.
+
+### Motion changes
+
+- Expanded the greeting from 3.2 seconds to a five-second cinematic performance with eased anticipation and a long, soft settle matching the timing language of the references.
+- Added connected full-body mechanics: initial notice, downward gaze toward the player shelf, forward lean, lateral weight transfer, torso counter-rotation, head counter-tilt, ear perk, smile, speech, two-stage wave, tail response, blink punctuation, and return to idle.
+- Strengthened the articulated wave across shoulder, elbow, wrist, and paw rather than rotating one arm control.
+- Both planted legs continue to solve through analytic IK while the torso shifts. Paw targets remain grounded, with a small reactive load change on the wave side.
+- Mane sections now respond to both head spring velocity and torso follow-through. The four-part tail receives the inverse body impulse and settles progressively from base to tuft.
+- Added two geometry morph targets: cheek lift and paw curl. The rig now has six morph targets total: blink, jaw open, mouth width, brow lift, cheek lift, and paw curl.
+- Added deliberate greeting blinks, including a late double blink/smile punctuation inspired by the references.
+- Browser voice playback now starts 900 ms after activation, aligned with `SPEECH_START_MS`, so the audible phrase begins with the jaw/viseme timeline after the visual anticipation.
+
+### QA markers and verification
+
+- Runtime markers: `data-rig="skinned-mesh"`, `data-bones="28"`, `data-morph-targets="6"`, `data-performance-ms="5000"`.
+- Four browser frames were visually checked at anticipation, active speech/wave, counter-motion, and settled idle. No sprite transition, blank canvas, or mesh tear appeared.
+- The character returns to semantic `Lion idle` after the five-second performance.
+- Focused ESLint on `ArticulatedLion.tsx`: PASS.
+- `git diff --check`: PASS.
+- Fresh production build: PASS.
+- `WelcomePage.tsx` still has three older unrelated lint findings (unused `AvatarFrame`, unused `TITLE_COLORS`, and an existing empty catch); the voice-sync change did not add a new lint finding.
+
+## Codex Handoff - Professional Rigging Principles Pass (2026-08-19)
+
+This pass continues the existing Three.js rig. It does not migrate to Rive, Spine, Blender, sprites, video playback, or a replacement lion.
+
+### Architecture upgrades
+
+- Replaced hard one-bone anatomical partitions with overlapping normalized weight fields. Elbows, knees, ankles, neck, mane, tail, and paw boundaries now blend between neighboring controls like hand-painted skin weights rather than bending as rigid cut pieces.
+- Added a dedicated neck bone between torso and head. The runtime skeleton now has 29 bones. Neck and head receive separately damped, limited rotations so the torso, neck, and skull overlap instead of moving as one block.
+- Split the old shared blink into independent left/right eyelid morph targets with subtle timing offsets. Eye aim is now spring-smoothed and includes low-amplitude asynchronous saccades.
+- Added bone-driven jaw translation/rotation underneath the existing viseme morphs. Speech now combines skeletal jaw motion with mouth-width and jaw-open shape deformation.
+- The runtime now exposes seven morph targets: left blink, right blink, jaw open, mouth width, brow lift, cheek lift, and paw curl.
+
+### Constraints and secondary motion
+
+- Upgraded both leg solvers with soft reach near full extension, shortest-angle mixing, keyed runtime constraint strength, and per-joint limits for hips, knees, ankles, and paws.
+- Preserved planted paw targets while torso weight shifts. Constraint order is primary body pose -> neck/head overlap -> secondary physics -> leg IK -> facial morphs.
+- Spring integration now subdivides each rendered frame at up to 120 Hz. Tail, tuft, ears, mane, neck, head, and eye tracking therefore behave consistently across 24/30/60/120 Hz rendering rather than changing stiffness with frame rate.
+- Added explicit limits to neck, head, ears, shoulder, elbow, wrist/paw, and all tail-chain rotations to prevent procedural overshoot from breaking the approved silhouette.
+- The five-second greeting remains an additive layered performance: breathing/weight never stops while notice, gaze, ear perk, lean, head tilt, speech, wave, tail, and mane systems overlap.
+
+### Professional references applied
+
+- Rive: overlapping weighted vertices, independent bone chains, IK target strength, and state-layer thinking.
+- Spine: soft IK near extension, mixable constraints, explicit constraint order, and inertia/strength/damping concepts for runtime secondary motion.
+- Blender: armature hierarchy, localized multi-bone vertex influence, joint constraints, and shape-key-style facial deformation.
+- Three.js: one persistent `SkinnedMesh`, normalized skin indices/weights, one `Skeleton`, bone transforms, and morph target influences.
+
+### Verification
+
+- Runtime QA markers: `data-rig="skinned-mesh"`, `data-bones="29"`, `data-morph-targets="7"`, `data-performance-ms="5000"`.
+- Visual QA passed at 390x844, 820x1180, and 1440x900.
+- Idle, anticipation, active speech/wave, counter-motion, double-blink punctuation, and final settle were checked without blank rendering or visible mesh tearing.
+- Focused ESLint on `ArticulatedLion.tsx`: PASS.
+- `git diff --check`: PASS.
+- Fresh production build: PASS.
+
+### Exact remaining asset ceiling
+
+The current approved lion is one front-view raster image with no hidden pixels behind overlapping body parts. Weighted skinning can bend and blend the visible surface, but it cannot reveal a correctly painted inner elbow, side of the torso, back paw, opposite side of the mane, or mouth interior that does not exist in the source. This is why large turns, crossed limbs, true foot lifts, and extreme jaw poses must stay restrained.
+
+The minimum asset upgrade is not a replacement character or a set of pose pictures. It is the same approved lion separated into a layered source file (PSD or equivalent) with clean transparent parts and overlap margins: torso, head, upper/lower mane sections, ears, eye whites/irises/pupils/lids, brows, muzzle, upper/lower jaw plus mouth interior, upper/lower front limbs, paws/pads, upper/lower hind limbs, feet, three tail segments, and tuft. That layered art can be bound to this same skeleton or imported into Rive/Spine without changing the public `LionMascot` state API. A true camera orbit or convincing side view additionally requires one authored rigged GLB model with matching facial blend shapes.
+
+## Codex Handoff - Wave Readability Pass (2026-08-19)
+
+- Replaced direct shoulder/elbow rotation curves with a target-driven analytic two-bone arm solve.
+- The raised paw now follows a curved runtime path; shoulder and elbow angles are solved continuously from that target while preserving the same persistent mesh.
+- Added a distinct preparation dip before the greeting wave, shoulder translation/lift, elbow follow, phase-lagged wrist rotation, and direction-sensitive paw curl.
+- Increased the arc enough to read at the production 190px mascot size while retaining explicit joint limits.
+- Torso counterbalance, neck/head counter-tilt, planted-leg IK, tail reaction, and mane inertia remain active during the wave rather than pausing for it.
+- The arm returns through damped springs, producing a small natural overshoot before settling into idle instead of snapping to a keyed pose.
+- Focused ESLint, `git diff --check`, and production build pass. The preparation, outward sweep, return sweep, and release were visually checked in the local browser without an elbow kink or mesh tear.
+
+## Codex Handoff - Tail-Only Physics Pass (2026-08-19)
+
+- Scope was intentionally limited to the existing lion tail. No face, arm, leg, mane, composition, or visual-style system was redesigned in this pass.
+- Replaced the previous alternating sine rotations with a base-driven four-bone dynamic chain: `tail0` initiates, `tail1` and `tail2` inherit delayed counter-curvature, and `tailTuft` has the softest spring and longest follow-through.
+- Added measured torso linear/angular velocity input so the tail reacts to real body weight shifts and the greeting wave instead of playing an isolated loop.
+- The greeting now has a small anticipation tuck, a broader happy swish during speech, and a damped release into idle. Idle uses two low-amplitude frequencies to avoid a repetitive pendulum rhythm.
+- Stiffness and damping decrease toward the tip, creating overlapping action; the tuft also receives a velocity-limited stretch response that settles without a snap.
+- Every tail joint has explicit conservative angle limits because the approved front-view raster does not contain hidden rear/side tail pixels.
+- `prefers-reduced-motion` keeps the chain neutral and disables velocity stretch.
+- Focused ESLint and `git diff --check`: PASS. Phone visual QA checked idle, anticipation, active swish, delayed tuft follow-through, and final settle with no visible mesh tear or tip jump.
+
+## Codex Handoff - Welcome Browser-Comment Fixes (2026-08-19)
+
+- Grounding: added a `grounded` mode to `LionMascot`. The welcome hero no longer translates/rotates the entire character layer; paws stay planted while the internal skeleton continues breathing, shifting weight, waving, blinking, and moving its tail. The hero is seated 9px into the grass edge to hold contact at mobile and wider breakpoints.
+- Speech: separated the body-performance trigger from the mouth trigger. `speechKey` starts anticipation/body acting; `mouthKey` is fired from `SpeechSynthesisUtterance.onstart`, so visemes begin when audible speech actually begins. Jaw and mouth-width targets now use damped springs, the phrase timeline is 1.8s, and extreme jaw amplitudes were reduced.
+- Character consistency: `IdleMascot` now lazy-loads the shared `LionMascot` rig instead of the legacy `MascotLion` SVG. It is suppressed on `/` and `/onboarding`, preventing the duplicate bottom-right lion from covering New Player. Missing emotional PNG poses reuse the approved idle lion artwork while the runtime rig supplies state motion; there is no old-SVG style flash.
+- New Player: profile creation now opens in a dedicated centered, scrollable glass overlay. The hero lion and speech bubble fade out and are removed from the accessibility tree while the form is active. Removed forced input autofocus that previously scrolled mobile past the avatar choices.
+- Title: retained the staggered spring entrance and added subtle asynchronous per-letter lift, tilt, and brightness cycles. `prefers-reduced-motion` disables the continuous cycle.
+- Browser QA: passed at 390x844 and the commented 639x863 viewport. Verified planted paws, no duplicate legacy mascot, moving title transforms, unobstructed create flow, visible name field, same skinned helper rig on `/help`, and zero console errors.
+- Focused ESLint, `git diff --check`, and production build: PASS. Existing unrelated warning remains: duplicate `workbox` key in `vite.config.ts`.
+
+## Codex Handoff - Living Homepage Worlds Pass (2026-08-19)
+
+### Direction and architecture
+
+- Preserved the existing shared `LionMascot`, `WorldTitle`, profile cards, onboarding flow, theme picker, and world parallax system. No character or working flow was replaced.
+- Rebuilt Sky Islands, River Garden, and Treehouse Village around scenery-only painted plates. None of the new plates contain a lion, title, speech bubble, Parent/World control, player card, or other baked UI.
+- Live layers remain separate: the rigged lion, title, profile controls, hero contact surface, parallax, particles, moving props, and reduced-motion behavior are all runtime elements.
+- Added truthful image previews for all four themes in the World picker.
+
+### Sky Islands Adventure
+
+- Added `/public/assets/worlds/sky-islands/backplate.webp` and transparent `/public/assets/worlds/sky-islands/stage.webp`.
+- Replaced the flat purple sticker scene with a cinematic cloudscape, distant floating islands/castle/schoolhouse, and separate dimensional hero island.
+- The lion and island move as one unit, preserving paw contact. Live hot-air balloon, traveling rocket with pulsing exhaust, depth-separated cloud wisps, stars, motes, glow, and pointer parallax remain independent.
+
+### River Garden
+
+- Added `/public/assets/worlds/river-garden/backplate.webp` and transparent `/public/assets/worlds/river-garden/stage.webp`.
+- The environment now includes the missing waterfall, curved turquoise river, stepping stones, flower banks, trees, distant hills, and rainbow.
+- Added runtime water caustics, shimmer, ripple rings, two custom SVG fish, glass bubbles, sparkles, and parallax. The lion is planted on the separate shoreline island, and the title straddles its front edge.
+
+### Treehouse Village
+
+- Added `/public/assets/worlds/treehouse/backplate.webp`.
+- Replaced the geometric sunset/tree stickers with a lantern-lit treehouse, distant mountains, balloons, flowers, and a real wooden deck.
+- The shared lion stands directly on the deck with a contact shadow. The existing live wooden title sign sits beside it on desktop and below it on mobile. Lantern light pools, asynchronous fireflies, and drifting leaves animate independently.
+
+### Verification
+
+- Visual QA passed at 390x844 and 1440x900 for all three rebuilt worlds. Checked hero grounding, title/speech-bubble separation, foreground shelf placement, portrait crops, desktop composition, and theme picker previews.
+- New Player still opens in the centered glass overlay above every world; the hero is suppressed while it is open.
+- Focused ESLint: PASS.
+- `git diff --check`: PASS.
+- Production build: PASS. Existing unrelated warning remains: duplicate `workbox` key in `vite.config.ts`.
+
+### Suggested next world work
+
+- Keep Sunny Meadow as-is for now; it already uses the painted plate + separate stage architecture.
+- Do not replace these scenes with full screenshots or videos. Future polish should add small transparent prop layers (for example animated waterfall mist, balloon basket occupant, lantern bodies) only when they materially improve depth.
+- The next homepage task should be player-card/shelf material polish per world, especially replacing River Garden's broad green shelf and Treehouse's uniform board band with subtler contact surfaces that reveal more scenery.
+
+## Codex Handoff - Treehouse Patio Placement Fix (2026-08-19)
+
+- Removed the full-width synthetic plank shelf from Treehouse Village. The painted backplate already contains a perspective-correct wooden patio, so adding another board surface created a visibly fake wall behind the player controls.
+- Reordered the mobile/tablet hero composition so the live title sign remains above the character instead of pushing the lion away from the patio.
+- Repositioned the shared live lion onto the real deck: left of the first-player control on phones, grounded at the patio edge on tablet and desktop, with paws visible and no flat character replacement.
+- Shifted the first-player card to the right only below the `sm` breakpoint, keeping it beside rather than over the lion at 390px. Wider layouts preserve centered shelf alignment.
+- Reduced only Treehouse's shelf bottom padding so New Player and Parent Sign In rest naturally on the patio rather than inside a separate UI zone.
+- Visual QA passed at 390x844, 639x863, 820x1180, and 1440x900. Focused ESLint, `git diff --check`, and production build: PASS.
+
+## Codex Handoff - Approved World Reference Map (2026-08-19)
+
+- The four images supplied by the user are now explicitly mapped in `public/assets/worlds/README.md`; they are the visual source of truth, not loose inspiration.
+- Sunny Meadow = `03_18_20`, Sky Islands = `03_18_40`, River Garden = `03_18_35`, Treehouse = `03_18_28`.
+- Preserve the exact environmental logic from each image: meadow foreground, cloud shelf, riverbank, and real wooden patio respectively. Do not invent generic panels or full-width replacement surfaces that cover those landmarks.
+- The references contain sample UI, title and lion imagery. Those baked elements must not be rendered directly. Rebuild them with the existing live `LionMascot`, `WorldTitle`, speech, profile cards, and controls over scenery-only plates.
+- Responsive priority is documented: character contact surface first, then title and player controls, then primary world landmark, then ambient details.
+
+## Codex Handoff - Treehouse Image + Motion Reference (2026-08-19)
+
+- Approved still composition: `/Users/netsanettiruye/Downloads/ChatGPT Image Apr 23, 2026 at 03_18_28 PM.png` (the clipboard image supplied again by the user shows the same target).
+- Approved motion-quality clip: `/Users/netsanettiruye/Downloads/vidu-video-3263005378019917 (1).mp4` (5.08s, 1920x1080, 24fps).
+- Match the reference hierarchy deliberately: treehouse left, live lion center-left and grounded on the patio, speech above the lion, large hanging live title sign right, and a single horizontal player-card row on the lower patio.
+- Motion observations from the clip: the raised paw wave affects shoulder, torso and head; the lion blinks and redirects its gaze; the body never freezes; the wave settles gradually; mane, ears and tail provide quieter follow-through.
+- The MP4 is analysis material only. Never play it as the homepage, extract it into sprites, or substitute its baked lion/UI for the existing `LionMascot`, `WorldTitle`, profile cards, and controls.
+
+## Codex Handoff - Treehouse Grounding + Hanging Sign (2026-08-19)
+
+- Replaced the shared lion/title flex baseline with two independent scene anchors. The lion is now positioned from the patio contact line, while the sign is positioned from the overhead canopy; neither can push the other out of place.
+- The lion's paws overlap the deck edge slightly at phone and 1109x994 layouts, removing the remaining floating read while preserving the live rig and contact shadow.
+- Rebuilt only the Treehouse `WorldTitle` sign treatment to match the supplied still/video: long visible ropes, a much larger three-line `Kids / Learning / Fun!` board, live vine trim and leaves, corner hardware, subtle sign sway, and the smaller subtitle plaque below.
+- The mobile sign uses the same hanging construction from the upper canopy but clears the lion and New Player card instead of covering them.
+- Visual QA passed at 390x844 and the user-commented 1109x994 breakpoint. Focused ESLint, `git diff --check`, and production build: PASS.
+
+## Codex Handoff - Treehouse Plaque Shape + Forward Contact (2026-08-19)
+
+- Replaced the remaining rounded rectangular sign body with a purpose-built irregular SVG plaque matching the reference silhouette: asymmetric bulged sides, uneven carved perimeter, thicker dark rim and tall 3:2 proportions.
+- Changed the sign material from light tan boards to the approved deep reddish-brown wood. Added an inset bevel, organic grain paths, knot curves, dark corner hardware, a raised contour-following vine and dimensional leaves.
+- Kept the live three-line animated title and subtitle plaque independent from the scenic image. Nothing is baked into the Treehouse backplate.
+- Moved the lion farther forward at `md` and above (`bottom: 15%`, `left: 25%`) and lowered/widened its contact shadow. Both paws now visibly overlap the patio planks at 1109x994 instead of touching the rear scenery edge.
+- Visual QA passed at the exact 1109x994 browser-comment viewport and 390x844. Focused ESLint, `git diff --check`, and production build: PASS.
+
+## Codex Handoff - Vidu Frame-by-Frame Lion Review (2026-08-19)
+
+- Reviewed `/Users/netsanettiruye/Downloads/vidu-video-3263005378019917.mp4` at 3 fps across its full 5.08-second duration, plus a dedicated close crop of the lion. This is the primary motion reference; it is not an app asset.
+- Reference performance phases: (1) alert forward-facing greeting, (2) paw held high while eyes and smile engage, (3) long blink/cheek smile rather than a mechanical blink, (4) eyes lead a gradual head/chest turn, (5) raised paw lowers with wrist follow-through, and (6) planted three-quarter settle looking toward the player row.
+- The feet remain planted throughout. Motion is carried by chest weight transfer, neck/head turn, gaze, facial expression, shoulder/elbow/wrist settling, mane lag and tail counter-motion. The background and card row stay compositionally stable.
+- Existing rig already matched the five-second duration, planted-leg IK, independent blinks/gaze, articulated wave, tail springs and mane inertia. Its identified gap was the final phase: it relaxed toward the front-facing bind pose instead of completing the reference's attention shift.
+- Added a conservative `closingTurn` envelope from 2.35s to 5s. Eyes now lead right, head/chest shift and compress slightly toward a three-quarter read, the waving paw lowers and curls, and left/top/right mane sections settle with different offsets while leg IK holds both paws.
+- The turn is intentionally restrained because the approved source remains one front-view texture; stronger yaw would reveal nonexistent side pixels. A layered source or authored 3D model is still required for the full rotation visible in the generated video.
+- Focused ESLint and `git diff --check`: PASS. Production build: PASS after rerunning with normal Vite temporary-file access (the first sandboxed build was blocked from writing `node_modules/.vite-temp`).
+
+## Codex Handoff - Visible Lion Motion Pass (2026-08-19)
+
+- The previous Vidu-matched closing turn was technically present but too restrained to read at the mascot's phone size. This pass increases motion readability without changing the approved lion image or the planted leg IK targets.
+- Enlarged the shared live lion from 190px to 210px. Scaling remains bottom-centered, so the paws retain their established patio/grass contact instead of floating upward.
+- Strengthened the articulated wave through the existing shoulder/elbow/wrist IK chain: wider paw travel, clearer vertical arc, stronger wrist follow-through, and modestly expanded joint limits. The character is still one persistent `SkinnedMesh`; no pose swapping or frames were added.
+- Strengthened the late performance turn: eyes lead, head and chest follow with larger but still safe 2.5D offsets, and the raised paw visibly lowers into the settle. Feet remain planted throughout.
+- Tail now receives the closing-turn envelope directly. Its four bones counter-swing in sequence with different spring stiffness, phase lag and tuft stretch. Idle and happy swish amplitudes were also raised so secondary motion survives small rendering sizes.
+- Increased asymmetric mane lag during the wave and settle so the head, mane, torso and tail no longer stop together.
+- Manual browser QA replayed the five-second performance at the user-commented local page and captured notice/wave/settle phases. No blank canvas, detached mesh, or foot sliding was observed.
+- Focused ESLint, `git diff --check`, and production build: PASS. Vite still reports the existing large-chunk advisory; it does not block the build.
+
+## Codex Handoff - Treehouse Sign Proportion + Subtitle Attachment (2026-08-19)
+
+- Increased the live three-line title from the undersized 2.15rem/4.8vw treatment to a responsive 3.1rem/6.6vw treatment with a small additional letter scale. The words now use the plaque surface instead of sitting as a tiny label in a large empty board.
+- Fixed the detached `Create a player to begin` label. The SVG plaque reserves transparent canvas below its painted silhouette, which made a normal-flow subtitle appear to float far beneath the sign.
+- Moved the subtitle into the sign assembly at the visible plaque edge. It now hangs from two short ropes on a matching dark carved-wood slat with hardware, inset light and synchronized gentle sway.
+- Visual QA passed at the exact user-commented 778x863 viewport and at 390x844. The title remains unclipped, the subtitle is attached, and neither collides with the lion or New Player card.
+- Focused ESLint, `git diff --check`, and production build: PASS.
+
+## Codex Handoff - Treehouse Rope Continuity Fix (2026-08-19)
+
+- Fixed the main plaque hangers appearing to terminate in open air. The two ropes now extend upward through the canopy to the viewport boundary while preserving the board's established vertical position.
+- Added visible rope knots/rings where both main ropes meet the top corners of the wooden plaque. The smaller subtitle slat remains connected by its own two short ropes.
+- Visual QA passed at 778x863 and 390x844: no free rope ends, board displacement, title clipping, or subtitle detachment.
+- Focused ESLint, `git diff --check`, and production build: PASS.
+## Final Local Checkpoint - 2026-08-19
+
+### Saved implementation
+
+- Four selectable homepage worlds are implemented with layered scene assets, live UI, and motion overlays: Sunny Meadow, River Garden, Sky Islands, and Treehouse Village.
+- Treehouse now uses the approved patio composition: the lion is grounded on the deck, the title uses an irregular carved hanging plaque, the subtitle is attached as a second slat, and the suspension ropes visibly connect to the canopy.
+- The existing lion appearance is preserved while the homepage uses a persistent real-time Three.js character rig with 29 bones, articulated limbs, gaze/blink and jaw controls, tail and mane follow-through, planted paws, reduced-motion support, and a readable multi-joint greeting wave.
+- Current authored lion art includes idle, waving, thinking, and celebrating PNGs. Missing future poses reuse the idle asset; they are not silently represented as completed art.
+- World assets, lion assets, homepage components, responsive/colouring verification scripts, dependency updates, and asset documentation are included in this checkpoint.
+
+### Verification at closeout
+
+- Production build: PASS (`npm run build`).
+- Focused ESLint for the homepage world, title, player-card, mascot, and articulated-lion files: PASS.
+- Patch whitespace validation: PASS (`git diff --check`).
+- Manual visual QA: PASS for the current homepage composition at phone, tablet, and desktop widths, including the latest Treehouse grounding, sign scale, subtitle attachment, and rope continuity changes.
+- Unit suite baseline: 723 passed and 29 failed across 57 files. The 29 failures are existing expectation/mock drift in MissionCard, StarCounter, audio hooks, recommendations, and sync tests; this checkpoint does not claim that the full suite is green.
+- Full repository lint baseline: 1,011 findings (986 errors, 25 warnings), primarily existing test and motion-infrastructure debt.
+- Full repository typecheck still reports existing Framer Motion/easing/model errors outside this homepage checkpoint. The PlayerCard optional-avatar error introduced in the homepage work was fixed before saving.
+
+### Saved-state policy
+
+- Product source, approved assets, documentation, and helper scripts are committed together.
+- Generated Playwright `test-results/` changes are preserved in named git stashes rather than mixed into product history.
+- Nothing is pushed or deployed by this checkpoint. Continue locally from the saved commit and use this file, `docs/asset-manifest.md`, `docs/generation-prompts.md`, and `public/assets/lion/README.md` as the current source of truth.
+
+### Next-session priorities
+
+1. Resolve repository-wide TypeScript and ESLint debt in focused batches without disturbing the approved homepage composition.
+2. Update the six failing unit-test suites to the current UI/audio/recommendation/sync contracts.
+3. Optimize the current lion PNGs and add genuinely authored reading, sleeping, listening, cheering, pointing, and encouraging poses only when matching art is available.
+4. Continue responsive player-card polish and movement step-specific character art after the homepage checkpoint is protected.

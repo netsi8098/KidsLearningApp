@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import MascotLion from './svg/MascotLion';
+import { useLocation } from 'react-router-dom';
+
+const LionMascot = lazy(() => import('./character/LionMascot'));
 
 const IDLE_TIMEOUT = 15000; // 15 seconds
 const MESSAGES = [
@@ -13,12 +15,18 @@ const MESSAGES = [
 ];
 
 export default function IdleMascot() {
+  const location = useLocation();
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState('');
+  const isWelcomeFlow = location.pathname === '/' || location.pathname === '/onboarding';
 
   const dismiss = useCallback(() => setVisible(false), []);
 
   useEffect(() => {
+    if (isWelcomeFlow) {
+      return;
+    }
+
     let timer: ReturnType<typeof setTimeout>;
 
     function resetTimer() {
@@ -38,11 +46,11 @@ export default function IdleMascot() {
       clearTimeout(timer);
       events.forEach((e) => window.removeEventListener(e, resetTimer));
     };
-  }, []);
+  }, [isWelcomeFlow]);
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && !isWelcomeFlow && (
         <motion.div
           className="fixed bottom-20 right-4 z-50 flex items-end gap-2 cursor-pointer"
           initial={{ x: 100, opacity: 0 }}
@@ -67,12 +75,9 @@ export default function IdleMascot() {
           </motion.div>
 
           {/* Mascot */}
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <MascotLion size={60} expression="waving" animated />
-          </motion.div>
+          <Suspense fallback={null}>
+            <LionMascot state="encouraging" size={72} />
+          </Suspense>
         </motion.div>
       )}
     </AnimatePresence>

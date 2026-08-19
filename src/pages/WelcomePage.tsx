@@ -1,10 +1,9 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useProfiles } from '../hooks/useProfile';
 import AvatarPicker from '../components/AvatarPicker';
-import AvatarFrame from '../components/AvatarFrame';
 import LionMascot, { type MascotState } from '../components/character/LionMascot';
 import { PlayerCard, NewPlayerCard } from '../components/homepage/PlayerCard';
 import WorldTitle, { SpeechBubble } from '../components/homepage/WorldTitle';
@@ -82,17 +81,14 @@ function getLastPlayedId(profiles: { id?: number; lastPlayedAt: Date }[]): numbe
 function ShieldLockIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M9 1L15 4V8.5C15 12.5 12.5 15.5 9 17C5.5 15.5 3 12.5 3 8.5V4L9 1Z" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
-      <rect x="6.5" y="8" width="5" height="4" rx="1" stroke="rgba(255,255,255,0.85)" strokeWidth="1.2" fill="none" />
-      <path d="M7.5 8V6.5C7.5 5.7 8.2 5 9 5C9.8 5 10.5 5.7 10.5 6.5V8" stroke="rgba(255,255,255,0.85)" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M9 1L15 4V8.5C15 12.5 12.5 15.5 9 17C5.5 15.5 3 12.5 3 8.5V4L9 1Z" stroke="#6B5BA8" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
+      <rect x="6.5" y="8" width="5" height="4" rx="1" stroke="#6B5BA8" strokeWidth="1.2" fill="none" />
+      <path d="M7.5 8V6.5C7.5 5.7 8.2 5 9 5C9.8 5 10.5 5.7 10.5 6.5V8" stroke="#6B5BA8" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 }
 
 /* ── Animated title ── */
-
-const TITLE_COLORS = ['#FF6B6B', '#FF8C42', '#FFE66D', '#6BCB77', '#4ECDC4', '#45B7D1', '#A78BFA', '#FF8FAB'];
-
 
 /* ═══════════════════════════════════════════════
    WELCOME PAGE
@@ -108,7 +104,7 @@ const WORLD_BY_THEME: Record<string, (p: { children: ReactNode }) => JSX.Element
 
 export default function WelcomePage() {
   const navigate = useNavigate();
-  const { setCurrentPlayer } = useApp();
+  const { setCurrentPlayer, speechEnabled } = useApp();
   const { profiles, createProfile, updateLastPlayed } = useProfiles();
   const [showCreate, setShowCreate] = useState(false);
   const [createStep, setCreateStep] = useState<CreateStep>('name-avatar');
@@ -123,13 +119,17 @@ export default function WelcomePage() {
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [mascotState, setMascotState] = useState<MascotState>('waving');
+  const [mascotReactionKey, setMascotReactionKey] = useState(0);
+  const [mascotSpeechKey, setMascotSpeechKey] = useState(0);
+  const [mascotMouthKey, setMascotMouthKey] = useState(0);
+  const mascotVoiceTimerRef = useRef<number | null>(null);
   const [themeId, setThemeId] = useState(() => {
     try { return localStorage.getItem('klf-homepage-theme') || DEFAULT_THEME_ID; } catch { return DEFAULT_THEME_ID; }
   });
   const activeTheme = getThemeById(themeId);
   const handleThemeSelect = (id: string) => {
     setThemeId(id);
-    try { localStorage.setItem('klf-homepage-theme', id); } catch {}
+    try { localStorage.setItem('klf-homepage-theme', id); } catch { /* Storage can be disabled in private mode. */ }
   };
 
   const lastPlayedId = getLastPlayedId(profiles);
@@ -202,6 +202,56 @@ export default function WelcomePage() {
     setShowCreate(true);
   }
 
+  function greetFromMascot(playVoice = true) {
+    setMascotState('waving');
+    setMascotReactionKey((value) => value + 1);
+    setMascotSpeechKey((value) => value + 1);
+
+    if (mascotVoiceTimerRef.current != null) window.clearTimeout(mascotVoiceTimerRef.current);
+    if (!playVoice || !speechEnabled || !('speechSynthesis' in window)) {
+      mascotVoiceTimerRef.current = window.setTimeout(() => {
+        setMascotMouthKey((value) => value + 1);
+        mascotVoiceTimerRef.current = null;
+      }, 900);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance("Who's playing today?");
+    utterance.rate = 0.86;
+    utterance.pitch = 1.08;
+    utterance.volume = 0.92;
+    const friendlyVoice = window.speechSynthesis.getVoices().find((voice) =>
+      voice.lang.startsWith('en') && /Samantha|Ava|Google|Natural/i.test(voice.name),
+    );
+    if (friendlyVoice) utterance.voice = friendlyVoice;
+    let mouthStarted = false;
+    const startMouth = () => {
+      if (mouthStarted) return;
+      mouthStarted = true;
+      setMascotMouthKey((value) => value + 1);
+    };
+    utterance.onstart = startMouth;
+    utterance.onerror = startMouth;
+    mascotVoiceTimerRef.current = window.setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+      mascotVoiceTimerRef.current = null;
+    }, 720);
+  }
+
+  // The visual performance introduces the character without forcing audio.
+  // A tap/click replays it with voice after the browser has a user gesture.
+  useEffect(() => {
+    const timer = window.setTimeout(() => greetFromMascot(false), 850);
+    return () => {
+      window.clearTimeout(timer);
+      if (mascotVoiceTimerRef.current != null) window.clearTimeout(mascotVoiceTimerRef.current);
+      window.speechSynthesis?.cancel();
+    };
+    // The intro intentionally runs once for this mounted welcome experience.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /* ── Shared UI sections ── */
 
   const topControls = (
@@ -251,34 +301,24 @@ export default function WelcomePage() {
               ))}
             </div>
           ) : profiles.length === 0 ? (
-            /* ── Empty State ── */
+            /* The first-player action is a real shelf card, not a large modal
+               panel that hides the world the child just arrived in. */
             <motion.div
-              className="text-center py-5 px-5 rounded-3xl mx-auto max-w-xs"
-              style={{ background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}
-              initial={{ opacity: 0, y: 10 }}
+              className={`flex flex-col items-center gap-2 ${activeTheme.id === 'treehouse' ? 'relative left-[18vw] sm:left-0' : ''}`}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <p className="font-display text-lg text-[#2D2D3A] mb-1">Ready to play?</p>
-              <p className="text-xs text-[#6B6B7B] mb-3">Create a player to start learning!</p>
-              <div className="flex flex-col gap-2.5">
-                <motion.button
-                  className="w-full px-6 py-3.5 rounded-2xl font-display text-base text-white cursor-pointer animate-glow-pulse"
-                  style={{ background: 'linear-gradient(135deg, #4ECDC4 0%, #3DBDB4 100%)', boxShadow: '0 4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(78,205,196,0.3)' }}
-                  onClick={startLocalPlayerSetup}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Get Started — Free
-                </motion.button>
-                <motion.button
-                  className="w-full px-5 py-2.5 rounded-2xl font-display text-sm cursor-pointer"
-                  style={{ background: 'rgba(255,255,255,0.7)', color: '#6B6B7B', border: '2px solid rgba(0,0,0,0.08)' }}
-                  onClick={() => setShowAuthModal(true)}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Parent Sign In
-                </motion.button>
+              <div className="w-[144px] sm:w-[156px]">
+                <NewPlayerCard onClick={startLocalPlayerSetup} />
               </div>
+              <motion.button
+                className="px-4 py-2 rounded-full text-xs font-extrabold cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.82)', color: '#6553A8', boxShadow: '0 5px 16px rgba(38,45,70,0.16)' }}
+                onClick={() => setShowAuthModal(true)}
+                whileTap={{ scale: 0.95 }}
+              >
+                Parent Sign In
+              </motion.button>
             </motion.div>
           ) : (
             /* ── Player shelf: a row of cards resting on the world's
@@ -340,7 +380,7 @@ export default function WelcomePage() {
                 </div>
                 <div>
                   <p className="font-display text-xl mb-2 text-center text-[#2D2D3A]">What&apos;s your name?</p>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name..." maxLength={20} autoFocus className="w-full bg-white rounded-2xl px-4 py-3.5 text-lg text-center shadow-sm border border-[#F0EAE0] outline-none focus:ring-4 focus:ring-coral/20 focus:border-coral/30 transition-all font-bold" />
+                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name..." maxLength={20} className="w-full bg-white rounded-2xl px-4 py-3.5 text-lg text-center shadow-sm border border-[#F0EAE0] outline-none focus:ring-4 focus:ring-coral/20 focus:border-coral/30 transition-all font-bold" />
                 </div>
                 <div className="flex gap-3">
                   <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={resetCreateFlow} whileTap={{ scale: 0.95 }}>Back</motion.button>
@@ -410,25 +450,47 @@ export default function WelcomePage() {
       : (hoveredCard / (cardCount - 1)) * 2 - 1;
 
   const mascot = (
-    <div className="relative flex items-end justify-center">
+    <motion.div
+      className="relative flex items-end justify-center"
+      animate={showCreate ? { opacity: 0, y: -3, scale: 0.92 } : { opacity: 1, y: 9, scale: 1 }}
+      transition={{ duration: 0.28, ease: 'easeOut' }}
+      style={{ pointerEvents: showCreate ? 'none' : 'auto' }}
+      aria-hidden={showCreate}
+    >
       {/* The hero scales up with the viewport instead of staying phone-sized
           on desktop — the scene grows, it doesn't just get wider margins. */}
       <div
         className="[--m:1] md:[--m:1.22] lg:[--m:1.45]"
         style={{ transform: 'scale(var(--m))', transformOrigin: 'bottom center' }}
       >
-        <LionMascot
-          state={showCreate ? 'thinking' : hoveredCard != null ? 'attention' : mascotState}
-          size={168}
-          lookAt={lookAt}
-          onStateComplete={() => setMascotState('idle')}
-        />
+        <motion.button
+          type="button"
+          aria-label="Hear the lion ask who's playing today"
+          className="block border-0 bg-transparent p-0 cursor-pointer"
+          onPointerDown={() => greetFromMascot(true)}
+          onClick={(event) => { if (event.detail === 0) greetFromMascot(true); }}
+          whileHover={{ scale: 1.035 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <LionMascot
+            key={`${showCreate ? 'thinking' : hoveredCard != null ? 'attention' : mascotState}-${mascotReactionKey}`}
+            state={showCreate ? 'thinking' : hoveredCard != null ? 'attention' : mascotState}
+            size={210}
+            lookAt={lookAt}
+            speechText="Who's playing today?"
+            speechKey={mascotSpeechKey}
+            mouthKey={mascotMouthKey}
+            grounded
+            onSpeechComplete={() => setMascotState('idle')}
+            onStateComplete={() => setMascotState('idle')}
+          />
+        </motion.button>
       </div>
       {/* Greeting bubble, anchored beside the mascot's shoulder */}
-      <div className="absolute left-[82%] bottom-[58%] hidden sm:block">
+      <div className="absolute left-[76%] bottom-[62%] scale-[0.76] sm:left-[82%] sm:bottom-[58%] sm:scale-100 origin-left">
         <SpeechBubble />
       </div>
-    </div>
+    </motion.div>
   );
 
   const title = (
@@ -445,15 +507,32 @@ export default function WelcomePage() {
         <div className="flex-1 min-h-[8px]" />
         {/* Card shelf: cards rest ON a world-native ledge, with the surface
             drawn behind them so they read as objects in the scene. */}
-        <div className="relative z-20 pt-2">
-          <ShelfSurface themeId={activeTheme.id} />
-          <div className="relative z-10 px-3 md:px-6 pb-6 md:pb-8">
-            <div className="mx-auto w-full max-w-[1180px]">{cardContent}</div>
+        {!showCreate && (
+          <div className="relative z-20 pt-2">
+            <ShelfSurface themeId={activeTheme.id} />
+            <div className={`relative z-10 px-3 md:px-6 ${activeTheme.id === 'treehouse' ? 'pb-2 md:pb-4' : 'pb-6 md:pb-8'}`}>
+              <div className="mx-auto w-full max-w-[1180px]">{cardContent}</div>
+            </div>
           </div>
-        </div>
+        )}
       </World>
 
       {/* ═══ MODALS (outside scene — always accessible) ═══ */}
+      <AnimatePresence>
+        {showCreate && (
+          <motion.div
+            className="fixed inset-0 z-[60] overflow-y-auto"
+            style={{ background: 'rgba(18,45,70,0.34)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="min-h-full flex items-center justify-center px-4 py-20">
+              <div className="w-full max-w-md">{cardContent}</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}

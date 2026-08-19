@@ -1,329 +1,217 @@
 /**
- * SkyIslandsWorld — Code-built scene for the Sky Islands theme.
+ * SkyIslandsWorld — painted scenery with live, independently moving layers.
  *
- * Dreamy high-altitude palette: violet-to-blue sky, floating grass islands,
- * a rainbow band, planets, a hot-air balloon and a looping rocket.
- *
- * Layers (back to front):
- *   0. Sky gradient
- *   1. Distant elements (rainbow band, stars, planets, clouds)
- *   2. Side floating islands (castle + cottage)
- *   3. Hot-air balloon + rocket
- *   4. Central floating island + lion
- *   5. Foreground cloud bank (cards sit here)
- *   6. Animated overlays (sparkles, motes)
- *   7. Content (children prop — UI elements)
+ * The backplate contains environment only. The hero island, mascot, title,
+ * balloon, rocket, cloud wisps and particles remain separate runtime layers so
+ * the page keeps its depth and responds to pointer parallax without baking UI
+ * into a wallpaper.
  */
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
-import SkyLife from '../SkyLife';
-import { useSceneParallax, DEPTH } from '../useSceneParallax';
+import { useMotionPreset } from '../../../motion/useMotionPreset';
+import { DEPTH, useSceneParallax } from '../useSceneParallax';
+
+const spring = { type: 'spring' as const, stiffness: 52, damping: 22, mass: 0.9 };
+
+function Star({ left, top, size, delay }: { left: string; top: string; size: number; delay: number }) {
+  const { isReducedMotion } = useMotionPreset();
+  return (
+    <motion.svg
+      className="absolute"
+      style={{ left, top, filter: 'drop-shadow(0 0 7px rgba(255,236,145,0.72))' }}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      animate={isReducedMotion ? undefined : { opacity: [0.35, 1, 0.35], scale: [0.82, 1.14, 0.82], rotate: [0, 9, 0] }}
+      transition={{ duration: 2.8 + delay * 0.25, repeat: Infinity, ease: 'easeInOut', delay }}
+    >
+      <path d="M12 1.5L14.5 8.7L22 12L14.5 15.3L12 22.5L9.5 15.3L2 12L9.5 8.7Z" fill="#FFF1A8" />
+    </motion.svg>
+  );
+}
+
+function HotAirBalloon() {
+  const { isReducedMotion } = useMotionPreset();
+  return (
+    <motion.div
+      className="absolute left-[7%] top-[8%] z-[6] hidden sm:block"
+      aria-hidden="true"
+      animate={isReducedMotion ? undefined : { y: [0, -13, 0], x: [0, 7, 0], rotate: [-1.8, 1.8, -1.8] }}
+      transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      <svg width="72" height="104" viewBox="0 0 72 104" fill="none" style={{ filter: 'drop-shadow(0 10px 12px rgba(57,66,130,0.24))' }}>
+        <defs>
+          <linearGradient id="balloon-pink" x1="8" y1="4" x2="58" y2="62" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#FFC8EB" />
+            <stop offset="1" stopColor="#E56DC4" />
+          </linearGradient>
+          <linearGradient id="balloon-gold" x1="20" y1="2" x2="50" y2="64" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#FFF2A8" />
+            <stop offset="1" stopColor="#F4A943" />
+          </linearGradient>
+        </defs>
+        <path d="M36 3C55 3 66 16 64 34C62 51 51 61 36 71C21 61 10 51 8 34C6 16 17 3 36 3Z" fill="url(#balloon-pink)" stroke="rgba(255,255,255,.7)" strokeWidth="2" />
+        <path d="M36 3C45 5 49 18 48 35C47 51 42 62 36 71C30 62 25 51 24 35C23 18 27 5 36 3Z" fill="url(#balloon-gold)" opacity="0.95" />
+        <path d="M36 3C40 7 41 20 40 36C40 51 38 63 36 71C34 63 32 51 32 36C31 20 32 7 36 3Z" fill="#8ADAF5" opacity="0.92" />
+        <path d="M27 70L25 82M45 70L47 82" stroke="#856347" strokeWidth="2" />
+        <path d="M22 81H50L46 99H26L22 81Z" fill="#B9864F" />
+        <path d="M27 84H45" stroke="#E7BC7B" strokeWidth="2" />
+      </svg>
+    </motion.div>
+  );
+}
+
+function Rocket() {
+  const { isReducedMotion } = useMotionPreset();
+  if (isReducedMotion) return null;
+
+  return (
+    <motion.div
+      className="absolute z-[7] pointer-events-none"
+      style={{ left: '-16%', top: '19%' }}
+      aria-hidden="true"
+      animate={{ x: ['0vw', '126vw'], y: [28, -8, 18, -24, 4], rotate: [-9, -3, 6, -5] }}
+      transition={{ duration: 18, repeat: Infinity, ease: 'linear', repeatDelay: 3 }}
+    >
+      <svg width="86" height="50" viewBox="0 0 86 50" fill="none" style={{ filter: 'drop-shadow(0 7px 9px rgba(68,79,151,0.28))' }}>
+        <motion.path
+          d="M4 25L25 17V33L4 25Z"
+          fill="#FFD56F"
+          animate={{ scaleX: [0.8, 1.15, 0.9] }}
+          transition={{ duration: 0.42, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: '25px 25px' }}
+        />
+        <path d="M24 25C35 10 56 7 76 21C79 23 79 27 76 29C56 43 35 40 24 25Z" fill="#FFF8F0" stroke="rgba(255,255,255,.85)" strokeWidth="2" />
+        <path d="M76 21C82 23 84 25 76 29L67 34V16L76 21Z" fill="#FF79A8" />
+        <circle cx="54" cy="25" r="8" fill="#78CEF1" stroke="#9B7BE8" strokeWidth="3" />
+        <path d="M43 15L34 5L38 18Z" fill="#FF79A8" />
+        <path d="M43 35L34 45L38 32Z" fill="#FF79A8" />
+      </svg>
+    </motion.div>
+  );
+}
 
 export default function SkyIslandsWorld({ mascot, title, children }: WorldProps) {
-  const par = useSceneParallax();
+  const parallax = useSceneParallax();
+  const { isReducedMotion } = useMotionPreset();
+
   return (
-    <div className="min-h-dvh relative overflow-hidden">
-      {/* ═══ L0 — SKY GRADIENT ═══ */}
+    <div className="relative min-h-dvh overflow-hidden bg-[#79B8F4]">
+      {/* Painted environment only: no mascot, title, cards or controls. */}
+      <motion.img
+        src="/assets/worlds/sky-islands/backplate.webp"
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className="absolute -inset-[2%] h-[104%] w-[104%] max-w-none select-none object-cover"
+        style={{ objectPosition: 'center 50%' }}
+        animate={{ x: parallax.x * -DEPTH.far, y: parallax.y * -DEPTH.far }}
+        transition={spring}
+      />
+
+      {/* Atmospheric veil keeps the central live character legible over every crop. */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
         style={{
-          background: `linear-gradient(180deg,
-            #3E5CC8 0%,
-            #5A78D8 14%,
-            #7B93E4 28%,
-            #9AA9EC 42%,
-            #A99BE0 56%,
-            #9B84D4 70%,
-            #8670C4 85%,
-            #6F5BB0 100%)`,
+          background:
+            'radial-gradient(circle at 50% 37%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.08) 24%, transparent 48%), linear-gradient(180deg, transparent 58%, rgba(105,90,185,0.12) 100%)',
         }}
       />
 
-      {/* ═══ L1 — DISTANT ELEMENTS ═══ */}
+      {/* Far cloud layers move at different rates, creating depth around the plate. */}
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
-        animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
-        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+        aria-hidden="true"
+        animate={{ x: parallax.x * -DEPTH.mid, y: parallax.y * -DEPTH.mid }}
+        transition={spring}
       >
-        <SkyLife birds={false} wispColor="rgba(237,234,253,0.6)" />
-        {/* Soft light bloom top-center */}
-        <motion.div
-          className="absolute top-[-6%] left-[46%] -translate-x-1/2 w-[46vw] h-[46vw] max-w-[330px] max-h-[330px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(255,240,255,0.35) 0%, rgba(220,200,255,0.12) 50%, transparent 74%)' }}
-          animate={{ scale: [1, 1.07, 1], opacity: [0.65, 0.95, 0.65] }}
-          transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        {/* Rainbow band sweeping the right side */}
-        <svg className="absolute top-[6%] right-[-12%] w-[62%] h-[46%] opacity-45" viewBox="0 0 500 250" fill="none">
-          <defs>
-            <linearGradient id="si-rb" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#FF6B6B" />
-              <stop offset="20%" stopColor="#FF8C42" />
-              <stop offset="40%" stopColor="#FFE66D" />
-              <stop offset="60%" stopColor="#6BCB77" />
-              <stop offset="80%" stopColor="#45B7D1" />
-              <stop offset="100%" stopColor="#A78BFA" />
-            </linearGradient>
-          </defs>
-          <path d="M-20 230 Q180 40 480 10" stroke="url(#si-rb)" strokeWidth="30" strokeLinecap="round" opacity="0.75" />
-          <path d="M-20 250 Q180 62 480 32" stroke="url(#si-rb)" strokeWidth="14" strokeLinecap="round" opacity="0.4" />
-        </svg>
-
-        {/* Twinkling stars */}
-        {[
-          { l: '8%', t: '8%', s: 6 }, { l: '20%', t: '16%', s: 4 },
-          { l: '38%', t: '6%', s: 7 }, { l: '52%', t: '18%', s: 4.5 },
-          { l: '66%', t: '9%', s: 5 }, { l: '88%', t: '22%', s: 6 },
-          { l: '14%', t: '30%', s: 4 }, { l: '78%', t: '34%', s: 5 },
-        ].map((s, i) => (
-          <motion.svg
-            key={`star${i}`}
-            className="absolute" style={{ left: s.l, top: s.t }}
-            width={s.s * 2.6} height={s.s * 2.6} viewBox="0 0 24 24" fill="none"
-            animate={{ opacity: [0.25, 1, 0.25], scale: [0.8, 1.15, 0.8], rotate: [0, 12, 0] }}
-            transition={{ duration: 2.4 + i * 0.3, repeat: Infinity, ease: 'easeInOut', delay: i * 0.35 }}
-          >
-            <path d="M12 1 L14.6 8.6 L22.5 8.9 L16.2 13.7 L18.5 21.4 L12 16.8 L5.5 21.4 L7.8 13.7 L1.5 8.9 L9.4 8.6 Z" fill="#FFE9A8" />
-          </motion.svg>
-        ))}
-
-        {/* Planets */}
-        <motion.div
-          className="absolute left-[8%] top-[18%]"
-          animate={{ y: [0, -12, 0], rotate: [-4, 4, -4] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <svg width="66" height="46" viewBox="0 0 66 46" fill="none">
-            <ellipse cx="33" cy="23" rx="17" ry="17" fill="#FF9ECD" />
-            <ellipse cx="27" cy="17" rx="5" ry="4" fill="#FFC2E0" opacity="0.7" />
-            <ellipse cx="33" cy="24" rx="31" ry="8" fill="none" stroke="#FFD48A" strokeWidth="3.5" opacity="0.9" />
-          </svg>
-        </motion.div>
-
-        <motion.div
-          className="absolute right-[12%] top-[30%]"
-          animate={{ y: [0, 10, 0], rotate: [3, -3, 3] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-        >
-          <svg width="54" height="38" viewBox="0 0 54 38" fill="none">
-            <ellipse cx="27" cy="19" rx="14" ry="14" fill="#8FD4F5" />
-            <ellipse cx="22" cy="14" rx="4" ry="3.2" fill="#C4EAFB" opacity="0.7" />
-            <ellipse cx="27" cy="20" rx="25" ry="6.5" fill="none" stroke="#C3B1E1" strokeWidth="3" opacity="0.85" />
-          </svg>
-        </motion.div>
-
-        {/* Drifting clouds */}
-        {[
-          { t: '14%', l: '-14%', w: 130, o: 0.55, dur: 74 },
-          { t: '40%', l: '-24%', w: 100, o: 0.4, dur: 92 },
-        ].map((c, i) => (
+        {[{ top: '22%', size: 118, duration: 62, opacity: 0.34 }, { top: '47%', size: 88, duration: 78, opacity: 0.26 }].map((cloud, index) => (
           <motion.div
-            key={`cloud${i}`}
-            className="absolute"
-            style={{ top: c.t, left: c.l, opacity: c.o }}
-            animate={{ x: ['0vw', '130vw'] }}
-            transition={{ duration: c.dur, repeat: Infinity, ease: 'linear', delay: i * 8 }}
+            key={cloud.top}
+            className="absolute -left-32"
+            style={{ top: cloud.top, opacity: cloud.opacity, filter: 'blur(1px)' }}
+            animate={isReducedMotion ? undefined : { x: ['-5vw', '135vw'] }}
+            transition={{ duration: cloud.duration, repeat: Infinity, ease: 'linear', delay: index * 14 }}
           >
-            <svg width={c.w} height={c.w * 0.42} viewBox="0 0 140 58" fill="none">
-              <ellipse cx="42" cy="38" rx="34" ry="18" fill="#E4E0FA" />
-              <ellipse cx="72" cy="28" rx="27" ry="22" fill="#EDEAFD" />
-              <ellipse cx="98" cy="38" rx="29" ry="16" fill="#E4E0FA" />
+            <svg width={cloud.size} height={cloud.size * 0.46} viewBox="0 0 140 64" fill="none">
+              <ellipse cx="38" cy="42" rx="34" ry="18" fill="white" />
+              <ellipse cx="73" cy="29" rx="31" ry="25" fill="white" />
+              <ellipse cx="106" cy="43" rx="30" ry="17" fill="white" />
             </svg>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* ═══ L2 — SIDE FLOATING ISLANDS ═══ */}
+      <HotAirBalloon />
+      <Rocket />
+
+      {/* The island, mascot and title travel as one unit. The lion never floats
+          independently from its contact surface. */}
       <motion.div
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-        animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
-        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
-      >
-        {/* Left island with castle */}
-        <motion.div
-          className="absolute left-[-3%] bottom-[40%] w-[30vw] max-w-[170px]"
-          animate={{ y: [0, -9, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <svg viewBox="0 0 140 110" fill="none" className="w-full h-auto">
-            {/* Castle */}
-            <rect x="44" y="30" width="18" height="34" fill="#F3E3F5" />
-            <rect x="76" y="24" width="20" height="40" fill="#EDD9F0" />
-            <rect x="62" y="40" width="14" height="24" fill="#E5CCEA" />
-            <path d="M44 30 L53 14 L62 30 Z" fill="#FF8FAB" />
-            <path d="M76 24 L86 6 L96 24 Z" fill="#FF8FAB" />
-            <rect x="50" y="42" width="6" height="8" rx="2" fill="#8FD4F5" />
-            <rect x="82" y="36" width="7" height="9" rx="2" fill="#8FD4F5" />
-            {/* Island rock */}
-            <ellipse cx="70" cy="68" rx="56" ry="12" fill="#7ED87E" />
-            <path d="M14 68 Q26 96 48 104 Q70 112 92 104 Q114 96 126 68 Q98 82 70 82 Q42 82 14 68 Z" fill="#9B7B5A" />
-            {/* Tiny tree */}
-            <ellipse cx="26" cy="58" rx="10" ry="9" fill="#5FBF5F" />
-            <rect x="24" y="62" width="4" height="8" fill="#7E6044" />
-          </svg>
-        </motion.div>
-
-        {/* Right island with cottage */}
-        <motion.div
-          className="absolute right-[-2%] bottom-[43%] w-[28vw] max-w-[158px]"
-          animate={{ y: [0, 11, 0] }}
-          transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
-        >
-          <svg viewBox="0 0 140 110" fill="none" className="w-full h-auto">
-            {/* Cottage */}
-            <rect x="52" y="36" width="38" height="28" rx="3" fill="#F5E6D3" />
-            <path d="M46 36 L71 16 L96 36 Z" fill="#C3B1E1" />
-            <rect x="66" y="48" width="12" height="16" rx="2" fill="#9A7048" />
-            <rect x="56" y="44" width="8" height="8" rx="2" fill="#8FD4F5" />
-            <rect x="80" y="44" width="8" height="8" rx="2" fill="#8FD4F5" />
-            {/* Island rock */}
-            <ellipse cx="70" cy="68" rx="54" ry="12" fill="#7ED87E" />
-            <path d="M16 68 Q28 94 50 102 Q70 110 90 102 Q112 94 124 68 Q98 82 70 82 Q42 82 16 68 Z" fill="#9B7B5A" />
-            {/* Tiny trees */}
-            <ellipse cx="112" cy="58" rx="11" ry="10" fill="#4FAF4F" />
-            <rect x="110" y="62" width="4" height="9" fill="#7E6044" />
-          </svg>
-        </motion.div>
-      </motion.div>
-
-      {/* ═══ L3 — BALLOON + ROCKET ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Hot-air balloon */}
-        <motion.div
-          className="absolute left-[10%] top-[6%]"
-          animate={{ y: [0, -18, 0], x: [0, 10, 0], rotate: [-2.5, 2.5, -2.5] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <svg width="58" height="82" viewBox="0 0 58 82" fill="none">
-            <path d="M29 2 Q52 2 52 27 Q52 44 29 56 Q6 44 6 27 Q6 2 29 2 Z" fill="#FF9ECD" />
-            <path d="M29 2 Q37 2 39 27 Q40 44 29 56 Q18 44 19 27 Q21 2 29 2 Z" fill="#FFD48A" />
-            <path d="M29 2 Q33 2 34 27 Q34 44 29 56 Q24 44 24 27 Q25 2 29 2 Z" fill="#8FD4F5" />
-            <path d="M22 56 L20 66 M36 56 L38 66" stroke="#B08A5E" strokeWidth="1.6" />
-            <rect x="19" y="64" width="20" height="14" rx="3" fill="#B08A5E" />
-          </svg>
-        </motion.div>
-
-        {/* Rocket looping across the sky */}
-        <motion.div
-          className="absolute"
-          style={{ top: '22%', left: '-8%' }}
-          animate={{ x: ['0vw', '116vw'], y: [0, -34, 12, -22, 0] }}
-          transition={{ duration: 17, repeat: Infinity, ease: 'linear' }}
-        >
-          <svg width="52" height="26" viewBox="0 0 52 26" fill="none">
-            {/* Exhaust trail */}
-            <path d="M0 13 L14 10 L14 16 Z" fill="#FFD48A" opacity="0.65" />
-            <ellipse cx="34" cy="13" rx="15" ry="7" fill="#F5F1FF" />
-            <path d="M49 13 Q44 8 40 6 L40 20 Q44 18 49 13 Z" fill="#FF8FAB" />
-            <circle cx="35" cy="13" r="3.6" fill="#8FD4F5" />
-            <path d="M28 7 L22 1 L24 8 Z" fill="#FF8FAB" />
-            <path d="M28 19 L22 25 L24 18 Z" fill="#FF8FAB" />
-          </svg>
-        </motion.div>
-      </div>
-
-      {/* ═══ L4 — CENTRAL FLOATING ISLAND + LION ═══ */}
-      <motion.div
-        className="absolute bottom-[27%] left-1/2 -translate-x-1/2 flex flex-col items-center"
-        animate={{ y: [0, -7, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute z-[14] bottom-[25%] sm:bottom-[28%] md:bottom-[25%] left-1/2 w-[92vw] max-w-[640px] -translate-x-1/2"
+        animate={isReducedMotion ? undefined : { y: [0, -3, 0] }}
+        transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut' }}
       >
         <motion.div
-          className="absolute rounded-full blur-3xl pointer-events-none"
-          style={{ width: '45vw', maxWidth: 240, height: '45vw', maxHeight: 240, top: '5%', background: 'radial-gradient(circle, rgba(255,235,180,0.22) 0%, rgba(200,170,255,0.1) 50%, transparent 75%)' }}
-          animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0.9, 0.6] }}
-          transition={{ duration: 4.6, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-1/2 top-[31%] h-[42%] w-[70%] -translate-x-1/2 rounded-full blur-2xl"
+          aria-hidden="true"
+          style={{ background: 'radial-gradient(ellipse, rgba(255,239,164,0.42), rgba(181,154,255,0.12) 55%, transparent 76%)' }}
+          animate={isReducedMotion ? undefined : { opacity: [0.62, 0.92, 0.62], scale: [0.97, 1.04, 0.97] }}
+          transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        <div className="relative z-[2]" style={{ marginBottom: '-20px' }}>
-          {mascot}
-        </div>
+        <div className="relative aspect-[3/2] w-full">
+          <img
+            src="/assets/worlds/sky-islands/stage.webp"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none object-contain drop-shadow-[0_22px_20px_rgba(74,71,142,0.30)]"
+          />
 
-        {/* Floating island — grass cap over a rocky underside */}
-        <svg viewBox="0 0 280 96" className="w-[52vw] max-w-[280px] md:max-w-[344px] lg:max-w-[400px] relative z-[1]" fill="none">
-          <defs>
-            <radialGradient id="si-isle" cx="50%" cy="26%" r="70%">
-              <stop offset="0%" stopColor="#9BEE8E" />
-              <stop offset="60%" stopColor="#6CCB5A" />
-              <stop offset="100%" stopColor="#45A038" />
-            </radialGradient>
-          </defs>
-          <ellipse cx="140" cy="32" rx="130" ry="28" fill="url(#si-isle)" />
-          <ellipse cx="140" cy="26" rx="118" ry="21" fill="#84DD74" opacity="0.5" />
-          {/* Rocky underside tapering to a point */}
-          <path d="M14 34 Q30 62 60 76 Q100 94 140 96 Q180 94 220 76 Q250 62 266 34 Q206 56 140 56 Q74 56 14 34 Z" fill="#9B7B5A" />
-          <path d="M60 76 Q100 94 140 96 Q120 78 104 62 Q80 70 60 76 Z" fill="#836546" opacity="0.7" />
-          {/* Flower dots */}
-          {[[56,24,'#FF8FAB'],[94,18,'#FFE66D'],[188,20,'#C3B1E1'],[222,26,'#FF8FAB']].map(([cx, cy, f], i) => (
-            <circle key={i} cx={cx as number} cy={cy as number} r="3.4" fill={f as string} />
-          ))}
-        </svg>
+          <div className="absolute left-1/2 top-[29%] z-[2] -translate-x-1/2 -translate-y-[79%]">
+            {mascot}
+          </div>
 
-        {/* Title straddles the stage's front edge — it belongs to the world,
-            not to a text column floating above it (see reference art). */}
-        <div
-          className="relative z-[3] w-[92vw] max-w-[760px] flex justify-center px-2"
-          style={{ marginTop: 'clamp(-42px, -4.2vw, -18px)' }}
-        >
-          {title}
+          <div className="absolute left-1/2 top-[45%] z-[3] flex w-[96vw] max-w-[760px] -translate-x-1/2 justify-center px-2">
+            {title}
+          </div>
         </div>
       </motion.div>
 
-      {/* ═══ L5 — FOREGROUND CLOUD BANK ═══ */}
-      <div className="absolute bottom-0 left-0 right-0 h-[28%] pointer-events-none">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 110" preserveAspectRatio="none" fill="none">
-          <path d="M0 110 L0 40 Q40 14 88 30 Q140 48 196 26 Q252 4 306 26 Q356 46 400 24 L400 110 Z" fill="#8A72C4" opacity="0.85" />
-          <path d="M0 110 L0 64 Q60 44 128 58 Q200 72 268 54 Q334 38 400 58 L400 110 Z" fill="#7A62B4" opacity="0.9" />
-        </svg>
-      </div>
-
-      {/* ═══ L6 — ANIMATED OVERLAYS ═══ */}
+      {/* Foreground stars and drifting dust sit in front of the hero. */}
       <motion.div
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-        animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
-        transition={{ type: 'spring', stiffness: 55, damping: 20, mass: 0.9 }}
+        className="absolute inset-0 z-[8] overflow-hidden pointer-events-none"
+        aria-hidden="true"
+        animate={{ x: parallax.x * -DEPTH.fore, y: parallax.y * -DEPTH.fore }}
+        transition={spring}
       >
-        {/* Sparkles */}
-        {[
-          { l: '16%', t: '44%', s: 2.4, d: 0, dur: 2.2 },
-          { l: '60%', t: '40%', s: 2, d: 0.5, dur: 2.6 },
-          { l: '86%', t: '52%', s: 1.8, d: 1.0, dur: 2.0 },
-          { l: '30%', t: '54%', s: 2.6, d: 1.4, dur: 2.8 },
-          { l: '46%', t: '62%', s: 1.7, d: 0.3, dur: 2.4 },
-          { l: '72%', t: '60%', s: 2.1, d: 1.8, dur: 2.2 },
-        ].map((p, i) => (
-          <motion.div
-            key={`sp${i}`}
-            className="absolute rounded-full"
-            style={{
-              left: p.l, top: p.t, width: p.s * 2, height: p.s * 2,
-              background: 'white', boxShadow: `0 0 ${p.s * 5}px rgba(255,255,255,0.85)`,
-            }}
-            animate={{ opacity: [0.08, 0.85, 0.08], scale: [0.6, 1.15, 0.6] }}
-            transition={{ duration: p.dur, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
-          />
-        ))}
+        <Star left="9%" top="18%" size={18} delay={0.2} />
+        <Star left="26%" top="11%" size={12} delay={1.1} />
+        <Star left="72%" top="16%" size={15} delay={1.8} />
+        <Star left="88%" top="34%" size={19} delay={0.7} />
+        <Star left="18%" top="48%" size={10} delay={2.3} />
+        <Star left="78%" top="53%" size={11} delay={1.4} />
 
-        {/* Drifting light motes */}
         {[
-          { x1: -3, x2: 103, t: '36%', d: 0, dur: 23 },
-          { x1: 103, x2: -3, t: '50%', d: 6, dur: 27 },
-          { x1: -3, x2: 103, t: '64%', d: 11, dur: 25 },
-        ].map((m, i) => (
-          <motion.div
-            key={`mote${i}`}
-            className="absolute h-1 w-1 rounded-full bg-purple-100/60"
-            style={{ top: m.t, left: `${m.x1}%` }}
-            animate={{ left: [`${m.x1}%`, `${m.x2}%`], y: [0, -18, 8, -12, 0], opacity: [0, 0.55, 0.35, 0.55, 0] }}
-            transition={{ duration: m.dur, repeat: Infinity, ease: 'linear', delay: m.d }}
+          { left: '12%', top: '38%', duration: 16, delay: 0 },
+          { left: '42%', top: '20%', duration: 19, delay: 4 },
+          { left: '66%', top: '42%', duration: 21, delay: 7 },
+          { left: '84%', top: '26%', duration: 18, delay: 2 },
+        ].map((mote) => (
+          <motion.span
+            key={`${mote.left}-${mote.top}`}
+            className="absolute h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_9px_rgba(255,255,255,0.92)]"
+            style={{ left: mote.left, top: mote.top }}
+            animate={isReducedMotion ? undefined : { y: [0, -24, 8, 0], x: [0, 12, -8, 0], opacity: [0.12, 0.86, 0.4, 0.12] }}
+            transition={{ duration: mote.duration, repeat: Infinity, ease: 'easeInOut', delay: mote.delay }}
           />
         ))}
       </motion.div>
 
-      {/* ═══ L7 — CONTENT ═══ */}
-      <div className="relative z-10 min-h-dvh flex flex-col">{children}</div>
+      <div className="relative z-20 flex min-h-dvh flex-col">{children}</div>
     </div>
   );
 }

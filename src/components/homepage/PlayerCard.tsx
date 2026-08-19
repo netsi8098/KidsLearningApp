@@ -105,7 +105,7 @@ export function PlayerCard({
           boxShadow: `0 4px 12px ${accent}55`,
         }}
       >
-        <AvatarFrame emoji={avatarEmoji} photo={avatarPhoto} size="md" />
+        <AvatarFrame emoji={avatarEmoji ?? '\u{1F981}'} photo={avatarPhoto} size="md" />
       </span>
 
       {age != null && (
@@ -171,8 +171,8 @@ export function NewPlayerCard({ disabled, index = 0, onClick }: NewPlayerCardPro
       aria-label={disabled ? 'Player limit reached' : 'Create a new player'}
       className="relative flex flex-col items-center justify-center gap-2.5 rounded-[26px] px-3 py-6 w-full cursor-pointer"
       style={{
-        background: disabled ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.58)',
-        border: `2px dashed ${disabled ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.95)'}`,
+        background: disabled ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.86)',
+        border: `2px dashed ${disabled ? 'rgba(255,255,255,0.55)' : 'rgba(139,111,232,0.7)'}`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         opacity: disabled ? 0.55 : 1,
@@ -202,7 +202,7 @@ export function NewPlayerCard({ disabled, index = 0, onClick }: NewPlayerCardPro
       >
         +
       </motion.span>
-      <span className="font-display text-[15px]" style={{ color: '#FFFFFF', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+      <span className="font-display text-[15px]" style={{ color: '#6547C5' }}>
         New Player
       </span>
     </motion.button>

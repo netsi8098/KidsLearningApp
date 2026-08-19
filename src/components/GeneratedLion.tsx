@@ -8,11 +8,11 @@
  *   - Secondary sway (slight body rotation)
  *   - Per-pose custom motion (wave arm, bounce, etc.)
  *
- * Falls back to PremiumLion SVG when generated art isn't available.
+ * Missing emotional pose art reuses the approved idle lion while the live rig
+ * supplies the state-specific motion, so the character identity never changes.
  */
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import PremiumLion from './svg/PremiumLion';
+import ArticulatedLion from './character/ArticulatedLion';
 
 export type LionPose =
   // Required pose set — see public/assets/lion/README.md for the art spec.
@@ -41,6 +41,15 @@ interface GeneratedLionProps {
   className?: string;
   /** Disable motion (for static contexts like thumbnails) */
   static?: boolean;
+  /** Horizontal gaze target from -1 (left) to 1 (right). */
+  lookAt?: number;
+  /** Text used to drive the articulated mouth timeline. */
+  speechText?: string;
+  /** Increment to start a new speaking performance. */
+  speechKey?: number;
+  /** Increment when audible speech actually begins. */
+  mouthKey?: number;
+  onSpeechComplete?: () => void;
 }
 
 /**
@@ -66,6 +75,10 @@ const POSE_PATHS: Record<LionPose, string> = {
   clapping: '/assets/lion/clapping.png',
   jumping: '/assets/lion/jumping.png',
 };
+
+/** Authored art currently present in the repository. Missing emotional poses
+ * reuse the approved idle art and remain differentiated by the live rig. */
+const AVAILABLE_ART_POSES = new Set<LionPose>(['idle', 'waving', 'thinking', 'celebrating']);
 
 interface PoseMotion {
   breathe: { scaleY: number[]; duration: number };
@@ -167,35 +180,14 @@ export default function GeneratedLion({
   size = 200,
   className,
   static: isStatic = false,
+  lookAt = 0,
+  speechText,
+  speechKey = 0,
+  mouthKey = 0,
+  onSpeechComplete,
 }: GeneratedLionProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
-
-  const src = POSE_PATHS[pose];
+  const src = AVAILABLE_ART_POSES.has(pose) ? POSE_PATHS[pose] : POSE_PATHS.idle;
   const m = POSE_MOTION[pose] ?? BASE_MOTION;
-
-  // Preload image to detect availability
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageFailed(false);
-    const img = new Image();
-    img.onload = () => setImageLoaded(true);
-    img.onerror = () => setImageFailed(true);
-    img.src = src;
-  }, [src]);
-
-  // Fallback to SVG when generated art isn't available
-  if (imageFailed) {
-    return <PremiumLion size={size} className={className} />;
-  }
-
-  // While probing for generated art, draw the SVG rather than an empty box.
-  // With /assets/lion/ unpopulated this is the steady state, and it means
-  // dropping real pose art in later swaps the artwork without ever flashing
-  // a hole in the scene.
-  if (!imageLoaded) {
-    return <PremiumLion size={size} className={className} />;
-  }
 
   if (isStatic) {
     return (
@@ -212,57 +204,18 @@ export default function GeneratedLion({
 
   return (
     <div className={className} style={{ width: size, height: size, position: 'relative' }}>
-      {/* Layer 1: Shadow — breathes with body */}
-      <motion.div
-        className="absolute bottom-[2%] left-1/2 -translate-x-1/2 w-[60%] h-[8%] rounded-full bg-black/8 blur-md"
-        animate={{
-          scaleX: [1, 1.05, 1],
-          opacity: [0.5, 0.35, 0.5],
-        }}
-        transition={{ duration: m.breathe.duration, repeat: Infinity, ease: 'easeInOut' }}
+      <ArticulatedLion
+        src={src}
+        pose={pose}
+        size={size}
+        lookAt={lookAt}
+        speechText={speechText}
+        speechKey={speechKey}
+        mouthKey={mouthKey}
+        onSpeechComplete={onSpeechComplete}
       />
 
-      {/* Layer 2: Main body — breathing + floating + sway combined */}
-      <motion.div
-        className="relative w-full h-full"
-        animate={{
-          scaleY: m.breathe.scaleY,
-          y: m.float.y,
-          rotate: m.sway.rotate,
-        }}
-        transition={{
-          scaleY: { duration: m.breathe.duration, repeat: Infinity, ease: 'easeInOut' },
-          y: { duration: m.float.duration, repeat: Infinity, ease: 'easeInOut' },
-          rotate: { duration: m.sway.duration, repeat: Infinity, ease: 'easeInOut' },
-        }}
-        style={{ transformOrigin: 'center bottom' }}
-      >
-        <img
-          src={src}
-          alt={`Lion ${pose}`}
-          className="w-full h-full object-contain"
-          draggable={false}
-        />
-
-        {/* Layer 3: Blink overlay — semi-transparent eyelid flash */}
-        {pose !== 'sleeping' && (
-          <motion.div
-            className="absolute top-[28%] left-[25%] w-[50%] h-[8%] flex gap-[18%]"
-            animate={{ opacity: [0, 0, 1, 0, 0] }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              times: [0, 0.43, 0.46, 0.49, 1],
-            }}
-          >
-            <div className="flex-1 rounded-full bg-[#F5B55A]/80" />
-            <div className="flex-1 rounded-full bg-[#F5B55A]/80" />
-          </motion.div>
-        )}
-      </motion.div>
-
-      {/* Layer 4: Warm ambient glow behind character */}
+      {/* Warm ambient glow remains outside the anatomical rig. */}
       <motion.div
         className="absolute inset-[-10%] rounded-full pointer-events-none -z-10"
         style={{

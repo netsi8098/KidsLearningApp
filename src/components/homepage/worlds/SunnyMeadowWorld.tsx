@@ -23,6 +23,7 @@ import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
 import SkyLife from '../SkyLife';
 import { useSceneParallax, DEPTH } from '../useSceneParallax';
+import WorldPlate, { useWorldPlate } from '../WorldPlate';
 import { useMotionPreset } from '../../../motion/useMotionPreset';
 
 /** Sun position, in %, drives every highlight and shadow in the scene. */
@@ -70,10 +71,21 @@ function BlossomTree({
 export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps) {
   const par = useSceneParallax();
   const { isReducedMotion } = useMotionPreset();
+  const hasPaintedBackplate = useWorldPlate('sunny-meadow', 'backplate');
   const spring = { type: 'spring' as const, stiffness: 55, damping: 20, mass: 0.9 };
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
+      <WorldPlate theme="sunny-meadow" layer="backplate" />
+
+      {/* The illustrated plate supplies cinematic depth when available. The
+          code scene remains a complete offline fallback instead of flashing
+          behind it while the image is being resolved. */}
+      <div
+        className="absolute inset-0"
+        style={{ opacity: hasPaintedBackplate ? 0 : 1 }}
+        aria-hidden={hasPaintedBackplate ? 'true' : undefined}
+      >
       {/* ═══ L0 — SKY ═══
           Warmer toward the horizon, cooler at zenith: the single cheapest way to
           make a flat gradient read as air rather than paint. */}
@@ -86,7 +98,7 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
         }}
       />
 
-      {/* ═══ L1 — DISTANCE ═══ */}
+      {/* ═══ L1 — DISTANCE (code fallback) ═══ */}
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
         animate={{ x: par.x * -DEPTH.far, y: par.y * -DEPTH.far }}
@@ -165,7 +177,7 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
         </svg>
       </motion.div>
 
-      {/* ═══ L2 — MIDGROUND ═══ */}
+      {/* ═══ L2 — MIDGROUND (code fallback) ═══ */}
       <motion.div
         className="absolute inset-0 overflow-hidden pointer-events-none"
         animate={{ x: par.x * -DEPTH.mid, y: par.y * -DEPTH.mid }}
@@ -236,11 +248,12 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
           </svg>
         ))}
       </motion.div>
+      </div>
 
       {/* ═══ L3 — HERO STAGE ═══
           The mound is lit from the sun side and drops a contact shadow, so the
           mascot reads as standing on ground rather than pasted over it. */}
-      <div className="absolute bottom-[27%] left-1/2 -translate-x-1/2 flex flex-col items-center">
+      <div className="absolute z-[15] bottom-[36%] md:bottom-[34%] lg:bottom-[27%] left-1/2 -translate-x-1/2 flex flex-col items-center">
         <motion.div
           className="absolute rounded-full blur-3xl pointer-events-none"
           style={{
@@ -255,7 +268,22 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
           {mascot}
         </div>
 
-        <svg viewBox="0 0 300 96" className="w-[54vw] max-w-[300px] md:max-w-[360px] lg:max-w-[416px] relative z-[1]" fill="none">
+        {hasPaintedBackplate ? (
+          <img
+            src="/assets/worlds/sunny-meadow/stage.png"
+            alt=""
+            aria-hidden="true"
+            className="w-[66vw] max-w-[390px] md:max-w-[470px] lg:max-w-[540px] relative z-[1] pointer-events-none select-none"
+            style={{ marginTop: '-82px', marginBottom: '-6px' }}
+            draggable={false}
+          />
+        ) : (
+
+        <svg
+          viewBox="0 0 300 96"
+          className="w-[54vw] max-w-[300px] md:max-w-[360px] lg:max-w-[416px] relative z-[1]"
+          fill="none"
+        >
           <defs>
             <radialGradient id="sm-grass" cx="62%" cy="24%" r="76%">
               <stop offset="0%" stopColor="#A8F09A" /><stop offset="46%" stopColor="#74D45C" />
@@ -297,6 +325,7 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
             </g>
           ))}
         </svg>
+        )}
 
         {/* Title straddles the stage's front edge — part of the world, not a
             text column floating above it. */}
@@ -313,7 +342,7 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
           midground snap into focus. Hidden on phones, where it would only eat
           space the child needs. */}
       <motion.div
-        className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block"
+        className={`absolute inset-0 overflow-hidden pointer-events-none ${hasPaintedBackplate ? 'hidden' : 'hidden sm:block'}`}
         style={{ zIndex: 30 }}
         animate={{ x: par.x * -DEPTH.fore, y: par.y * -DEPTH.fore }}
         transition={spring}

@@ -24,6 +24,8 @@ export interface HomepageTheme {
   mood: 'cheerful' | 'peaceful' | 'magical' | 'cozy';
   /** Preview background color for theme picker card */
   previewBg: string;
+  /** Optional crop of the real world art for a truthful picker preview. */
+  previewImage?: string;
 }
 
 export const themes: HomepageTheme[] = [
@@ -41,6 +43,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'cheerful',
     previewBg: '#B8E4F0',
+    previewImage: '/assets/worlds/sunny-meadow/backplate.webp',
   },
   {
     id: 'sky-islands',
@@ -56,6 +59,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'magical',
     previewBg: '#2D1B69',
+    previewImage: '/assets/worlds/sky-islands/backplate.webp',
   },
   {
     id: 'river-garden',
@@ -71,6 +75,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'peaceful',
     previewBg: '#C8E6C9',
+    previewImage: '/assets/worlds/river-garden/backplate.webp',
   },
   {
     id: 'treehouse',
@@ -86,6 +91,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'cozy',
     previewBg: '#FF8C42',
+    previewImage: '/assets/worlds/treehouse/backplate.webp',
   },
 ];
 
