@@ -2196,3 +2196,118 @@ onboarding (`pointing`/`encouraging`), stories (`reading`), rewards
   deep-link fix and the slimmer artifact.
 - **15 YouTube IDs** — will not guess.
 - **All art** — cannot generate images.
+
+---
+
+# ⚠️ ACTION REQUIRED — Findings + Clarity Needed
+
+**Date:** 2026-08-19 · Written for Codex. Everything above is detail; this
+section is what actually needs a decision or an action from someone who is not
+Claude.
+
+## A · The one finding that invalidates prior audits
+
+**The production site serves nothing.** Not stale — empty.
+
+| Probe | Result |
+|---|---|
+| `GET /` | **404** — `Azure Static Web Apps - 404: Not found` |
+| `GET /index.html` | **404** |
+| `GET /assets/index-*.js` | **404** |
+| Route sweep vs prod | **0 / 41 healthy** |
+| Route sweep vs local build | **41 / 41 healthy** |
+
+- Last deploy run **failed** (`ci: retry deploy — Azure SWA upload timeouts`,
+  2026-04-23). Last *successful* deploy was earlier the same day.
+- **No deploy runs at all since 2026-04-23** — four months.
+- Run logs are past GitHub's retention window (HTTP 410); the original failure
+  cause cannot be recovered.
+- Local `HEAD` is **28 commits ahead of `origin/main`**.
+
+**Consequence:** every audit finding sourced from the live URL — blank
+`/stories`, "public routes redirect", "desktop menu is a narrow rail", the
+coloring observations — was measured against a dead or four-month-old site.
+Several were already fixed in source at the time they were reported.
+
+**Until a deploy succeeds, the only valid test target is a local production
+build:** `npm run build && npx vite preview --port 4173`. Both QA harnesses take
+`--url` so they can be re-pointed at production the moment it is live.
+
+## B · Blocking — needs someone other than Claude
+
+### B1. Deploy to `main` (highest priority, blocks all production QA)
+
+Claude cannot push — the harness permission classifier denies `git push`. 28
+commits are waiting, including the SPA-fallback fix that repairs deep links and
+the slimmer artifact (4.8 MB → 2.6 MB) that de-risks the upload timeout.
+
+```
+git push origin dev:main      # from /Users/netsanettiruye/Desktop/KidsLearningApp
+```
+
+**Also needs checking by someone with Azure access:** given the site is empty and
+the last run failed, please confirm the SWA still has a valid deployment token
+and the resource is intact. If the token has rotated or expired, a push will
+fail the same way and the empty-site symptom will persist.
+
+### B2. Real lion pose art — 12 files
+
+Codex's guidance was "use real assets where they matter most, especially
+lion/world/movement". The contract is stable and documented
+(`public/assets/lion/README.md`); art drops in with **zero code change**.
+
+**Not yet answered: who produces it, and when?** This decides Claude's next move:
+
+- **If art is coming soon** → Claude stops investing in the fallback SVG and
+  moves to wiring mascot states into onboarding / stories / rewards / loading.
+- **If art is months away** → Claude should instead build a genuinely
+  multi-pose SVG lion (real limb/expression variation per state), which is
+  meaningful work that the PNG system would later supersede.
+
+Right now Claude is doing neither, because the answer changes which is correct.
+
+### B3. 15 valid YouTube IDs
+
+Listed with title / channel / rail in the earlier audit section. Claude will not
+guess IDs. Until supplied, the dead entries stay flagged `unavailable` and
+withheld from children; 13 videos remain live.
+
+## C · Decisions Claude needs, with a default it will otherwise take
+
+Claude will proceed on the marked default if there is no reply — say so if the
+default is wrong.
+
+| # | Question | Options | Default Claude will take |
+|---|---|---|---|
+| C1 | Codex said *"1 excellent world beats 4 weak ones"* — **which world?** | sunny-meadow (closest to reference, brightest, best-lit) · river-garden (current default theme) · treehouse (most distinctive materials) | **sunny-meadow**, and switch `DEFAULT_THEME_ID` to it so the strongest world is what a new child sees first |
+| C2 | "Homepage + key child surfaces" — **which pages count?** | menu only · menu + stories + rewards · menu + stories + rewards + learn hubs | **menu + stories + rewards** — highest traffic, and rewards/stories are where mascot states pay off |
+| C3 | Yoga floor poses (downward dog, cobra, child's pose) — an upright parametric figure cannot express them | commission 3 bespoke images · reword instructions to standing variants · accept the `bend-down` approximation | **accept the approximation, flag it in-app as needing art** — rewording changes the activity's teaching content, which is a product call, not a code one |
+| C4 | Should Claude keep hardening the fallback worlds, or hold for plates? | keep improving code art · hold and do non-art work | **hold** — more code decoration risks the "sticker collage" failure mode the brief warns against; better returns elsewhere |
+
+## D · Honest state of the product
+
+**Truly fixed:** SPA deep-link 404 root cause · all Tailwind-`fixed` overlays ·
+`/privacy` crash · duplicate title + fake Parent pill · homepage composition ·
+movement instruction mismatch (36% → 1% unmatched across 117 real lines) ·
+coloring palette + artboard sizing · `/emotions` malformed path · dead videos
+withheld from children.
+
+**Fallback only — NOT premium, do not sign off:** all four worlds · the lion
+(one SVG pose across all 12 states) · the movement figure. Architecture,
+composition, layering and motion are real and testable; **finish quality is
+placeholder** and is not competitive with the reference art.
+
+**QA status:** local 41/41 routes, 80/80 homepage checks (4 worlds × 3
+viewports), 30/30 child-mobile e2e, build + tsc clean.
+**Production: 0/41 — nothing deployed.**
+
+## E · What Codex should verify next
+
+1. **Deploy, then re-run both harnesses with `--url <prod>`.** Nothing about
+   production is meaningful until a run succeeds.
+2. On the **local build**, judge *architecture and composition*, not finish:
+   is the lion grounded, do cards read as resting on the shelf, is the title
+   integrated, is motion restrained rather than noisy?
+3. Colouring studio at 390 and 1440 — palette reachability, artboard size.
+4. Movement session — step through an activity; every instruction should change
+   the pose.
