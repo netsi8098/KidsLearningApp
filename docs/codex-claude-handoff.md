@@ -2484,3 +2484,116 @@ npm run build && npx vite preview --port 4173
    not doing enough and I should be told.
 3. Movement session — every instruction should change the pose.
 4. Colouring studio at 390 and 1440 — palette reachability, artboard size.
+
+---
+
+## Pass: River Garden → flagship treatment (localhost)
+
+**Date:** 2026-08-19 · **Commit:** `e549662`
+
+### The real problem was identity, not polish
+
+River Garden did not read as a river garden. No visible water, no stepping
+stones, no waterfall — a green meadow with a teal band across it. So this was
+less "apply the technique set" than "build the world's defining material".
+
+**Water, built from five stacked cues** (any one alone reads as paint):
+
+1. depth gradient — lighter at the shoreline, deeper toward the viewer
+2. surface shimmer — short bright dashes drifting sideways at varied rates
+3. ripple rings where the island displaces the water
+4. a blurred inverted reflection beneath the island — the cue that most sells
+   "this is floating in a river"
+5. life beneath: cruising fish, rising bubbles, drifting lily pads
+
+The shoreline is a **curve with a wet lip and a shallows band**, not a ruled
+horizontal line. That single change did more than anything else — a straight
+edge across the frame reads as a seam between two flat colours.
+
+**Technique set also applied:** atmospheric perspective on the ridges, depth of
+field on foreground reeds and blooms, directed light (sun upper-**left** here, so
+highlights lean opposite to Meadow — the worlds should not feel lit by the same
+lamp), varied scale, grounded island with rocky underside. Added stepping stones
+receding in size, dragonflies, light motes.
+
+### The waterfall was removed — deliberately
+
+Four attempts: bare sheet → rock walls → irregular outcrop → raised grassy
+ledge. Every version read as a pale slab or a brown block stuck to the hillside.
+A convincing fall needs a believable **elevation change**, and flat vector shapes
+at this scale could not sell one; the last attempt actively made the scene worse.
+
+A feature that does not read is worse than its absence, so it is gone. The
+reasoning is recorded in the file so nobody re-attempts it blind. **This is the
+one reference feature that genuinely wants real art** — it belongs in
+`public/assets/worlds/river-garden/midground.webp`.
+
+### A bug I shipped and caught by looking
+
+My own "waterfall removed" note was written as a bare `/* */` inside JSX instead
+of `{/* */}`. React rendered the entire comment as **visible copy across the top
+of the page** — and all 80 existing checks passed it, because none of them looked
+at what the page actually said.
+
+Fixed, and the harness now asserts **no source artefacts in rendered text**
+(comment delimiters, `undefined` / `NaN` / `[object Object]`, source fragments).
+This is the same class of defect as the stray `N` that once shipped in the
+Explore nav. **80 → 92 checks.**
+
+Worth stating plainly: a screenshot-only or metrics-only QA pass would have
+shipped this. Rendered text needs assertions of its own.
+
+---
+
+## Status by track
+
+### ✅ Localhost verified
+
+- Build green · `tsc` clean on touched files
+- **Homepage QA 92/92** — 4 worlds × 3 viewports, now including stray-source-text
+- **Route sweep 41/41 healthy**
+- River Garden inspected at 390 / 820 / 1440
+
+### ⚠️ Production verified — nothing
+
+Unchanged and not blocking. Azure SWA is the host; whether the recorded hostname
+is current or the deployment is stale is still unresolved (needs `az login` or
+the correct URL). No production claim here is verified.
+
+### 🟡 Fallback only
+
+| Surface | State |
+|---|---|
+| **Lion** | One SVG pose behind all 14 states. Unchanged — the single biggest visual gap. |
+| **treehouse, sky-islands** | Still at the old quality level. The gap to Meadow / River Garden is now obvious, which is the intended signal. |
+| **Movement figure** | Parametric SVG; poses correct, art placeholder. |
+| **River Garden waterfall** | Absent by choice; wants real art. |
+
+### 🔒 Blocked externally
+
+Push to `main` (32 commits) · Azure reconciliation · 12 lion pose PNGs ·
+15 valid YouTube IDs.
+
+### ▶️ Next recommended
+
+**The lion.** Both flagship worlds are now clearly ahead of their mascot — a
+single static SVG pose standing in a composed scene is the weakest thing on
+screen, and it is the same in every world. Either real pose art lands, or I build
+a genuinely multi-pose SVG lion (distinct limb and expression geometry per state,
+in the manner of the movement figure, which does work).
+
+Treehouse and Sky Islands can wait; upgrading them repeats a known technique,
+while the mascot is the unsolved problem.
+
+### What Codex should verify on localhost
+
+```
+npm run build && npx vite preview --port 4173
+```
+
+1. **Meadow vs River Garden at 1440** — they should feel like different places
+   lit by different suns, not one template recoloured.
+2. **Either flagship vs Treehouse** — the quality gap should be obvious. If it is
+   not, the technique set is not earning its keep and I want to know before it is
+   applied to two more worlds.
+3. River Garden water — does it read as water, or as a blue-green area?
