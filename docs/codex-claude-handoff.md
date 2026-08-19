@@ -1814,3 +1814,143 @@ parent gates ("solve 11 + 12") and empty states are *intentionally* sparse.
 Node count is not a blank-page signal. The detector now keys off HTTP status,
 error-boundary copy, and recognised sparse-by-design screens. **Audit the local
 production build, not the deployed URL, unless the deploy is confirmed current.**
+
+---
+
+## Pass: Scene Depth · Mascot Spec · Video Audit · World Contract · Movement Poses
+
+**Date:** 2026-08-19 · **Commits:** `f74924f`, `1213585`
+
+### 1. Homepage / world quality
+
+Depth was the gap, not size — so nothing here is "bigger text plus decoration".
+
+- **`useSceneParallax`** — pointer-driven, spring damped, only a few px of
+  travel. Off under `prefers-reduced-motion` and on coarse pointers, where it
+  would fight the card shelf's scroll.
+- **Layer separation** — every world moves L1/L2/L6 at different depths
+  (far/mid/fore), so the scene stops sliding as one plate.
+- **`SkyLife`** — bird flocks with flapping wings on long traversals, plus high
+  wisp clouds above the main deck. The upper band was reading as dead space.
+- **`ShelfSurface`** — the card shelf is now a world-native ledge per theme
+  (grass bank with blade fringe · plank deck · stone riverbank · cloud shelf),
+  and cards carry a contact shadow so they sit **on** it rather than hover.
+- **Treehouse repairs** — the sign was an oversized flat slab (full width,
+  3.6 rem type, one hairline of "grain"); it is now bounded timber with plank
+  banding and corner bolts. The deck was a plain tan band; it now has
+  front-to-back boards and a lit front lip.
+
+### 2. Mascot system — matches the Lion Asset Spec
+
+- **All 12 required poses wired**: `idle`, `waving`, `excited`, `thinking`,
+  `celebrating`, `encouraging`, `surprised`, `success`, `gentle-error`,
+  `loading`, `reading`, `pointing` — plus the 5 optional expansions
+  (`sleepy`, `listening`, `sad-soft`, `clapping`, `jumping`). Each has its own
+  motion profile.
+- **Where files go:** `public/assets/lion/<pose>.png`. Filenames live only in
+  `GeneratedLion`; callers name a *state*, never a file.
+- **Resolution chain:** `MascotState → POSE_FOR_STATE → LionPose → PNG`, falling
+  back to the `PremiumLion` SVG per-pose. `GeneratedLion` now draws the SVG
+  *while probing* instead of an empty box, so there is no flash today and
+  dropping art in swaps the artwork with zero code change.
+- **State mapping note:** `attention` maps to `idle` art — it is a lean toward
+  the pointer, not a separate drawing.
+- **Wired now:** homepage (`waving` on arrival, `attention` on card hover,
+  `thinking` during create). **Ready but not yet consuming:** onboarding,
+  rewards, stories, loading and error states — they can adopt
+  `<LionMascot state="…" />` without further architecture work.
+- Spec documented in `public/assets/lion/README.md` (canvas 1024–1400 px, safe
+  padding, render sizes 120–320 px, per-pose direction, style consistency).
+
+### 3. Video audit — 15 of 28 ids are dead
+
+`scripts/audit-video-ids.mjs` checks each id against YouTube's **oEmbed**
+endpoint (authoritative; a thumbnail 404 alone is weaker evidence).
+**No replacements were invented.**
+
+| Rail | Dead | IDs |
+|---|---|---|
+| learning | 2 | `eCbHpeOgPuw` (Learn to Count 1-10), `2bLk6gXJNbw` (First Words for Baby) |
+| nursery-rhymes | 4 | `0j6k1SNgLcg` (Twinkle Twinkle), `BsSz8MpUvKc` (Old MacDonald), `gGKKOqnD-Yw` (Baby Shark), `fe4fOiaKo5o` (Head Shoulders Knees & Toes) |
+| alphabet | 2 | `Y88p4V_BCXE` (Phonics Song), `5XEN4mtV5x4` (A is for Apple) |
+| colors-shapes | 3 | `zBMOCqk-M3M` (Colors Song), `jYAQzxgMb3I` (Learn Colors with Balloons), `4CWrFXBWIFo` (Rainbow Colors Song) |
+| animals | 2 | `pWepfJ-8XR0` (Animal Sounds), `CI8RqEQmv4Y` (Sea Animals) |
+| bedtime | 2 | `ufKmPvdEpfg` (Calm Lullabies), `TpGSQOLh1ss` (Hush Little Baby) |
+
+**Replacement structure** — flip these two things and the entry is restored:
+
+```ts
+{ id: '<NEW_VALID_ID>', title: '…', channel: '…',
+  thumbnail: thumb('<NEW_VALID_ID>'), duration: '…', category: '…' }
+//  ↑ replace                                   ↑ delete `unavailable: true`
+```
+
+Until then the dead entries are flagged `unavailable: true` and withheld by
+`playableVideos`. All five consumers (VideosPage, VideoPlayer, SearchBar,
+useRecommendations, contentRegistry) were switched off the raw list — a child
+must never tap a card that leads to an unplayable video. 13 videos remain live.
+
+### 4. World asset contract
+
+`public/assets/worlds/README.md` defines the five layers, formats
+(`.webp` scenic, `.png` transparent), master sizes (2560×1440 preferred for
+plates), composition rules and per-world art direction.
+
+| World | backplate | midground | stage | shelf | foreground |
+|---|---|---|---|---|---|
+| sunny-meadow | code | code | code | code | code |
+| sky-islands | code | code | code | code | code |
+| treehouse | code | code | code | code | code |
+| river-garden | code | code | code | code | code |
+
+**No painted plates exist yet — every layer is code-built and is the fallback.**
+`<WorldPlate theme layer />` adopts art per layer as it lands. Ambient motion
+stays in code (`SkyLife`, `useSceneParallax`, each world's L6) and must never be
+baked into the art.
+
+### 5. Movement — instruction-matched visuals
+
+**The problem:** the session rendered `MovementIllustrationByTitle(activity.title)`
+for *every* step, so "Shake your arms up high!" and "Freeze!" were the same
+picture — exactly the mismatch called out in the spec.
+
+- `movementPoses.ts` maps instruction **text** to one of 22 semantic actions, so
+  matching follows meaning rather than step index. Sequences carry the previous
+  pose forward, because "Now do it faster!" continues a move.
+- **Coverage against all 117 real instruction lines: 36% → 1% unmatched.**
+- `StepPose` renders a parametric figure posed by limb geometry — one character,
+  so every pose stays on-style. Art wins when present: per-activity
+  (`/assets/movement/steps/<activity-id>/<action>.png`), then shared
+  (`/assets/movement/shared/<action>.png`), then the figure.
+
+Two bugs fixed while building it: SVG `transform-origin` was not applying across
+nested groups (limbs pivoted about the wrong point and swung off-canvas), and
+the angle convention was inverted so `stand-tall` pointed the arms nearly
+straight up. Limbs now use trigonometry — deterministic and reproducible.
+
+**Status:** all activities get semantic step poses. **No badge or step art files
+exist yet**; every activity is on the code figure. Yoga floor poses
+(downward dog, cobra, child's pose) map to `bend-down` — an upright figure
+cannot express them, so those specifically want bespoke art.
+
+### Verified this pass
+
+- Build green; `tsc` clean on every touched file
+- **Homepage QA 80/80** — 4 worlds × phone/tablet/desktop, incl. mascot never
+  >22% occluded, parent gate, player selection
+- **Route sweep 41/41 healthy**
+- **child-mobile e2e 30/30**
+- Movement session walked step by step: each instruction renders its own pose
+
+### Still short of the premium bar
+
+1. **Deployment still stale** — the deep-link 404 fix and everything since is
+   not live. Handled separately per your note; final QA should run against
+   production once pushed.
+2. **No real art anywhere** — lion, worlds and movement all run on code
+   fallbacks. Every contract is documented and wired; art is the gating item.
+3. **Desktop upper sky is better, not solved** — birds and wisps help, but a
+   painted midground plate would do more than more code decoration.
+4. **Yoga poses** need bespoke art (see above).
+5. **Untouched:** coloring ergonomics, read-aloud highlight sync — next in your
+   stated order.
