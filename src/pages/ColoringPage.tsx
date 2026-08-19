@@ -89,20 +89,39 @@ export default function ColoringPage() {
   const [showColorExpanded, setShowColorExpanded] = useState(false);
   const [activeSticker, setActiveSticker] = useState<StickerDef | null>(null);
   const [recentColors, setRecentColors] = useState<string[]>([]);
-  // Canvas resolution adapts to screen size — larger on desktop
-  const canvasW = typeof window !== 'undefined' && window.innerWidth >= 768 ? 600 : 400;
+  /* Canvas resolution is chosen once, at mount: changing it mid-session would
+     resize the backing store and discard the drawing. Large displays get a
+     genuinely higher-resolution artboard rather than an upscaled small one. */
+  const [canvasW] = useState(() => {
+    if (typeof window === 'undefined') return 400;
+    if (window.innerWidth >= 1280) return 760;
+    if (window.innerWidth >= 768) return 600;
+    return 400;
+  });
   const canvasH = Math.round(canvasW * 1.3); // maintain aspect ratio
+
+  /* Chrome reserved around the artboard: top controls plus the persistent
+     colour palette along the bottom. Without this the fit put the artboard
+     under the palette on short screens. */
+  /* The tool rail sits beside the artboard on desktop but overlays the edge on
+     phones, so horizontal reservation differs by breakpoint. Vertical is the
+     same everywhere: top controls plus the palette. */
+  const isWide = typeof window !== 'undefined' && window.innerWidth >= 768;
+  const CHROME_X = isWide ? 140 : 84;
+  const CHROME_Y = 150;
 
   // Compute fit-to-screen zoom
   const [zoom, setZoom] = useState(() => {
     if (typeof window === 'undefined') return 0.8;
-    const availW = window.innerWidth - 60;
-    const availH = window.innerHeight - 56;
-    const fitW = availW / canvasW;
-    const fitH = availH / canvasH;
-    return Math.min(fitW, fitH, 1);
+    const availW = window.innerWidth - CHROME_X;
+    const availH = window.innerHeight - CHROME_Y;
+    return Math.min(availW / canvasW, availH / canvasH, 1);
   });
-  const [panX, setPanX] = useState(0);
+  /* On phones the tool rail overlays the right edge, so centring the artboard
+     in the full viewport slides its right side underneath. Nudge it left so it
+     centres in the space the child can actually reach. */
+  const RAIL_OFFSET = isWide ? 0 : -34;
+  const [panX, setPanX] = useState(RAIL_OFFSET);
   const [panY, setPanY] = useState(0);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [showColorWheel, setShowColorWheel] = useState(false);
@@ -270,35 +289,29 @@ export default function ColoringPage() {
             onZoomIn={() => setZoom((z) => Math.min(5, z + 0.25))}
             onZoomOut={() => setZoom((z) => Math.max(0.3, z - 0.25))}
             onReset={() => {
-              setZoom(Math.min((window.innerWidth - 60) / canvasW, (window.innerHeight - 56) / canvasH, 1));
-              setPanX(0); setPanY(0);
+              setZoom(Math.min((window.innerWidth - CHROME_X) / canvasW, (window.innerHeight - CHROME_Y) / canvasH, 1));
+              setPanX(RAIL_OFFSET); setPanY(0);
             }}
           />
           </>}
         </div>
 
-        {/* ── Bottom-left: Compact color control ── */}
-        <div className="fixed bottom-3 left-3 z-30 flex items-center gap-1.5 p-1.5 rounded-2xl" style={glass} onClick={(e) => e.stopPropagation()}>
-          {/* Active color preview */}
-          <motion.button
-            className="w-10 h-10 rounded-xl cursor-pointer border-2"
-            style={{ background: activeColor, borderColor: 'rgba(255,255,255,0.2)', boxShadow: `0 0 8px ${activeColor}40` }}
-            onClick={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }}
-            whileTap={{ scale: 0.9 }}
-            aria-label="Open color picker"
+        {/* ── Bottom: persistent colour palette ──
+            Colour switching is the primary action in a colouring app, so the
+            palette is always on screen and centred under the artboard rather
+            than behind a modal reached from a corner. ColorRail already existed
+            and was imported but never rendered — the studio shipped with a
+            single swatch that only opened the wheel. */}
+        <div
+          className="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 w-[calc(100%-1.5rem)] max-w-[560px] md:max-w-[680px]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ColorRail
+            activeColor={activeColor}
+            onColorChange={handleColorChange}
+            recentColors={recentColors}
+            onColorWheelOpen={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }}
           />
-          {/* Color wheel button */}
-          <motion.button
-            className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
-            style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #45B7D1, #A78BFA)', padding: '1.5px' }}
-            onClick={() => { closeAllDrawers(); setTimeout(() => setShowColorWheel(true), 50); }}
-            whileTap={{ scale: 0.9 }}
-            aria-label="Color wheel"
-          >
-            <div className="w-full h-full rounded-[9px] flex items-center justify-center" style={{ background: 'rgba(30,30,45,0.85)' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-            </div>
-          </motion.button>
         </div>
 
         {/* ── Drawers ── */}
