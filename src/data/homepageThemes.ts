@@ -96,10 +96,8 @@ export function getThemeById(id: string): HomepageTheme {
 /** Default theme for new profiles */
 export const DEFAULT_THEME_ID = 'river-garden';
 
-/** Map theme IDs to clean hero image filenames (baked-in UI removed) */
-export const themeHeroImages: Record<string, string> = {
-  'sunny-meadow': '/assets/themes/sunny-meadow-hero-clean.jpg',
-  'sky-islands': '/assets/themes/sky-islands-hero-clean.jpg',
-  'river-garden': '/assets/themes/river-garden-hero-clean.jpg',
-  'treehouse': '/assets/themes/treehouse-hero-clean.jpg',
-};
+/* NOTE: the /assets/themes/*-hero*.jpg plates are no longer rendered.
+   Despite the "-clean" suffix they were never cleaned — each one still has the
+   title, subtitle and a fake "Parent" pill painted into the JPEG, so they
+   double-rendered against the real UI. Every theme is now a code-built world
+   under components/homepage/worlds/. The files are kept as reference art. */

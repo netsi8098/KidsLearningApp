@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useProfiles } from '../hooks/useProfile';
 import AvatarPicker from '../components/AvatarPicker';
 import AvatarFrame from '../components/AvatarFrame';
-import AnimatedBackground from '../components/svg/AnimatedBackground';
 import MascotLion from '../components/svg/MascotLion';
 import AuthModal from '../components/AuthModal';
-import PremiumLion from '../components/svg/PremiumLion';
 import ThemePicker from '../components/homepage/ThemePicker';
-import { HomepageWorldOverlay } from '../components/homepage/HomepageLiveWorldOverlays';
-import { getThemeById, DEFAULT_THEME_ID, themeHeroImages } from '../data/homepageThemes';
+import { getThemeById, DEFAULT_THEME_ID } from '../data/homepageThemes';
+import RiverGardenWorld from '../components/homepage/worlds/RiverGardenWorld';
+import SunnyMeadowWorld from '../components/homepage/worlds/SunnyMeadowWorld';
+import TreehouseWorld from '../components/homepage/worlds/TreehouseWorld';
+import SkyIslandsWorld from '../components/homepage/worlds/SkyIslandsWorld';
+
+/* ── Utility helpers ── */
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -27,7 +30,6 @@ function timeAgo(date: Date): string {
 }
 
 type CreateStep = 'name-avatar' | 'age' | 'interests';
-
 const ageOptions = [2, 3, 4, 5, 6, 7, 8] as const;
 
 function getAgeGroup(age: number): '2-3' | '4-5' | '6-8' {
@@ -54,18 +56,9 @@ const interestOptions = [
 ] as const;
 
 const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -300 : 300,
-    opacity: 0,
-  }),
+  enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({ x: direction > 0 ? -300 : 300, opacity: 0 }),
 };
 
 const ageColorMap: Record<number, string> = {
@@ -91,7 +84,8 @@ function getLastPlayedId(profiles: { id?: number; lastPlayedAt: Date }[]): numbe
   return latest.id;
 }
 
-/* Small SVG icons */
+/* ── Small SVG icons ── */
+
 function StarIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
@@ -112,20 +106,21 @@ function FlameIcon({ size = 16 }: { size?: number }) {
 function ShieldLockIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M9 1L15 4V8.5C15 12.5 12.5 15.5 9 17C5.5 15.5 3 12.5 3 8.5V4L9 1Z" stroke="#9B9BAB" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
-      <rect x="6.5" y="8" width="5" height="4" rx="1" stroke="#9B9BAB" strokeWidth="1.2" fill="none" />
-      <path d="M7.5 8V6.5C7.5 5.7 8.2 5 9 5C9.8 5 10.5 5.7 10.5 6.5V8" stroke="#9B9BAB" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M9 1L15 4V8.5C15 12.5 12.5 15.5 9 17C5.5 15.5 3 12.5 3 8.5V4L9 1Z" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
+      <rect x="6.5" y="8" width="5" height="4" rx="1" stroke="rgba(255,255,255,0.85)" strokeWidth="1.2" fill="none" />
+      <path d="M7.5 8V6.5C7.5 5.7 8.2 5 9 5C9.8 5 10.5 5.7 10.5 6.5V8" stroke="rgba(255,255,255,0.85)" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 }
 
-/* Title with per-letter rainbow colors + bounce animation */
+/* ── Animated title ── */
+
 const TITLE_COLORS = ['#FF6B6B', '#FF8C42', '#FFE66D', '#6BCB77', '#4ECDC4', '#45B7D1', '#A78BFA', '#FF8FAB'];
 
 function AnimatedTitle() {
   const text = 'Kids Learning Fun!';
   return (
-    <h1 className="text-center" style={{ fontSize: 'clamp(2.5rem, 9vw, 3.5rem)', lineHeight: 1.1 }}>
+    <h1 className="text-center" style={{ fontSize: 'clamp(2.2rem, 8vw, 3.2rem)', lineHeight: 1.1 }}>
       {text.split('').map((char, i) => (
         <span
           key={i}
@@ -134,7 +129,8 @@ function AnimatedTitle() {
             animationDelay: `${i * 0.04}s`,
             display: char === ' ' ? 'inline' : 'inline-block',
             color: TITLE_COLORS[i % TITLE_COLORS.length],
-            textShadow: '0 2px 0 rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06)',
+            textShadow: '0 2px 0 rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.18), 0 0 20px rgba(0,0,0,0.08)',
+            WebkitTextStroke: '0.5px rgba(0,0,0,0.06)',
           }}
         >
           {char === ' ' ? '\u00A0' : char}
@@ -143,6 +139,18 @@ function AnimatedTitle() {
     </h1>
   );
 }
+
+/* ═══════════════════════════════════════════════
+   WELCOME PAGE
+   ═══════════════════════════════════════════════ */
+
+/** Theme id → code-built world component */
+const WORLD_BY_THEME: Record<string, (p: { children: ReactNode }) => JSX.Element> = {
+  'river-garden': RiverGardenWorld,
+  'sunny-meadow': SunnyMeadowWorld,
+  'treehouse': TreehouseWorld,
+  'sky-islands': SkyIslandsWorld,
+};
 
 export default function WelcomePage() {
   const navigate = useNavigate();
@@ -174,7 +182,6 @@ export default function WelcomePage() {
   async function handleSelectProfile(profile: typeof profiles[number]) {
     try {
       setSelectedProfileId(profile.id ?? null);
-      // Ensure safe defaults
       const safeProfile = {
         ...profile,
         avatarEmoji: profile.avatarEmoji || '\u{1F981}',
@@ -188,7 +195,7 @@ export default function WelcomePage() {
           if (safeProfile.id) await updateLastPlayed(safeProfile.id);
           navigate('/menu');
         } catch (err) {
-          console.error('[WelcomePage] Error navigating to menu:', err);
+          console.error('[WelcomePage] Error navigating:', err);
           navigate('/menu');
         }
       }, 400);
@@ -239,28 +246,13 @@ export default function WelcomePage() {
     setShowCreate(true);
   }
 
-  return (
-    <div className="min-h-dvh flex flex-col relative overflow-hidden" style={{ background: activeTheme.id === 'treehouse' ? '#3E2723' : activeTheme.id === 'sky-islands' ? '#C8B8E8' : activeTheme.id === 'river-garden' ? '#4DB8CC' : '#7BBF5E' }}>
-      {/* ═══ SCENE: image + live animated overlays ═══ */}
-      <div className="relative w-full flex-shrink-0">
-        <img
-          src={themeHeroImages[activeTheme.id] || '/assets/themes/river-garden-hero-clean.jpg'}
-          alt=""
-          className="w-full"
-          aria-hidden="true"
-        />
-        {/* Live animated overlays — positioned on the scene */}
-        <HomepageWorldOverlay
-          worldId={activeTheme.id === 'treehouse' ? 'treehouse-village' : activeTheme.id === 'sky-islands' ? 'sky-islands' : activeTheme.id === 'sunny-meadow' ? 'sunny-meadow' : 'river-garden'}
-          className="absolute inset-0 pointer-events-none overflow-hidden"
-        />
-      </div>
+  /* ── Shared UI sections ── */
 
-
-      {/* ═══ LAYER 2: Top controls ═══ */}
-      {/* Theme picker trigger — top-left */}
+  const topControls = (
+    <div className="flex justify-between items-start px-4 pt-4 flex-shrink-0">
       <motion.button
-        className="fixed top-4 left-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer glass"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer"
+        style={{ background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
         onClick={() => setShowThemePicker(true)}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -268,12 +260,12 @@ export default function WelcomePage() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9BAB" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 0 0 0 20 10 10 0 0 0 0-20" /><circle cx="12" cy="12" r="3" /></svg>
-        <span className="text-xs font-semibold text-[#9B9BAB]">World</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 0 0 0 20 10 10 0 0 0 0-20" /><circle cx="12" cy="12" r="3" /></svg>
+        <span className="text-xs font-semibold text-white/90">World</span>
       </motion.button>
-      {/* Parent access — top-right */}
       <motion.button
-        className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer glass"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer"
+        style={{ background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
         onClick={() => setShowAuthModal(true)}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -282,308 +274,238 @@ export default function WelcomePage() {
         whileTap={{ scale: 0.95 }}
       >
         <ShieldLockIcon />
-        <span className="text-xs font-semibold text-[#9B9BAB]">Parent</span>
+        <span className="text-xs font-semibold text-white/90">Parent</span>
       </motion.button>
+    </div>
+  );
 
-      {/* ═══ GROUND ZONE — cards sit on the scene's surface ═══ */}
-      <div className="relative z-10 w-full flex-1 flex flex-col items-center px-4 md:px-8 pt-3 pb-4">
-        <div className="w-full max-w-2xl mx-auto">
-          <AnimatePresence mode="wait">
-            {!showCreate ? (
-              <motion.div
-                key="profiles"
-                className="w-full max-w-lg md:max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {isLoading ? (
-              <div className="space-y-3">
-                {[0, 1].map(i => (
-                  <div key={i} className="w-full rounded-3xl p-5 bg-white/60 backdrop-blur-sm animate-shimmer h-24" />
-                ))}
-              </div>
-            ) : profiles.length === 0 ? (
-              /* Empty State — glass card in the scene */
-              <motion.div className="text-center py-6 px-6 rounded-3xl mx-auto max-w-sm" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <MascotLion size={100} expression="excited" animated className="mx-auto mb-3" />
-                <p className="font-display text-xl text-[#2D2D3A] mb-1">Welcome!</p>
-                <p className="text-xs text-[#6B6B7B] mb-4 max-w-xs mx-auto">
-                  Create a player profile to start learning. Parent sign-in can be added later.
-                </p>
-                <div className="flex flex-col gap-3 max-w-xs mx-auto">
-                  <motion.button
-                    className="w-full px-8 py-4 rounded-2xl font-display text-lg text-white cursor-pointer animate-glow-pulse"
-                    style={{ background: 'linear-gradient(135deg, #4ECDC4 0%, #3DBDB4 100%)', boxShadow: '0 4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(78,205,196,0.3)' }}
-                    onClick={startLocalPlayerSetup}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Get Started — Free
-                  </motion.button>
-                  <motion.button
-                    className="w-full px-6 py-3 rounded-2xl font-display text-sm cursor-pointer"
-                    style={{ background: 'rgba(255,255,255,0.7)', color: '#6B6B7B', border: '2px solid #E8E0D4' }}
-                    onClick={() => setShowAuthModal(true)}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Parent Sign In
-                  </motion.button>
-                  <p className="text-[10px] text-[#9B9BAB] mt-2">
-                    Free forever. No credit card needed. COPPA compliant.
-                  </p>
-                </div>
-              </motion.div>
-            ) : (
-              /* Profile Cards */
-              <div className="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
-                {profiles.map((profile, i) => {
-                  const accent = getAccentColor(i);
-                  const isLastPlayed = profile.id === lastPlayedId && profiles.length > 1;
-                  const isSelected = profile.id === selectedProfileId;
+  const titleSection = (
+    <div className="flex-shrink-0 text-center px-4 pt-2">
+      <AnimatedTitle />
+      <motion.p
+        className="text-white/80 text-sm font-bold mt-1"
+        style={{ textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+      >
+        Who's playing today?
+      </motion.p>
+    </div>
+  );
 
-                  return (
-                    <motion.button
-                      key={profile.id}
-                      className={`relative w-full rounded-3xl p-4 flex items-center gap-4 cursor-pointer transition-all tap-bounce ${isSelected ? 'animate-pop' : ''}`}
-                      style={{
-                        background: 'rgba(255,255,255,0.85)',
-                        backdropFilter: 'blur(12px)',
-                        borderLeft: `4px solid ${accent}`,
-                        boxShadow: isLastPlayed
-                          ? `0 4px 24px rgba(45,45,58,0.1), 0 0 0 2px ${accent}30`
-                          : '0 2px 12px rgba(45,45,58,0.06)',
-                      }}
-                      onClick={() => handleSelectProfile(profile)}
-                      initial={{ x: -40, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
-                      whileHover={{ scale: 1.02, boxShadow: `0 8px 28px rgba(45,45,58,0.12)` }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {/* Avatar with colored ring */}
-                      <div
-                        className="flex-shrink-0 w-[76px] h-[76px] rounded-full flex items-center justify-center overflow-hidden"
-                        style={{ border: `4px solid ${accent}`, background: `${accent}15` }}
-                      >
-                        <AvatarFrame
-                          emoji={profile.avatarEmoji}
-                          photo={profile.avatarPhoto}
-                          size="md"
-                        />
-                      </div>
-
-                      {/* Profile info */}
-                      <div className="text-left flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-display text-[#2D2D3A]" style={{ whiteSpace: 'nowrap', fontSize: '16px' }}>{profile.name}</p>
-                          {profile.age && (
-                            <span
-                              className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white"
-                              style={{ backgroundColor: accent }}
-                            >
-                              Age {profile.age}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Stars + Streak */}
-                        <div className="flex items-center gap-3 mb-1.5">
-                          <span className="flex items-center gap-1 text-sm font-bold text-amber-600">
-                            <StarIcon size={14} />
-                            {profile.totalStars}
-                          </span>
-                          {profile.streakDays > 0 && (
-                            <span className="flex items-center gap-1 text-sm font-bold text-orange-500">
-                              <FlameIcon size={14} />
-                              {profile.streakDays}d
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Last played */}
-                        {profile.lastPlayedAt && (
-                          <p className="text-[11px] text-[#9B9BAB]">{timeAgo(new Date(profile.lastPlayedAt))}</p>
-                        )}
-                      </div>
-
-                      {/* Play indicator */}
-                      {isLastPlayed && (
-                        <div className="absolute top-2 right-3">
-                          <span className="text-[10px] font-bold text-white uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: '#4CAF7D' }}>
-                            Recent
-                          </span>
-                        </div>
-                      )}
-                    </motion.button>
-                  );
-                })}
-
-                {/* Add Player Card */}
+  const cardContent = (
+    <AnimatePresence mode="wait">
+      {!showCreate ? (
+        <motion.div key="profiles" className="w-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[0, 1].map(i => (
+                <div key={i} className="w-full rounded-3xl p-5 bg-white/20 animate-shimmer h-24" />
+              ))}
+            </div>
+          ) : profiles.length === 0 ? (
+            /* ── Empty State ── */
+            <motion.div
+              className="text-center py-5 px-5 rounded-3xl mx-auto max-w-xs"
+              style={{ background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <p className="font-display text-lg text-[#2D2D3A] mb-1">Ready to play?</p>
+              <p className="text-xs text-[#6B6B7B] mb-3">Create a player to start learning!</p>
+              <div className="flex flex-col gap-2.5">
                 <motion.button
-                  className="w-full rounded-3xl p-5 font-display text-lg cursor-pointer border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[100px] transition-all"
-                  style={profiles.length >= 6
-                    ? { opacity: 0.4, cursor: 'not-allowed', borderColor: '#9B9BAB80', color: '#9B9BAB', background: 'rgba(155,155,171,0.05)' }
-                    : { borderColor: '#4ECDC480', color: '#4ECDC4', background: 'rgba(78, 205, 196, 0.05)' }
-                  }
-                  onClick={() => { if (profiles.length < 6) setShowCreate(true); }}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: profiles.length * 0.1 }}
-                  whileHover={{ scale: profiles.length < 6 ? 1.02 : 1 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full px-6 py-3.5 rounded-2xl font-display text-base text-white cursor-pointer animate-glow-pulse"
+                  style={{ background: 'linear-gradient(135deg, #4ECDC4 0%, #3DBDB4 100%)', boxShadow: '0 4px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(78,205,196,0.3)' }}
+                  onClick={startLocalPlayerSetup}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <span className="w-12 h-12 rounded-full bg-teal/10 flex items-center justify-center text-2xl animate-float-gentle">+</span>
-                  New Player
+                  Get Started — Free
+                </motion.button>
+                <motion.button
+                  className="w-full px-5 py-2.5 rounded-2xl font-display text-sm cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.7)', color: '#6B6B7B', border: '2px solid rgba(0,0,0,0.08)' }}
+                  onClick={() => setShowAuthModal(true)}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Parent Sign In
                 </motion.button>
               </div>
-            )}
-          </motion.div>
-        ) : (
-          /* Create Flow */
-          <motion.div
-            key="create"
-            className="relative z-10 w-full max-w-sm md:max-w-md rounded-3xl p-6 overflow-hidden"
-            style={{
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(16px)',
-              boxShadow: '0 16px 48px rgba(45,45,58,0.12)',
-              border: '1px solid rgba(255,255,255,0.3)',
-            }}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-          >
-            <AnimatePresence mode="wait" custom={direction}>
-              {/* Step 1: Name & Avatar */}
-              {createStep === 'name-avatar' && (
-                <motion.div key="step-name" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }} className="space-y-5">
-                  <div>
-                    <p className="font-display text-xl mb-3 text-center text-[#2D2D3A]">Pick your avatar</p>
-                    <AvatarPicker selected={avatar} onSelect={setAvatar} photo={avatarPhoto} onPhotoChange={setAvatarPhoto} />
-                  </div>
-                  <div>
-                    <p className="font-display text-xl mb-2 text-center text-[#2D2D3A]">What&apos;s your name?</p>
-                    <input
-                      type="text" value={name} onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter name..." maxLength={20} autoFocus
-                      className="w-full bg-white rounded-2xl px-4 py-3.5 text-lg text-center shadow-sm border border-[#F0EAE0] outline-none focus:ring-4 focus:ring-coral/20 focus:border-coral/30 transition-all font-bold"
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={resetCreateFlow} whileTap={{ scale: 0.95 }}>Back</motion.button>
-                    <motion.button className="flex-1 bg-gradient-to-r from-coral to-[#FF8E8E] text-white rounded-2xl py-3 font-bold shadow-lg cursor-pointer disabled:opacity-40" onClick={() => goToStep('age')} disabled={!name.trim()} whileTap={{ scale: 0.95 }}>Next</motion.button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 2: Age */}
-              {createStep === 'age' && (
-                <motion.div key="step-age" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }} className="space-y-5">
-                  <div>
-                    <p className="font-display text-xl mb-1 text-center text-[#2D2D3A]">How old are you?</p>
-                    {selectedAge && (
-                      <motion.p className="text-center text-[#6B6B7B] text-sm font-bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        {getAgeLabel(selectedAge)}
-                      </motion.p>
+            </motion.div>
+          ) : (
+            /* ── Profile Cards ── */
+            <div className="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+              {profiles.map((profile, i) => {
+                const accent = getAccentColor(i);
+                const isLastPlayed = profile.id === lastPlayedId && profiles.length > 1;
+                const isSelected = profile.id === selectedProfileId;
+                return (
+                  <motion.button
+                    key={profile.id}
+                    className={`relative w-full rounded-3xl p-4 flex items-center gap-4 cursor-pointer transition-all tap-bounce ${isSelected ? 'animate-pop' : ''}`}
+                    style={{
+                      background: 'rgba(255,255,255,0.82)',
+                      backdropFilter: 'blur(12px)',
+                      borderLeft: `4px solid ${accent}`,
+                      boxShadow: isLastPlayed
+                        ? `0 4px 24px rgba(0,0,0,0.15), 0 0 0 2px ${accent}40`
+                        : '0 2px 12px rgba(0,0,0,0.1)',
+                    }}
+                    onClick={() => handleSelectProfile(profile)}
+                    initial={{ x: -40, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
+                    whileHover={{ scale: 1.02, boxShadow: '0 8px 28px rgba(0,0,0,0.15)' }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <div className="flex-shrink-0 w-[76px] h-[76px] rounded-full flex items-center justify-center overflow-hidden" style={{ border: `4px solid ${accent}`, background: `${accent}15` }}>
+                      <AvatarFrame emoji={profile.avatarEmoji} photo={profile.avatarPhoto} size="md" />
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="font-display text-[#2D2D3A]" style={{ whiteSpace: 'nowrap', fontSize: '16px' }}>{profile.name}</p>
+                        {profile.age && <span className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white" style={{ backgroundColor: accent }}>Age {profile.age}</span>}
+                      </div>
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <span className="flex items-center gap-1 text-sm font-bold text-amber-600"><StarIcon size={14} />{profile.totalStars}</span>
+                        {profile.streakDays > 0 && <span className="flex items-center gap-1 text-sm font-bold text-orange-500"><FlameIcon size={14} />{profile.streakDays}d</span>}
+                      </div>
+                      {profile.lastPlayedAt && <p className="text-[11px] text-[#9B9BAB]">{timeAgo(new Date(profile.lastPlayedAt))}</p>}
+                    </div>
+                    {isLastPlayed && (
+                      <div className="absolute top-2 right-3">
+                        <span className="text-[10px] font-bold text-white uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: '#4CAF7D' }}>Recent</span>
+                      </div>
                     )}
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {ageOptions.map((age, i) => (
-                      <motion.button
-                        key={age}
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-display text-white cursor-pointer shadow-lg transition-all tap-bounce ${
-                          selectedAge === age ? 'ring-4 ring-offset-2 ring-coral/50 scale-110' : 'opacity-80'
-                        }`}
-                        style={{ backgroundColor: ageColorMap[age] }}
-                        onClick={() => setSelectedAge(age)}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', delay: i * 0.05 }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        {age}
-                      </motion.button>
-                    ))}
-                  </div>
-                  <div className="flex gap-3">
-                    <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={() => goToStep('name-avatar')} whileTap={{ scale: 0.95 }}>Back</motion.button>
-                    <motion.button className="flex-1 bg-white/60 text-[#9B9BAB] rounded-2xl py-3 font-bold cursor-pointer border border-[#F0EAE0]" onClick={() => { setSelectedAge(null); goToStep('interests'); }} whileTap={{ scale: 0.95 }}>Skip</motion.button>
-                    <motion.button className="flex-1 bg-gradient-to-r from-coral to-[#FF8E8E] text-white rounded-2xl py-3 font-bold shadow-lg cursor-pointer disabled:opacity-40" onClick={() => goToStep('interests')} disabled={!selectedAge} whileTap={{ scale: 0.95 }}>Next</motion.button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 3: Interests */}
-              {createStep === 'interests' && (
-                <motion.div key="step-interests" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }} className="space-y-5">
-                  <div>
-                    <p className="font-display text-xl mb-1 text-center text-[#2D2D3A]">What do you like?</p>
-                    <p className="text-center text-[#9B9BAB] text-sm font-bold">Pick 1-4 things you enjoy</p>
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-2.5">
-                    {interestOptions.map((interest, i) => {
-                      const isActive = selectedInterests.includes(interest.key);
-                      return (
-                        <motion.button
-                          key={interest.key}
-                          className="px-4 py-2.5 rounded-full flex items-center gap-2 font-bold text-sm cursor-pointer shadow-sm border-2 transition-all tap-bounce"
-                          style={{
-                            backgroundColor: isActive ? interest.color : 'white',
-                            color: isActive ? 'white' : '#2D2D3A',
-                            borderColor: isActive ? interest.color : '#F0EAE0',
-                          }}
-                          onClick={() => handleToggleInterest(interest.key)}
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', delay: i * 0.04 }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          {interest.label}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-3">
-                    <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={() => goToStep('age')} whileTap={{ scale: 0.95 }}>Back</motion.button>
-                    <motion.button className="flex-1 bg-white/60 text-[#9B9BAB] rounded-2xl py-3 font-bold cursor-pointer border border-[#F0EAE0]" onClick={handleFinishCreate} whileTap={{ scale: 0.95 }}>Skip</motion.button>
-                    <motion.button
-                      className="flex-1 text-white rounded-2xl py-3 font-display text-base shadow-lg cursor-pointer disabled:opacity-40 animate-glow-pulse"
-                      style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)' }}
-                      onClick={handleFinishCreate}
-                      disabled={selectedInterests.length === 0}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Let&apos;s Go!
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
+                  </motion.button>
+                );
+              })}
+              <motion.button
+                className="w-full rounded-3xl p-5 font-display text-lg cursor-pointer border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[100px] transition-all"
+                style={profiles.length >= 6
+                  ? { opacity: 0.4, cursor: 'not-allowed', borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }
+                  : { borderColor: 'rgba(78,205,196,0.6)', color: '#4ECDC4', background: 'rgba(78,205,196,0.08)' }
+                }
+                onClick={() => { if (profiles.length < 6) setShowCreate(true); }}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: profiles.length * 0.1 }}
+                whileHover={{ scale: profiles.length < 6 ? 1.02 : 1 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-2xl animate-float-gentle">+</span>
+                New Player
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+      ) : (
+        /* ═══ CREATE FLOW ═══ */
+        <motion.div
+          key="create"
+          className="relative w-full max-w-sm md:max-w-md mx-auto rounded-3xl p-6 overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(16px)', boxShadow: '0 16px 48px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.3)' }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+        >
+          <AnimatePresence mode="wait" custom={direction}>
+            {createStep === 'name-avatar' && (
+              <motion.div key="step-name" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }} className="space-y-5">
+                <div>
+                  <p className="font-display text-xl mb-3 text-center text-[#2D2D3A]">Pick your avatar</p>
+                  <AvatarPicker selected={avatar} onSelect={setAvatar} photo={avatarPhoto} onPhotoChange={setAvatarPhoto} />
+                </div>
+                <div>
+                  <p className="font-display text-xl mb-2 text-center text-[#2D2D3A]">What&apos;s your name?</p>
+                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name..." maxLength={20} autoFocus className="w-full bg-white rounded-2xl px-4 py-3.5 text-lg text-center shadow-sm border border-[#F0EAE0] outline-none focus:ring-4 focus:ring-coral/20 focus:border-coral/30 transition-all font-bold" />
+                </div>
+                <div className="flex gap-3">
+                  <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={resetCreateFlow} whileTap={{ scale: 0.95 }}>Back</motion.button>
+                  <motion.button className="flex-1 bg-gradient-to-r from-coral to-[#FF8E8E] text-white rounded-2xl py-3 font-bold shadow-lg cursor-pointer disabled:opacity-40" onClick={() => goToStep('age')} disabled={!name.trim()} whileTap={{ scale: 0.95 }}>Next</motion.button>
+                </div>
+              </motion.div>
+            )}
+            {createStep === 'age' && (
+              <motion.div key="step-age" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }} className="space-y-5">
+                <div>
+                  <p className="font-display text-xl mb-1 text-center text-[#2D2D3A]">How old are you?</p>
+                  {selectedAge && <motion.p className="text-center text-[#6B6B7B] text-sm font-bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{getAgeLabel(selectedAge)}</motion.p>}
+                </div>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {ageOptions.map((age, i) => (
+                    <motion.button key={age} className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-display text-white cursor-pointer shadow-lg transition-all tap-bounce ${selectedAge === age ? 'ring-4 ring-offset-2 ring-coral/50 scale-110' : 'opacity-80'}`} style={{ backgroundColor: ageColorMap[age] }} onClick={() => setSelectedAge(age)} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: i * 0.05 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>{age}</motion.button>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={() => goToStep('name-avatar')} whileTap={{ scale: 0.95 }}>Back</motion.button>
+                  <motion.button className="flex-1 bg-white/60 text-[#9B9BAB] rounded-2xl py-3 font-bold cursor-pointer border border-[#F0EAE0]" onClick={() => { setSelectedAge(null); goToStep('interests'); }} whileTap={{ scale: 0.95 }}>Skip</motion.button>
+                  <motion.button className="flex-1 bg-gradient-to-r from-coral to-[#FF8E8E] text-white rounded-2xl py-3 font-bold shadow-lg cursor-pointer disabled:opacity-40" onClick={() => goToStep('interests')} disabled={!selectedAge} whileTap={{ scale: 0.95 }}>Next</motion.button>
+                </div>
+              </motion.div>
+            )}
+            {createStep === 'interests' && (
+              <motion.div key="step-interests" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }} className="space-y-5">
+                <div>
+                  <p className="font-display text-xl mb-1 text-center text-[#2D2D3A]">What do you like?</p>
+                  <p className="text-center text-[#9B9BAB] text-sm font-bold">Pick 1-4 things you enjoy</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2.5">
+                  {interestOptions.map((interest, i) => {
+                    const isActive = selectedInterests.includes(interest.key);
+                    return (
+                      <motion.button key={interest.key} className="px-4 py-2.5 rounded-full flex items-center gap-2 font-bold text-sm cursor-pointer shadow-sm border-2 transition-all tap-bounce" style={{ backgroundColor: isActive ? interest.color : 'white', color: isActive ? 'white' : '#2D2D3A', borderColor: isActive ? interest.color : '#F0EAE0' }} onClick={() => handleToggleInterest(interest.key)} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: i * 0.04 }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}>{interest.label}</motion.button>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-3">
+                  <motion.button className="flex-1 bg-white rounded-2xl py-3 font-bold cursor-pointer text-[#6B6B7B] shadow-sm border border-[#F0EAE0]" onClick={() => goToStep('age')} whileTap={{ scale: 0.95 }}>Back</motion.button>
+                  <motion.button className="flex-1 bg-white/60 text-[#9B9BAB] rounded-2xl py-3 font-bold cursor-pointer border border-[#F0EAE0]" onClick={handleFinishCreate} whileTap={{ scale: 0.95 }}>Skip</motion.button>
+                  <motion.button className="flex-1 text-white rounded-2xl py-3 font-display text-base shadow-lg cursor-pointer disabled:opacity-40 animate-glow-pulse" style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)' }} onClick={handleFinishCreate} disabled={selectedInterests.length === 0} whileTap={{ scale: 0.95 }}>Let&apos;s Go!</motion.button>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
-        </div>
-      </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
-      {/* Parent Auth Modal */}
+  /* ═══ RENDER ═══ */
+
+  /* Every theme is a code-built world. The old hero-image path was removed:
+     the "-hero-clean.jpg" plates were never actually cleaned — they still had
+     the title, subtitle and a fake Parent pill painted into the JPEG, which
+     double-rendered against the real UI. */
+  const World = WORLD_BY_THEME[activeTheme.id] ?? RiverGardenWorld;
+
+  return (
+    <>
+      <World>
+        {topControls}
+        {titleSection}
+        <div className="flex-1 min-h-[32px]" />
+        {/* Cards sit on the foreground bank (bottom ~26% of every scene) */}
+        <div className="relative z-20 px-4 pb-8 pt-2">
+          <div className="max-w-2xl mx-auto w-full">{cardContent}</div>
+        </div>
+      </World>
+
+      {/* ═══ MODALS (outside scene — always accessible) ═══ */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={(user) => {
           console.log('[Auth] Logged in as:', user.email);
           setShowAuthModal(false);
-          // If a player is already selected, go to parent dashboard
-          // Otherwise stay on welcome page — parent needs to select/create a player first
           if (profiles.length > 0) {
-            // Auto-select last played profile and go to dashboard
             const lastPlayed = profiles[0];
             if (lastPlayed) {
               setCurrentPlayer({
                 ...lastPlayed,
-                avatarEmoji: lastPlayed.avatarEmoji || '🦁',
+                avatarEmoji: lastPlayed.avatarEmoji || '\u{1F981}',
                 totalStars: lastPlayed.totalStars ?? 0,
                 streakDays: lastPlayed.streakDays ?? 0,
                 name: lastPlayed.name || 'Player',
@@ -591,19 +513,16 @@ export default function WelcomePage() {
             }
             navigate('/parent-dashboard');
           }
-          // If no profiles exist, parent stays on welcome to create one
         }}
         onContinueLocal={startLocalPlayerSetup}
         onCreateChildProfile={() => setShowCreate(true)}
       />
-
-      {/* Theme picker */}
       <ThemePicker
         open={showThemePicker}
         onClose={() => setShowThemePicker(false)}
         activeThemeId={themeId}
         onSelect={handleThemeSelect}
       />
-    </div>
+    </>
   );
 }
