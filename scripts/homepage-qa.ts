@@ -122,6 +122,28 @@ async function auditWorld(browser: Browser, world: string, vp: typeof VIEWPORTS[
     const mascot = await mascotUnobstructed(page);
     record(scope, 'mascot unobstructed', mascot.ok, mascot.detail);
 
+    /* 4b. No source artefacts rendered as page text. A JSX comment written
+       `/* *\/` instead of `{/* *\/}` renders its whole body as visible copy,
+       and stray characters leak the same way (an `Explore` nav item once shipped
+       a bare "N"). Screenshots pass this happily, so assert on it. */
+    const strayText = await page.evaluate(() => {
+      const body = (document.body.innerText || '');
+      const artefacts = [
+        { re: /\/\*|\*\//, what: 'comment delimiter' },
+        { re: /\bundefined\b|\bNaN\b|\[object Object\]/, what: 'unrendered value' },
+        { re: /className=|=>\s|\bconst\b\s+\w+\s*=/, what: 'source code' },
+      ];
+      for (const a of artefacts) {
+        const m = body.match(a.re);
+        if (m) {
+          const i = Math.max(0, body.indexOf(m[0]) - 30);
+          return { ok: false, detail: `${a.what}: "${body.slice(i, i + 90).replace(/\s+/g, ' ')}"` };
+        }
+      }
+      return { ok: true, detail: 'no source artefacts in rendered text' };
+    });
+    record(scope, 'no stray source text', strayText.ok, strayText.detail);
+
     // 5. Card shelf populated
     const cardCount = await page.getByRole('button', { name: /play as/i }).count();
     record(scope, 'player cards on shelf', cardCount >= 1, `${cardCount} player card(s)`);
