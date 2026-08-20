@@ -28,7 +28,9 @@
     "test:ci": "npm run test -- --reporter=junit --outputFile=coverage/frontend-results.xml && npm run test:backend && npm run test:admin",
     "test:certify": "npm run test:all && npm run test:e2e",
     "env:build": "blender --background --factory-startup --python tools/blender/build_home_environment.py",
-    "env:validate": "blender --background art/blender/home_environment.blend --factory-startup --python tools/blender/validate_home_environment.py"
+    "env:validate": "blender --background art/blender/home_environment.blend --factory-startup --python tools/blender/validate_home_environment.py",
+    "env:export": "blender --background art/blender/home_environment.blend --factory-startup --python tools/blender/export_home_environment.py",
+    "env:validate:glb": "node scripts/validate-environment-glb.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

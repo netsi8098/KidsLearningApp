@@ -48,6 +48,8 @@ const EmotionsPage = lazy(() => import('./pages/EmotionsPage'));
 const BedtimePage = lazy(() => import('./pages/BedtimePage'));
 const AudioPage = lazy(() => import('./pages/AudioPage'));
 const ColoringPage = lazy(() => import('./pages/ColoringPage'));
+/* Verification surface for the Blender -> GLB -> R3F round trip. */
+const World3DProofPage = lazy(() => import('./pages/World3DProofPage'));
 const MovementPage = lazy(() => import('./pages/MovementPage'));
 const CookingPage = lazy(() => import('./pages/CookingPage'));
 const HomeActivitiesPage = lazy(() => import('./pages/HomeActivitiesPage'));
@@ -185,6 +187,7 @@ export default function App() {
             <Route path="/bedtime" element={<ProtectedRoute><BedtimePage /></ProtectedRoute>} />
             <Route path="/audio" element={<ProtectedRoute><AudioPage /></ProtectedRoute>} />
             <Route path="/coloring" element={<ProtectedRoute><ColoringPage /></ProtectedRoute>} />
+            <Route path="/world3d" element={<SafeRoute><World3DProofPage /></SafeRoute>} />
             <Route path="/movement" element={<ProtectedRoute><MovementPage /></ProtectedRoute>} />
             <Route path="/cooking" element={<ProtectedRoute><CookingPage /></ProtectedRoute>} />
             <Route path="/home-activities" element={<ProtectedRoute><HomeActivitiesPage /></ProtectedRoute>} />
