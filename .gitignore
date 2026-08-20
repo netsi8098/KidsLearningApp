@@ -53,3 +53,10 @@ playwright-report/
 e2e/test-results/
 coverage/
 test-results/
+
+# Local AI runtime (recreated by npm run ai:setup)
+tools/local-ai/.venv/
+tools/local-ai/models/
+tools/local-ai/output/
+__pycache__/
+*.py[cod]

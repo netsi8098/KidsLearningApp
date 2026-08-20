@@ -2982,3 +2982,41 @@ The minimum asset upgrade is not a replacement character or a set of pose pictur
 2. Update the six failing unit-test suites to the current UI/audio/recommendation/sync contracts.
 3. Optimize the current lion PNGs and add genuinely authored reading, sleeping, listening, cheering, pointing, and encouraging poses only when matching art is available.
 4. Continue responsive player-card polish and movement step-specific character art after the homepage checkpoint is protected.
+
+## Codex Handoff - Offline Voice + Semantic Search Pilot (2026-08-20)
+
+### Installed locally
+
+- Added an isolated Python 3.12 environment at `tools/local-ai/.venv` and model cache at `tools/local-ai/models`. Both paths are gitignored and reproducible with `npm run ai:setup`.
+- Installed `hexgrad/Kokoro-82M` for local narration and `sentence-transformers/all-MiniLM-L6-v2` for semantic content ranking. The combined runtime and cached weights use approximately 1.5 GB.
+- Installed `espeak-ng` as Kokoro's local phonemizer dependency. The system's default Python remains unchanged.
+
+### App integration
+
+- Replaced the old network-dependent Edge TTS server implementation with one localhost service in `tts-server.py`.
+- Existing `/tts`, `/voices`, and `/health` contracts remain available, so story narration uses Kokoro without rewriting reader callers. Web Speech remains the automatic fallback whenever the local service is unavailable.
+- Added `POST /semantic/search` and a frontend semantic service. Universal search still shows exact keyword matches immediately, then appends MiniLM meaning-based matches when enabled and reachable.
+- Semantic search is development-only by default through `.env.development`. The example production flag remains false. No child/profile data is sent to a cloud model.
+- Settings now instructs local developers to run `npm run ai:start` rather than invoking the Python file directly.
+
+### Commands
+
+- One-time setup: `npm run ai:setup`
+- Start both models: `npm run ai:start`
+- Health check: `npm run ai:check`
+- Full operating notes: `docs/local-ai-models.md`
+
+### Verification
+
+- Kokoro generated a valid mono 24 kHz PCM WAV for `Who is playing today? Welcome to Kids Learning Fun!` with a measured duration of 3.575 seconds.
+- MiniLM ranked `Goodnight Moon bedtime story calm sleep` first for `something calm to help me fall asleep` with score 0.563; unrelated math and dance candidates ranked lower.
+- Focused search tests: 14/14 PASS (12 hook tests + 2 semantic service tests).
+- Focused ESLint for new semantic config/service/hook: PASS.
+- Production build: PASS. Existing large-chunk advisory remains.
+- Full typecheck still reports the pre-existing Framer Motion and unrelated UI typing backlog documented in the previous checkpoint; no new local-AI files appear in those errors.
+
+### Scope boundary
+
+- MiniLM supports search, recommendations, and content grouping only. It does not create images, voice, or animation.
+- Kokoro supports voice only. It does not solve word-highlight timestamps by itself; precise alignment remains a separate phoneme/word timing task.
+- Wan and other video diffusion models remain motion-reference tools, not runtime character rigs. Continue using the existing Three.js articulated lion architecture for interactive motion.

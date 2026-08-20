@@ -2,7 +2,7 @@
  * TTS Service — Enhanced speech synthesis for Kids Learning Fun
  *
  * Priority order:
- * 1. Local AI voice server (tts-server.py with Edge TTS) — best quality
+ * 1. Local offline Kokoro voice server — best quality and private
  * 2. Web Speech API with natural speech engine — phrase splitting,
  *    pitch/rate variation, premium voice selection
  *
