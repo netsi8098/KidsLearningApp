@@ -56,6 +56,14 @@ def apply_scales():
 
 
 def main():
+    # Optimise before exporting: join by material (draw calls) and bake AO into
+    # vertex colours (look development). Both run on the in-memory scene so the
+    # .blend stays editable with named individual objects — only the export
+    # artifact is optimised.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import optimize_and_bake
+    optimize_and_bake.main()
+
     applied = apply_scales()
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
 
@@ -71,6 +79,7 @@ def main():
         export_yup=True,
         export_texcoords=True,
         export_normals=True,
+        export_vertex_color="MATERIAL",   # carries the baked AO as COLOR_0
         export_materials="EXPORT",
         export_animations=False,     # the environment is static; the lion animates
     )
