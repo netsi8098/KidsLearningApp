@@ -12,6 +12,8 @@
     "ai:setup": "bash scripts/setup-local-ai.sh",
     "ai:start": "bash scripts/start-local-ai.sh",
     "ai:check": "curl -fsS http://localhost:5555/health",
+    "lion:build": "blender --background --factory-startup --python tools/blender/build_rigged_lion.py",
+    "lion:validate": "node scripts/validate-lion-glb.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -24,9 +26,13 @@
     "test:backend": "cd backend && npx vitest run",
     "test:admin": "cd admin && npx vitest run",
     "test:ci": "npm run test -- --reporter=junit --outputFile=coverage/frontend-results.xml && npm run test:backend && npm run test:admin",
-    "test:certify": "npm run test:all && npm run test:e2e"
+    "test:certify": "npm run test:all && npm run test:e2e",
+    "env:build": "blender --background --factory-startup --python tools/blender/build_home_environment.py",
+    "env:validate": "blender --background art/blender/home_environment.blend --factory-startup --python tools/blender/validate_home_environment.py"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
     "@types/three": "^0.185.4",
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
