@@ -70,7 +70,7 @@ MANE_TOP = 1.10         # crown of the mane == total height
 # cube; the reference silhouette is closer to square, with the tail adding
 # length beyond that.
 BODY_FRONT_Y = 0.22     # chest, sitting behind the mane mass
-BODY_BACK_Y = -0.27     # pelvis
+BODY_BACK_Y = -0.32     # pelvis
 HEAD_Y = 0.40           # head is well forward, not perched over the chest
 
 # Radii. (x, z) per skin vertex.
@@ -78,14 +78,14 @@ R_HEAD = 0.190
 R_MANE = 0.245
 R_MUZZLE = 0.130
 R_NECK = 0.120
-R_CHEST = 0.178
-R_WAIST = 0.158
-R_HIP = 0.170
+R_CHEST = 0.184
+R_WAIST = 0.162
+R_HIP = 0.182
 R_LEG_TOP = 0.098
 R_LEG_MID = 0.082
-R_PAW = 0.108
-R_TAIL = 0.032
-R_TUFT = 0.088
+R_PAW = 0.084
+R_TAIL = 0.026
+R_TUFT = 0.098
 
 
 def reset():
@@ -152,11 +152,14 @@ def build_skeleton_mesh():
     leg(0.098, BODY_BACK_Y + 0.02, False)
 
     # ── Tail ───────────────────────────────────────────────────────────────
-    t1 = add((0.0, BODY_BACK_Y - 0.08, SPINE_Z + 0.05), (R_TAIL, R_TAIL))
-    t2 = add((0.0, BODY_BACK_Y - 0.18, SPINE_Z + 0.12), (R_TAIL * 0.92, R_TAIL * 0.92))
-    t3 = add((0.0, BODY_BACK_Y - 0.25, SPINE_Z + 0.22), (R_TAIL * 0.85, R_TAIL * 0.85))
-    tuft = add((0.0, BODY_BACK_Y - 0.27, SPINE_Z + 0.31), (R_TUFT, R_TUFT))
-    e += [(pelvis, t1), (t1, t2), (t2, t3), (t3, tuft)]
+    # Long, light and tapering, lifted at the tip. Review 7 was closer but still
+    # read heavy; the shaft is thinner now and the tuft carries the weight.
+    t1 = add((0.0, BODY_BACK_Y - 0.09, SPINE_Z + 0.04), (R_TAIL, R_TAIL))
+    t2 = add((0.0, BODY_BACK_Y - 0.21, SPINE_Z + 0.10), (R_TAIL * 0.86, R_TAIL * 0.86))
+    t3 = add((0.0, BODY_BACK_Y - 0.32, SPINE_Z + 0.20), (R_TAIL * 0.74, R_TAIL * 0.74))
+    t4 = add((0.0, BODY_BACK_Y - 0.37, SPINE_Z + 0.31), (R_TAIL * 0.66, R_TAIL * 0.66))
+    tuft = add((0.0, BODY_BACK_Y - 0.38, SPINE_Z + 0.40), (R_TUFT, R_TUFT))
+    e += [(pelvis, t1), (t1, t2), (t2, t3), (t3, t4), (t4, tuft)]
 
     mesh = bpy.data.meshes.new("LionBody")
     mesh.from_pydata([tuple(p) for p in v], e, [])
@@ -188,17 +191,14 @@ def build_skeleton_mesh():
 
 
 def build_head_masses(body):
-    """Skull, muzzle, mane and ears as DISTINCT volumes.
+    """Head, mane, paws and face planes as DISTINCT volumes.
 
     Built separately and unified by a voxel remesh — the standard sculpting
-    blockout route. Unlike the Skin modifier it preserves the boundaries between
-    masses, so a muzzle stays a muzzle.
+    blockout route. Unlike the Skin modifier it preserves boundaries between
+    masses, so a muzzle stays a muzzle and a paw stays a paw.
 
-    Corrected against the approved turnaround: the mane is NOT a ring around the
-    head. It is a large mass covering neck and shoulders, with the face set into
-    its FRONT — from the side it reads as one big rounded volume at the front of
-    the body, taller than the barrel behind it. The ring version framed the face
-    like a sunflower and lost the mass entirely.
+    The mane is a large mass covering neck and shoulders with the face set into
+    its FRONT, per the approved turnaround — not a ring around the head.
     """
     parts = []
 
@@ -214,36 +214,69 @@ def build_head_masses(body):
     mane_y = HEAD_Y - 0.15
     mane_z = HEAD_Z - 0.03
 
-    # ── Mane: the dominant frontal mass ────────────────────────────────────
-    ball("ManeCore", (0.0, mane_y, mane_z), 0.285, (1.0, 0.82, 1.12))
-    # Lower ruff spilling onto the chest, as the turnaround shows.
-    ball("ManeRuff", (0.0, mane_y + 0.045, mane_z - 0.185), 0.215, (1.02, 0.80, 0.78))
-    # Raised top tuft / pompadour.
-    ball("ManeTuft", (0.0, mane_y - 0.020, mane_z + 0.225), 0.135, (0.92, 0.78, 0.95))
+    # ══ MANE: macro silhouette in large readable shape groups ══════════════
+    # Not individual clumps — those produced a chain-of-balls artefact and were
+    # removed. This is the broad shape LOGIC of the reference: a strong upper
+    # crown, broad side masses framing the face, and a lower chest ruff.
+    ball("ManeCore", (0.0, mane_y, mane_z), 0.278, (1.0, 0.84, 1.10))
 
-    # NOTE: surface lobes were built here and removed. Ringing spheres around
-    # the mane produced a visible CHAIN OF BALLS down the front in side view —
-    # the same failure as the grass tufts in the environment. The reference mane
-    # is one smooth rounded mass; its layered look comes from shading and
-    # texture, not from separate volumes. Layering belongs to the surface pass.
+    # Upper crown / quiff — the reference's most distinctive mane feature.
+    ball("ManeCrown", (0.0, mane_y - 0.030, mane_z + 0.215), 0.165, (0.94, 0.80, 0.86))
+    ball("ManeQuiff", (0.0, mane_y + 0.045, mane_z + 0.255), 0.105, (0.80, 0.72, 0.78))
 
-    # ── Head set into the FRONT of the mane ────────────────────────────────
-    ball("Skull", (0.0, HEAD_Y + 0.035, HEAD_Z), R_HEAD, (1.03, 0.95, 0.98))
+    # Broad side masses framing the face.
+    for sx in (-1, 1):
+        ball(f"ManeSide_{'L' if sx < 0 else 'R'}",
+             (sx * 0.185, mane_y + 0.010, mane_z - 0.020), 0.180, (0.86, 0.82, 1.06))
 
-    # Muzzle: short, broad, and set low on the face; it must protrude clearly
-    # past the mane or the head reads as a disc.
-    ball("Muzzle", (0.0, HEAD_Y + 0.175, HEAD_Z - 0.070), 0.112, (1.12, 1.05, 0.85))
-    ball("Nose", (0.0, HEAD_Y + 0.245, HEAD_Z - 0.052), 0.055, (1.0, 0.9, 0.88))
+    # Lower chest / neck ruff spilling forward onto the chest.
+    ball("ManeRuff", (0.0, mane_y + 0.055, mane_z - 0.195), 0.205, (1.04, 0.84, 0.76))
 
-    # Cheek mass either side of the muzzle, which the turnaround shows clearly.
+    # ══ HEAD set into the FRONT of the mane ════════════════════════════════
+    ball("Skull", (0.0, HEAD_Y + 0.030, HEAD_Z), R_HEAD, (1.04, 0.96, 0.98))
+
+    # Face plate: a broad flattened mass establishing the FACIAL PLANE that
+    # retopology has to support. Wide and shallow so it reads as a plane, not a
+    # bump.
+    ball("FacePlane", (0.0, HEAD_Y + 0.098, HEAD_Z + 0.005), 0.163, (1.06, 0.42, 1.00))
+
+    # Brow ridge: the ONLY additive feature in the eye region. Eye sockets are
+    # implied by the brow above and the cheek below, not modelled directly —
+    # additive primitives can only ADD mass, so a sphere placed at the eye
+    # bulges outward exactly where the socket should recess. An earlier version
+    # did that and turned the face into a lumpy mass.
+    for sx in (-1, 1):
+        ball(f"Brow_{'L' if sx < 0 else 'R'}",
+             (sx * 0.078, HEAD_Y + 0.138, HEAD_Z + 0.070), 0.062, (1.22, 0.56, 0.46))
+
+    # ══ MUZZLE: compact, flatter, tucked — not a bulb ══════════════════════
+    # Review 7 projected ~0.30 forward of the head centre and read as a snout
+    # stuck on the front. Forward reach is cut by roughly a third, the front
+    # plane is flattened (low Y scale), and the mass underneath is reduced.
+    # Kept to THREE volumes: stacking more only produced competing bumps.
+    ball("Muzzle", (0.0, HEAD_Y + 0.130, HEAD_Z - 0.052), 0.104, (1.24, 0.72, 0.84))
+    ball("Nose", (0.0, HEAD_Y + 0.170, HEAD_Z - 0.020), 0.042, (1.05, 0.78, 0.82))
+    ball("Jaw", (0.0, HEAD_Y + 0.088, HEAD_Z - 0.112), 0.090, (1.10, 0.88, 0.60))
+
+    # Cheeks flowing back into the mane.
     for sx in (-1, 1):
         ball(f"Cheek_{'L' if sx < 0 else 'R'}",
-             (sx * 0.085, HEAD_Y + 0.125, HEAD_Z - 0.055), 0.078, (0.95, 0.95, 0.85))
+             (sx * 0.096, HEAD_Y + 0.058, HEAD_Z - 0.052), 0.090, (0.94, 0.96, 0.90))
 
-    # ── Ears: small, rounded, peeking above the mane ───────────────────────
+    # ══ EARS: larger, higher, clear of the mane contour ════════════════════
+    # Review 7 nested them so deeply they were swallowed by the ruff.
     for sx in (-1, 1):
         ball(f"Ear_{'L' if sx < 0 else 'R'}",
-             (sx * 0.128, HEAD_Y - 0.020, HEAD_Z + 0.165), 0.070, (0.95, 0.55, 1.0))
+             (sx * 0.148, HEAD_Y - 0.005, HEAD_Z + 0.192), 0.088, (0.98, 0.52, 1.02))
+
+    # ══ PAWS: distinct bulbous socks, wider than the shafts ════════════════
+    # Built as separate volumes so there is a clean break between leg column and
+    # paw mass. Widening the skin-chain radius only swelled the shaft tip.
+    for x in (-0.098, 0.098):
+        for y, front in ((BODY_FRONT_Y + 0.02, True), (BODY_BACK_Y + 0.02, False)):
+            tag = f"{'F' if front else 'R'}{'L' if x < 0 else 'R'}"
+            ball(f"Paw_{tag}", (x, y + (0.018 if front else 0.010), GROUND + 0.062),
+                 0.108, (1.06, 1.18, 0.72))
 
     return parts
 
