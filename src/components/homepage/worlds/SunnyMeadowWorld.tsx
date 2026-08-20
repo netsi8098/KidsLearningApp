@@ -18,12 +18,18 @@
  * Layers (back to front): sky · distance · midground · hero stage · foreground
  * bank · foreground depth accents · ambient motion · content.
  */
-import { motion } from 'framer-motion';
+import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
+import { useRef, type ReactNode } from 'react';
 import type { WorldProps } from './types';
 import SkyLife from '../SkyLife';
 import { useSceneParallax, DEPTH } from '../useSceneParallax';
 import WorldPlate, { useWorldPlate } from '../WorldPlate';
 import { useMotionPreset } from '../../../motion/useMotionPreset';
+import {
+  IDLE_LOCOMOTION,
+  LionLocomotionContext,
+  type LionLocomotionFrame,
+} from '../../character/LionLocomotionContext';
 
 /** Sun position, in %, drives every highlight and shadow in the scene. */
 const SUN = { x: 78, y: 12 };
@@ -68,13 +74,146 @@ function BlossomTree({
 }
 
 const LIVE_FLORA = [
-  { left: '28%', top: '51%', color: '#FFF8F0', scale: 0.78, duration: 3.8, delay: 0.2 },
-  { left: '34%', top: '49%', color: '#FF91B8', scale: 0.66, duration: 4.4, delay: 1.1 },
-  { left: '40%', top: '52%', color: '#FFE36D', scale: 0.58, duration: 3.5, delay: 0.7 },
-  { left: '60%', top: '50%', color: '#C9A7FF', scale: 0.68, duration: 4.1, delay: 1.7 },
-  { left: '66%', top: '52%', color: '#FFF8F0', scale: 0.8, duration: 3.7, delay: 0.9 },
-  { left: '72%', top: '50%', color: '#FF9FAE', scale: 0.62, duration: 4.6, delay: 0.4 },
+  { left: '28%', groundY: 56, color: '#FFF8F0', scale: 0.78, duration: 3.8, delay: 0.2 },
+  { left: '34%', groundY: 54.5, color: '#FF91B8', scale: 0.66, duration: 4.4, delay: 1.1 },
+  { left: '40%', groundY: 53.2, color: '#FFE36D', scale: 0.58, duration: 3.5, delay: 0.7 },
+  { left: '60%', groundY: 53.2, color: '#C9A7FF', scale: 0.68, duration: 4.1, delay: 1.7 },
+  { left: '66%', groundY: 54.5, color: '#FFF8F0', scale: 0.8, duration: 3.7, delay: 0.9 },
+  { left: '72%', groundY: 56, color: '#FF9FAE', scale: 0.62, duration: 4.6, delay: 0.4 },
 ];
+
+const PLAY_GREETING_MS = 5200;
+const PLAY_LOOP_MS = 14000;
+
+const smoothStep = (value: number) => {
+  const t = Math.max(0, Math.min(1, value));
+  return t * t * (3 - 2 * t);
+};
+
+function playfulLionFrame(timeMs: number, travel: number) {
+  if (timeMs < PLAY_GREETING_MS) {
+    return { x: 0, y: 0, rotate: 0, scaleX: 1, scaleY: 1, rig: IDLE_LOCOMOTION };
+  }
+
+  const time = ((timeMs - PLAY_GREETING_MS) % PLAY_LOOP_MS) / 1000;
+  const frame: LionLocomotionFrame = { ...IDLE_LOCOMOTION };
+  let x = 0;
+  let y = 0;
+  let rotate = 0;
+  let scaleX = 1;
+  let scaleY = 1;
+
+  if (time >= 2 && time < 4.5) {
+    const progress = (time - 2) / 2.5;
+    const eased = smoothStep(progress);
+    frame.mode = 'walk';
+    frame.gait = progress * 2.15;
+    frame.direction = -1;
+    frame.speed = Math.sin(Math.PI * progress);
+    x = -travel * eased;
+    y = -Math.abs(Math.sin(frame.gait * Math.PI)) * 2.6 + eased * 2.2;
+    rotate = -1.2 * frame.speed;
+  } else if (time >= 4.5 && time < 5.5) {
+    x = -travel;
+    y = 2.2;
+  } else if (time >= 5.5 && time < 5.9) {
+    const progress = smoothStep((time - 5.5) / 0.4);
+    frame.mode = 'anticipate';
+    frame.direction = 1;
+    frame.crouch = progress;
+    x = -travel;
+    y = 2.2 + progress * 5;
+    scaleX = 1 + progress * 0.035;
+    scaleY = 1 - progress * 0.045;
+    rotate = -1.5 * progress;
+  } else if (time >= 5.9 && time < 6.9) {
+    const progress = (time - 5.9) / 1;
+    const eased = smoothStep(progress);
+    const lift = Math.sin(Math.PI * progress);
+    frame.mode = 'airborne';
+    frame.direction = 1;
+    frame.speed = Math.sin(Math.PI * progress);
+    frame.lift = lift;
+    x = -travel + travel * 1.7 * eased;
+    y = 2.2 - lift * Math.min(54, Math.max(36, travel * 0.95));
+    rotate = -1.5 + eased * 3;
+    scaleX = 1 - lift * 0.018;
+    scaleY = 1 + lift * 0.025;
+  } else if (time >= 6.9 && time < 7.4) {
+    const progress = (time - 6.9) / 0.5;
+    const impact = Math.sin(Math.PI * progress);
+    frame.mode = 'land';
+    frame.direction = 1;
+    frame.landing = impact;
+    x = travel * 0.7;
+    y = 1.5 + impact * 5;
+    rotate = 1.5 * (1 - smoothStep(progress));
+    scaleX = 1 + impact * 0.055;
+    scaleY = 1 - impact * 0.065;
+  } else if (time >= 7.4 && time < 9) {
+    x = travel * 0.7;
+    y = 1.5;
+  } else if (time >= 9 && time < 11.5) {
+    const progress = (time - 9) / 2.5;
+    const eased = smoothStep(progress);
+    frame.mode = 'walk';
+    frame.gait = progress * 2.1;
+    frame.direction = -1;
+    frame.speed = Math.sin(Math.PI * progress);
+    x = travel * 0.7 * (1 - eased);
+    y = 1.5 * (1 - eased) - Math.abs(Math.sin(frame.gait * Math.PI)) * 2.4;
+    rotate = -0.9 * frame.speed;
+  }
+
+  return { x, y, rotate, scaleX, scaleY, rig: frame };
+}
+
+function PlayfulHillLion({ children, reducedMotion }: { children: ReactNode; reducedMotion: boolean }) {
+  const locomotionRef = useRef<LionLocomotionFrame>({ ...IDLE_LOCOMOTION });
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotate = useMotionValue(0);
+  const scaleX = useMotionValue(1);
+  const scaleY = useMotionValue(1);
+  const shadowScaleX = useMotionValue(1);
+  const shadowOpacity = useMotionValue(0.28);
+
+  useAnimationFrame((time) => {
+    if (reducedMotion) {
+      locomotionRef.current = IDLE_LOCOMOTION;
+      x.set(0); y.set(0); rotate.set(0); scaleX.set(1); scaleY.set(1);
+      shadowScaleX.set(1); shadowOpacity.set(0.28);
+      return;
+    }
+    const viewportWidth = typeof window === 'undefined' ? 900 : window.innerWidth;
+    const travel = Math.max(30, Math.min(56, viewportWidth * 0.055));
+    const sample = playfulLionFrame(time, travel);
+    locomotionRef.current = sample.rig;
+    x.set(sample.x);
+    y.set(sample.y);
+    rotate.set(sample.rotate);
+    scaleX.set(sample.scaleX);
+    scaleY.set(sample.scaleY);
+    shadowScaleX.set(1 - sample.rig.lift * 0.42 + sample.rig.landing * 0.08);
+    shadowOpacity.set(0.28 - sample.rig.lift * 0.16 + sample.rig.landing * 0.05);
+  });
+
+  return (
+    <LionLocomotionContext.Provider value={locomotionRef}>
+      <motion.div
+        aria-hidden="true"
+        className="absolute bottom-[1.5%] left-1/2 -z-[1] h-[clamp(12px,1.6vw,20px)] w-[clamp(104px,13vw,165px)] -translate-x-1/2 rounded-[50%] bg-[rgba(43,91,31,0.31)] blur-[4px]"
+        style={{ x, scaleX: shadowScaleX, opacity: shadowOpacity, transformOrigin: '50% 50%' }}
+      />
+      <motion.div
+        data-testid="sunny-lion-locomotion"
+        style={{ x, y, rotate, scaleX, scaleY, transformOrigin: '50% 100%', willChange: 'transform' }}
+      >
+        {children}
+      </motion.div>
+    </LionLocomotionContext.Provider>
+  );
+}
 
 function LivingMeadowDetails({ reducedMotion }: { reducedMotion: boolean }) {
   return (
@@ -104,7 +243,7 @@ function LivingMeadowDetails({ reducedMotion }: { reducedMotion: boolean }) {
         <motion.svg
           key={`live-flower-${index}`}
           className="absolute h-auto w-[clamp(18px,2.3vw,30px)] overflow-visible"
-          style={{ left: flower.left, top: flower.top, transformOrigin: '50% 100%' }}
+          style={{ left: flower.left, bottom: `${100 - flower.groundY}%`, transformOrigin: '50% 100%' }}
           viewBox="0 0 28 44"
           fill="none"
           animate={reducedMotion ? undefined : {
@@ -145,7 +284,8 @@ function LivingMeadowDetails({ reducedMotion }: { reducedMotion: boolean }) {
 function GroundingGrass({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <div
-      className="absolute left-1/2 top-[54.1%] z-[17] h-8 w-[clamp(150px,22vw,250px)] -translate-x-1/2 pointer-events-none"
+      className="absolute left-1/2 z-[17] h-8 w-[clamp(150px,22vw,250px)] -translate-x-1/2 pointer-events-none"
+      style={{ top: 'calc(54% - 32px)' }}
       aria-hidden="true"
     >
       {Array.from({ length: 15 }, (_, index) => (
@@ -362,20 +502,19 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
           {/* The mascot now lands on the connected hill in the painted world.
               Character and title have independent anchors so typography can
               never pull the paws away from the ridge. */}
-          <div className="absolute z-[15] left-1/2 top-[27.5%] sm:top-[27%] md:top-[26%] lg:top-[24.5%] -translate-x-1/2">
+          <div
+            className="absolute z-[15] left-1/2 -translate-x-1/2"
+            style={{ top: 'calc(54% - 204px)' }}
+          >
             <motion.div
               className="absolute left-1/2 top-[8%] h-[clamp(190px,24vw,310px)] w-[clamp(190px,24vw,310px)] -translate-x-1/2 rounded-full blur-3xl pointer-events-none"
               style={{ background: 'radial-gradient(circle, rgba(255,237,154,0.3) 0%, rgba(255,223,128,0.1) 52%, transparent 74%)' }}
               animate={isReducedMotion ? undefined : { scale: [1, 1.06, 1], opacity: [0.68, 0.95, 0.68] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             />
-            <div className="relative z-[2]">{mascot}</div>
-            <motion.div
-              className="absolute bottom-[1.5%] left-1/2 -z-[1] h-[clamp(12px,1.6vw,20px)] w-[clamp(104px,13vw,165px)] -translate-x-1/2 rounded-[50%] blur-[4px]"
-              style={{ background: 'rgba(43,91,31,0.31)' }}
-              animate={isReducedMotion ? undefined : { scaleX: [1, 0.94, 1], opacity: [0.28, 0.2, 0.28] }}
-              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-            />
+            <div className="relative z-[2]">
+              <PlayfulHillLion reducedMotion={isReducedMotion}>{mascot}</PlayfulHillLion>
+            </div>
           </div>
           <div className="absolute z-[16] left-1/2 top-[57%] w-[92vw] max-w-[760px] -translate-x-1/2 px-2">
             {title}

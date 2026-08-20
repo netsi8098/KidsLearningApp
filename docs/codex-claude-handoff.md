@@ -3044,3 +3044,36 @@ The detached oval grass-and-stone platform was rejected because it isolated the 
 - Improve the hill/character contact by tuning responsive anchors, not by adding another platform.
 - Ambient movement must remain layered and asynchronous; do not animate the scenery as one flat image.
 - Validate phone, tablet, and desktop before changing the hill crest position.
+
+## Codex Handoff - Grounded Playful Lion Locomotion (2026-08-20)
+
+### Problem confirmed from live browser review
+
+- The connected hill asset was correct, but the lion anchor still left the paws visibly above the crest on desktop and phone.
+- Several live flower overlays were positioned by their visual center, so stems ended in open sky.
+- The mascot remained in one location after the greeting instead of feeling like a child playing in the world.
+
+### Implemented
+
+- Re-anchored the lion and paw grass to one shared `54%` hill-contact baseline. The same formula holds at 390x844 and 1109x994 because responsive lion scaling uses a bottom transform origin.
+- Converted six live flowers to contour-based ground anchors so every stem terminates on the hill.
+- Added `LionLocomotionContext`, a stable mutable frame channel between the Framer Motion scene loop and the existing Three.js rig. It avoids React rerenders at animation-frame frequency.
+- Added a bounded play sequence after the opening greeting: two-sided walk, pause, anticipation crouch, hop, articulated landing, rest, and walk home.
+- Extended the existing 29-bone lion rig during locomotion: alternating leg IK, airborne paw tuck, torso weight transfer, head and gaze follow, tail counterbalance, and mane lift/landing lag.
+- The shadow now follows horizontal travel while remaining on the hill. It contracts and fades during the hop instead of floating upward with the lion.
+- Reduced motion keeps the lion planted and disables locomotion travel.
+
+### Guardrails
+
+- Do not replace this with a root-only CSS bob, pose swapping, PNG sequences, GIFs, or video.
+- Keep locomotion additive: root travel, leg IK, speech, wave, eyes, tail, mane, and breathing must continue concurrently.
+- Preserve the planted 5.2-second greeting before the play loop begins.
+- If the painted hill changes, remeasure one terrain baseline and update lion, grass, flowers, and shadow together.
+
+### Verification
+
+- Browser QA PASS at 1109x994: planted greeting, side travel, title/card clearance, and flower grounding.
+- Browser QA PASS at 390x844: planted greeting, visible airborne frame, articulated landing, bounded travel, and no title/card collision.
+- Clean-page browser console: no warnings or errors.
+- Focused ESLint and `git diff --check`: PASS.
+- Production build: PASS (existing large-chunk advisory only).

@@ -375,6 +375,50 @@ import StartupSequence from '../startup/StartupSequence';
 
 ---
 
+## Real-Time Mascot Locomotion
+
+The homepage lion is one persistent `THREE.SkinnedMesh`. World-level travel and
+rig-level articulation must run together; never replace locomotion with image
+swaps, sprite frames, video playback, or a whole-character bob.
+
+### Sunny Meadow Play Loop
+
+1. Keep the first 5.2 seconds planted so the greeting, gaze, speech, and wave
+   remain readable.
+2. Walk across the hill with alternating leg IK and small terrain-following root
+   travel.
+3. Pause and compress into a visible anticipation crouch.
+4. Hop along a bounded arc. Legs tuck while airborne; the tail and mane react to
+   lift and direction.
+5. Land with brief squash, mane follow-through, and tail counterbalance.
+6. Rest, walk home, and blend back to the living idle.
+
+`LionLocomotionContext` carries a mutable per-frame locomotion sample from the
+Framer Motion world loop into the Three.js render loop without a React render on
+every frame. Root motion is limited to scene travel. The existing bones still
+control torso weight, head follow, eyes, legs, paws, tail, and mane concurrently.
+
+### Contact Rules
+
+- The Sunny Meadow paw baseline and live grass baseline are both the painted hill
+  crest at `54%` of the viewport height.
+- Flowers are anchored by their SVG root to measured hill-contour baselines. Do
+  not position flower centers with arbitrary `top` values.
+- The ground shadow follows horizontal travel but stays on the terrain. During a
+  hop it shrinks and fades rather than rising with the character.
+- Mobile travel is narrower than desktop travel. The hop remains clearly visible
+  at both widths while staying inside the title composition.
+- `prefers-reduced-motion` disables travel, hopping, and procedural scenery sway.
+
+### Technical References
+
+- Rive IK constraints for planted feet: https://rive.app/docs/editor/constraints/ik-constraint
+- Rive concurrent state blending: https://rive.app/docs/editor/state-machine/states
+- Three.js `SkinnedMesh` and skeleton architecture: https://archive.threejs.org/docs/api/en/objects/SkinnedMesh.html
+- Motion frame callbacks and motion values: https://motion.dev/docs/react-use-animation-frame and https://motion.dev/docs/react-motion-value
+
+---
+
 ## Quick Reference Card
 
 ```
