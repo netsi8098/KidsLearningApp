@@ -61,7 +61,10 @@ async function onboard(page: Page) {
 
 (async () => {
   console.log(`Route sweep against ${BASE_URL}\n`);
-  const browser = await chromium.launch();
+  /* SwiftShader gives headless a real WebGL context. Without it the rigged-lion
+   canvas cannot initialise and every scope fails on WebGL errors, masking real
+   defects behind an environment limitation. */
+  const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
   await onboard(page);

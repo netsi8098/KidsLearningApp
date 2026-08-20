@@ -37,20 +37,24 @@ function Flock({ color, delay, top, dur, scale }: { color: string; delay: number
           { x: 38, y: 12, s: 0.72 },
           { x: 54, y: 6, s: 0.6 },
         ].map((b, i) => (
-          <motion.path
+          /* Wings flap by squashing the whole bird vertically. Animating the
+             `d` attribute looked equivalent but framer-motion does not
+             interpolate path data, so `d` went momentarily `undefined` and the
+             browser rejected the path ("Expected moveto path command"). */
+          <motion.g
             key={i}
-            d={`M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`}
-            stroke={color}
-            strokeWidth={1.7 * b.s}
-            strokeLinecap="round"
-            fill="none"
-            animate={isReducedMotion ? undefined : { d: [
-              `M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`,
-              `M${b.x} ${b.y} q ${5 * b.s} ${2 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${2 * b.s} ${10 * b.s} 0`,
-              `M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`,
-            ] }}
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+            animate={isReducedMotion ? undefined : { scaleY: [1, 0.45, 1] }}
             transition={{ duration: 0.85 + i * 0.08, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          >
+            <path
+              d={`M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`}
+              stroke={color}
+              strokeWidth={1.7 * b.s}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </motion.g>
         ))}
       </svg>
     </motion.div>

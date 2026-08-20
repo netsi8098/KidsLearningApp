@@ -11,8 +11,13 @@
  * Missing emotional pose art reuses the approved idle lion while the live rig
  * supplies the state-specific motion, so the character identity never changes.
  */
+import { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import ArticulatedLion from './character/ArticulatedLion';
+import RiggedLionBoundary from './character/rigged/RiggedLionBoundary';
+import { RIGGED_LION_ENABLED } from './character/rigged/lionRigContract';
+
+const RiggedLionCanvas = lazy(() => import('./character/rigged/RiggedLionCanvas'));
 
 export type LionPose =
   // Required pose set — see public/assets/lion/README.md for the art spec.
@@ -57,28 +62,35 @@ interface GeneratedLionProps {
  * resolved by key. Nothing else in the app hard-codes a lion filename.
  */
 const POSE_PATHS: Record<LionPose, string> = {
-  idle: '/assets/lion/idle.png',
-  waving: '/assets/lion/waving.png',
-  excited: '/assets/lion/excited.png',
-  thinking: '/assets/lion/thinking.png',
-  celebrating: '/assets/lion/celebrating.png',
-  encouraging: '/assets/lion/encouraging.png',
-  surprised: '/assets/lion/surprised.png',
-  success: '/assets/lion/success.png',
-  'gentle-error': '/assets/lion/gentle-error.png',
-  loading: '/assets/lion/loading.png',
-  reading: '/assets/lion/reading.png',
-  pointing: '/assets/lion/pointing.png',
-  sleepy: '/assets/lion/sleepy.png',
-  listening: '/assets/lion/listening.png',
-  'sad-soft': '/assets/lion/sad-soft.png',
-  clapping: '/assets/lion/clapping.png',
-  jumping: '/assets/lion/jumping.png',
+  idle: '/assets/lion/idle.webp',
+  waving: '/assets/lion/waving.webp',
+  excited: '/assets/lion/excited.webp',
+  thinking: '/assets/lion/thinking.webp',
+  celebrating: '/assets/lion/celebrating.webp',
+  encouraging: '/assets/lion/encouraging.webp',
+  surprised: '/assets/lion/surprised.webp',
+  success: '/assets/lion/success.webp',
+  'gentle-error': '/assets/lion/gentle-error.webp',
+  loading: '/assets/lion/loading.webp',
+  reading: '/assets/lion/reading.webp',
+  pointing: '/assets/lion/pointing.webp',
+  sleepy: '/assets/lion/sleepy.webp',
+  listening: '/assets/lion/listening.webp',
+  'sad-soft': '/assets/lion/sad-soft.webp',
+  clapping: '/assets/lion/clapping.webp',
+  jumping: '/assets/lion/jumping.webp',
 };
 
-/** Authored art currently present in the repository. Missing emotional poses
- * reuse the approved idle art and remain differentiated by the live rig. */
-const AVAILABLE_ART_POSES = new Set<LionPose>(['idle', 'waving', 'thinking', 'celebrating']);
+/**
+ * Authored art actually present on disk. Poses outside this set reuse the idle
+ * render and stay differentiated by the live rig and body motion.
+ *
+ * Only ONE render exists today. `idle/waving/thinking/celebrating.png` were four
+ * byte-identical copies of the same waving image (verified by md5), so listing
+ * them as four poses overstated what shipped and cost 5.2MB of duplicate bytes.
+ * Add a pose here the moment a genuinely distinct render lands beside it.
+ */
+const AVAILABLE_ART_POSES = new Set<LionPose>(['idle']);
 
 interface PoseMotion {
   breathe: { scaleY: number[]; duration: number };
@@ -183,7 +195,7 @@ export default function GeneratedLion({
   lookAt = 0,
   speechText,
   speechKey = 0,
-  mouthKey = 0,
+  mouthKey,
   onSpeechComplete,
 }: GeneratedLionProps) {
   const src = AVAILABLE_ART_POSES.has(pose) ? POSE_PATHS[pose] : POSE_PATHS.idle;
@@ -202,18 +214,36 @@ export default function GeneratedLion({
     );
   }
 
+  const articulatedFallback = (
+    <ArticulatedLion
+      src={src}
+      pose={pose}
+      size={size}
+      lookAt={lookAt}
+      speechText={speechText}
+      speechKey={speechKey}
+      mouthKey={mouthKey}
+      onSpeechComplete={onSpeechComplete}
+    />
+  );
+
   return (
     <div className={className} style={{ width: size, height: size, position: 'relative' }}>
-      <ArticulatedLion
-        src={src}
-        pose={pose}
-        size={size}
-        lookAt={lookAt}
-        speechText={speechText}
-        speechKey={speechKey}
-        mouthKey={mouthKey}
-        onSpeechComplete={onSpeechComplete}
-      />
+      {RIGGED_LION_ENABLED ? (
+        <RiggedLionBoundary fallback={articulatedFallback}>
+          <Suspense fallback={articulatedFallback}>
+            <RiggedLionCanvas
+              pose={pose}
+              size={size}
+              lookAt={lookAt}
+              speechText={speechText}
+              speechKey={speechKey}
+              mouthKey={mouthKey}
+              onSpeechComplete={onSpeechComplete}
+            />
+          </Suspense>
+        </RiggedLionBoundary>
+      ) : articulatedFallback}
 
       {/* Warm ambient glow remains outside the anatomical rig. */}
       <motion.div
