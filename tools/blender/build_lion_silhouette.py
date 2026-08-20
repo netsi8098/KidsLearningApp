@@ -54,35 +54,38 @@ PREVIEW_DIR = os.path.join(REPO, "docs", "assets", "lion-silhouette")
 TOTAL_H = 1.10
 GROUND = 0.0
 
-LEG_LEN = 0.26          # short legs — identity lock calls for a low stance
-BELLY_Z = 0.30          # underside of the barrel
-SPINE_Z = 0.52          # centre line of the body
-SHOULDER_Z = 0.58       # slightly above spine; withers sit high on a cub
-HEAD_Z = 0.84           # head centre
+# Proportions read from the approved four-view turnaround
+# (docs/assets/lion-reference/turnaround.png). Measured against total height:
+#   legs ~30%, belly line ~33%, back ~57%, mane mass 25%-100%, body longer than
+#   it is tall once the tail is included.
+LEG_LEN = 0.33
+BELLY_Z = 0.41          # underside of the barrel
+SPINE_Z = 0.54          # centre line of the body
+SHOULDER_Z = 0.62       # withers
+HEAD_Z = 0.80           # head centre
 MANE_TOP = 1.10         # crown of the mane == total height
 
-# Review 1 read as a dachshund: the body was 0.50m long against a 0.94m height,
-# so the animal was longer than it was tall. The identity lock calls for a
-# COMPACT cub, so the barrel is roughly halved and the head is pulled back over
-# the chest instead of reaching forward on a long neck.
-BODY_FRONT_Y = 0.12     # chest
-BODY_BACK_Y = -0.17     # pelvis
-HEAD_Y = 0.29           # far enough forward that a neck exists
+# The turnaround shows a LONGER body than review 4 had. Halving the barrel to
+# escape the dachshund read went too far the other way and produced a stubby
+# cube; the reference silhouette is closer to square, with the tail adding
+# length beyond that.
+BODY_FRONT_Y = 0.22     # chest, sitting behind the mane mass
+BODY_BACK_Y = -0.27     # pelvis
+HEAD_Y = 0.40           # head is well forward, not perched over the chest
 
-# Radii drive the whole silhouette. (x, z) per skin vertex.
-R_HEAD = 0.215
-R_MANE = 0.245          # wider than the skull, but not so much that it absorbs
-                        # it (see review 2)
-R_MUZZLE = 0.145
-R_NECK = 0.115
-R_CHEST = 0.165
-R_WAIST = 0.140
-R_HIP = 0.158
-R_LEG_TOP = 0.078       # review 1 legs were spindly at 0.062
-R_LEG_MID = 0.062
-R_PAW = 0.082           # large rounded paws are an identity feature
-R_TAIL = 0.026
-R_TUFT = 0.062
+# Radii. (x, z) per skin vertex.
+R_HEAD = 0.190
+R_MANE = 0.245
+R_MUZZLE = 0.130
+R_NECK = 0.120
+R_CHEST = 0.178
+R_WAIST = 0.158
+R_HIP = 0.170
+R_LEG_TOP = 0.098
+R_LEG_MID = 0.082
+R_PAW = 0.108
+R_TAIL = 0.032
+R_TUFT = 0.088
 
 
 def reset():
@@ -132,24 +135,27 @@ def build_skeleton_mesh():
 
     # ── Legs ───────────────────────────────────────────────────────────────
     def leg(x, y, front):
-        hip_z = SHOULDER_Z if front else SPINE_Z + 0.02
-        top = add((x, y, hip_z - 0.06), (R_LEG_TOP, R_LEG_TOP))
-        mid = add((x, y + (0.02 if front else -0.02), BELLY_Z - 0.02), (R_LEG_MID, R_LEG_MID))
-        paw = add((x, y + (0.045 if front else -0.02), GROUND + 0.042), (R_PAW, R_PAW))
+        # Straight vertical columns. Review 4 splayed the paws outward from the
+        # hip, which read as a newborn foal; the turnaround shows the legs
+        # dropping plumb from the body with the paws directly beneath.
+        hip_z = SHOULDER_Z if front else SPINE_Z + 0.03
+        top = add((x, y, hip_z - 0.07), (R_LEG_TOP, R_LEG_TOP))
+        mid = add((x, y, BELLY_Z - 0.05), (R_LEG_MID, R_LEG_MID))
+        paw = add((x, y, GROUND + 0.048), (R_PAW, R_PAW))
         e.append((chest if front else pelvis, top))
         e.append((top, mid))
         e.append((mid, paw))
 
-    leg(-0.105, BODY_FRONT_Y - 0.01, True)
-    leg(0.105, BODY_FRONT_Y - 0.01, True)
-    leg(-0.105, BODY_BACK_Y + 0.01, False)
-    leg(0.105, BODY_BACK_Y + 0.01, False)
+    leg(-0.098, BODY_FRONT_Y + 0.02, True)
+    leg(0.098, BODY_FRONT_Y + 0.02, True)
+    leg(-0.098, BODY_BACK_Y + 0.02, False)
+    leg(0.098, BODY_BACK_Y + 0.02, False)
 
     # ── Tail ───────────────────────────────────────────────────────────────
-    t1 = add((0.0, BODY_BACK_Y - 0.06, SPINE_Z + 0.05), (R_TAIL, R_TAIL))
-    t2 = add((0.0, BODY_BACK_Y - 0.13, SPINE_Z + 0.14), (R_TAIL * 0.9, R_TAIL * 0.9))
-    t3 = add((0.0, BODY_BACK_Y - 0.14, SPINE_Z + 0.24), (R_TAIL * 0.85, R_TAIL * 0.85))
-    tuft = add((0.0, BODY_BACK_Y - 0.11, SPINE_Z + 0.32), (R_TUFT, R_TUFT))
+    t1 = add((0.0, BODY_BACK_Y - 0.08, SPINE_Z + 0.05), (R_TAIL, R_TAIL))
+    t2 = add((0.0, BODY_BACK_Y - 0.18, SPINE_Z + 0.12), (R_TAIL * 0.92, R_TAIL * 0.92))
+    t3 = add((0.0, BODY_BACK_Y - 0.25, SPINE_Z + 0.22), (R_TAIL * 0.85, R_TAIL * 0.85))
+    tuft = add((0.0, BODY_BACK_Y - 0.27, SPINE_Z + 0.31), (R_TUFT, R_TUFT))
     e += [(pelvis, t1), (t1, t2), (t2, t3), (t3, tuft)]
 
     mesh = bpy.data.meshes.new("LionBody")
@@ -184,13 +190,15 @@ def build_skeleton_mesh():
 def build_head_masses(body):
     """Skull, muzzle, mane and ears as DISTINCT volumes.
 
-    Built separately and then unified by a voxel remesh, which is the standard
-    sculpting blockout route: separate primitives establish the forms, the remesh
-    turns them into one continuous watertight surface. Unlike the Skin modifier
-    it preserves the boundaries between masses, so a muzzle stays a muzzle.
+    Built separately and unified by a voxel remesh — the standard sculpting
+    blockout route. Unlike the Skin modifier it preserves the boundaries between
+    masses, so a muzzle stays a muzzle.
 
-    Topology from a remesh is uniform rather than edge-loop friendly. That is
-    expected at blockout: the brief calls for retopology before rigging anyway.
+    Corrected against the approved turnaround: the mane is NOT a ring around the
+    head. It is a large mass covering neck and shoulders, with the face set into
+    its FRONT — from the side it reads as one big rounded volume at the front of
+    the body, taller than the barrel behind it. The ring version framed the face
+    like a sunflower and lost the mass entirely.
     """
     parts = []
 
@@ -203,32 +211,39 @@ def build_head_masses(body):
         parts.append(o)
         return o
 
-    # Skull: broad and rounded, the dominant cranial mass.
-    ball("Skull", (0.0, HEAD_Y, HEAD_Z), R_HEAD, (1.02, 0.94, 1.0))
+    mane_y = HEAD_Y - 0.15
+    mane_z = HEAD_Z - 0.03
 
-    # Muzzle: a short forward box-ish mass, set LOW on the face.
-    ball("Muzzle", (0.0, HEAD_Y + 0.150, HEAD_Z - 0.085), 0.108, (1.15, 1.05, 0.82))
-    ball("Nose", (0.0, HEAD_Y + 0.225, HEAD_Z - 0.070), 0.052, (1.0, 0.9, 0.85))
+    # ── Mane: the dominant frontal mass ────────────────────────────────────
+    ball("ManeCore", (0.0, mane_y, mane_z), 0.285, (1.0, 0.82, 1.12))
+    # Lower ruff spilling onto the chest, as the turnaround shows.
+    ball("ManeRuff", (0.0, mane_y + 0.045, mane_z - 0.185), 0.215, (1.02, 0.80, 0.78))
+    # Raised top tuft / pompadour.
+    ball("ManeTuft", (0.0, mane_y - 0.020, mane_z + 0.225), 0.135, (0.92, 0.78, 0.95))
 
-    # Mane: a ring of overlapping lobes AROUND the skull, not a sphere over it.
-    for i in range(11):
-        a = (i / 11) * math.tau
-        r_ring = 0.215
-        ball(f"ManeLobe_{i:02d}",
-             (math.sin(a) * r_ring * 1.05,
-              HEAD_Y - 0.055 - math.cos(a) * 0.035,
-              HEAD_Z + math.cos(a) * r_ring),
-             0.098 + (i % 3) * 0.012,
-             (1.0, 0.72, 1.0))
-    # Raised top tuft called out in the identity lock.
-    ball("ManeTuft", (0.0, HEAD_Y - 0.075, HEAD_Z + 0.235), 0.085, (1.0, 0.8, 1.15))
+    # NOTE: surface lobes were built here and removed. Ringing spheres around
+    # the mane produced a visible CHAIN OF BALLS down the front in side view —
+    # the same failure as the grass tufts in the environment. The reference mane
+    # is one smooth rounded mass; its layered look comes from shading and
+    # texture, not from separate volumes. Layering belongs to the surface pass.
 
-    # Ears: they must BREAK the mane silhouette, not sit inside it. At 0.062
-    # tucked against the skull they were swallowed by the ruff and the head read
-    # as a featureless disc from the front.
+    # ── Head set into the FRONT of the mane ────────────────────────────────
+    ball("Skull", (0.0, HEAD_Y + 0.035, HEAD_Z), R_HEAD, (1.03, 0.95, 0.98))
+
+    # Muzzle: short, broad, and set low on the face; it must protrude clearly
+    # past the mane or the head reads as a disc.
+    ball("Muzzle", (0.0, HEAD_Y + 0.175, HEAD_Z - 0.070), 0.112, (1.12, 1.05, 0.85))
+    ball("Nose", (0.0, HEAD_Y + 0.245, HEAD_Z - 0.052), 0.055, (1.0, 0.9, 0.88))
+
+    # Cheek mass either side of the muzzle, which the turnaround shows clearly.
+    for sx in (-1, 1):
+        ball(f"Cheek_{'L' if sx < 0 else 'R'}",
+             (sx * 0.085, HEAD_Y + 0.125, HEAD_Z - 0.055), 0.078, (0.95, 0.95, 0.85))
+
+    # ── Ears: small, rounded, peeking above the mane ───────────────────────
     for sx in (-1, 1):
         ball(f"Ear_{'L' if sx < 0 else 'R'}",
-             (sx * 0.150, HEAD_Y - 0.010, HEAD_Z + 0.200), 0.078, (0.92, 0.52, 1.05))
+             (sx * 0.128, HEAD_Y - 0.020, HEAD_Z + 0.165), 0.070, (0.95, 0.55, 1.0))
 
     return parts
 
