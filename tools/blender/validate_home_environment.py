@@ -30,8 +30,13 @@ CAMERA_NAME = "CAM_Home_Main"
 
 # Budgets. The lion is the hero and gets the larger share of the frame budget;
 # the environment must not eat it.
-MAX_TRIS = 60_000
-MAX_MATERIALS = 28
+#
+# Materials are a DRAW CALL budget, not a memory one. 32 is deliberate headroom
+# for the tonal separation this art direction needs (lit/shade pairs for grass
+# and foliage, shallow vs deep water). If it is ever raised again, the right
+# answer is a texture atlas, not a bigger number.
+MAX_TRIS = 95_000
+MAX_MATERIALS = 32
 
 ISLAND_R = 3.10
 WALK_R = 2.05

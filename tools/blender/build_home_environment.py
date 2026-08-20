@@ -148,6 +148,10 @@ def build_materials():
     MAT["hill_far"] = material("ENV_HillFar", (0.545, 0.831, 0.678), 0.90)
     MAT["hill_mid"] = material("ENV_HillMid", (0.412, 0.757, 0.510), 0.88)
     MAT["cloud"] = material("ENV_Cloud", (1.000, 0.996, 0.988), 0.95)
+    MAT["leaf_dark"] = material("ENV_LeafDark", (0.133, 0.404, 0.129), 0.86)
+    MAT["grass_lit"] = material("ENV_GrassLit", (0.427, 0.816, 0.290), 0.78)
+    MAT["water_shallow"] = material("ENV_WaterShallow", (0.208, 0.749, 0.780), 0.13)
+    MAT["soil_dark"] = material("ENV_SoilDark", (0.353, 0.243, 0.157), 0.92)
 
 
 # ── Layer 1 — the island the lion stands on ─────────────────────────────────
@@ -329,53 +333,97 @@ def build_lily_pads(col):
 
 
 # ── Layer 3 — foliage ───────────────────────────────────────────────────────
-def build_tree(name, loc, scale, col, blossom=True):
-    """Stylised rounded tree: trunk plus three canopy masses.
+def build_tree(name, loc, scale, col, blossom=True, tone=0.0):
+    """Stylised tree with a two-tone canopy and a flared trunk.
 
-    Deliberately low geometry. These read at a few hundred pixels; film-level
-    complexity here would spend the GPU budget the lion needs.
+    The blockout version was three same-size spheres on a cylinder, which reads
+    as a lollipop. What makes a stylised canopy read as foliage is asymmetry and
+    a lit/shaded split: a shadow mass low and away from the sun, lit masses on
+    the sun side, and a few small clumps breaking the outer silhouette.
     """
     parts = []
-    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.17, depth=1.25,
-                                        location=(loc[0], loc[1], loc[2] + 0.62))
+    sun_x, sun_y = 0.62, 0.78          # matches LIGHT_KeySun's azimuth
+
+    # Trunk: tapered, with a root flare so it grows out of the ground.
+    bpy.ops.mesh.primitive_cone_add(vertices=14, radius1=0.26, radius2=0.145,
+                                    depth=1.35, location=(loc[0], loc[1], loc[2] + 0.66))
     trunk = bpy.context.object
     trunk.name = f"{name}_Trunk"
     assign(trunk, MAT["bark"])
     parts.append(trunk)
 
-    for i, (dx, dy, dz, r, mat) in enumerate([
-        (-0.30, 0.10, 1.48, 0.74, MAT["leaf"]),
-        (0.32, -0.08, 1.62, 0.80, MAT["leaf_lit"]),
-        (0.02, 0.06, 2.02, 0.66, MAT["leaf_lit"]),
-    ]):
+    bpy.ops.mesh.primitive_cone_add(vertices=14, radius1=0.40, radius2=0.24,
+                                    depth=0.34, location=(loc[0], loc[1], loc[2] + 0.15))
+    flare = bpy.context.object
+    flare.name = f"{name}_RootFlare"
+    assign(flare, MAT["bark"])
+    parts.append(flare)
+
+    # A short fork so the canopy has something to sit on.
+    for i, (bx, by) in enumerate(((-0.34, 0.10), (0.32, -0.12))):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=8, radius1=0.10, radius2=0.05, depth=0.62,
+            location=(loc[0] + bx * 0.6, loc[1] + by * 0.6, loc[2] + 1.28))
+        b = bpy.context.object
+        b.name = f"{name}_Branch_{i}"
+        b.rotation_euler = (math.radians(by * 90), math.radians(-bx * 90), 0)
+        assign(b, MAT["bark"])
+        parts.append(b)
+
+    # Canopy: shadow mass first, then lit masses biased toward the sun.
+    canopy = [
+        (-0.42, -0.30, 1.52, 0.78, "dark"),
+        (0.30, 0.26, 1.60, 0.74, "mid"),
+        (sun_x * 0.55, sun_y * 0.42, 1.86, 0.70, "lit"),
+        (-0.20, 0.44, 1.94, 0.58, "mid"),
+        (0.46, -0.34, 1.78, 0.56, "mid"),
+        (sun_x * 0.34, sun_y * 0.30, 2.18, 0.46, "lit"),
+        (-0.52, 0.14, 1.30, 0.50, "dark"),
+    ]
+    tone_map = {"dark": MAT["leaf_dark"], "mid": MAT["leaf"], "lit": MAT["leaf_lit"]}
+    for i, (dx, dy, dz, r, key) in enumerate(canopy):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            segments=20, ring_count=12, radius=r,
+            segments=18, ring_count=11, radius=r,
             location=(loc[0] + dx, loc[1] + dy, loc[2] + dz))
         c = bpy.context.object
         c.name = f"{name}_Canopy_{i}"
-        c.scale = (1.0, 1.0, 0.86)
-        assign(c, mat)
+        c.scale = (1.0, 1.0, 0.84)
+        assign(c, tone_map[key])
         parts.append(c)
 
+    # Small clumps break the outer silhouette so it is not a smooth blob.
+    for i in range(6):
+        a = (i / 6) * math.tau + 0.4
+        rr = 0.80
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            segments=10, ring_count=7, radius=0.24,
+            location=(loc[0] + math.cos(a) * rr,
+                      loc[1] + math.sin(a) * rr * 0.85,
+                      loc[2] + 1.62 + math.sin(a * 1.7) * 0.34))
+        cl = bpy.context.object
+        cl.name = f"{name}_Clump_{i}"
+        assign(cl, MAT["leaf_lit"] if i % 2 else MAT["leaf"])
+        parts.append(cl)
+
     if blossom:
-        for i in range(7):
-            a = (i / 7) * math.tau
+        for i in range(11):
+            a = (i / 11) * math.tau
             bpy.ops.mesh.primitive_uv_sphere_add(
-                segments=7, ring_count=5, radius=0.10,
-                location=(loc[0] + math.cos(a) * 0.72,
-                          loc[1] + math.sin(a) * 0.62,
-                          loc[2] + 1.70 + math.sin(a * 2) * 0.24))
+                segments=7, ring_count=5, radius=0.085,
+                location=(loc[0] + math.cos(a) * 0.80,
+                          loc[1] + math.sin(a) * 0.70,
+                          loc[2] + 1.72 + math.sin(a * 2.3) * 0.36))
             b = bpy.context.object
             b.name = f"{name}_Blossom_{i}"
-            assign(b, MAT["blossom"])
+            assign(b, MAT["blossom"] if i % 3 else MAT["petal_white"])
             parts.append(b)
 
-    for p in parts:
-        p.scale = tuple(s * scale for s in p.scale)
-        p.location = (loc[0] + (p.location.x - loc[0]) * scale,
-                      loc[1] + (p.location.y - loc[1]) * scale,
-                      loc[2] + (p.location.z - loc[2]) * scale)
-        link(p, col)
+    for pt in parts:
+        pt.scale = tuple(v * scale for v in pt.scale)
+        pt.location = (loc[0] + (pt.location.x - loc[0]) * scale,
+                       loc[1] + (pt.location.y - loc[1]) * scale,
+                       loc[2] + (pt.location.z - loc[2]) * scale)
+        link(pt, col)
     return parts
 
 
@@ -483,6 +531,143 @@ def build_island_detail(col):
         c.name = f"ENV_RingFlower_{i}_Core"
         assign(c, MAT["petal_gold"])
         link(c, col)
+
+
+
+def build_island_edge(col):
+    """Grass lip and soil band where the island meets its stone rim.
+
+    A grass dome sitting straight on stones reads as two stacked primitives. In
+    the reference the turf visibly overhangs its edge with soil showing beneath,
+    which is what makes the island read as ground rather than a cake.
+    """
+    # Overhanging turf lip, slightly wider than the dome.
+    bpy.ops.mesh.primitive_torus_add(major_radius=ISLAND_R * 0.985, minor_radius=0.20,
+                                     major_segments=56, minor_segments=10,
+                                     location=(0, 0, DOME_CENTRE_Z + 0.05))
+    lip = bpy.context.object
+    lip.name = "ENV_IslandLip"
+    lip.scale = (1.0, 1.0, 0.72)
+    assign(lip, MAT["grass_lit"])
+    link(lip, col)
+
+    # Exposed soil under the lip.
+    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=ISLAND_R * 0.955, depth=0.40,
+                                        location=(0, 0, DOME_CENTRE_Z - 0.22))
+    band = bpy.context.object
+    band.name = "ENV_IslandSoilBand"
+    assign(band, MAT["soil_dark"])
+    link(band, col)
+
+    # Tufts spilling over the edge, tucked so they read as overhang not spikes.
+    for i in range(26):
+        a = (i / 26) * math.tau
+        r = ISLAND_R * 0.94
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            segments=10, ring_count=7, radius=0.19 + (i % 3) * 0.05,
+            location=(math.cos(a) * r, math.sin(a) * r, DOME_CENTRE_Z + 0.02))
+        t = bpy.context.object
+        t.name = f"ENV_EdgeTuft_{i:02d}"
+        t.scale = (1.0, 1.0, 0.52)
+        assign(t, MAT["grass_lit"] if i % 2 else MAT["grass"])
+        link(t, col)
+
+
+def build_water_detail(col):
+    """Shallows, contact ripples and blooming lily pads."""
+    # Lighter shallow ring hugging the island — depth cue in the water itself.
+    bpy.ops.mesh.primitive_torus_add(major_radius=ISLAND_R + 0.55, minor_radius=0.62,
+                                     major_segments=48, minor_segments=8,
+                                     location=(0, 0, WATER_Z + 0.012))
+    sh = bpy.context.object
+    sh.name = "ENV_Shallows"
+    sh.scale = (1.0, 1.0, 0.035)
+    assign(sh, MAT["water_shallow"])
+    link(sh, col)
+
+    # NOTE: concentric contact ripples were tried here and removed. Three bright
+    # rings around the island read as a painted racetrack and pulled the eye
+    # straight off the hero stage. The shallow band alone is enough to say the
+    # island displaces water; the reference has no such rings either.
+
+    # More lily pads, some carrying a bloom.
+    pads = [
+        (-4.55, -2.30, 0.46, True), (-3.10, -3.55, 0.34, False),
+        (3.05, -3.70, 0.40, True), (-5.45, -1.15, 0.30, False),
+        (4.85, -1.05, 0.36, False), (5.60, -2.55, 0.28, True),
+        (-4.05, -0.70, 0.32, False), (3.90, -2.20, 0.26, False),
+    ]
+    for i, (x, y, r, bloom) in enumerate(pads):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=22, radius=r, depth=0.05,
+                                            location=(x, y, WATER_Z + 0.035))
+        pad = bpy.context.object
+        pad.name = f"ENV_LilyPadB_{i}"
+        assign(pad, MAT["leaf"])
+        link(pad, col)
+        # Notch stem: a small darker wedge reads as the pad's split.
+        bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=r * 0.22, depth=0.055,
+                                            location=(x + r * 0.7, y, WATER_Z + 0.036))
+        notch = bpy.context.object
+        notch.name = f"ENV_LilyNotch_{i}"
+        assign(notch, MAT["water"])
+        link(notch, col)
+        if bloom:
+            for k in range(5):
+                a = (k / 5) * math.tau
+                bpy.ops.mesh.primitive_uv_sphere_add(
+                    segments=8, ring_count=6, radius=0.075,
+                    location=(x + math.cos(a) * 0.10, y + math.sin(a) * 0.10, WATER_Z + 0.10))
+                pb = bpy.context.object
+                pb.name = f"ENV_LilyBloom_{i}_{k}"
+                assign(pb, MAT["blossom"])
+                link(pb, col)
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.055,
+                                                 location=(x, y, WATER_Z + 0.125))
+            core = bpy.context.object
+            core.name = f"ENV_LilyBloomCore_{i}"
+            assign(core, MAT["petal_gold"])
+            link(core, col)
+
+
+def build_far_bank_detail(col):
+    """Break up the far bank, which read as one smooth green band."""
+    # Rolling mounds along the bank so its top edge is not a clean arc.
+    for i in range(14):
+        a = math.radians(200 + i * 10)
+        r = 11.5 + (i % 3) * 0.9
+        x, y = math.cos(a) * r, math.sin(a) * r + 1.5
+        if y < 1.0:
+            continue
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            segments=16, ring_count=9, radius=1.4 + (i % 4) * 0.55,
+            location=(x, y, WATER_Z + 0.35))
+        m = bpy.context.object
+        m.name = f"ENV_BankMound_{i:02d}"
+        m.scale = (1.5, 1.2, 0.44)
+        assign(m, MAT["grass_dark"] if i % 2 else MAT["grass"])
+        link(m, col)
+
+    # Bushes and small trees dotted along it.
+    for i in range(9):
+        a = math.radians(196 + i * 16)
+        r = 12.6
+        x, y = math.cos(a) * r, math.sin(a) * r + 1.5
+        if y < 1.5:
+            continue
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8,
+                                             radius=0.72 + (i % 3) * 0.24,
+                                             location=(x, y, WATER_Z + 0.95))
+        b = bpy.context.object
+        b.name = f"ENV_BankBush_{i}"
+        b.scale = (1.3, 1.1, 0.78)
+        assign(b, MAT["leaf"] if i % 2 else MAT["leaf_dark"])
+        link(b, col)
+
+    for i, ang in enumerate((214, 236, 300, 324)):
+        a = math.radians(ang)
+        r = 13.4
+        build_tree(f"ENV_BankTree_{i}", (math.cos(a) * r, math.sin(a) * r + 1.5, WATER_Z + 0.7),
+                   0.92, col, blossom=(i % 2 == 0))
 
 
 # ── Sky detail ──────────────────────────────────────────────────────────────
@@ -765,6 +950,9 @@ def main():
     build_flowers(c_props)
     build_reeds(c_props)
     build_island_detail(c_props)
+    build_island_edge(c_ground)
+    build_water_detail(c_water)
+    build_far_bank_detail(c_foliage)
     c_sky = collection("ENV_Sky")
     build_clouds(c_sky)
     build_rainbow(c_sky)
