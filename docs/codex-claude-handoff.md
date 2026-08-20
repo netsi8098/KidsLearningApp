@@ -3077,3 +3077,261 @@ The detached oval grass-and-stone platform was rejected because it isolated the 
 - Clean-page browser console: no warnings or errors.
 - Focused ESLint and `git diff --check`: PASS.
 - Production build: PASS (existing large-chunk advisory only).
+
+## Codex Handoff - Production Rigged Lion Boundary (2026-08-20)
+
+### Decision
+
+The current `ArticulatedLion` is a textured skinned plane, not a real quadruped.
+Further CSS or plane-deformation polish cannot meet the requested locomotion. It is
+now explicitly treated as a temporary fallback. Do not remove it until a valid
+production GLB is visually approved.
+
+### Implemented
+
+- Added the authoritative 45-bone, four-leg hierarchy, 13-clip contract, and 16
+  facial morph contract in `src/data/lionRigContract.json`.
+- Added a lazy R3F/Drei/Three runtime with skeleton cloning, animation mixing,
+  crossfades, additive overlays, semantic commands, gaze, blinking, jaw/visemes,
+  root travel, and reduced-motion handling.
+- Preserved the existing `GeneratedLion` API. The new runtime is gated by
+  `VITE_RIGGED_LION_ENABLED` and falls back on any load/runtime failure.
+- Added `npm run lion:validate`, an offline GLB parser that rejects missing skins,
+  joint/weight attributes, bones, parents, clips, and morph targets.
+- Added focused contract tests and the full Blender handoff in
+  `docs/rigged-lion-production.md`.
+- Added GLB/WebP/WAV to PWA precaching and raised the per-asset ceiling to 12 MB.
+
+### Verification
+
+- Focused rig ESLint: PASS.
+- Rig contract tests: 2/2 PASS.
+- Production build: PASS. The R3F runtime is a separate lazy chunk.
+- Full repository typecheck remains red on pre-existing Framer Motion/UI typing
+  debt already documented in this handoff; no new rig file appears in those errors.
+
+### Blocking asset work
+
+There is no Blender/FBX/glTF/GLB lion source in the repository and Blender is not
+installed on this machine. A character artist must model and skin the approved lion,
+author the required clips and shape keys, and export
+`public/assets/lion/rigged/lion.glb`. Do not create a generic replacement lion and
+do not enable the flag until `npm run lion:validate` passes.
+
+## Codex Handoff - Blender and R3F Current-State Audit (2026-08-20)
+
+### Read first
+
+The earlier "Blender is not installed / no GLB exists" statement is obsolete.
+Blender 5.2 LTS is installed, `art/blender/lion.blend` exists, and
+`public/assets/lion/rigged/lion.glb` passes the contract. The exact 16-part
+audit is now the source of truth:
+
+`docs/blender-current-state-audit.md`
+
+### Honest status
+
+- Pipeline: proven.
+- 3D mesh, 45-bone armature, glTF skin, four semantic leg chains: present.
+- 13 Actions and 16 facial morph targets: present and validated.
+- IK, pole targets, control rig, production topology, and professional weight
+  painting: absent.
+- Blender environment, real ground, production camera, markers, lighting, and
+  environment GLB: absent.
+- Full-screen 3D world with preserved DOM UI: absent.
+- Current live-local lion: loads and waves, but floats over the painted hill and
+  does not yet match the approved quadruped mascot closely enough.
+
+### Runtime correction
+
+`inspectLionRig` now identifies the GLTFLoader scene wrapper by object identity
+instead of assuming its runtime type is `Scene`. This removes a false root-parent
+failure that previously disabled every authored animation in the browser.
+
+### Verification
+
+- `npm run lion:validate`: PASS, 45 bones, 13 clips, 16 morph targets.
+- `lionRigContract.test.ts`: PASS, 2 of 2.
+- production build: PASS.
+- local GLB rendering and Wave playback: PASS.
+
+### Next task, do not skip the blockout
+
+Create `home_environment.blend` and a minimal environment GLB with real ground,
+walk bounds, camera, basic lighting, and named spawn/speech/title/card markers.
+Integrate it through one full-screen R3F Canvas behind the existing React DOM UI.
+Use the current lion only as a pipeline proxy. Do not spend time detailing the
+environment or polishing the prototype lion until phone, tablet, and desktop
+composition and ground contact pass.
+
+## Codex Handoff - Homepage 3D Production Freeze and Reference Lock (2026-08-20)
+
+The user rejected rushing the prototype into the app. Do not make further
+homepage integration changes until the production lion and three video-defined
+worlds pass offline Blender approval.
+
+References extracted and saved:
+
+- `art/blender/references/sky-river-contact-sheet.png`
+- `art/blender/references/treehouse-contact-sheet.png`
+- selected full-resolution frames under `motion_reference_frames/`
+- visual and motion analysis in `art/blender/references/README.md`
+
+The production sequence and approval gates are defined in:
+
+`docs/3d-homepage-production-lock.md`
+
+Three required worlds are now locked:
+
+1. Sky Islands
+2. River Garden
+3. Treehouse Village
+
+The current `lion.blend` is a pipeline prototype, not `lion_master.blend`. Its
+upright primitive body does not match the low quadruped mascot in the videos.
+Preserve its export/runtime lessons, but begin the production lion with an
+offline proportion study and clay blockout. First deliverable is a four-view
+turntable and grounded three-quarter pose. No new GLB goes into React before
+identity, ground contact, motion, and responsive world composition are approved.
+
+### Offline proportion study started
+
+Codex created `art/blender/lion_proportion_study.blend` and reproducible builder
+`tools/blender/build_lion_proportion_study.py`. Four renders are under
+`docs/assets/lion-proportion-study/`. This work is not connected to React.
+
+Review 1 is intentionally marked NOT APPROVED. It establishes four grounded paws
+and a compact quadruped stance, but the face remains too spherical, the mane too
+uniform, and the limbs too primitive. Continue the corrections listed in
+`docs/3d-homepage-production-lock.md`; do not rig, retopologize, export, or replace
+the current runtime GLB with this study yet.
+
+## Codex Handoff - Lion Reference Stage and Review 3 (2026-08-20)
+
+No homepage or React integration was changed in this pass. Production remains
+frozen at the offline Blender asset gate.
+
+New modeling references and tools:
+
+- `art/blender/references/lion-turnaround-study-v1.png`
+- four cropped views under `art/blender/references/turnaround/`
+- `tools/blender/build_lion_reference_stage.py`
+- `art/blender/lion_reference_stage.blend`
+
+The reference stage appends the current proportion model and provides four named
+cameras, each with one correctly assigned background plate, plus six measurement
+guides. Blender 5.2 validation reports 4 cameras, 4 background references, 81
+blockout objects, and 6 guides.
+
+Version 2 is preserved at `art/blender/lion_proportion_study_v2.blend`. Version 3
+is the current `lion_proportion_study.blend` and has updated review renders. It is
+also rejected for rigging: the broad quadruped silhouette improved, but the legs,
+paws, face, mane, and body transitions still read as intersecting primitives.
+
+Next work must use the reference-stage cameras for a continuous clay sculpt or
+equivalent production modeling pass. Do not tune more cylinders, do not export a
+new GLB, and do not reconnect this study to the application. Original video
+close-ups remain authoritative over the generated turnaround.
+
+---
+
+# Claude Takeover — 2026-08-20
+
+Codex is out of quota. Claude is now the active developer. Its 3D product code
+is left intact; this pass covered payload, one rendering bug, and QA that was
+reporting falsely in both directions.
+
+## What Codex left working (verified, not assumed)
+
+All four worlds render painted backplates. Sunny Meadow goes through
+`WorldPlate` with a path override to `backplate-hill-v2.webp`; the other three
+use a direct `<motion.img>`. The lion is grounded on a connected hill — the
+floating-stage defect from the previous pass is **fixed**. The mascot is now
+interactive (tap to hear it speak). Homepage composition reads as one designed
+world at all three viewports.
+
+## What this pass changed
+
+### Payload: precache 14.9MB → 7.0MB
+
+- `idle/waving/thinking/celebrating.png` were **four byte-identical copies** of
+  the same waving render (verified by md5) — 5.4MB of duplicate bytes for one
+  image. Replaced with a single 88KB WebP (800px, q88, alpha preserved; rendered
+  at most ~400px). `AVAILABLE_ART_POSES` is now `['idle']` so the code states
+  what exists instead of claiming four poses.
+- Three stage plates (1.1MB) shipped but **no world renders a stage layer**.
+- Masters preserved outside the deploy under `art/lion-masters/`,
+  `art/world-masters/`.
+
+Still heavy: **`lion.glb` at 2.5MB**, plus ~1MB of R3F JavaScript.
+
+### Rendering bug
+
+`SkyLife` bird wings animated the SVG `d` attribute. framer-motion does not
+interpolate path data, so `d` went momentarily `undefined` and the browser
+rejected the path. Wings now flap by squashing the group (`scaleY`).
+
+### QA was lying in both directions
+
+1. **Under-reporting:** the harness launched Chromium without WebGL, so the
+   rigged-lion canvas could never initialise. All 12 scopes failed on
+   environment errors, masking real defects. Now launches with
+   `--enable-unsafe-swiftshader` and exercises the real 3D path.
+2. **Over-reporting:** the occlusion check found the mascot by "largest SVG",
+   which matched the decorative shelf plate sitting under the card row —
+   reporting 25% occlusion on a hero nothing was touching. Fixed to identify the
+   mascot by what it is (R3F canvas / lion art / fallback SVG). Then it reported
+   **100% covered** because Codex made the lion itself a button, so it counted
+   the mascot as covering itself. Now excludes the mascot's own wrapper.
+
+**Verified:** build green · homepage QA **92/92** · route sweep **41/41**.
+
+## Recommendation: stop the 3D lion pipeline
+
+Codex asked for approval to install TripoSR locally. **I advise against it**, and
+I have not installed it.
+
+The reasoning:
+
+1. **It has not converged.** Three proportion-study reviews were self-rejected —
+   correctly; the blockout reads as intersecting primitives. TripoSR
+   reconstructs a rough mesh from a single image. That is a *starting* mesh for a
+   human artist, not a premium hero character. It would need retopology, UVs,
+   texturing, rigging and skinning — days of skilled 3D work, not a scripted step.
+2. **The problem it solves is already solved better in 2D.** The goal is 12
+   distinct poses. We already have one production-quality render that looks
+   excellent in the app. Whatever produced `waving.png` and the four backplates
+   can produce the other eleven in the same style — minutes of work against days
+   of uncertain 3D.
+3. **3D carries real cost on the target device.** 2.5MB GLB + ~1MB of R3F, and
+   WebGL is not guaranteed. Headless Chromium proved the failure path is live:
+   no context, loud console errors, fallback to the 2D image. Kids' tablets are
+   exactly where that happens.
+4. **It is blocking product work.** Homepage integration was frozen behind an
+   asset gate that is not converging, while dead videos, read-aloud sync and
+   coloring polish sit untouched.
+
+**What I would do instead:** generate 11 more 2D poses to the contract in
+`public/assets/lion/README.md` (transparent, consistent style/lighting/scale,
+≤300KB each as WebP). Drop them in and they render with **zero code change** —
+`AVAILABLE_ART_POSES` is the only line to update. Keep the GLB work archived
+under `art/` in case a 3D artist picks it up later.
+
+This is a recommendation, not a decision. If you want TripoSR, say so and I will
+install it in an isolated venv — but I would rather spend the time on the eleven
+poses and the untouched P2 work.
+
+## Status by track
+
+- **Localhost verified:** homepage QA 92/92, route sweep 41/41, build + tsc clean
+- **Production:** still unreconciled; Azure SWA is the host, hostname vs stale
+  deploy unresolved. No production claim is verified.
+- **Fallback only:** 11 of 12 lion poses (one render exists, reused everywhere)
+- **Blocked externally:** push to `main` · Azure reconciliation · 11 lion poses ·
+  15 valid YouTube IDs
+
+## Next recommended
+
+1. Eleven lion poses (unblocks the whole mascot system)
+2. Read-aloud highlight sync — untouched, and a core learning surface
+3. `/videos` — still 15 dead IDs withheld from children
