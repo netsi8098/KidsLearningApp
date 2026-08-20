@@ -19,7 +19,6 @@
  * bank · foreground depth accents · ambient motion · content.
  */
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
 import type { WorldProps } from './types';
 import SkyLife from '../SkyLife';
 import { useSceneParallax, DEPTH } from '../useSceneParallax';
@@ -65,6 +64,111 @@ function BlossomTree({
         <circle key={i} cx={cx} cy={cy} r={r} fill={blossom} opacity={r > 4 ? 1 : 0.8} />
       ))}
     </svg>
+  );
+}
+
+const LIVE_FLORA = [
+  { left: '28%', top: '51%', color: '#FFF8F0', scale: 0.78, duration: 3.8, delay: 0.2 },
+  { left: '34%', top: '49%', color: '#FF91B8', scale: 0.66, duration: 4.4, delay: 1.1 },
+  { left: '40%', top: '52%', color: '#FFE36D', scale: 0.58, duration: 3.5, delay: 0.7 },
+  { left: '60%', top: '50%', color: '#C9A7FF', scale: 0.68, duration: 4.1, delay: 1.7 },
+  { left: '66%', top: '52%', color: '#FFF8F0', scale: 0.8, duration: 3.7, delay: 0.9 },
+  { left: '72%', top: '50%', color: '#FF9FAE', scale: 0.62, duration: 4.6, delay: 0.4 },
+];
+
+function LivingMeadowDetails({ reducedMotion }: { reducedMotion: boolean }) {
+  return (
+    <div className="absolute inset-0 z-[9] overflow-hidden pointer-events-none" aria-hidden="true">
+      {/* Barely visible cloud veils add depth without covering the painted sky. */}
+      {[
+        { top: '20%', left: '-18%', width: '34vw', duration: 42, opacity: 0.2 },
+        { top: '30%', left: '72%', width: '27vw', duration: 49, opacity: 0.16 },
+      ].map((cloud, index) => (
+        <motion.div
+          key={`live-cloud-${index}`}
+          className="absolute h-[5.5vw] min-h-8 max-h-16 rounded-[50%] blur-[7px]"
+          style={{
+            top: cloud.top,
+            left: cloud.left,
+            width: cloud.width,
+            opacity: cloud.opacity,
+            background: 'radial-gradient(ellipse, rgba(255,255,255,0.9), rgba(238,249,255,0.32) 58%, transparent 74%)',
+          }}
+          animate={reducedMotion ? undefined : { x: ['0vw', '42vw', '92vw'], scale: [0.96, 1.05, 0.98] }}
+          transition={{ duration: cloud.duration, repeat: Infinity, ease: 'linear', delay: index * -17 }}
+        />
+      ))}
+
+      {/* These are live foreground details placed on the connected hill crest. */}
+      {LIVE_FLORA.map((flower, index) => (
+        <motion.svg
+          key={`live-flower-${index}`}
+          className="absolute h-auto w-[clamp(18px,2.3vw,30px)] overflow-visible"
+          style={{ left: flower.left, top: flower.top, transformOrigin: '50% 100%' }}
+          viewBox="0 0 28 44"
+          fill="none"
+          animate={reducedMotion ? undefined : {
+            rotate: index % 2 ? [-2, 4, -2] : [3, -3, 3],
+            y: [0, -1.5, 0],
+          }}
+          transition={{ duration: flower.duration, repeat: Infinity, ease: 'easeInOut', delay: flower.delay }}
+        >
+          <path d="M14 43 C13 31 15 24 14 16" stroke="#4A9B39" strokeWidth="2.7" strokeLinecap="round" />
+          <path d="M13 31 C8 27 6 29 5 33 C9 34 12 33 14 30" fill="#62B74C" />
+          <path d="M15 26 C20 22 22 24 22 28 C18 29 16 28 14 26" fill="#76C85B" />
+          <motion.g
+            style={{ transformOrigin: '14px 14px' }}
+            animate={reducedMotion ? undefined : { rotate: [0, index % 2 ? 5 : -5, 0] }}
+            transition={{ duration: flower.duration * 0.78, repeat: Infinity, ease: 'easeInOut', delay: flower.delay + 0.2 }}
+          >
+            {[0, 72, 144, 216, 288].map((angle) => (
+              <ellipse
+                key={angle}
+                cx={14 + Math.cos((angle * Math.PI) / 180) * 6}
+                cy={14 + Math.sin((angle * Math.PI) / 180) * 6}
+                rx={4.6 * flower.scale}
+                ry={5.8 * flower.scale}
+                fill={flower.color}
+                transform={`rotate(${angle + 90} ${14 + Math.cos((angle * Math.PI) / 180) * 6} ${14 + Math.sin((angle * Math.PI) / 180) * 6})`}
+              />
+            ))}
+            <circle cx="14" cy="14" r="3.4" fill="#FFC83D" />
+            <circle cx="13" cy="13" r="1.2" fill="#FFF5AE" />
+          </motion.g>
+        </motion.svg>
+      ))}
+
+    </div>
+  );
+}
+
+function GroundingGrass({ reducedMotion }: { reducedMotion: boolean }) {
+  return (
+    <div
+      className="absolute left-1/2 top-[54.1%] z-[17] h-8 w-[clamp(150px,22vw,250px)] -translate-x-1/2 pointer-events-none"
+      aria-hidden="true"
+    >
+      {Array.from({ length: 15 }, (_, index) => (
+        <motion.span
+          key={`paw-grass-${index}`}
+          className="absolute bottom-0 block w-[3px] origin-bottom rounded-full"
+          style={{
+            left: `${4 + index * 6.5}%`,
+            height: `${10 + (index % 4) * 3}px`,
+            background: index % 2 ? '#66BA3E' : '#83D352',
+            rotate: `${-14 + (index % 5) * 7}deg`,
+          }}
+          animate={reducedMotion ? undefined : {
+            rotate: [
+              `${-12 + (index % 5) * 6}deg`,
+              `${-3 + (index % 5) * 4}deg`,
+              `${-12 + (index % 5) * 6}deg`,
+            ],
+          }}
+          transition={{ duration: 2.8 + (index % 4) * 0.45, repeat: Infinity, ease: 'easeInOut', delay: index * 0.09 }}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -250,9 +354,34 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
       </motion.div>
       </div>
 
-      {/* ═══ L3 — HERO STAGE ═══
-          The mound is lit from the sun side and drops a contact shadow, so the
-          mascot reads as standing on ground rather than pasted over it. */}
+      {hasPaintedBackplate && <LivingMeadowDetails reducedMotion={isReducedMotion} />}
+
+      {/* ═══ L3 — HERO ═══ */}
+      {hasPaintedBackplate ? (
+        <>
+          {/* The mascot now lands on the connected hill in the painted world.
+              Character and title have independent anchors so typography can
+              never pull the paws away from the ridge. */}
+          <div className="absolute z-[15] left-1/2 top-[27.5%] sm:top-[27%] md:top-[26%] lg:top-[24.5%] -translate-x-1/2">
+            <motion.div
+              className="absolute left-1/2 top-[8%] h-[clamp(190px,24vw,310px)] w-[clamp(190px,24vw,310px)] -translate-x-1/2 rounded-full blur-3xl pointer-events-none"
+              style={{ background: 'radial-gradient(circle, rgba(255,237,154,0.3) 0%, rgba(255,223,128,0.1) 52%, transparent 74%)' }}
+              animate={isReducedMotion ? undefined : { scale: [1, 1.06, 1], opacity: [0.68, 0.95, 0.68] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div className="relative z-[2]">{mascot}</div>
+            <motion.div
+              className="absolute bottom-[1.5%] left-1/2 -z-[1] h-[clamp(12px,1.6vw,20px)] w-[clamp(104px,13vw,165px)] -translate-x-1/2 rounded-[50%] blur-[4px]"
+              style={{ background: 'rgba(43,91,31,0.31)' }}
+              animate={isReducedMotion ? undefined : { scaleX: [1, 0.94, 1], opacity: [0.28, 0.2, 0.28] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </div>
+          <div className="absolute z-[16] left-1/2 top-[57%] w-[92vw] max-w-[760px] -translate-x-1/2 px-2">
+            {title}
+          </div>
+        </>
+      ) : (
       <div className="absolute z-[15] bottom-[36%] md:bottom-[34%] lg:bottom-[27%] left-1/2 -translate-x-1/2 flex flex-col items-center">
         <motion.div
           className="absolute rounded-full blur-3xl pointer-events-none"
@@ -267,17 +396,6 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
         <div className="relative z-[2]" style={{ marginBottom: '-18px' }}>
           {mascot}
         </div>
-
-        {hasPaintedBackplate ? (
-          <img
-            src="/assets/worlds/sunny-meadow/stage.png"
-            alt=""
-            aria-hidden="true"
-            className="w-[66vw] max-w-[390px] md:max-w-[470px] lg:max-w-[540px] relative z-[1] pointer-events-none select-none"
-            style={{ marginTop: '-82px', marginBottom: '-6px' }}
-            draggable={false}
-          />
-        ) : (
 
         <svg
           viewBox="0 0 300 96"
@@ -325,7 +443,6 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
             </g>
           ))}
         </svg>
-        )}
 
         {/* Title straddles the stage's front edge — part of the world, not a
             text column floating above it. */}
@@ -336,6 +453,9 @@ export default function SunnyMeadowWorld({ mascot, title, children }: WorldProps
           {title}
         </div>
       </div>
+      )}
+
+      {hasPaintedBackplate && <GroundingGrass reducedMotion={isReducedMotion} />}
 
       {/* ═══ L4 — FOREGROUND DEPTH ═══
           Blurred and oversized: this is the depth-of-field cue that makes the

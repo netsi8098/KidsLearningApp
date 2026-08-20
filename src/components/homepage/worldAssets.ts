@@ -21,12 +21,19 @@ const LAYER_EXT: Record<WorldLayerKey, 'webp' | 'png'> = {
   foreground: 'png',
 };
 
+const WORLD_LAYER_OVERRIDES: Record<string, string> = {
+  // Sunny Meadow's hero ground is painted into the environment so the mascot
+  // stands on the landscape instead of a disconnected floating platform.
+  'sunny-meadow:backplate': '/assets/worlds/sunny-meadow/backplate-hill-v2.webp',
+};
+
 export const WORLD_THEMES = ['sunny-meadow', 'sky-islands', 'treehouse', 'river-garden'] as const;
 export type WorldThemeId = typeof WORLD_THEMES[number];
 
 /** Resolve the expected path for a world layer. */
 export function worldAssetPath(theme: string, layer: WorldLayerKey): string {
-  return `/assets/worlds/${theme}/${layer}.${LAYER_EXT[layer]}`;
+  return WORLD_LAYER_OVERRIDES[`${theme}:${layer}`]
+    ?? `/assets/worlds/${theme}/${layer}.${LAYER_EXT[layer]}`;
 }
 
 /**
