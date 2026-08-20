@@ -131,22 +131,23 @@ MAT = {}
 
 
 def build_materials():
-    MAT["grass"] = material("ENV_Grass", (0.353, 0.729, 0.286), 0.82)
-    MAT["grass_dark"] = material("ENV_GrassShade", (0.220, 0.541, 0.196), 0.86)
+    MAT["grass"] = material("ENV_Grass", (0.310, 0.729, 0.216), 0.80)
+    MAT["grass_dark"] = material("ENV_GrassShade", (0.161, 0.482, 0.129), 0.84)
     MAT["soil"] = material("ENV_Soil", (0.482, 0.353, 0.235), 0.90)
     MAT["rock"] = material("ENV_Rock", (0.706, 0.612, 0.478), 0.82)
-    MAT["water"] = material("ENV_Water", (0.204, 0.678, 0.729), 0.18)
-    MAT["water_deep"] = material("ENV_WaterDeep", (0.129, 0.522, 0.612), 0.22)
+    MAT["water"] = material("ENV_Water", (0.106, 0.647, 0.722), 0.14)
+    MAT["water_deep"] = material("ENV_WaterDeep", (0.055, 0.404, 0.522), 0.18)
     MAT["foam"] = material("ENV_Foam", (0.945, 0.988, 1.000), 0.35)
     MAT["bark"] = material("ENV_Bark", (0.478, 0.353, 0.231), 0.88)
-    MAT["leaf"] = material("ENV_Leaf", (0.290, 0.639, 0.278), 0.84)
-    MAT["leaf_lit"] = material("ENV_LeafLit", (0.435, 0.784, 0.365), 0.80)
+    MAT["leaf"] = material("ENV_Leaf", (0.220, 0.596, 0.200), 0.82)
+    MAT["leaf_lit"] = material("ENV_LeafLit", (0.408, 0.808, 0.322), 0.78)
     MAT["blossom"] = material("ENV_Blossom", (1.000, 0.741, 0.859), 0.70)
     MAT["petal_white"] = material("ENV_PetalWhite", (0.996, 0.988, 0.945), 0.68)
     MAT["petal_gold"] = material("ENV_PetalGold", (1.000, 0.831, 0.298), 0.66)
     MAT["petal_violet"] = material("ENV_PetalViolet", (0.765, 0.694, 0.937), 0.70)
-    MAT["hill_far"] = material("ENV_HillFar", (0.647, 0.855, 0.741), 0.92)
-    MAT["hill_mid"] = material("ENV_HillMid", (0.549, 0.804, 0.612), 0.90)
+    MAT["hill_far"] = material("ENV_HillFar", (0.545, 0.831, 0.678), 0.90)
+    MAT["hill_mid"] = material("ENV_HillMid", (0.412, 0.757, 0.510), 0.88)
+    MAT["cloud"] = material("ENV_Cloud", (1.000, 0.996, 0.988), 0.95)
 
 
 # ── Layer 1 — the island the lion stands on ─────────────────────────────────
@@ -184,7 +185,7 @@ def build_island(col):
         a = (i / 22) * math.tau
         r = ISLAND_R * 0.965
         bpy.ops.mesh.primitive_uv_sphere_add(
-            segments=14, ring_count=8, radius=0.30,
+            segments=12, ring_count=7, radius=0.30,
             location=(math.cos(a) * r, math.sin(a) * r, ISLAND_TOP_Z - 0.20))
         s = bpy.context.object
         s.name = f"ENV_RimStone_{i:02d}"
@@ -230,7 +231,7 @@ def build_banks(col):
         (23.0, WATER_Z + 1.25, 0.24, MAT["hill_far"]),
         (30.0, WATER_Z + 1.95, 0.18, MAT["hill_far"]),
     ]):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=36, ring_count=12, radius=rad,
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=22, ring_count=9, radius=rad,
                                              location=(0, 6.0 + i * 3.0, z - rad * (1 - sc)))
         h = bpy.context.object
         h.name = f"ENV_DistantHill_{i}"
@@ -240,49 +241,63 @@ def build_banks(col):
 
 
 def build_waterfall(col):
-    """Left-side fall from a raised ledge into the river.
+    """A cascade on the FAR bank, not in the foreground.
 
-    Codex removed the 2D waterfall after four attempts because flat vector art
-    could not sell an elevation change. In 3D the elevation is real, so the
-    feature works: a ledge with actual height, a curved sheet, and foam where it
-    lands.
+    Earlier passes built this as a large near-camera feature and it failed
+    repeatedly — as a pale slab, a beige drum, and a green drum with white
+    spikes. The diagnosis was never the shading: a foreground waterfall invites
+    close inspection that blockout geometry cannot survive, and every added
+    detail made it noisier.
+
+    The reference treats it correctly — small, mid-distance, left of frame. At
+    that scale a cascade only needs three legible cues: a gap in the bank, a
+    bright vertical ribbon, and foam where it lands. Complexity is matched to
+    the pixel budget instead of fighting it.
     """
-    ledge_x, ledge_y = -6.1, 1.4
-    bpy.ops.mesh.primitive_cylinder_add(vertices=26, radius=1.85, depth=2.10,
-                                        location=(ledge_x, ledge_y, WATER_Z + 0.95))
-    ledge = bpy.context.object
-    ledge.name = "ENV_FallLedge"
-    assign(ledge, MAT["rock"])
-    link(ledge, col)
+    fx, fy = -9.4, 9.2                      # on the far bank, well behind the island
+    bank_top = WATER_Z + 1.62
 
-    bpy.ops.mesh.primitive_cylinder_add(vertices=26, radius=1.92, depth=0.40,
-                                        location=(ledge_x, ledge_y, WATER_Z + 2.10))
-    cap = bpy.context.object
-    cap.name = "ENV_FallLedgeGrass"
-    assign(cap, MAT["grass"])
-    link(cap, col)
+    # Notch: two rounded shoulders with a gap between them.
+    for i, sx in enumerate((-1.35, 1.35)):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            segments=18, ring_count=12, radius=1.05,
+            location=(fx + sx, fy, bank_top - 0.30))
+        sh = bpy.context.object
+        sh.name = f"ENV_FallShoulder_{i}"
+        sh.scale = (1.0, 1.15, 0.95)
+        assign(sh, MAT["grass_dark"])
+        link(sh, col)
 
-    # The falling sheet: a plane bowed outward at the lip.
-    bpy.ops.mesh.primitive_grid_add(x_subdivisions=8, y_subdivisions=14, size=1.0,
-                                    location=(ledge_x + 1.62, ledge_y, WATER_Z + 1.05))
-    sheet = bpy.context.object
-    sheet.name = "ENV_FallSheet"
-    sheet.rotation_euler = (0, math.radians(90), 0)
-    sheet.scale = (2.20, 1.75, 1.0)
-    for v in sheet.data.vertices:
-        v.co.x += 0.16 * (1.0 - abs(v.co.y) * 2.0)   # bow the lip forward
-    assign(sheet, MAT["foam"])
-    link(sheet, col)
+    # The ribbon of falling water, widening slightly toward the pool.
+    fall_h = bank_top - WATER_Z
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=16, radius1=0.42, radius2=0.62, depth=fall_h,
+        location=(fx, fy - 0.55, WATER_Z + fall_h * 0.5))
+    ribbon = bpy.context.object
+    ribbon.name = "ENV_FallRibbon"
+    ribbon.scale = (1.0, 0.42, 1.0)
+    assign(ribbon, MAT["foam"])
+    link(ribbon, col)
 
-    for i in range(4):
+    # Foam where it meets the river.
+    for i in range(3):
         bpy.ops.mesh.primitive_uv_sphere_add(
             segments=16, ring_count=10, radius=0.52 + i * 0.16,
-            location=(ledge_x + 1.7 + i * 0.30, ledge_y + (i - 1.5) * 0.38, WATER_Z + 0.06))
+            location=(fx + (i - 1) * 0.46, fy - 0.85, WATER_Z + 0.05))
         f = bpy.context.object
         f.name = f"ENV_FallFoam_{i}"
-        f.scale = (1.0, 1.0, 0.32)
+        f.scale = (1.0, 0.72, 0.26)
         assign(f, MAT["foam"])
         link(f, col)
+
+    # One spreading ripple, enough to say "something lands here".
+    bpy.ops.mesh.primitive_torus_add(major_radius=1.45, minor_radius=0.05,
+                                     major_segments=28, minor_segments=6,
+                                     location=(fx, fy - 0.95, WATER_Z + 0.03))
+    ring = bpy.context.object
+    ring.name = "ENV_FallRipple"
+    assign(ring, MAT["foam"])
+    link(ring, col)
 
 
 def build_stepping_stones(col):
@@ -346,7 +361,7 @@ def build_tree(name, loc, scale, col, blossom=True):
         for i in range(7):
             a = (i / 7) * math.tau
             bpy.ops.mesh.primitive_uv_sphere_add(
-                segments=8, ring_count=6, radius=0.10,
+                segments=7, ring_count=5, radius=0.10,
                 location=(loc[0] + math.cos(a) * 0.72,
                           loc[1] + math.sin(a) * 0.62,
                           loc[2] + 1.70 + math.sin(a * 2) * 0.24))
@@ -412,6 +427,161 @@ def build_flowers(col):
         c.name = f"ENV_Flower_{i}_Core"
         assign(c, MAT["petal_gold"])
         link(c, col)
+
+
+
+
+def build_island_detail(col):
+    """Surface interest on the hero stage.
+
+    Everything here stays OUTSIDE a clear radius around the centre: that is
+    where the lion stands, and props competing with the character is exactly
+    what the brief warns against. Detail rings the stage rather than filling it.
+    """
+    clear_r = 1.05          # keep the lion's footprint free
+
+    # NOTE: individual grass tufts were tried here and removed. Upward cones
+    # read as dark spikes at this scale no matter how they are tinted, and the
+    # reference island is smooth grass carrying flowers, not visible blades.
+    # Surface interest comes from blooms and bedded rocks instead.
+
+    # Small rocks bedded into the grass give the surface scale.
+    for i, (x, y, r) in enumerate([
+        (-1.62, 0.92, 0.15), (1.78, -0.62, 0.12), (0.42, 1.72, 0.10),
+        (-0.95, -1.68, 0.13), (2.05, 1.15, 0.11),
+    ]):
+        z = island_surface_z(x, y)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=r,
+                                             location=(x, y, z - r * 0.35))
+        o = bpy.context.object
+        o.name = f"ENV_IslandRock_{i}"
+        o.scale = (1.25, 1.0, 0.66)
+        assign(o, MAT["rock"])
+        link(o, col)
+
+    # A second ring of blooms further out, at mixed scale.
+    ring = [
+        (-2.25, 0.35, 0.070, MAT["petal_white"]), (2.30, 0.55, 0.062, MAT["petal_violet"]),
+        (-1.35, 1.95, 0.058, MAT["petal_gold"]), (1.55, 1.85, 0.066, MAT["petal_white"]),
+        (-2.05, -1.35, 0.060, MAT["petal_violet"]), (2.10, -1.45, 0.055, MAT["petal_gold"]),
+        (0.15, 2.25, 0.064, MAT["petal_white"]), (-0.35, -2.15, 0.058, MAT["petal_violet"]),
+    ]
+    for i, (x, y, r, mat) in enumerate(ring):
+        z = island_surface_z(x, y)
+        for k in range(5):
+            a = (k / 5) * math.tau
+            bpy.ops.mesh.primitive_uv_sphere_add(
+                segments=8, ring_count=6, radius=r,
+                location=(x + math.cos(a) * r * 1.5, y + math.sin(a) * r * 1.5, z + 0.05))
+            pt = bpy.context.object
+            pt.name = f"ENV_RingFlower_{i}_{k}"
+            assign(pt, mat)
+            link(pt, col)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=r * 0.7,
+                                             location=(x, y, z + 0.07))
+        c = bpy.context.object
+        c.name = f"ENV_RingFlower_{i}_Core"
+        assign(c, MAT["petal_gold"])
+        link(c, col)
+
+
+# ── Sky detail ──────────────────────────────────────────────────────────────
+def build_clouds(col):
+    """Soft cumulus clusters. Each cloud is 4-6 squashed spheres so the
+    silhouette is lumpy rather than a single blob, which is what separates a
+    stylised cloud from a grey ellipse."""
+    clouds = [
+        (-14.0, 26.0, 5.8, 2.1), (11.0, 30.0, 7.0, 2.5), (-3.0, 34.0, 8.4, 1.9),
+        (21.0, 24.0, 6.0, 1.9), (-24.0, 22.0, 5.4, 1.7), (4.5, 20.0, 4.9, 1.4),
+        (30.0, 32.0, 8.8, 2.2), (-32.0, 28.0, 7.2, 2.0), (16.0, 18.0, 4.4, 1.3),
+    ]
+    for ci, (cx, cy, cz, scale) in enumerate(clouds):
+        for pi, (dx, dy, dz, r) in enumerate([
+            (0.0, 0.0, 0.0, 1.00), (-1.15, 0.20, -0.18, 0.74),
+            (1.20, -0.15, -0.22, 0.80), (0.35, 0.30, 0.52, 0.66),
+            (-0.55, -0.25, 0.40, 0.58), (2.05, 0.10, -0.40, 0.50),
+        ]):
+            bpy.ops.mesh.primitive_uv_sphere_add(
+                segments=12, ring_count=7, radius=r * scale,
+                location=(cx + dx * scale, cy + dy * scale, cz + dz * scale))
+            o = bpy.context.object
+            o.name = f"ENV_Cloud_{ci:02d}_{pi}"
+            o.scale = (1.25, 1.0, 0.62)
+            assign(o, MAT["cloud"])
+            link(o, col)
+
+
+def build_rainbow(col):
+    """Seven concentric bands, sunk so only the arc clears the hills.
+
+    Modelled as full tori rather than arc geometry: the lower halves fall below
+    the horizon line and behind the distant hills, which is how the arc reads
+    without any trimmed topology to export.
+    """
+    bands = [
+        ("Red", (0.988, 0.451, 0.451)), ("Orange", (1.000, 0.635, 0.353)),
+        ("Yellow", (1.000, 0.878, 0.478)), ("Green", (0.573, 0.855, 0.510)),
+        ("Cyan", (0.510, 0.804, 0.918)), ("Blue", (0.514, 0.620, 0.918)),
+        ("Violet", (0.749, 0.663, 0.937)),
+    ]
+    cx, cy, cz = 7.0, 40.0, -4.2
+    for i, (name, rgb) in enumerate(bands):
+        mat = material(f"ENV_Rainbow{name}", rgb, roughness=0.9, emission=rgb)
+        mat.blend_method = "BLEND"
+        mat.use_backface_culling = False
+        bsdf = mat.node_tree.nodes.get("Principled BSDF")
+        bsdf.inputs["Alpha"].default_value = 0.34
+        if "Emission Strength" in bsdf.inputs:
+            bsdf.inputs["Emission Strength"].default_value = 0.55
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=14.0 - i * 0.55, minor_radius=0.31,
+            major_segments=64, minor_segments=8,
+            location=(cx, cy, cz), rotation=(math.radians(90), 0, 0))
+        o = bpy.context.object
+        o.name = f"ENV_Rainbow_{name}"
+        assign(o, mat)
+        link(o, col)
+
+
+def build_bubbles(col):
+    """Drifting bubbles — a signature of the reference world."""
+    mat = material("ENV_Bubble", (0.92, 0.98, 1.0), roughness=0.05,
+                   emission=(0.72, 0.88, 1.0))
+    mat.blend_method = "BLEND"
+    bsdf = mat.node_tree.nodes.get("Principled BSDF")
+    bsdf.inputs["Alpha"].default_value = 0.20
+    if "Emission Strength" in bsdf.inputs:
+        bsdf.inputs["Emission Strength"].default_value = 0.35
+    spots = [
+        (-4.2, -2.0, 1.35, 0.22), (3.6, -1.2, 1.85, 0.16), (-2.4, 2.6, 2.25, 0.13),
+        (5.1, 1.4, 1.15, 0.19), (-6.0, -0.6, 2.60, 0.11), (1.4, 3.2, 2.95, 0.15),
+        (6.4, -2.8, 2.10, 0.12), (-3.1, -3.6, 0.95, 0.17),
+    ]
+    for i, (x, y, z, r) in enumerate(spots):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8,
+                                             radius=r, location=(x, y, z))
+        o = bpy.context.object
+        o.name = f"ENV_Bubble_{i}"
+        assign(o, mat)
+        link(o, col)
+
+
+def build_reeds(col):
+    """Foreground reeds at the near bank — the depth cue closest to camera."""
+    for i, (x, y, h) in enumerate([
+        (-7.4, -5.6, 1.5), (-6.6, -6.2, 1.9), (-7.9, -6.8, 1.3),
+        (7.8, -5.2, 1.7), (8.5, -6.1, 2.1), (7.1, -6.6, 1.4),
+    ]):
+        for k in range(4):
+            bpy.ops.mesh.primitive_cone_add(
+                vertices=8, radius1=0.075, radius2=0.012, depth=h,
+                location=(x + (k - 1.5) * 0.20, y + (k % 2) * 0.16,
+                          WATER_Z + h * 0.5))
+            r = bpy.context.object
+            r.name = f"ENV_Reed_{i}_{k}"
+            r.rotation_euler = (math.radians((k - 1.5) * 6), 0, math.radians(k * 22))
+            assign(r, MAT["leaf"] if k % 2 else MAT["grass_dark"])
+            link(r, col)
 
 
 # ── Camera, markers, lighting ───────────────────────────────────────────────
@@ -503,14 +673,14 @@ def build_lighting(col):
     out = nt.nodes.new("ShaderNodeOutputWorld")
 
     rng.inputs["From Min"].default_value = -0.12   # a little below the horizon
-    rng.inputs["From Max"].default_value = 0.62    # zenith arrives before straight up
+    rng.inputs["From Max"].default_value = 0.48    # zenith arrives before straight up
     rng.inputs["To Min"].default_value = 0.0
     rng.inputs["To Max"].default_value = 1.0
     rng.clamp = True
 
     ramp.color_ramp.elements[0].position = 0.00
-    ramp.color_ramp.elements[0].color = (0.949, 0.925, 0.812, 1.0)   # warm horizon haze
-    ramp.color_ramp.elements[1].position = 0.55
+    ramp.color_ramp.elements[0].color = (0.878, 0.918, 0.906, 1.0)   # soft horizon haze
+    ramp.color_ramp.elements[1].position = 0.30
     ramp.color_ramp.elements[1].color = (0.298, 0.663, 0.925, 1.0)   # mid sky
     top = ramp.color_ramp.elements.new(1.0)
     top.color = (0.141, 0.478, 0.859, 1.0)                            # deeper zenith
@@ -593,6 +763,12 @@ def main():
     build_lily_pads(c_water)
     build_foliage(c_foliage)
     build_flowers(c_props)
+    build_reeds(c_props)
+    build_island_detail(c_props)
+    c_sky = collection("ENV_Sky")
+    build_clouds(c_sky)
+    build_rainbow(c_sky)
+    build_bubbles(c_sky)
     build_camera(c_cam)
     build_markers(c_markers)
     build_lighting(c_light)
