@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { generateSimpleLipSync, getMouthShapeAtTime, type MouthShape } from '../../mascot/lipSync';
 import { useMotionPreset } from '../../motion/useMotionPreset';
 import type { LionPose } from '../GeneratedLion';
+import { IDLE_LOCOMOTION, LionLocomotionContext } from './LionLocomotionContext';
 
 interface ArticulatedLionProps {
   src: string;
@@ -393,11 +394,28 @@ interface TailMotionInput {
   reduced: boolean;
   torsoLinearVelocity: number;
   torsoAngularVelocity: number;
+  locomotionSpeed: number;
+  locomotionDirection: -1 | 0 | 1;
+  locomotionLift: number;
+  locomotionLanding: number;
   dt: number;
 }
 
 function updateTail(rig: LionRig, input: TailMotionInput) {
-  const { seconds, elapsed, greeting, closingTurn, reduced, torsoLinearVelocity, torsoAngularVelocity, dt } = input;
+  const {
+    seconds,
+    elapsed,
+    greeting,
+    closingTurn,
+    reduced,
+    torsoLinearVelocity,
+    torsoAngularVelocity,
+    locomotionSpeed,
+    locomotionDirection,
+    locomotionLift,
+    locomotionLanding,
+    dt,
+  } = input;
   const anticipationTuck = greeting ? -0.075 * envelope(elapsed, 260, 620, 870, 1260) : 0;
   const happyEnvelope = greeting ? envelope(elapsed, 650, 1080, 3250, 4580) : 0;
   const idleSwish = reduced
@@ -411,7 +429,15 @@ function updateTail(rig: LionRig, input: TailMotionInput) {
     );
   const bodyImpulse = reduced
     ? 0
-    : clamp(-torsoAngularVelocity * 0.0075 - torsoLinearVelocity * 0.00042, -0.085, 0.085);
+    : clamp(
+      -torsoAngularVelocity * 0.0075
+      - torsoLinearVelocity * 0.00042
+      - locomotionDirection * locomotionSpeed * 0.055
+      + locomotionLift * 0.045
+      - locomotionLanding * 0.07,
+      -0.14,
+      0.14,
+    );
   // Counterbalance the late body turn, then let each downstream segment lag.
   // This is deliberately stronger than the idle swish so the motion remains
   // readable when the mascot is rendered at phone size.
@@ -450,6 +476,7 @@ function jawForShape(shape: MouthShape) {
  * mesh every requestAnimationFrame; no image layers or frames are swapped.
  */
 export default function ArticulatedLion({ src, pose, size, lookAt = 0, speechText = "Who's playing today?", speechKey = 0, mouthKey = 0, onSpeechComplete, className }: ArticulatedLionProps) {
+  const locomotionRef = useContext(LionLocomotionContext);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rigRef = useRef<LionRig | null>(null);
   const poseRef = useRef(pose);
@@ -522,6 +549,9 @@ export default function ArticulatedLion({ src, pose, size, lookAt = 0, speechTex
         const speechElapsed = clamp(mouthElapsed, 0, SPEECH_MS);
         const speaking = !reduced && mouthElapsed >= 0 && mouthElapsed <= SPEECH_MS;
         const excited = activePose === 'celebrating' || activePose === 'excited' || activePose === 'success';
+        const locomotion = reduced ? IDLE_LOCOMOTION : locomotionRef?.current ?? IDLE_LOCOMOTION;
+        const gaitWave = Math.sin(locomotion.gait * Math.PI * 2);
+        const locomotionFollow = locomotion.direction * locomotion.speed;
         const breathe = reduced ? 0 : Math.sin(seconds * 1.85) * 3.2;
         const weight = reduced ? 0 : Math.sin(seconds * 0.72) * 4.5;
         const notice = greeting ? envelope(elapsed, 0, 280, 1100, 1800) : 0;
@@ -541,16 +571,17 @@ export default function ArticulatedLion({ src, pose, size, lookAt = 0, speechTex
         const waveCycle = waveEnvelope * Math.sin(wavePhase);
         const bodyFollow = waveEnvelope * Math.sin(wavePhase - 0.62);
         const bounce = excited ? Math.max(0, Math.sin(seconds * 5.2)) : 0;
-        rig.bones.torso.position.x = px(650) + weight - notice * 8 + lean * 10 + bodyFollow * 16 + closingTurn * 24;
-        rig.bones.torso.position.y = py(850) + breathe - bounce * 18 - lean * 13 - Math.abs(waveCycle) * 4;
-        rig.bones.torso.rotation.z = reduced ? 0 : -lean * 0.03 + bodyFollow * 0.055 + closingTurn * 0.035;
+        rig.bones.torso.position.x = px(650) + weight - notice * 8 + lean * 10 + bodyFollow * 16 + closingTurn * 24 + gaitWave * locomotion.speed * 5;
+        rig.bones.torso.position.y = py(850) + breathe - bounce * 18 - lean * 13 - Math.abs(waveCycle) * 4 - locomotion.crouch * 11 - locomotion.landing * 9;
+        rig.bones.torso.rotation.z = reduced ? 0 : -lean * 0.03 + bodyFollow * 0.055 + closingTurn * 0.035 - locomotionFollow * 0.028;
         const torsoLinearVelocity = clamp((rig.bones.torso.position.x - rig.bodyMotion.torsoX) / dt, -120, 120);
         const torsoAngularVelocity = clamp((rig.bones.torso.rotation.z - rig.bodyMotion.torsoRotation) / dt, -2.4, 2.4);
         rig.bodyMotion.torsoX = rig.bones.torso.position.x;
         rig.bodyMotion.torsoRotation = rig.bones.torso.rotation.z;
+        const locomotionSquash = locomotion.crouch * 0.035 + locomotion.landing * 0.055;
         rig.bones.torso.scale.set(
-          1 - lean * 0.008 + bounce * 0.025 + Math.abs(waveCycle) * 0.008 - closingTurn * 0.04,
-          1 + breathe * 0.0015 + lean * 0.014 - bounce * 0.035 - Math.abs(waveCycle) * 0.008,
+          1 - lean * 0.008 + bounce * 0.025 + Math.abs(waveCycle) * 0.008 - closingTurn * 0.04 + locomotionSquash,
+          1 + breathe * 0.0015 + lean * 0.014 - bounce * 0.035 - Math.abs(waveCycle) * 0.008 - locomotionSquash,
           1,
         );
 
@@ -562,13 +593,13 @@ export default function ArticulatedLion({ src, pose, size, lookAt = 0, speechTex
         const neckTarget = combinedHeadTarget * 0.42 - rig.bones.torso.rotation.z * 0.18;
         rig.bones.neck.rotation.z = clamp(springStep(rig.springs.neck, neckTarget, dt, 88, 17), -0.11, 0.11);
         rig.bones.head.rotation.z = clamp(springStep(rig.springs.head, combinedHeadTarget * 0.68, dt, 105, 18), -0.1, 0.1);
-        rig.bones.head.position.x = headTilt * 9 - bodyFollow * 6 + closingTurn * 21;
-        rig.bones.head.position.y = 55 - lean * 10 + Math.abs(waveCycle) * 3;
+        rig.bones.head.position.x = headTilt * 9 - bodyFollow * 6 + closingTurn * 21 - locomotionFollow * 5;
+        rig.bones.head.position.y = 55 - lean * 10 + Math.abs(waveCycle) * 3 + locomotion.lift * 3 - locomotion.landing * 2;
         rig.bones.head.scale.set(1 - closingTurn * 0.065, 1 + closingTurn * 0.01, 1);
         const gaze = reduced ? 0 : clamp(lookAtRef.current, -1, 1);
         const cardLook = greeting ? envelope(elapsed, 60, 300, 720, 1150) : 0;
         const microSaccade = reduced ? 0 : Math.sin(seconds * 2.23) * 0.75 + Math.sin(seconds * 0.67) * 0.5;
-        const gazeX = springStep(rig.springs.eyeX, gaze * 7 + bodyFollow * 3 + closingTurn * 12 + microSaccade, dt, 145, 22);
+        const gazeX = springStep(rig.springs.eyeX, gaze * 7 + bodyFollow * 3 + closingTurn * 12 + microSaccade + locomotionFollow * 4, dt, 145, 22);
         const gazeY = springStep(rig.springs.eyeY, -cardLook * 15 + (speaking ? 2 : 0), dt, 145, 22);
         rig.bones.eyeL.position.set(-95 + gazeX, 312 + gazeY, 0);
         rig.bones.eyeR.position.set(115 + gazeX * 0.92, 349 + gazeY, 0);
@@ -594,15 +625,30 @@ export default function ArticulatedLion({ src, pose, size, lookAt = 0, speechTex
           reduced,
           torsoLinearVelocity,
           torsoAngularVelocity,
+          locomotionSpeed: locomotion.speed,
+          locomotionDirection: locomotion.direction,
+          locomotionLift: locomotion.lift,
+          locomotionLanding: locomotion.landing,
           dt,
         });
         const headVelocity = rig.springs.head.velocity + rig.springs.neck.velocity * 0.65;
-        rig.bones.maneL.rotation.z = springStep(rig.springs.maneL, -headVelocity * 0.012 - bodyFollow * 0.04 - closingTurn * 0.038, dt, 48, 9.2);
-        rig.bones.maneTop.rotation.z = springStep(rig.springs.maneTop, headVelocity * 0.01 + bodyFollow * 0.024 + closingTurn * 0.02, dt, 44, 8.4);
-        rig.bones.maneR.rotation.z = springStep(rig.springs.maneR, -headVelocity * 0.011 - bodyFollow * 0.034 + closingTurn * 0.05, dt, 50, 9);
+        rig.bones.maneL.rotation.z = springStep(rig.springs.maneL, -headVelocity * 0.012 - bodyFollow * 0.04 - closingTurn * 0.038 - locomotionFollow * 0.025 + locomotion.landing * 0.04, dt, 48, 9.2);
+        rig.bones.maneTop.rotation.z = springStep(rig.springs.maneTop, headVelocity * 0.01 + bodyFollow * 0.024 + closingTurn * 0.02 + locomotion.lift * 0.025 - locomotion.landing * 0.045, dt, 44, 8.4);
+        rig.bones.maneR.rotation.z = springStep(rig.springs.maneR, -headVelocity * 0.011 - bodyFollow * 0.034 + closingTurn * 0.05 - locomotionFollow * 0.018 + locomotion.landing * 0.035, dt, 50, 9);
 
-        const targetL = new THREE.Vector2(px(510) - bounce * 8 - bodyFollow * 4, py(1190));
-        const targetR = new THREE.Vector2(px(790) + bounce * 8 + bodyFollow * 5, py(1182) + waveEnvelope * 3);
+        const walking = locomotion.mode === 'walk';
+        const stepL = walking ? Math.max(0, gaitWave) : 0;
+        const stepR = walking ? Math.max(0, -gaitWave) : 0;
+        const stride = walking ? Math.cos(locomotion.gait * Math.PI * 2) * locomotion.speed * 13 : 0;
+        const airborneTuck = locomotion.lift * 22;
+        const targetL = new THREE.Vector2(
+          px(510) - bounce * 8 - bodyFollow * 4 + stride * locomotion.direction,
+          py(1190) + stepL * 22 + airborneTuck,
+        );
+        const targetR = new THREE.Vector2(
+          px(790) + bounce * 8 + bodyFollow * 5 - stride * locomotion.direction,
+          py(1182) + waveEnvelope * 3 + stepR * 22 + airborneTuck,
+        );
         const ikMix = reduced ? 0.96 : 0.985 + lean * 0.015;
         solveLeg(rig, 'L', targetL, -1, ikMix, 26);
         solveLeg(rig, 'R', targetR, 1, ikMix, 26);
@@ -666,7 +712,7 @@ export default function ArticulatedLion({ src, pose, size, lookAt = 0, speechTex
       rig.renderer.dispose();
       rigRef.current = null;
     };
-  }, [src]);
+  }, [locomotionRef, src]);
 
   return (
     <div
