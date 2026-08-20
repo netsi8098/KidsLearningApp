@@ -18,7 +18,10 @@ import { useGLTF, Preload } from '@react-three/drei';
 import * as THREE from 'three';
 
 const ENV_URL = '/assets/worlds/river-garden/home_environment.glb';
-const LION_URL = '/assets/lion/rigged/lion.glb';
+/* Retopologised blockout: one continuous quad mesh, 15.8k tris, 278KB — against
+   2.4MB for the old 96-part rigid assembly. Unrigged, so it stands as a static
+   proxy for scale and composition checking until the skeleton lands. */
+const LION_URL = '/assets/lion/retopo/lion_retopo.glb';
 
 /**
  * Total lion height in metres, matching the world scale contract in
@@ -136,8 +139,11 @@ function Lion({
     onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.01);
   }, [clone, spawn, onMeasured]);
 
+  /* The character is modelled facing +Y in Blender, which after the glTF Y-up
+     conversion points it straight away from the production camera. Turn it to
+     face the viewer. */
   return (
-    <group ref={group}>
+    <group ref={group} rotation={[0, Math.PI, 0]}>
       <primitive object={clone} />
     </group>
   );
