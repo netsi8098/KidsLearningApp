@@ -84,7 +84,7 @@ R_HIP = 0.182
 R_LEG_TOP = 0.098
 R_LEG_MID = 0.082
 R_PAW = 0.084
-R_TAIL = 0.026
+R_TAIL = 0.040
 R_TUFT = 0.098
 
 
@@ -155,9 +155,9 @@ def build_skeleton_mesh():
     # Long, light and tapering, lifted at the tip. Review 7 was closer but still
     # read heavy; the shaft is thinner now and the tuft carries the weight.
     t1 = add((0.0, BODY_BACK_Y - 0.09, SPINE_Z + 0.04), (R_TAIL, R_TAIL))
-    t2 = add((0.0, BODY_BACK_Y - 0.21, SPINE_Z + 0.10), (R_TAIL * 0.86, R_TAIL * 0.86))
-    t3 = add((0.0, BODY_BACK_Y - 0.32, SPINE_Z + 0.20), (R_TAIL * 0.74, R_TAIL * 0.74))
-    t4 = add((0.0, BODY_BACK_Y - 0.37, SPINE_Z + 0.31), (R_TAIL * 0.66, R_TAIL * 0.66))
+    t2 = add((0.0, BODY_BACK_Y - 0.21, SPINE_Z + 0.10), (R_TAIL * 0.92, R_TAIL * 0.92))
+    t3 = add((0.0, BODY_BACK_Y - 0.32, SPINE_Z + 0.20), (R_TAIL * 0.86, R_TAIL * 0.86))
+    t4 = add((0.0, BODY_BACK_Y - 0.37, SPINE_Z + 0.31), (R_TAIL * 0.80, R_TAIL * 0.80))
     tuft = add((0.0, BODY_BACK_Y - 0.38, SPINE_Z + 0.40), (R_TUFT, R_TUFT))
     e += [(pelvis, t1), (t1, t2), (t2, t3), (t3, t4), (t4, tuft)]
 
@@ -227,7 +227,16 @@ def build_head_masses(body):
     # Broad side masses framing the face.
     for sx in (-1, 1):
         ball(f"ManeSide_{'L' if sx < 0 else 'R'}",
-             (sx * 0.185, mane_y + 0.010, mane_z - 0.020), 0.180, (0.86, 0.82, 1.06))
+             (sx * 0.158, mane_y + 0.015, mane_z - 0.015), 0.208, (0.92, 0.84, 1.08))
+    # Filler masses bridging core to sides, so the frame is continuous. At the
+    # earlier spacing the three volumes read as separate lumps head-on.
+    for sx in (-1, 1):
+        ball(f"ManeBridge_{'L' if sx < 0 else 'R'}",
+             (sx * 0.108, mane_y + 0.005, mane_z + 0.120), 0.165, (0.94, 0.82, 0.98))
+
+    # Rump: rounded hindquarter mass. The skin-chain hip alone left the rear
+    # view flat, where the reference shows a clearly domed rear.
+    ball("Rump", (0.0, BODY_BACK_Y - 0.020, SPINE_Z + 0.020), 0.196, (1.06, 0.94, 0.96))
 
     # Lower chest / neck ruff spilling forward onto the chest.
     ball("ManeRuff", (0.0, mane_y + 0.055, mane_z - 0.195), 0.205, (1.04, 0.84, 0.76))
