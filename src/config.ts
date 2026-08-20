@@ -9,6 +9,7 @@ export const config = {
   apiUrl: import.meta.env.VITE_API_URL || '',
   ttsUrl: import.meta.env.VITE_TTS_URL || '',
   ollamaUrl: import.meta.env.VITE_OLLAMA_URL || '',
+  semanticUrl: import.meta.env.VITE_SEMANTIC_URL || '',
 
   // App metadata
   appName: import.meta.env.VITE_APP_NAME || 'Kids Learning Fun',
@@ -17,6 +18,7 @@ export const config = {
   // Feature flags
   analyticsEnabled: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
   debugEnabled: import.meta.env.VITE_ENABLE_DEBUG === 'true',
+  semanticSearchEnabled: import.meta.env.VITE_ENABLE_SEMANTIC_SEARCH === 'true',
 
   // Error reporting
   sentryDsn: import.meta.env.VITE_SENTRY_DSN || '',
@@ -49,5 +51,12 @@ export function getOllamaUrls(): string[] {
   const urls: string[] = [];
   if (config.ollamaUrl) urls.push(config.ollamaUrl);
   if (config.isDev && !urls.includes('http://localhost:11434')) urls.push('http://localhost:11434');
+  return urls;
+}
+
+export function getSemanticUrls(): string[] {
+  const urls: string[] = [];
+  if (config.semanticUrl) urls.push(config.semanticUrl);
+  if (config.isDev && !urls.includes('http://localhost:5555')) urls.push('http://localhost:5555');
   return urls;
 }

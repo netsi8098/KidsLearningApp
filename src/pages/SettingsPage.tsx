@@ -143,7 +143,7 @@ function VoicePicker() {
         <div className="bg-amber-50 rounded-xl p-3 border border-amber-200">
           <p className="text-xs font-bold text-amber-800 mb-1">AI Voice Server is offline</p>
           <p className="text-xs text-amber-700 leading-relaxed">
-            Ask a grown-up to run <strong>python3 tts-server.py</strong> in the KidsLearningApp folder to enable natural AI voices.
+            Ask a grown-up to run <strong>npm run ai:start</strong> in the KidsLearningApp folder to enable natural offline voices.
           </p>
           <button
             onClick={recheckServer}
