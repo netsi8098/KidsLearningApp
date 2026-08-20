@@ -77,7 +77,7 @@ One image never fits all — the renderer composes responsively per breakpoint.
 
 | World | backplate | midground | stage | shelf | foreground |
 |---|---|---|---|---|---|
-| sunny-meadow | painted WebP | code overlays | transparent PNG | subtle code contact veil | painted into backplate |
+| sunny-meadow | `backplate-hill-v2.webp` with connected hero hill | code overlays | legacy stage retained for rollback, not rendered | live paw grass + contact shadow | painted into backplate |
 | sky-islands | painted WebP | code overlays | transparent WebP | live cloud shelf | painted into backplate |
 | treehouse | painted WebP | code overlays | real patio in backplate | real patio in backplate | painted into backplate |
 | river-garden | painted WebP | code overlays | transparent WebP | live riverbank ledge | painted into backplate |

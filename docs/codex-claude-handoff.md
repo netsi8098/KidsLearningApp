@@ -3020,3 +3020,27 @@ The minimum asset upgrade is not a replacement character or a set of pose pictur
 - MiniLM supports search, recommendations, and content grouping only. It does not create images, voice, or animation.
 - Kokoro supports voice only. It does not solve word-highlight timestamps by itself; precise alignment remains a separate phoneme/word timing task.
 - Wan and other video diffusion models remain motion-reference tools, not runtime character rigs. Continue using the existing Three.js articulated lion architecture for interactive motion.
+
+## Codex Handoff - Sunny Meadow Connected Hill (2026-08-20)
+
+### Design decision
+
+The detached oval grass-and-stone platform was rejected because it isolated the lion from the world. Sunny Meadow now uses a project-bound illustrated backplate with a broad hill connected to the surrounding landscape. Do not restore `stage.png` in the painted Sunny Meadow path.
+
+### Implemented
+
+- Added `public/assets/worlds/sunny-meadow/backplate-hill-v2.webp` (1672x941) as the active Sunny Meadow backplate.
+- Preserved the original `backplate.webp` and `stage.png` for rollback/reference only.
+- `worldAssetPath()` now resolves the Sunny Meadow backplate to the connected-hill version.
+- The lion and title use separate responsive anchors. The lion's paws land on the hill crest; title layout can no longer pull the character off the ground.
+- Added a contact shadow and a live grass fringe around the paws.
+- Added independent, staggered flower sway, cloud drift, butterflies, and pollen motion.
+- All new ambient movement respects reduced-motion preferences.
+- Updated the world picker preview to show the connected-hill composition.
+
+### Guardrails for the next pass
+
+- Keep the existing rigged lion and its visual identity.
+- Improve the hill/character contact by tuning responsive anchors, not by adding another platform.
+- Ambient movement must remain layered and asynchronous; do not animate the scenery as one flat image.
+- Validate phone, tablet, and desktop before changing the hill crest position.

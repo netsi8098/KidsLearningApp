@@ -43,7 +43,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'cheerful',
     previewBg: '#B8E4F0',
-    previewImage: '/assets/worlds/sunny-meadow/backplate.webp',
+    previewImage: '/assets/worlds/sunny-meadow/backplate-hill-v2.webp',
   },
   {
     id: 'sky-islands',
