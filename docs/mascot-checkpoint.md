@@ -150,23 +150,50 @@ validation clean, zero control bones in the skin, both clips (`Idle`, `Walk`)
 present, floor gap −11.5 mm, 29 draw calls, and the 121-check homepage QA suite
 still fully green.
 
-## F. Verdict — **NOT YET READY FOR FINAL RETOPOLOGY**
+## F. Verdict — **CLOSE, BUT THE FACE IS STILL MISSING**
 
-Weighted IoU 0.590 → 0.822 is real progress and the front view is close. But the
-success criterion is that flat clay reads unmistakably as the approved mascot from
-all four views, and it does not yet.
+Weighted silhouette IoU has gone 0.590 → 0.822 → **0.878** (registered; 0.869
+unregistered), with front 0.936 and side 0.875, and the motion system is now
+BETTER than the technical donor on three metrics rather than merely preserved.
 
-Remaining visual defects, in priority order:
+Every correction in this pass came from a measurement, and four of them overturned
+a diagnosis made by reading the overlay:
 
-1. **Side view is the weakest at 0.739**, with 17.2% still missing. The mane reads
-   as a bonnet with a hard vertical front lip rather than a teardrop sweeping up
-   over the crown and back.
-2. **The mane's inner rim is a visible hard edge** where it should tuck into the
-   face.
-3. **The tail is too thin and sits too high** — blue in the side overlay along its
-   whole length.
-4. **No face.** The head is still a smooth skull: no eye sockets, no brow plane,
-   no cheek transition, no mouth. That is Gate 15 and is deliberately not started,
-   but it is a large part of why this does not yet read as *the* mascot.
-5. Rear view carries 16.8% extra, most of it the documented 18% front/rear
-   mane-width disagreement in the source artwork.
+1. **The top-band overshoot was the ears, not the mane crown.** Per-object
+   measurement: `LionCage` 0.442 H against `LionMane` 0.293 H in band 0.95-1.00.
+2. **The 0.75-0.90 deficit was the ears again**, and only the divergence between
+   the colour-segmented mane and the full silhouette (1.69x at h 0.82) could show
+   it — material outside the mane that is not mane-coloured.
+3. **The blue band on the back and the red band under the belly were one fault.**
+   Both edges were wrong by the same amount in the same direction, so the barrel
+   was the right size in the wrong place: 0.045 H too high on legs 20% too long.
+4. **The head was 0.131 H too high.** `face_centre_front` = 0.604 against a
+   contract HEAD_Z of 0.735. The mane's inner aperture was already being built at
+   0.604, so the hood's hole and the head it framed were 0.131 apart — the actual
+   cause of the face-swallowed-by-mane defect that had been chased twice.
+
+Two latent bugs surfaced, both in the builder rather than the data. `ring_frame()`
+never orthogonalised `right` against the tangent; every existing ring had tangent
+x = 0 so it happened to be perpendicular, and the first sideways-growing ear
+collapsed its rings toward a line. And limb rings were circular-only, which made a
+broad flat paw impossible to build at all — the paws were 3-5x too short at ground
+contact, the largest single error in the asset.
+
+### What still blocks final retopology
+
+1. **No face.** The head is a smooth skull: no eye sockets, no brow plane, no
+   cheek break, no mouth. That is Gate 15, deliberately not started, and it is now
+   the single largest reason this does not read as *the* mascot. Everything below
+   it is minor by comparison.
+2. **The mane has no chin lobe.** Its front rim is a flat wall at y 0.566 where the
+   reference recedes to 0.44-0.48 around the face and then juts forward below it.
+   Silhouette-neutral (the union still matches) but it is why the mane reads as a
+   hood rather than a mane.
+3. **Tail tuft sits slightly high**, and its true rear extent is unknowable — the
+   side reference is clipped at the canvas edge there.
+4. **Rear view carries 17.6% extra**, most of it the documented 18% front/rear
+   mane-width disagreement in the source artwork. Front is the authority; this is
+   not a defect to chase.
+5. **4 pinched faces and a REVIEW rig-overlay verdict**, both traced to the
+   documented 12% rear-limb trim. Recoverable with the leg-volume work, which will
+   re-space those rings anyway.

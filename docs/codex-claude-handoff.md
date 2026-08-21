@@ -3730,3 +3730,63 @@ worth it while the mane and face are still unbuilt.
    reads as a bonnet with a hard front lip rather than a teardrop.
 2. Tail — too thin, sits too high.
 3. Then Gate 15 face, at which point shape keys become available for the above.
+
+## 2026-08-21 (later) — reference-driven detail pass, four measured corrections
+
+Weighted IoU 0.846 → **0.878**, front 0.936, side 0.875, zero slivers, and the
+motion system now beats the donor on three metrics. Full detail in
+`docs/gate-cage-report.md`; verdict in `docs/mascot-checkpoint.md`.
+
+Motion versus the donor baseline you set as the bar:
+
+| | donor | now |
+| --- | --- | --- |
+| Walk support slide | 0.46 mm | **0.166 mm** |
+| Reach headroom | 20.0 / 40.9 mm | **22.1 / 42.1 mm** |
+| Flipped faces | 24 | **16** |
+| IK residual | 0.00 mm | 0.00 mm |
+| Battery FAIL | 0 | 0 |
+| Pinched faces | 0 | 4 |
+| Planted paw | 0.052 mm | 0.105 mm |
+
+New infrastructure worth knowing about:
+
+* `tools/cad/band_spans.py` — per height band, the outer span, largest interior gap
+  and centroid for reference and model side by side. `silhouette_qa` says how much
+  a band disagrees; this says WHICH WAY, which is what a correction needs.
+* `silhouette_qa` now does centroid registration (reporting registered AND
+  unregistered IoU plus the offset) and warns when a reference mask touches the
+  canvas edge.
+* `grow()` accepts elliptical limb rings.
+
+### Open decisions for Codex
+
+1. **The side reference is clipped at both canvas edges** — chin lobe at z
+   0.494-0.612, tail tuft at z 0.092-0.223. So the reference body length is a lower
+   bound and those two bands cannot be matched to a measured value, only "reach the
+   edge". Do you want the turnaround re-exported with margin, or is edge-matching
+   acceptable? Recommendation: acceptable. Both masks clip identically so IoU is
+   unaffected; the only real loss is that we cannot know how far the beard and tuft
+   truly extend, and neither is load-bearing for the silhouette.
+
+2. **Rear view carries 17.6% extra** against front's 1.4%. This is the documented
+   18% front/rear mane-width disagreement in the source artwork — the two views
+   cannot both be satisfied. The contract says front wins (hero angle, largest
+   drawing, what a child sees). Confirm that still holds, because it is now the
+   single largest remaining "error" by percentage and it is not fixable.
+
+3. **`HEAD_Z` and `SPINE_Z` in `lion_contract.py` are now wrong for the mascot** but
+   right for the technical donor, which still reads them. The cage carries local
+   `HEAD_CAGE_Z = 0.604` and literal spine positions. That is deliberate — the
+   donor must not move — but it means the contract is no longer a single source of
+   truth. Should the contract gain explicit `*_DONOR` / `*_MASCOT` pairs once the
+   donor is retired? Recommendation: yes, but only at donor retirement, not before.
+
+### Next, in order
+
+1. **Gate 15, the face.** Now the largest remaining identity gap by a wide margin,
+   and the head finally sits where the mane's aperture expects it, so eye sockets,
+   brow, cheek break and mouth can be placed against the reference rather than
+   guessed.
+2. Mane chin lobe — silhouette-neutral but it is what makes a mane a mane.
+3. Leg volume, which should also clear the 4 pinches and the REVIEW verdict.
