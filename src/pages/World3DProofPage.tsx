@@ -24,7 +24,7 @@ export default function World3DProofPage() {
      Blender proves nothing about how it skins and shades at runtime. */
   const meshParam = new URLSearchParams(window.location.search).get('mesh');
   const lionUrl = meshParam === 'cage'
-    ? '/assets/lion/cage/lion_cage_rigged.glb'
+    ? '/assets/lion/cage/lion_cage_anim.glb'
     : undefined;
   const [showHud, setShowHud] = useState(true);
 

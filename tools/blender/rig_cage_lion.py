@@ -49,11 +49,22 @@ PREVIEW_DIR = os.path.join(REPO, "docs", "assets", "lion-rig")
 # shoulder. A front chain must reach the upper limb (4) and a rear chain the
 # thigh (5). The scapula and pelvis are deliberately OUTSIDE the chain — they
 # belong to the torso, and letting IK drive them means the body chases the feet.
+# (label, ik_bone, chain_len, pole_offset, pole_name, foot_bone)
+#
+# The IK constraint sits on the WRIST / ANKLE, not on the paw, and the paw takes
+# its orientation from the control instead.
+#
+# Constraining the paw directly pins its tail but leaves the bone free to rotate
+# about that point, so the SOLE tilts — and the sole is what touches the ground.
+# Measured during the walk cycle, the planted paws slid 42mm horizontally and
+# rose 31mm vertically purely from that tilt. Pinning the ankle and driving the
+# foot's orientation from the control keeps the sole flat and still, which is how
+# a foot IK rig is normally built.
 LEGS = [
-    ("FL", "paw_FL", 4, Vector((0.0, -0.62, 0.0)), "pole_FL"),
-    ("FR", "paw_FR", 4, Vector((0.0, -0.62, 0.0)), "pole_FR"),
-    ("RL", "paw_RL", 5, Vector((0.0, -0.62, 0.0)), "pole_RL"),
-    ("RR", "paw_RR", 5, Vector((0.0, -0.62, 0.0)), "pole_RR"),
+    ("FL", "wrist_FL", 3, Vector((0.0, -0.62, 0.0)), "pole_FL", "paw_FL"),
+    ("FR", "wrist_FR", 3, Vector((0.0, -0.62, 0.0)), "pole_FR", "paw_FR"),
+    ("RL", "ankle_RL", 4, Vector((0.0, -0.62, 0.0)), "pole_RL", "paw_RL"),
+    ("RR", "ankle_RR", 4, Vector((0.0, -0.62, 0.0)), "pole_RR", "paw_RR"),
 ]
 
 
@@ -77,11 +88,21 @@ def build_armature():
     # them deformable once drove a long dark spike through the chest, because
     # automatic weighting happily assigned mesh to a control bone floating in
     # mid-air.
-    for label, ik_bone, _chain, pole_off, pole_name in LEGS:
+    for label, ik_bone, _chain, pole_off, pole_name, foot in LEGS:
         src = made[ik_bone]
         t = arm_data.edit_bones.new(f"ik_{label}")
-        t.head = src.tail.copy()
-        t.tail = src.tail + Vector((0.0, 0.0, 0.075))
+        # An EXACT COPY of the foot bone's rest transform.
+        #
+        # The control carries the foot's orientation via a world-space Copy
+        # Rotation, so its rest orientation has to equal the foot's or the
+        # constraint snaps the foot to a different angle the moment it is
+        # applied. Pointing the control along +Y did that: the paw, which rests
+        # pointing down-and-forward, was forced flat and the sole swung.
+        # Copying head, tail and roll makes the constraint a no-op at rest.
+        foot_eb = made[foot]
+        t.head = foot_eb.head.copy()
+        t.tail = foot_eb.tail.copy()
+        t.roll = foot_eb.roll
         t.parent = made["root"]
         t.use_deform = False
 
@@ -254,7 +275,7 @@ def add_ik(arm):
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="POSE")
     n = 0
-    for label, ik_bone, chain, _off, pole_name in LEGS:
+    for label, ik_bone, chain, _off, pole_name, foot in LEGS:
         pb = arm.pose.bones[ik_bone]
         c = pb.constraints.new("IK")
         c.target = arm
@@ -266,12 +287,28 @@ def add_ik(arm):
         c.use_tail = True
         n += 1
 
+        # The foot follows the control's orientation. This is what keeps the sole
+        # flat while the body rocks over a planted paw.
+        fb = arm.pose.bones[foot]
+        cr = fb.constraints.new("COPY_ROTATION")
+        cr.target = arm
+        cr.subtarget = f"ik_{label}"
+        cr.target_space = "WORLD"
+        cr.owner_space = "WORLD"
+        cr.mix_mode = "REPLACE"
+
     # Hinge the mid-limb joints so IK cannot solve them sideways. Without this an
     # elbow will happily invert to reach a target, which looks like a broken leg.
     for side in ("L", "R"):
+        # Rear limits widened after measurement. With the hock clamped at -6
+        # degrees the rear chain could not open far enough to follow its control
+        # through stance: the IK residual sat at 21mm and the planted rear paws
+        # rose by exactly that. The front chain, which has no such clamp, tracked
+        # to 0.00mm. A limit that keeps a joint from inverting is useful; one that
+        # stops it reaching its own target is just a bug with an explanation.
         for bone, lo, hi in ((f"forearm_F{side}", -148.0, 26.0),
-                             (f"shin_R{side}", -150.0, 4.0),
-                             (f"hock_R{side}", -6.0, 130.0)):
+                             (f"shin_R{side}", -152.0, 42.0),
+                             (f"hock_R{side}", -48.0, 142.0)):
             pb = arm.pose.bones.get(bone)
             if not pb:
                 continue
@@ -300,7 +337,7 @@ def paw_world(arm, cage, label):
     if gi is not None:
         for v in me.vertices:
             for g in v.groups:
-                if g.group == gi and g.weight > 0.6:
+                if g.group == gi and g.weight > 0.9:
                     pts.append(cage.matrix_world @ v.co)
                     break
     out = sum(pts, Vector()) / len(pts) if pts else None

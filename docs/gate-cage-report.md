@@ -229,3 +229,100 @@ visualisation at 0.25× → stop/turn/navigation → three-leg wave → jump.
 * 4 sliver faces in cap fans
 * mane still the 31-lock proxy, untouched by design
 * rib/haunch shape refinement, cream chest V, inner-ear region
+
+---
+
+# GATES 10–11 — Idle and the four-beat walk, on the cage
+
+## Authored through IK, not FK
+
+The requirement is that a planted paw appears stationary relative to the ground
+during support. In FK that means hand-tuning limb rotations until the paw happens
+to trace a straight line — the kind of thing that looks right at full speed and
+slides at 0.25×.
+
+Driving the IK targets makes it structural. During stance a target travels
+backward in a straight line at exactly the rate the body advances; the clip
+carries no root translation, so when the runtime moves the character at
+stride ÷ cycle the two cancel and the paw is stationary **by construction**.
+
+## Gait
+
+| | |
+|---|---|
+| Sequence | lateral: RL → FL → RR → FR, a quarter cycle apart |
+| Cycle | 36 frames @ 24 fps = 1.5 s |
+| Duty factor | 0.75 stance / 0.25 swing per limb |
+| Support window | 0.68 (the last 7% of stance is LIFT — unweighting) |
+| Stride | 0.24 model units → ~0.32 m/s at the 1.30 m runtime scale |
+| Feet planted | **3 at every sampled frame** |
+
+`docs/assets/gate-walk/walk-states.png` shows twelve frames with each paw's
+phase — `CONTACT / STANCE / LIFT / SWING / PLACEMENT` — and the planted count.
+
+## Planted-paw, measured
+
+| | worst |
+|---|---|
+| Support slide | **0.46 mm** |
+| Support vertical | **0.15 mm** |
+| IK residual, all four legs | **0.00 mm** |
+
+Getting there took five separate fixes, and only one of them was the animation:
+
+1. **Pin the ankle, not the paw.** Constraining the paw pins its tail but leaves
+   the bone free to rotate about that point, so the *sole* tilts — and the sole
+   is what touches the ground. The IK now sits on the wrist/ankle and the foot
+   takes its orientation from the control. Planted-paw drift at animation
+   amplitudes: 2.86 mm → 0.257 mm.
+2. **Make the control an exact copy of the foot's rest transform.** A world-space
+   Copy Rotation snaps the foot to the control's orientation, so a control
+   pointing along +Y forced a foot that rests pointing down-and-forward flat.
+3. **Widen the rear joint limits.** With the hock clamped at −6° the rear chain
+   could not open far enough to follow its control: IK residual 21 mm, and the
+   planted rear paws rose by exactly that. The front chain, unclamped, tracked to
+   0.00 mm. A limit that stops a joint inverting is useful; one that stops it
+   reaching its own target is a bug with an explanation.
+4. **The gait arithmetic was wrong.** The body advances the stride over the FULL
+   cycle, but a paw is only planted for 0.75 of it — so relative to the body a
+   planted paw travels `stride × dutyFactor`, not `stride`. Swinging the target
+   ±stride/2 made the paw travel 33% faster than the body moved forward and every
+   planted paw slid ~55 mm. Caught because the compensated **target** position
+   drifted, which ruled out the solver and pointed back at the authoring.
+5. **Linear interpolation on the foot controls.** The control's rest orientation
+   is tilted, so a world-space straight line becomes two sloped curves in the
+   bone's local Y and Z. Easing those independently breaks the relationship
+   between them and bends the path back into three dimensions — the goal wandered
+   6.4 mm vertically and came up 24 mm short. Body curves stay Bezier; control
+   curves are linear, because a linear combination of linear curves is linear.
+
+## Idle
+
+5 s loop with three deliberately incommensurate cycles — breath every 2.5 s, a
+weight shift every 5 s, tail every 3.3 s — so the loop does not visibly beat.
+Restrained on purpose: the child is choosing a profile. Ear flicks are brief,
+sparse and asymmetric; a steady ear wobble reads as a mechanism.
+
+Blink and eye saccades are **absent** — they need facial shape keys, which do not
+exist yet.
+
+## Runtime
+
+`lion_cage_anim.glb` — 189.2 KB, 35 joints, **0 control bones in the skin**,
+`Idle` and `Walk` each 105 baked channels. glTF has no IK, so baking is what
+turns the solved chain into per-bone transforms; verified that `thigh_RL`,
+`shin_RL`, `hock_RL`, `upper_front_FL` and `forearm_FL` all carry curves.
+Khronos validator clean. Loads at `/world3d?mesh=cage`, no errors, still 29 draw
+calls.
+
+Also fixed: the runtime measured the character's footprint with
+`Box3.setFromObject`, which walks the live scene graph and therefore describes
+the **current pose**. Once a clip was playing, a re-run of that effect measured a
+mid-stride pose and reported the floor 444 mm below the origin — the character
+was seated against that and sank into the island. The footprint is now taken from
+geometry bind-pose bounds, which cannot depend on the frame.
+
+## Verdict
+
+Idle and the four-beat walk are proven on the production cage. Next:
+stop/turn/navigation with head lead, then the three-leg-supported wave, then jump.

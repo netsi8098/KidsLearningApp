@@ -169,23 +169,48 @@ function Lion({
     brain.setDurations(d);
   }, [animations, brain]);
 
+  /* Bind-pose footprint of the asset, measured from geometry rather than from
+     the posed hierarchy.
+     `Box3.setFromObject` walks the live scene graph, so once a clip is playing
+     it describes the CURRENT pose. This effect can re-run after the mixer has
+     started, and when it did the measured floor sat 444mm below the origin
+     instead of 11mm — the character was then seated against a number that
+     described a mid-stride pose and sank into the island. What is wanted here is
+     the asset's rest footprint, which is a property of the geometry and cannot
+     depend on what frame it happens to be on. */
+  const bindBox = useMemo(() => {
+    const box = new THREE.Box3();
+    const one = new THREE.Box3();
+    model.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || !m.geometry) return;
+      if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
+      if (!m.geometry.boundingBox) return;
+      one.copy(m.geometry.boundingBox);
+      box.union(one);
+    });
+    return box;
+  }, [model]);
+
   useEffect(() => {
-    if (!spawn || !group.current) return;
-    const raw = new THREE.Box3().setFromObject(model);
+    if (!spawn || !group.current || bindBox.isEmpty()) return;
     const size = new THREE.Vector3();
-    raw.getSize(size);
+    bindBox.getSize(size);
 
     const scale = size.y > 0 ? LION_TARGET_HEIGHT / size.y : 1;
     model.scale.setScalar(scale);
     model.updateMatrixWorld(true);
 
-    const scaled = new THREE.Box3().setFromObject(model);
-    const scaledSize = new THREE.Vector3();
-    scaled.getSize(scaledSize);
+    const scaledMinY = bindBox.min.y * scale;
+    const scaledSizeY = size.y * scale;
 
     // Seat the FEET on the marker rather than assuming the asset origin is at
     // ground level — that assumption is what makes characters hover or sink.
-    footOffset.current = -scaled.min.y;
+    footOffset.current = -scaledMinY;
+    brain.x = spawn.x;
+    brain.z = spawn.z;
+    brain.setHome(spawn.x, spawn.z);
+    group.current.position.set(spawn.x, spawn.y + footOffset.current, spawn.z);
 
     /* Match translation to the clip rather than to a constant. The rig script
        measures the walk stride off the authored action and writes it beside the
@@ -200,17 +225,9 @@ function Lion({
         }
       })
       .catch(() => { /* fallback speed already set */ });
-    brain.x = spawn.x;
-    brain.z = spawn.z;
-    brain.setHome(spawn.x, spawn.z);
-    group.current.position.set(spawn.x, spawn.y + footOffset.current, spawn.z);
-    /* Report the FLOOR GAP itself, not a pass/fail against an arbitrary 2cm.
-       The gap varies legitimately with the asset — the cage's paw soles sit 8mm
-       above its own origin — and the seating code below compensates for it
-       exactly, so a boolean here was reporting "not grounded" about a character
-       that was correctly on the ground. */
-    onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.05, names, scaled.min.y);
-  }, [model, spawn, onMeasured, names, brain, lionUrl]);
+
+    onMeasured(scaledSizeY, Math.abs(scaledMinY) < 0.05, names, scaledMinY);
+  }, [model, spawn, onMeasured, names, brain, lionUrl, bindBox]);
 
   /* Cross-fade between clips rather than cutting, so the character never snaps.
      Wave, Jump and Celebrate are one-shots: looping them makes the lion twitch
