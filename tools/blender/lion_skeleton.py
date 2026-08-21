@@ -87,6 +87,19 @@ def skeleton():
                   (sx * 0.110, 0.176, 0.146), (sx * 0.110, 0.216, 0.062)))
         B.append((f"wrist_F{sd}", f"forearm_F{sd}",
                   (sx * 0.110, 0.216, 0.062), (sx * 0.112, 0.222, 0.046)))
+        # LEFT EXACTLY WHERE IT WAS, on purpose, even though the paw geometry now
+        # reaches 0.13 forward of it.
+        #
+        # Two attempts to make the bone "follow" the bigger foot broke the walk.
+        # Lengthening it took support slide from 0.64 mm to 15.99 mm. Then moving
+        # its HEAD forward to sit inside the new paw made it worse — 1 battery
+        # FAIL and a 10.79 mm front IK residual — because a bone's head must
+        # coincide with its parent's tail, and shifting it silently disconnected
+        # the chain the IK solver runs along.
+        #
+        # The paw is weighted rigidly (1.0) to this bone, so the geometry travels
+        # with it whatever its length. Following the foot buys nothing and costs
+        # the one metric that must not move.
         B.append((f"paw_F{sd}", f"wrist_F{sd}",
                   (sx * 0.112, 0.222, 0.046), (sx * 0.112, 0.238, 0.008)))
 
@@ -200,6 +213,7 @@ FRONT_WEIGHTS = {
     "wrist_up": {"forearm_F{SD}": 0.70, "wrist_F{SD}": 0.30},
     "wrist":    {"forearm_F{SD}": 0.28, "wrist_F{SD}": 0.72},
     "paw_top":  {"wrist_F{SD}": 0.46, "paw_F{SD}": 0.54},
+    # The sole rides the paw bone rigidly. A foot is a plate, not a whip.
     "paw_mid":  {"paw_F{SD}": 1.0},
     "paw_sole": {"paw_F{SD}": 1.0},
 }
@@ -222,6 +236,7 @@ REAR_WEIGHTS = {
     "hock_lo":  {"hock_R{SD}": 1.0},
     "ankle":    {"hock_R{SD}": 0.46, "ankle_R{SD}": 0.54},
     "paw_top":  {"ankle_R{SD}": 0.50, "paw_R{SD}": 0.50},
+    "paw_mid":  {"paw_R{SD}": 1.0},
     "paw_sole": {"paw_R{SD}": 1.0},
 }
 

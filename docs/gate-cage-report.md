@@ -475,3 +475,76 @@ an area ratio. Setting the belly to the middle of its measured range (0.172 rath
 than the 0.160 low end) needed less compression and took the count 7 → 6 while
 improving worst area 0.139 → 0.165. Further recovery belongs with the leg-volume
 pass, which will re-space those rings anyway.
+
+### Paws — the largest single error, and a capability gap in the builder
+
+Measuring the SEPARATE silhouette runs at each height, rather than the band's
+total span (which merges leg and paw into one number and hides both), found this:
+
+| at z 0.02 | reference | model |
+| --- | --- | --- |
+| front paw | 0.154 → 0.412 (0.258) | 0.146 → 0.233 (**0.087**) |
+| rear paw | -0.102 → -0.373 (0.271) | -0.267 → -0.319 (**0.052**) |
+
+Three to five times too short at ground contact. Big paws are a defining feature
+of this mascot and the only silhouette event below the belly, so the entire lower
+body read as pegs.
+
+Fixing it needed a change to the cage builder, not just to numbers. Limb rings
+were circular-only, and a ring is a section perpendicular to its growth
+direction — so one radius has to serve two axes. A toe grown forward spends it on
+X and Z; a paw grown downward spends it on X and Y. Neither gives a broad FLAT
+foot. `grow()` now accepts an optional 5-tuple with separate right/up radii; body
+rings have always been elliptical, this gives limbs the same freedom, and every
+existing 4-tuple station behaves exactly as before.
+
+Two attempts got there. Growing the toe FORWARD needed a 0.110 x 0.048 ring —
+aspect ratio 2.3 — and the eight inherited vertices bunch at the flat ends of an
+ellipse that extreme: 12 slivers, then 20 when a taper ring was added to fix them.
+Growing DOWNWARD makes the rings horizontal, so one radius spans X and the other
+spans fore-aft, and the foot's flatness comes from ring SPACING in Z instead of a
+squashed section. Aspect ratio falls to 1.19.
+
+| | reference | this build |
+| --- | --- | --- |
+| front paw at z 0.02 | 0.154 → 0.412 | 0.144 → 0.400 |
+| rear paw at z 0.02 | -0.102 → -0.373 | -0.106 → -0.370 |
+| front-view width at z 0.02 | 0.479 | 0.480 |
+
+**The cage is now sliver-free for the first time.** The two long-standing slivers
+were the paw soles all along.
+
+### Where the walk was broken, twice, and why
+
+The paw geometry moved 0.13 forward, and making the paw BONE follow it was wrong
+both times it was tried.
+
+Lengthening the bone took support slide from 0.64 mm to **15.99 mm**, vertical paw
+movement to 5.37 mm and the front IK residual from 0.00 to 1.22 mm. Then moving
+the bone's HEAD forward so it sat inside the new paw was worse still — **1 battery
+FAIL** and a **10.79 mm** front IK residual — because a bone's head must coincide
+with its parent's tail, and shifting it silently disconnected the chain the IK
+solver runs along.
+
+The paw is weighted rigidly (1.0) to its bone, so the geometry travels with it
+whatever the bone's length. Following the foot buys nothing. Restoring the bones
+to exactly their previous positions gave the best motion result of the entire
+rebuild:
+
+| Metric | Donor | Before paws | After | |
+| --- | --- | --- | --- | --- |
+| Walk support slide, worst | 0.46 mm | 0.64 mm | **0.166 mm** | better than donor |
+| Rear paw slide | — | 0.64 mm | **0.04 mm** | |
+| IK residual, all four | 0.00 mm | 0.00 mm | **0.00 mm** | held |
+| Reach headroom FL/FR | 20.0 mm | 22.1 mm | **22.1 mm** | above donor |
+| Reach headroom RL/RR | 40.9 mm | 42.1 mm | **42.1 mm** | above donor |
+| Planted paw, animation | 0.052 mm | 0.062 mm | 0.105 mm | slightly worse |
+| Battery FAIL | 0 | 0 | **0** | held |
+| Worst area ratio | 0.267 | 0.165 | **0.165** | held |
+| Pinched faces | 0 | 6 | **4** | improved |
+| Slivers | — | 2 | **0** | first time clean |
+| Weighted IoU | — | 0.849 | **0.866** | |
+| Front / side IoU | — | 0.914 / 0.801 | **0.937 / 0.838** | |
+
+Runtime: 191.8 KB GLB, 1,005 verts / 2,006 tris / 35 joints, Khronos clean, zero
+control bones in the skin, both clips, floor gap -11.5 mm, 121/121 green.

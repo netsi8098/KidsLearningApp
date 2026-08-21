@@ -226,10 +226,46 @@ def front_limb(sx):
         ("forearm",  (sx * 0.126, 0.206, 0.100), (0, 0.22, -1), 0.080),
         ("wrist_up", (sx * 0.128, 0.213, 0.076), (0, 0.12, -1), 0.076),
         ("wrist",    (sx * 0.128, 0.216, 0.062), (0, 0.04, -1), 0.078),
-        # Paw: broad upper mass, then a flattened sole.
-        ("paw_top",  (sx * 0.130, 0.222, 0.046), (0, 0.30, -1), 0.092),
-        ("paw_mid",  (sx * 0.130, 0.232, 0.026), (0, 0.45, -1), 0.106),
-        ("paw_sole", (sx * 0.130, 0.234, 0.008), (0, 0.10, -1), 0.102),
+        # PAW REBUILT AS A FOOT THAT POINTS FORWARD, not a ball on the end of a
+        # stick. Measuring the separate silhouette runs at each height — rather
+        # than the band's total span, which merges leg and paw into one number —
+        # showed the paws were the largest error left in the whole asset:
+        #
+        #     z 0.02      front paw          rear paw
+        #     reference   0.154 -> 0.412     -0.102 -> -0.373   (0.258, 0.271)
+        #     model       0.146 -> 0.233     -0.267 -> -0.319   (0.087, 0.052)
+        #
+        # Three to five times too short at ground contact. Big paws are a defining
+        # feature of this mascot and the ONLY silhouette event below the belly, so
+        # the whole lower body read as pegs.
+        #
+        # Construction note. A limb ring is a circle in the plane perpendicular to
+        # its growth direction, so a ring cannot be both wide and flat: growing the
+        # toe forward spends the radius on X and Z, and growing it downward spends
+        # it on X and Y. Neither alone gives a broad flat foot. So the paw TURNS —
+        # the first rings still travel downward-and-forward and set the width, then
+        # the toe rings travel along +Y at a radius small enough to keep the sole
+        # near z = 0. Their centres sit at cz ~= 0.924 r, the octagon apothem, so
+        # the sole lands ON the ground rather than floating above it.
+        # THIRD attempt at the paw, and the direction of growth is the whole point.
+        #
+        # Growing the toe FORWARD needed a 0.110 x 0.048 ring — aspect ratio 2.3 —
+        # and the eight inherited vertices bunch at the flat ends of an ellipse
+        # that extreme, which produced 12 slivers, then 20 when a taper ring was
+        # added to fix them.
+        #
+        # Growing DOWNWARD instead makes the rings HORIZONTAL, so one radius spans
+        # X and the other spans fore-aft, and the flatness of the foot comes from
+        # ring SPACING in Z rather than from a squashed section. Aspect ratio falls
+        # to 1.19 and the sole becomes a horizontal cap sitting on the ground.
+        #
+        #     measured at z 0.02   reference          this build
+        #     front paw            0.154 -> 0.412     0.144 -> 0.400
+        #     rear paw            -0.102 -> -0.373   -0.106 -> -0.370
+        #     front-view width     0.479              0.480
+        ("paw_top",  (sx * 0.130, 0.250, 0.052), (0, 0.35, -1), 0.100, 0.110),
+        ("paw_mid",  (sx * 0.132, 0.268, 0.028), (0, 0.15, -1), 0.112, 0.130),
+        ("paw_sole", (sx * 0.132, 0.272, 0.010), (0, 0.05, -1), 0.108, 0.128),
     ]
 
 
@@ -250,8 +286,15 @@ def rear_limb(sx):
         ("hock",     (sx * 0.128, -0.290, 0.076), (0, 0.05, -1), 0.076),
         ("hock_lo",  (sx * 0.128, -0.276, 0.059), (0, 0.32, -1), 0.072),
         ("ankle",    (sx * 0.130, -0.256, 0.043), (0, 0.34, -1), 0.076),
-        ("paw_top",  (sx * 0.132, -0.244, 0.028), (0, 0.30, -1), 0.090),
-        ("paw_sole", (sx * 0.132, -0.238, 0.008), (0, 0.10, -1), 0.100),
+        # Same rebuild. The reference rear paw spans -0.102 to -0.373 — centred
+        # almost exactly where the old one was, but 5x longer, reaching back into
+        # a heel and forward into toes. So the chain drops past the ankle to form
+        # the heel by radius at the turn, then runs forward along +Y.
+        # Same construction. The reference rear paw spans -0.102 to -0.373, centred
+        # almost exactly where the old one was but five times longer.
+        ("paw_top",  (sx * 0.132, -0.244, 0.052), (0, -0.20, -1), 0.100, 0.112),
+        ("paw_mid",  (sx * 0.132, -0.240, 0.028), (0, -0.05, -1), 0.112, 0.134),
+        ("paw_sole", (sx * 0.132, -0.238, 0.010), (0,  0.05, -1), 0.108, 0.132),
     ]
 
 
@@ -521,7 +564,26 @@ class Cage:
         rings = [boundary]
         self.rings.append((f"{prefix}:attach", list(boundary)))
 
-        for name, centre, tangent, radius in stations:
+        for station in stations:
+            # A station is (name, centre, tangent, radius) for a circular ring, or
+            # (name, centre, tangent, r_right, r_up) for an elliptical one.
+            #
+            # Limb rings were circular-only, and that turned out to be the reason
+            # the paws could not be built. A ring is a section in the plane
+            # perpendicular to its growth direction, so one radius has to serve
+            # two axes: a toe grown forward spends it on X and Z, a paw grown
+            # downward spends it on X and Y. A broad FLAT foot needs 0.11 across
+            # and 0.05 tall, which no circle provides — the first attempt got the
+            # length right and then either floated the sole above the ground or
+            # lost a tenth of a body height of front-view width.
+            #
+            # The body rings have always been elliptical (rx, rz). This just gives
+            # limbs the same freedom. Four-tuples behave exactly as before.
+            if len(station) == 5:
+                name, centre, tangent, r_r, r_u = station
+            else:
+                name, centre, tangent, r_r = station
+                r_u = r_r
             right, up = ring_frame(tangent)
             c = Vector(centre)
             new = []
@@ -532,8 +594,8 @@ class Cage:
                 if abs(u) < 1e-9 and abs(w) < 1e-9:
                     u, w = 1.0, 0.0
                 a = math.atan2(w, u)
-                new.append(self.bm.verts.new(c + right * (radius * math.cos(a))
-                                             + up * (radius * math.sin(a))))
+                new.append(self.bm.verts.new(c + right * (r_r * math.cos(a))
+                                             + up * (r_u * math.sin(a))))
             n = len(prev)
             for k in range(n):
                 m = (k + 1) % n

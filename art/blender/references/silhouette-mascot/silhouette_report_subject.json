@@ -1,38 +1,38 @@
 {
   "front": {
-    "iou": 0.9138,
-    "iou_unregistered": 0.9126,
+    "iou": 0.9372,
+    "iou_unregistered": 0.9306,
     "registration_px": 3,
-    "missing_pct": 7.43,
-    "extra_pct": 1.3,
+    "missing_pct": 4.5,
+    "extra_pct": 1.9,
     "ref_px": 142621,
-    "model_px": 133872,
+    "model_px": 138919,
     "bands": [
       {
         "band_h": [
           0.9,
           1.0
         ],
-        "iou": 0.7894,
-        "missing": 881,
-        "extra": 657
+        "iou": 0.7926,
+        "missing": 852,
+        "extra": 664
       },
       {
         "band_h": [
           0.8,
           0.9
         ],
-        "iou": 0.9372,
-        "missing": 275,
-        "extra": 679
+        "iou": 0.9375,
+        "missing": 195,
+        "extra": 760
       },
       {
         "band_h": [
           0.7,
           0.8
         ],
-        "iou": 0.8638,
-        "missing": 2321,
+        "iou": 0.8753,
+        "missing": 2125,
         "extra": 2
       },
       {
@@ -40,35 +40,35 @@
           0.6,
           0.7
         ],
-        "iou": 0.9832,
-        "missing": 225,
-        "extra": 92
+        "iou": 0.9876,
+        "missing": 41,
+        "extra": 194
       },
       {
         "band_h": [
           0.5,
           0.6
         ],
-        "iou": 0.9783,
-        "missing": 402,
-        "extra": 7
+        "iou": 0.9937,
+        "missing": 41,
+        "extra": 78
       },
       {
         "band_h": [
           0.4,
           0.5
         ],
-        "iou": 0.9426,
-        "missing": 994,
-        "extra": 3
+        "iou": 0.9817,
+        "missing": 278,
+        "extra": 41
       },
       {
         "band_h": [
           0.3,
           0.4
         ],
-        "iou": 0.8554,
-        "missing": 2006,
+        "iou": 0.9076,
+        "missing": 1282,
         "extra": 0
       },
       {
@@ -76,139 +76,139 @@
           0.2,
           0.3
         ],
-        "iou": 0.9592,
-        "missing": 515,
-        "extra": 0
+        "iou": 0.9721,
+        "missing": 348,
+        "extra": 4
       },
       {
         "band_h": [
           0.1,
           0.2
         ],
-        "iou": 0.9248,
-        "missing": 600,
-        "extra": 290
+        "iou": 0.969,
+        "missing": 44,
+        "extra": 324
       },
       {
         "band_h": [
           0.0,
           0.1
         ],
-        "iou": 0.799,
-        "missing": 2149,
-        "extra": 121
+        "iou": 0.8622,
+        "missing": 980,
+        "extra": 649
       }
     ]
   },
   "side": {
-    "iou": 0.8014,
-    "iou_unregistered": 0.7965,
-    "registration_px": -11,
-    "missing_pct": 14.26,
-    "extra_pct": 6.99,
+    "iou": 0.8376,
+    "iou_unregistered": 0.8358,
+    "registration_px": -9,
+    "missing_pct": 10.09,
+    "extra_pct": 7.34,
     "ref_px": 175397,
-    "model_px": 162651,
+    "model_px": 170582,
     "bands": [
       {
         "band_h": [
           0.9,
           1.0
         ],
-        "iou": 0.8316,
-        "missing": 594,
-        "extra": 859
+        "iou": 0.8112,
+        "missing": 663,
+        "extra": 991
       },
       {
         "band_h": [
           0.8,
           0.9
         ],
-        "iou": 0.8579,
-        "missing": 348,
-        "extra": 1711
+        "iou": 0.8457,
+        "missing": 342,
+        "extra": 1927
       },
       {
         "band_h": [
           0.7,
           0.8
         ],
-        "iou": 0.8639,
-        "missing": 555,
-        "extra": 1698
+        "iou": 0.8507,
+        "missing": 563,
+        "extra": 1944
       },
       {
         "band_h": [
           0.6,
           0.7
         ],
-        "iou": 0.9296,
-        "missing": 292,
-        "extra": 946
+        "iou": 0.9302,
+        "missing": 189,
+        "extra": 1045
       },
       {
         "band_h": [
           0.5,
           0.6
         ],
-        "iou": 0.8102,
-        "missing": 3382,
-        "extra": 20
+        "iou": 0.8427,
+        "missing": 2815,
+        "extra": 1
       },
       {
         "band_h": [
           0.4,
           0.5
         ],
-        "iou": 0.8116,
-        "missing": 3204,
-        "extra": 1337
+        "iou": 0.8433,
+        "missing": 3037,
+        "extra": 629
       },
       {
         "band_h": [
           0.3,
           0.4
         ],
-        "iou": 0.9554,
-        "missing": 218,
-        "extra": 889
+        "iou": 0.9621,
+        "missing": 37,
+        "extra": 906
       },
       {
         "band_h": [
           0.2,
           0.3
         ],
-        "iou": 0.7798,
-        "missing": 2805,
-        "extra": 3336
+        "iou": 0.813,
+        "missing": 1955,
+        "extra": 3242
       },
       {
         "band_h": [
           0.1,
           0.2
         ],
-        "iou": 0.5985,
-        "missing": 7153,
-        "extra": 1324
+        "iou": 0.6685,
+        "missing": 5342,
+        "extra": 1822
       },
       {
         "band_h": [
           0.0,
           0.1
         ],
-        "iou": 0.5568,
-        "missing": 6184,
-        "extra": 139
+        "iou": 0.8033,
+        "missing": 2481,
+        "extra": 371
       }
     ]
   },
   "rear": {
-    "iou": 0.8333,
-    "iou_unregistered": 0.8333,
+    "iou": 0.8195,
+    "iou_unregistered": 0.8195,
     "registration_px": 0,
-    "missing_pct": 3.82,
-    "extra_pct": 15.42,
+    "missing_pct": 2.8,
+    "extra_pct": 18.61,
     "ref_px": 119952,
-    "model_px": 133872,
+    "model_px": 138916,
     "bands": [
       {
         "band_h": [
@@ -216,153 +216,153 @@
           1.0
         ],
         "iou": 0.8816,
-        "missing": 255,
-        "extra": 536
+        "missing": 239,
+        "extra": 554
       },
       {
         "band_h": [
           0.8,
           0.9
         ],
-        "iou": 0.8772,
-        "missing": 182,
-        "extra": 1672
+        "iou": 0.8666,
+        "missing": 193,
+        "extra": 1844
       },
       {
         "band_h": [
           0.7,
           0.8
         ],
-        "iou": 0.9097,
-        "missing": 781,
-        "extra": 620
+        "iou": 0.9052,
+        "missing": 725,
+        "extra": 760
       },
       {
         "band_h": [
           0.6,
           0.7
         ],
-        "iou": 0.836,
+        "iou": 0.8234,
         "missing": 0,
-        "extra": 3053
+        "extra": 3339
       },
       {
         "band_h": [
           0.5,
           0.6
         ],
-        "iou": 0.7868,
+        "iou": 0.7687,
         "missing": 0,
-        "extra": 3933
+        "extra": 4366
       },
       {
         "band_h": [
           0.4,
           0.5
         ],
-        "iou": 0.7151,
+        "iou": 0.6838,
         "missing": 0,
-        "extra": 4670
+        "extra": 5421
       },
       {
         "band_h": [
           0.3,
           0.4
         ],
-        "iou": 0.8815,
-        "missing": 315,
-        "extra": 1128
+        "iou": 0.8513,
+        "missing": 181,
+        "extra": 1717
       },
       {
         "band_h": [
           0.2,
           0.3
         ],
-        "iou": 0.8942,
-        "missing": 0,
-        "extra": 1280
+        "iou": 0.8739,
+        "missing": 51,
+        "extra": 1502
       },
       {
         "band_h": [
           0.1,
           0.2
         ],
-        "iou": 0.898,
-        "missing": 517,
-        "extra": 682
+        "iou": 0.9081,
+        "missing": 174,
+        "extra": 929
       },
       {
         "band_h": [
           0.0,
           0.1
         ],
-        "iou": 0.7038,
-        "missing": 2528,
-        "extra": 928
+        "iou": 0.7083,
+        "missing": 1793,
+        "extra": 1892
       }
     ]
   },
   "three-quarter": {
-    "iou": 0.8223,
-    "iou_unregistered": 0.8073,
-    "registration_px": -9,
-    "missing_pct": 12.86,
-    "extra_pct": 5.97,
+    "iou": 0.8205,
+    "iou_unregistered": 0.8123,
+    "registration_px": -7,
+    "missing_pct": 11.18,
+    "extra_pct": 8.25,
     "ref_px": 184111,
-    "model_px": 171431,
+    "model_px": 178719,
     "bands": [
       {
         "band_h": [
           0.9,
           1.0
         ],
-        "iou": 0.8436,
-        "missing": 322,
-        "extra": 936
+        "iou": 0.8353,
+        "missing": 325,
+        "extra": 1012
       },
       {
         "band_h": [
           0.8,
           0.9
         ],
-        "iou": 0.9326,
-        "missing": 426,
-        "extra": 554
+        "iou": 0.9263,
+        "missing": 379,
+        "extra": 703
       },
       {
         "band_h": [
           0.7,
           0.8
         ],
-        "iou": 0.9602,
-        "missing": 632,
-        "extra": 19
+        "iou": 0.9683,
+        "missing": 444,
+        "extra": 76
       },
       {
         "band_h": [
           0.6,
           0.7
         ],
-        "iou": 0.9306,
-        "missing": 943,
-        "extra": 291
+        "iou": 0.9344,
+        "missing": 739,
+        "extra": 437
       },
       {
         "band_h": [
           0.5,
           0.6
         ],
-        "iou": 0.8114,
-        "missing": 3768,
-        "extra": 42
+        "iou": 0.8277,
+        "missing": 3370,
+        "extra": 126
       },
       {
         "band_h": [
           0.4,
           0.5
         ],
-        "iou": 0.8447,
-        "missing": 3636,
+        "iou": 0.8323,
+        "missing": 3927,
         "extra": 0
       },
       {
@@ -370,36 +370,36 @@
           0.3,
           0.4
         ],
-        "iou": 0.9223,
-        "missing": 1797,
-        "extra": 64
+        "iou": 0.919,
+        "missing": 1658,
+        "extra": 300
       },
       {
         "band_h": [
           0.2,
           0.3
         ],
-        "iou": 0.7963,
-        "missing": 4824,
-        "extra": 573
+        "iou": 0.8116,
+        "missing": 4360,
+        "extra": 644
       },
       {
         "band_h": [
           0.1,
           0.2
         ],
-        "iou": 0.61,
-        "missing": 3251,
-        "extra": 6215
+        "iou": 0.6121,
+        "missing": 2880,
+        "extra": 6738
       },
       {
         "band_h": [
           0.0,
           0.1
         ],
-        "iou": 0.6836,
-        "missing": 4050,
-        "extra": 2297
+        "iou": 0.6675,
+        "missing": 2471,
+        "extra": 5147
       }
     ]
   }
