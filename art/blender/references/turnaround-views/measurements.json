@@ -1,0 +1,42 @@
+{
+  "front": {
+    "top": 10,
+    "ground": 493,
+    "left": 110,
+    "right": 454,
+    "height_px": 483,
+    "width_px": 344,
+    "pixels": 122867,
+    "aspect_w_over_h": 0.7122
+  },
+  "side": {
+    "top": 30,
+    "ground": 493,
+    "left": 12,
+    "right": 675,
+    "height_px": 463,
+    "width_px": 663,
+    "pixels": 140427,
+    "aspect_w_over_h": 1.432
+  },
+  "rear": {
+    "top": 41,
+    "ground": 467,
+    "left": 173,
+    "right": 423,
+    "height_px": 426,
+    "width_px": 250,
+    "pixels": 80441,
+    "aspect_w_over_h": 0.5869
+  },
+  "three-quarter": {
+    "top": 39,
+    "ground": 460,
+    "left": 43,
+    "right": 545,
+    "height_px": 421,
+    "width_px": 502,
+    "pixels": 120625,
+    "aspect_w_over_h": 1.1924
+  }
+}
