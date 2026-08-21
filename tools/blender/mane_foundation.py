@@ -142,6 +142,36 @@ def widest_depth_u():
     return best_u, best_h
 
 
+def measured_front_half_w():
+    """The reference front half-width against height, smoothed, as a lookup.
+
+    Shared by the hood construction and the fitting stage. It used to be a local
+    closure inside build_hood, which meant the fit stage had no idea what shape it
+    was fitting TO and could only match a single scalar.
+    """
+    raw = MODEL["views"]["front"]["mane_width"]
+    hs = sorted(float(k) for k in raw)
+    vals = [raw[f"{h:.3f}"]["half_w"] for h in hs]
+    win = max(3, int(0.05 * len(hs)))
+    sm = []
+    for i in range(len(vals)):
+        a, b = max(0, i - win // 2), min(len(vals), i + win // 2 + 1)
+        sm.append(sum(vals[a:b]) / (b - a))
+    table = list(zip(hs, sm))
+
+    def at(h):
+        if h <= table[0][0]:
+            return table[0][1]
+        if h >= table[-1][0]:
+            return table[-1][1]
+        for (h0, v0), (h1, v1) in zip(table, table[1:]):
+            if h0 <= h <= h1:
+                k = (h - h0) / max(1e-9, h1 - h0)
+                return v0 + (v1 - v0) * k
+        return table[-1][1]
+    return at
+
+
 def build_hood(nh=22, nring=26):
     """Two-view construction, with rings shaped BY the front silhouette.
 
@@ -353,6 +383,31 @@ def fit_to_measured(obj):
     against a measured 0.708 — the form was right and the dimensions were not.
     Normalising afterwards keeps both: clumps decide silhouette, measurement
     decides extent.
+
+    ONE GLOBAL X-SCALE WAS NOT ENOUGH, and the band measurement is what exposed it.
+
+    Fitting x by bounding box sets the WIDEST band exactly and lets every other
+    band inherit the same factor. That would be fine if subdivision shrank the
+    form uniformly — it does not. Subdivision pulls hardest where curvature is
+    highest, so the narrow upper mane lost far more than the broad middle, and a
+    single scale chosen from the middle cannot give it back:
+
+        front band     reference w    model w     delta
+        0.85-0.90        0.552        0.463      -0.089
+        0.80-0.85        0.621        0.452      -0.169
+        0.75-0.80        0.631        0.514      -0.117
+        0.70-0.75        0.650        0.664      +0.014   <- the band that set k.x
+
+    The model plateaued at ~0.45 from 0.80 to 0.95 and then jumped to 0.66, where
+    the reference flares smoothly all the way (0.248 -> 0.427 -> 0.552 -> 0.621 ->
+    0.650 -> 0.713). That plateau read as a bonnet with a hard lip, and it is why
+    the front overlay showed solid red at ear height — which was very nearly
+    misdiagnosed as an ear defect.
+
+    So x is now fitted PER HEIGHT BAND against the measured profile. Relief inside
+    a band is preserved (every vertex in it scales by the same factor, so clump
+    variation survives); only the band's overall extent is corrected. The
+    correction is smoothed across neighbouring bands so the profile cannot step.
     """
     me = obj.data
     pts = [v.co for v in me.vertices]
@@ -377,8 +432,39 @@ def fit_to_measured(obj):
             y_rear + (v.co.y - mn.y) * k.y,
             LM["mane_band"]["low"] + (v.co.z - mn.z) * k.z,
         ))
+    # Per-band x correction against the measured profile.
+    # The target is the COLOUR-SEGMENTED mane profile, deliberately, not the full
+    # silhouette mask the QA grades against. Above h 0.70 the two differ by up to
+    # 1.69x, and that difference is the ears — non-mane-coloured material outside
+    # the mane outline. Fitting the mane to the full mask would inflate it to
+    # cover the ears' width and produce a bonnet with no ears in it.
+    ref_at = measured_front_half_w()
+    zs = [v.co.z for v in me.vertices]
+    z0, z1 = min(zs), max(zs)
+    NB = 32
+    band_of = lambda z: min(NB - 1, max(0, int((z - z0) / max(1e-9, z1 - z0) * NB)))
+    cur = [0.0] * NB
+    for v in me.vertices:
+        b = band_of(v.co.z)
+        cur[b] = max(cur[b], abs(v.co.x))
+    want_w, fac = [0.0] * NB, [1.0] * NB
+    for b in range(NB):
+        zc = z0 + (b + 0.5) / NB * (z1 - z0)
+        want_w[b] = ref_at(zc)
+        if cur[b] > 1e-5 and want_w[b] > 1e-5:
+            # Clamped. An unbounded ratio lets one stray vertex in a nearly-empty
+            # band throw a spike into the surface.
+            fac[b] = min(2.10, max(0.55, want_w[b] / cur[b]))
+    sm = [sum(fac[max(0, b - 2):min(NB, b + 3)]) / len(fac[max(0, b - 2):min(NB, b + 3)])
+          for b in range(NB)]
+    for v in me.vertices:
+        v.co.x *= sm[band_of(v.co.z)]
+    worst = max(range(NB), key=lambda b: abs(sm[b] - 1.0))
     print(f"[mane] fitted: scale {tuple(round(c, 3) for c in k)} -> "
           f"w={want.x:.4f} d={want.y:.4f} h={want.z:.4f}")
+    print(f"[mane] per-band x correction over {NB} bands: "
+          f"min {min(sm):.3f} max {max(sm):.3f}, largest at "
+          f"h={z0 + (worst + 0.5) / NB * (z1 - z0):.3f}")
 
 
 def smooth_and_subdivide(obj):

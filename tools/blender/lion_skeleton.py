@@ -90,13 +90,27 @@ def skeleton():
         # geometry no longer reaches, and its head sat 0.6mm under the skin. Both
         # ends move: the tip follows the new ear, and the root moves inward so the
         # bone is enclosed rather than lying on the surface.
+        # DOCUMENTED RIG ADJUSTMENT #2 — ear bones follow the ears outward.
+        # The ears moved from the top of the head to its side (patch 45 -> 22.5
+        # deg) so they break the mane silhouette where the reference wants them.
+        # Bone names and count are unchanged; only the rest positions move.
         B.append((f"ear_{sd}", "head",
-                  (sx * 0.132, 0.474, HEAD_Z + 0.126), (sx * 0.178, 0.468, HEAD_Z + 0.202)))
+                  (sx * 0.170, 0.470, HEAD_Z + 0.076), (sx * 0.256, 0.460, HEAD_Z + 0.070)))
 
-    tail = [(0.0, -0.424, SPINE_Z + 0.060), (0.0, -0.470, SPINE_Z + 0.088),
-            (0.0, -0.512, SPINE_Z + 0.106), (0.0, -0.566, SPINE_Z + 0.118),
-            (0.0, -0.622, SPINE_Z + 0.120), (0.0, -0.678, SPINE_Z + 0.108),
-            (0.0, -0.726, SPINE_Z + 0.086)]
+    # DOCUMENTED RIG ADJUSTMENT — tail chain relocated, not distorted.
+    #
+    # The reference-driven cage moved the tail from a near-horizontal sweep at
+    # z 0.44-0.55 to a shaft that turns down into a tuft at z 0.18. The bone
+    # chain has to follow, or the skin stretches across a path the bones do not
+    # take. Bone COUNT and NAMES are unchanged — tail_01..tail_06 — so every
+    # consumer of the rig (the walk clip, the export filter, the runtime brain)
+    # keeps working; only the rest positions move. That is the distinction the
+    # brief asks for: adjust the landmark and record it, never let the mesh
+    # silently drift away from the skeleton.
+    tail = [(0.0, -0.392, 0.348), (0.0, -0.402, 0.310),
+            (0.0, -0.410, 0.272), (0.0, -0.430, 0.238),
+            (0.0, -0.492, 0.202), (0.0, -0.572, 0.158),
+            (0.0, -0.616, 0.160)]
     for i in range(len(tail) - 1):
         B.append((f"tail_{i + 1:02d}", "pelvis" if i == 0 else f"tail_{i:02d}",
                   tail[i], tail[i + 1]))
@@ -195,11 +209,18 @@ REAR_WEIGHTS = {
 TAIL_WEIGHTS = {
     "attach":   {"pelvis": 0.62, "tail_01": 0.38},
     "root_02":  {"pelvis": 0.22, "tail_01": 0.78},
-    "root_01":  {"tail_01": 0.45, "tail_02": 0.55},
-    "tail_03":  {"tail_02": 0.45, "tail_03": 0.55},
-    "tail_04":  {"tail_03": 0.45, "tail_04": 0.55},
-    "tail_05":  {"tail_04": 0.45, "tail_05": 0.55},
-    "tail_06":  {"tail_05": 0.30, "tail_06": 0.70},
+    "root_01":  {"tail_01": 0.42, "tail_02": 0.58},
+    "tail_03":  {"tail_02": 0.48, "tail_03": 0.52},
+    "tail_04":  {"tail_03": 0.50, "tail_04": 0.50},
+    "tail_05":  {"tail_04": 0.52, "tail_05": 0.48},
+    # The tuft rides tail_06 almost rigidly. A fluffy mass reads as one lump
+    # that swings; blending it across two bones shears it into a teardrop and
+    # loses the silhouette event the reference relies on.
+    "tuft_01":  {"tail_04": 0.28, "tail_05": 0.72},
+    "tuft_02":  {"tail_05": 0.55, "tail_06": 0.45},
+    "tuft_03":  {"tail_05": 0.18, "tail_06": 0.82},
+    "tuft_04":  {"tail_06": 1.00},
+    "tuft_05":  {"tail_06": 1.00},
 }
 
 EAR_WEIGHTS = {

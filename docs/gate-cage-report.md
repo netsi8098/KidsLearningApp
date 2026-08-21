@@ -326,3 +326,101 @@ geometry bind-pose bounds, which cannot depend on the frame.
 
 Idle and the four-beat walk are proven on the production cage. Next:
 stop/turn/navigation with head lead, then the three-leg-supported wave, then jump.
+
+## Reference-driven detail pass — 2026-08-21
+
+Weighted silhouette IoU **0.817 → 0.846** (registered; 0.839 unregistered), with
+the proven motion system intact. Every correction below came from a measurement,
+and two of them reversed a diagnosis made from the overlay by eye.
+
+### What the measurements changed
+
+A new tool, `tools/cad/band_spans.py`, reports per height band the outer span, the
+largest interior gap and the centroid for reference and model side by side.
+`silhouette_qa.py` says how much a band disagrees; it does not say which way, and
+a band can be 10,000 pixels wrong because it is too narrow, too short, or in the
+wrong place. Those call for opposite corrections.
+
+| Correction | Evidence | Result |
+| --- | --- | --- |
+| Tail rebuilt with a tuft | side band 0.50-0.55 was +0.563 H too wide, 0.15-0.20 was -0.473 H short — the same error twice | side IoU 0.735 → 0.781 |
+| Ears moved to the side of the head | segmented mane vs full silhouette diverge 1.69x at h 0.82; the difference is non-mane-coloured, i.e. ears | front IoU 0.888 → 0.916 |
+| Mane fitted per height band | one global x-scale could not undo subdivision's uneven shrink | mane profile now flares 0.248 → 0.713 as the reference does |
+| Rump pulled forward, rear rings respaced | reference y_rear is -0.319 at z 0.40 where the model reached -0.492 | rear IoU 0.799 → 0.835 |
+| Centroid registration in the QA | 3/4 view carried a 12px canvas offset against ≤6px elsewhere | 3/4 0.812 → 0.830 |
+
+### Two diagnoses the measurements overturned
+
+**The top-band overshoot was the ears, not the mane crown.** Measuring per object
+settled it: in band 0.95-1.00, `LionCage` reached 0.442 H and `LionMane` only
+0.293 H against a reference 0.248 H. The "blue lumps on the crown" in the front
+overlay were ear tips pushing through the mane. An earlier pass had lowered the
+ears for exactly this reason, which was right — but it bought height by hiding
+them inside the mane, and cost 0.10-0.17 H in the band below.
+
+**The 0.75-0.90 deficit was the mane, then the ears again.** The overlay showed
+solid red discs at ear height and the obvious reading was "ears too small". The
+band data disagreed: the reference flares smoothly while the model plateaued, so
+it looked like a mane-profile fault. Then the two reference measurements settled
+it properly — the colour-segmented mane and the full silhouette agree everywhere
+except h 0.74-0.86, where they diverge by up to 1.69x. Material outside the mane
+that is not mane-coloured is the ears. Both organs were wrong, in opposite
+directions, and only separating the two measurements showed which was which.
+
+### A latent bug the ears exposed
+
+`ring_frame()` returned a hardcoded `right = (1,0,0)` without orthogonalising it
+against the tangent. Every ring in the cage until now had a tangent with x = 0 —
+body along Y, limbs along -Z, tail along -Y — so it happened to be perpendicular
+and the basis happened to be orthonormal. Ears grown along +X made `right` nearly
+parallel to the normal, so the ring plane was not a plane and the rings collapsed
+toward a line: 8 slivers at the ear base and tip cap. Now projected properly, with
+the cross-product order preserved exactly (reversing it would flip every ring's
+winding and invert normals model-wide). For any tangent with x = 0 the projection
+is a no-op, so body, limbs and tail are bit-identical.
+
+### Motion, re-proven on the corrected mesh
+
+The tail chain, both ear bones and the rear body rings all moved, so the rig was
+rebuilt and the full battery re-run.
+
+| Metric | Donor | Before this pass | After | |
+| --- | --- | --- | --- | --- |
+| Battery FAIL | 0 | 0 | **0** | held |
+| Pinched faces | 0 | 4 | **2** | improved |
+| Worst area ratio | 0.267 | 0.128 | 0.128 | — |
+| Walk support slide | 0.46 mm | 0.62 mm | **0.64 mm** | held |
+| Walk vertical | 0.15 mm | 0.17 mm | **0.14 mm** | improved |
+| IK residual, all four | 0.00 mm | 0.00 mm | **0.00 mm** | held |
+| Planted paw, animation | 0.052 mm | 0.069 mm | 0.070 mm | held |
+| Reach headroom | 20.0/40.9 | 20.0/40.9 | 20.0/40.9 | held |
+| Feet planted per frame | 3 | 3 | **3** | held |
+
+The pinch count improving from 4 to 2 was not a weight change. Pulling the rump
+forward left the rear rings bunched at 0.030/0.030/0.022 apart where they had been
+0.050/0.038/0.028, and tighter rings make smaller faces, which the area-ratio
+metric reads as a pinch. Respacing `haunch` forward to -0.320 restored the
+spacing and took the count 6 → 2 — closer to the donor than before this pass
+started. Reverting `haunch_back` had been tried first and was not the cause: same
+6 pinches, and slivers went 2 → 4.
+
+`rig_overlay_check` reports REVIEW rather than PASS. All 13 flagged joints are
+rear-leg or pelvis, none elsewhere — a single coherent cause, the documented 12%
+rear-limb trim that stopped the midline collision. Clearances are 0.9-5.9 mm and
+every joint is contained; `tail_06`'s tip was pulled back inside the tuft, which
+removed the one flag that was not part of that group.
+
+Runtime: 190.9 KB GLB, 989 verts / 1,974 tris / 35 joints, Khronos clean, zero
+control bones in the skin, both clips present, floor gap -11.5 mm, 29 draw calls,
+121/121 homepage checks green.
+
+### What the overlay still shows, measured
+
+1. **Back line too high toward the rear** — a blue band from mid-back to the rump.
+2. **Mane missing mass below the chin** — red at the mane's lower front; the
+   reference has a beard/ruff the model does not.
+3. **Legs and paws still short of the reference** — red under the belly and around
+   every paw.
+4. **Tuft slightly high and forward** of the reference's.
+5. **No face.** Still Gate 15, still deliberately not started, and still a large
+   part of why this does not yet read as *the* mascot.

@@ -79,9 +79,29 @@ def ring_frame(normal):
     through the neck, forward again through the head. A ring has to stay
     perpendicular to the path or the cross-sections shear, so its plane is
     derived from the local tangent rather than being fixed to world axes.
+
+    LATENT BUG, fixed when the ears first grew sideways.
+
+    This used to return a hardcoded right = (1,0,0) without orthogonalising it
+    against the tangent. Every ring in the cage until now had a tangent with
+    x = 0 — the body runs along Y, the limbs along -Z, the tail along -Y — so
+    (1,0,0) happened to be perpendicular and the basis happened to be orthonormal.
+
+    The ears broke that assumption. Grown along +X, their tangent is very nearly
+    parallel to `right`, so the two "spanning" vectors were nearly collinear and
+    the ring plane was not a plane: the rings collapsed toward a line and the cage
+    came back with slivers at the ear base and tip cap.
+
+    So `right` is now projected onto the plane perpendicular to n, and the
+    reference axis swaps to Z when n points along X. Note the cross product order
+    is preserved exactly (right x n, not n x right) — reversing it flips `up` and
+    with it every ring's winding, which would invert normals across the whole
+    model. And for any tangent with x = 0 the projection is a no-op, so the body,
+    limbs and tail come out bit-identical to before.
     """
     n = Vector(normal).normalized()
-    right = Vector((1.0, 0.0, 0.0))
+    ref = Vector((0.0, 0.0, 1.0)) if abs(n.x) > 0.86 else Vector((1.0, 0.0, 0.0))
+    right = (ref - n * ref.dot(n)).normalized()
     up = right.cross(n).normalized()
     return right, up
 
@@ -123,12 +143,12 @@ BODY = [
     #
     # Stations under the mane (rib_front forward) are not measurable from any
     # view and keep their previous values.
-    ("rump_cap",   (0.000, -0.452, 0.272), (0, 1, 0.10), 0.090, 0.050),
-    ("rump",       (0.000, -0.424, 0.278), (0, 1, 0.06), 0.145, 0.078),
+    ("rump_cap",   (0.000, -0.418, 0.268), (0, 1, 0.10), 0.086, 0.048),
+    ("rump",       (0.000, -0.396, 0.274), (0, 1, 0.06), 0.142, 0.076),
     # Haunch: three rings carrying real mass. The rear silhouette needs a
     # pelvis -> glute -> thigh flow, and jump take-off reads off this shape.
-    ("haunch_back", (0.000, -0.386, 0.288), (0, 1, 0.03), 0.185, 0.098),
-    ("haunch",     (0.000, -0.336, 0.300), (0, 1, 0), 0.190, 0.120),
+    ("haunch_back", (0.000, -0.366, 0.286), (0, 1, 0.03), 0.185, 0.098),
+    ("haunch",     (0.000, -0.320, 0.300), (0, 1, 0), 0.190, 0.120),
     ("hip",        (0.000, -0.282, 0.312), (0, 1, 0), 0.188, 0.132),
     ("lumbar_02",  (0.000, -0.216, 0.326), (0, 1, 0), 0.172, 0.140),
     ("lumbar_01",  (0.000, -0.148, 0.340), (0, 1, 0), 0.156, 0.145),
@@ -249,20 +269,139 @@ def ear(sx):
         # — where the reference has them topping out just under the mane crown.
         # Wider and shorter also makes them read from the side, which is the
         # correction the brief asks for.
-        ("root",  (sx * 0.150, 0.474, HEAD_Z + 0.132), (sx * 0.40, -0.12, 1), 0.060),
-        ("mid",   (sx * 0.170, 0.472, HEAD_Z + 0.166), (sx * 0.32, -0.10, 1), 0.064),
-        ("upper", (sx * 0.182, 0.470, HEAD_Z + 0.194), (sx * 0.24, -0.08, 1), 0.054),
-        ("tip",   (sx * 0.188, 0.468, HEAD_Z + 0.208), (sx * 0.18, -0.06, 1), 0.028),
+        # SECOND correction. The first pass lowered the ears because they were the
+        # tallest thing on the model — 4,157 extra pixels in the top front band.
+        # It fixed height by trading away width, and the trade was the wrong way
+        # round.
+        #
+        # Per-object measurement settles it. In band h 0.95-1.00 the widest thing
+        # is not the mane at all:
+        #
+        #     LionCage  max|x| 0.2167  ->  0.442 H     reference 0.248 H
+        #     LionMane  max|x| 0.1438  ->  0.293 H
+        #
+        # The overshoot is the EARS breaking through the top of the mane, which is
+        # what the blue lumps on the crown of the front overlay actually were. But
+        # burying them cost the band below, where the reference wants ears clearly
+        # outside the mane outline:
+        #
+        #     front band     reference w   model w    delta
+        #     0.85-0.90        0.552       0.456     -0.096
+        #     0.80-0.85        0.621       0.448     -0.173
+        #     0.75-0.80        0.631       0.521     -0.110
+        #
+        # An ear inside the mane outline is not an ear. So the ears now grow
+        # OUTWARD instead of upward: dropped ~0.07 H so they clear the top band
+        # entirely, and pushed out to max|x| 0.290 so they break the mane's
+        # silhouette in the band that wants them. One move, both bands.
+        # The attachment patch moved with them, and it had to. Growing a sideways
+        # ear out of the 45-degree patch put the first ring below its own
+        # attachment point, so the surface folded back on itself and the cage came
+        # back with 6 slivers where it had 2. The patch is now at 22.5 degrees —
+        # the side of the head, z 0.821 — which is where the reference draws the
+        # ears anyway (front view puts them at h ~0.81).
+        #
+        # Radius is deliberately modest at 0.050-0.058. A limb ring is a circle in
+        # the plane perpendicular to its growth direction, so a laterally-grown ear
+        # spends its radius on Y and Z equally: every millimetre of thickness is
+        # also a millimetre of height. A fatter ear would spill back into the
+        # 0.90-0.95 band that was just cleared.
+        # Sized to sit INSIDE the mane's measured width, not to supply it. The
+        # 0.75-0.90 deficit is a mane-profile problem (see fit_to_measured); an
+        # ear inflated to cover it would have been the wrong organ doing the job.
+        # The root also stands clear of the 0.208 patch — at 0.212 the first ring
+        # was almost coincident with its own attachment and the cage came back
+        # with slivers there.
+        # SIZED FROM THE DIFFERENCE BETWEEN TWO REFERENCE MEASUREMENTS, which is
+        # what finally made the ear target unambiguous.
+        #
+        # The colour-segmented mane profile and the full silhouette mask agree at
+        # most heights and diverge sharply in one band:
+        #
+        #     h      segmented mane   full silhouette   ratio
+        #     0.90       0.2029           0.2154         1.06
+        #     0.86       0.2058           0.2567         1.25
+        #     0.82       0.1789           0.3029         1.69
+        #     0.78       0.1971           0.3154         1.60
+        #     0.74       0.2183           0.3106         1.42
+        #     0.70       0.3164           0.3250         1.03
+        #
+        # Non-mane-coloured material sticking out past the mane at h 0.74-0.86 IS
+        # the ears — the segmentation excludes them precisely because they are a
+        # different colour. So the reference is explicit: ears reach half-width
+        # 0.31-0.32 while the mane behind them is only 0.18-0.22. The ears carry
+        # that band's width and the mane must NOT be inflated to fake it.
+        ("root",  (sx * 0.238, 0.470, HEAD_Z + 0.078), (sx * 1.00, -0.09,  0.10), 0.052),
+        ("mid",   (sx * 0.260, 0.465, HEAD_Z + 0.074), (sx * 1.00, -0.09,  0.06), 0.054),
+        ("upper", (sx * 0.278, 0.460, HEAD_Z + 0.070), (sx * 1.00, -0.09,  0.02), 0.044),
+        ("tip",   (sx * 0.294, 0.456, HEAD_Z + 0.068), (sx * 1.00, -0.09, -0.02), 0.026),
     ]
 
 
+# The tail was the single largest silhouette error in the whole asset, and the
+# overlay alone did not say so — the band measurement did.
+#
+# The old tail ran almost straight back at z 0.44-0.55, which put 0.56 H of EXTRA
+# width into the side band 0.45-0.60 while leaving the reference's low rear mass
+# uncovered. Measured against the reference side view:
+#
+#     side band          reference w    model w      delta
+#     0.50-0.55            0.663        1.227       +0.563
+#     0.15-0.20            1.108        0.635       -0.473
+#
+# Both numbers are the same mistake: the tail was carrying its mass a third of a
+# body height too high. The reference tail leaves the rump, turns DOWN, and ends
+# in a distinct oval tuft — traced off the side view at centre y = -0.585,
+# z = 0.169, radii 0.069 (fore-aft) by 0.091 (vertical).
+#
+# The old tail also had no tuft at all, which for a lion is not a detail. It is
+# the feature that makes the back half read as a lion rather than a cub-shaped
+# animal, and it is the only silhouette event behind the haunch.
+#
+# Construction: a thinning shaft that turns downward, then rings that swing to
+# travel BACKWARD so the tuft's bulge lands in the x-z plane. That matters —
+# a ring's radius spans the two axes perpendicular to its direction, so a tuft
+# built on a downward-travelling shaft would have bulged fore-aft and sideways
+# instead of standing up the way the reference draws it.
 TAIL = [
-    ("root_02", (0.0, -0.470, SPINE_Z + 0.088), (0, -1, 0.30), 0.054),
-    ("root_01", (0.0, -0.512, SPINE_Z + 0.106), (0, -1, 0.24), 0.046),
-    ("tail_03", (0.0, -0.566, SPINE_Z + 0.118), (0, -1, 0.14), 0.040),
-    ("tail_04", (0.0, -0.622, SPINE_Z + 0.120), (0, -1, 0.00), 0.036),
-    ("tail_05", (0.0, -0.678, SPINE_Z + 0.108), (0, -1, -0.14), 0.032),
-    ("tail_06", (0.0, -0.726, SPINE_Z + 0.086), (0, -1, -0.24), 0.028),
+    # SECOND PASS, from the reference's rear-extent profile rather than its
+    # outline. Measuring the rearmost point of each mask at each height gave the
+    # tail's actual route, and it is stricter than the overlay suggested:
+    #
+    #     z      reference y_rear
+    #     0.400      -0.319
+    #     0.350      -0.362
+    #     0.300      -0.387
+    #     0.250      -0.406
+    #     0.225      -0.669   <- the tuft begins, in one step
+    #     0.075      -0.638
+    #     0.050      -0.377   <- and ends
+    #
+    # Two things follow. The shaft is INVISIBLE above z 0.235 — it runs inside the
+    # rump's own outline, so a shaft thick enough to poke past it is a defect, not
+    # a tail. And the tuft is a compact mass between z 0.075 and 0.235, lower than
+    # the first pass put it, which is why the band at 0.05-0.10 was still 0.371 H
+    # short after the tail was supposedly fixed.
+    # Shaft. Thin, and tucked against the rump rather than trailing behind it.
+    ("root_02", (0.0, -0.398, 0.328), (0, -0.40, -1.00), 0.038),
+    ("root_01", (0.0, -0.406, 0.294), (0, -0.25, -1.00), 0.032),
+    ("tail_03", (0.0, -0.412, 0.262), (0, -0.55, -1.00), 0.028),
+    ("tail_04", (0.0, -0.438, 0.236), (0, -1.00, -0.70), 0.028),
+    ("tail_05", (0.0, -0.480, 0.206), (0, -1.00, -0.35), 0.030),
+    # Tuft. Swings back to horizontal and bulges, so the oval stands upright.
+    #
+    # Centres dropped ~0.012 after the first attempt measured one band high at the
+    # top (z 0.245 reached -0.617 where the reference is still on the rump at
+    # -0.408) and 0.296 H short at the bottom. Note the apothem: these rings carry
+    # 8 vertices, so an inscribed octagon reaches only cos(pi/8) = 0.924 of the
+    # nominal radius, and the cage is graded UNSUBDIVIDED. The radii below are set
+    # from the effective extent, not the nominal one — reading r straight off the
+    # reference leaves the tuft visibly small.
+    ("tuft_01", (0.0, -0.520, 0.186), (0, -1.00, -0.20), 0.046),
+    ("tuft_02", (0.0, -0.556, 0.166), (0, -1.00, -0.10), 0.074),
+    ("tuft_03", (0.0, -0.592, 0.154), (0, -1.00,  0.10), 0.086),
+    ("tuft_04", (0.0, -0.624, 0.152), (0, -1.00,  0.30), 0.070),
+    ("tuft_05", (0.0, -0.642, 0.160), (0, -1.00,  0.50), 0.034),
 ]
 
 
@@ -584,8 +723,12 @@ def build():
     #   right leg  centre seg 14 = 315 deg (down and right)   columns 13,14,15
     #   left  leg  centre seg 10 = 225 deg (down and left)    columns  9,10,11
     #   tail       centre seg  4 =  90 deg (straight up)      columns  3, 4, 5
-    #   right ear  centre seg  2 =  45 deg (up and right)     columns  1, 2, 3
-    #   left  ear  centre seg  6 = 135 deg (up and left)      columns  5, 6, 7
+    #   right ear  centre seg  1 =  22.5 deg (side, right)    columns  0, 1, 2
+    #   left  ear  centre seg  7 = 157.5 deg (side, left)     columns  6, 7, 8
+    #
+    # The ears moved out of columns 1-3 / 5-7 so they no longer share a column
+    # with the tail patch (3,4,5) — and 22.5 degrees is where the reference puts
+    # them, on the side of the head rather than on top of it.
     fr = cage.open_patch(BODY_INDEX["rib_front"], 13)
     cage.cap_loop(cage.grow(fr, front_limb(+1), prefix="frontR")[-1])
     fl = cage.open_patch(BODY_INDEX["rib_front"], 9)
@@ -599,9 +742,9 @@ def build():
     tl = cage.open_patch(BODY_INDEX["rump"], 3)
     cage.cap_loop(cage.grow(tl, TAIL, prefix="tail")[-1])
 
-    er = cage.open_patch(BODY_INDEX["head_mid"], 1)
+    er = cage.open_patch(BODY_INDEX["head_mid"], 0)
     cage.cap_loop(cage.grow(er, ear(+1), prefix="earR")[-1])
-    el = cage.open_patch(BODY_INDEX["head_mid"], 5)
+    el = cage.open_patch(BODY_INDEX["head_mid"], 6)
     cage.cap_loop(cage.grow(el, ear(-1), prefix="earL")[-1])
 
     # Caps FIRST. The mouth socket sits within 0.036 of the nose ring, so with
@@ -773,7 +916,8 @@ def render_wires(obj):
         "elbow": (0.120, 0.205, 0.160, 240),
         "hip": (0.115, -0.290, 0.295, 300),
         "hock": (0.115, -0.275, 0.080, 300),
-        "tail_root": (0.0, -0.470, SPINE_Z + 0.09, 340),
+        "tail_root": (0.0, -0.462, 0.346, 340),
+        "tail_tuft": (0.0, -0.598, 0.180, 320),
     }
     for name, (tx, ty, tz, yaw) in closeups.items():
         t = Vector((tx, ty, tz))
