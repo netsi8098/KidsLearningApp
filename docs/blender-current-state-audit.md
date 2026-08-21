@@ -338,3 +338,45 @@ Recorded so they are not rediscovered:
    live IK pinned the legs and the walk stride measured 18 mm instead of 230 mm.
    Constraints now default to `influence = 0`.
 8. **`export_def_bones=True`** or every IK/pole control ships as a skin joint.
+9. **`ring_frame()` returned a non-orthonormal basis** for any tangent with a
+   non-zero x component. `right` was hardcoded to `(1,0,0)` and never projected
+   onto the plane perpendicular to the tangent. Every ring in the cage until the
+   ears had tangent x = 0 — body along Y, limbs along -Z, tail along -Y — so it
+   happened to be perpendicular and nothing showed. The first sideways-growing ear
+   made `right` nearly parallel to the normal, the "ring plane" stopped being a
+   plane, and the rings collapsed toward a line: 8 slivers at the ear base and tip
+   cap. Fixed by projecting `right`, swapping the reference axis to Z when the
+   tangent points along X, and **preserving the cross-product order** (`right × n`,
+   not `n × right`) — reversing it flips `up` and inverts every ring's winding
+   model-wide. A no-op for any tangent with x = 0.
+10. **Limb rings were circular-only**, and that made a whole class of form
+    unbuildable rather than merely awkward. A ring is a section perpendicular to
+    its growth direction, so one radius serves two axes: a toe grown forward spends
+    it on X and Z, a paw grown downward on X and Y. Neither gives a broad FLAT
+    foot, which is why the paws sat 3-5x too short at ground contact for so long.
+    `grow()` now accepts an optional 5-tuple with separate right/up radii.
+    Corollary learned the hard way: pushing an ellipse to aspect ratio 2.3 bunches
+    the eight inherited vertices at its flat ends and produces slivers — 12, then
+    20 when a taper ring was added to "fix" them. Prefer changing the growth
+    DIRECTION so flatness comes from ring spacing, which keeps the aspect near 1.2.
+11. **A bone's head must coincide exactly with its parent's tail.** Moving a paw
+    bone's head forward to sit inside enlarged paw geometry silently disconnected
+    the chain the IK solver runs along: 1 battery FAIL and a 10.79 mm front IK
+    residual. Lengthening the same bone was also wrong, taking walk support slide
+    from 0.166 mm to 15.99 mm, because the planted-contact point is measured at the
+    bone and a long bone swings its own tip through an arc the IK target knows
+    nothing about. Paws are weighted rigidly (1.0) to their bone, so the geometry
+    travels with it whatever its length — never reposition a foot bone to follow
+    the mesh.
+12. **Ring SPACING drives the area-ratio pinch metric**, not just weights. Twice a
+    correction that moved rings closer together raised the pinch count with no
+    weight change, and twice re-spacing them fixed it: pulling the rump forward
+    bunched the rear rings from 0.050/0.038/0.028 apart to 0.030/0.030/0.022 and
+    took the count to 6, and respacing `haunch` took it to 2. Before retuning
+    weights to chase a pinch, check whether the rings behind it got crowded.
+13. **A shortened chain shears more for the same rotation.** Dropping the head
+    0.131 compressed the neck from 0.24 of body height to 0.11 and turned pose
+    `08-head-turned` from WARN into FAIL — the weight ramp `0.30 → 0.72 → 1.00` was
+    fine over the long neck and sheared across a third of the distance on the short
+    one. Widened to `0.22 → 0.54 → 0.84 → 1.00`. When a chain's length changes,
+    re-check its weight gradient.

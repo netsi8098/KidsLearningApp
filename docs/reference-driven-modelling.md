@@ -258,3 +258,71 @@ the measurement even though the pre-modifier mesh was exact.
 * **Side view reads as a cape hanging vertically**, not the reference's teardrop
   sweeping up over the crown and back.
 * Rear view resolves into two wing-like masses.
+
+## Measuring which WAY a band is wrong
+
+`silhouette_qa.py` reports how much a band disagrees. It does not report which
+way, and that turned out to be the difference between a correction and a guess: a
+band can be 10,000 pixels wrong because it is too narrow, too short, or in the
+wrong place, and those call for opposite fixes. Four diagnoses made by reading the
+red/blue overlay came out backwards before this was addressed.
+
+`tools/cad/band_spans.py` reports, per height band and in units of H, the outer
+span, the largest interior gap, and the centroid — for reference and model side by
+side with the delta. The interior gap is what distinguishes a crotch gap or a
+belly clearance from a solid form; the centroid catches a shape that is the right
+size in the wrong place.
+
+Three further techniques earned their place:
+
+**Per-object measurement.** Grading the union hides which object is at fault. In
+band 0.95-1.00 the union was 0.442 H against a reference 0.248 H, and the obvious
+reading was "the mane crown is too wide". Per object: `LionCage` 0.442 H,
+`LionMane` 0.293 H. The overshoot was the ears breaking through the mane.
+
+**Comparing two reference measurements against each other.** The colour-segmented
+mane profile and the full silhouette agree at most heights and diverge by up to
+1.69x at h 0.82. Material outside the mane that is not mane-coloured *is* the
+ears — so the reference states, without ambiguity, that ears reach half-width
+0.31-0.32 while the mane behind them is only 0.18-0.22. Neither measurement alone
+says that.
+
+**Cheap decisive tests instead of reasoning.** A horizontal shift sweep showed the
+3/4 view's deficit was largely a registration offset (+0.019 IoU from a pure
+shift) rather than shape. A camera-yaw sweep showed its 47° angle was already at
+the peak, so the residual really was shape. Each took one run and replaced a
+paragraph of speculation.
+
+## Two properties of the reference that cannot be corrected
+
+**The side view is clipped at both canvas edges** — the mane's chin lobe at
+z 0.494-0.612 and the tail tuft at z 0.092-0.223. `silhouette_qa.py` now warns
+about this. Consequences: the measured body length of 1.344 H is a LOWER BOUND,
+and in a clipped band the only available target is "reach the edge". That is still
+legitimate for IoU, because the model render is clipped by the same canvas, but it
+must never be read as having matched a measured shape.
+
+**The front and rear views disagree by 18% on mane width** and both cannot be
+satisfied. Front wins, per the contract: hero angle, largest drawing, the view a
+child sees. The rear view therefore carries a permanent model-too-wide halo of
+around 17%, and that halo is not a defect to chase.
+
+## Registration
+
+Comparison is now preceded by horizontal centroid registration, reported alongside
+the unregistered figure and the applied offset. An unregistered comparison
+measures shape AND where the drawing happens to sit in its canvas; since the
+turnaround was already measured as non-orthographic (11.8% height disagreement,
+26px ground-line disagreement), some offset between views is a property of the
+artwork. The 3/4 view carried 12px against 6px or less elsewhere.
+
+Registration is by **centroid, not best fit**. Searching for the offset that
+maximises IoU would be tuning the metric to flatter the model; a centroid is an
+objective landmark that cannot be steered.
+
+## Files added
+
+| Path | Role |
+|---|---|
+| `tools/cad/band_spans.py` | per-band span, interior gap and centroid, reference vs model |
+| `art/blender/references/silhouette-mascot/` | mascot masks, per-view overlays, sheet |

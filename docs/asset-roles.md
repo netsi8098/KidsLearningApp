@@ -21,13 +21,37 @@ be discarded until the production mascot has inherited all of it:
 | AnimationMixer architecture, state names, controller | `src/components/homepage/world3d/` |
 | GLB export rules, validators, runtime loading, QA | `scripts/`, `tools/blender/` |
 
-Measured baseline the production mascot must not regress:
+Measured baseline the production mascot must not regress, and where the mascot
+now stands against it (2026-08-21):
 
-* deformation battery **0 pinched faces**, worst area ratio **0.267**, 0 FAIL
-* planted paw at animation amplitudes **0.052 mm**
-* walk support slide **0.46 mm**, vertical **0.15 mm**, IK residual **0.00 mm**
-* 3 feet planted at every frame
-* reach headroom front **20.0 mm**, rear **40.9 mm**
+| Metric | Donor baseline | Mascot | |
+| --- | --- | --- | --- |
+| Battery FAIL | 0 | **0** | held |
+| Battery PASS / WARN | 5 / 7 | **6 / 6** | improved |
+| Pinched faces | 0 | 4 | regressed |
+| Worst area ratio | 0.267 | 0.165 | regressed |
+| Flipped faces | 24 | **16** | improved |
+| Slivers | 2 | **0** | improved |
+| Planted paw, animation amplitude | 0.052 mm | 0.105 mm | regressed |
+| Walk support slide, worst | 0.46 mm | **0.166 mm** | improved |
+| Walk vertical paw movement | 0.15 mm | 0.32 mm | regressed |
+| IK residual, all four paws | 0.00 mm | **0.00 mm** | held |
+| Feet planted every frame | 3 | **3** | held |
+| Reach headroom front / rear | 20.0 / 40.9 mm | **22.1 / 42.1 mm** | improved |
+
+Read honestly: the mascot beats the donor on locomotion accuracy, rig headroom and
+mesh cleanliness, and trails it on deformation *degree* at extreme poses. Nothing
+fails. The remaining pinch count and the REVIEW verdict from `rig_overlay_check`
+both trace to one documented cause — the 12% rear-limb trim taken to stop a
+midline collision.
+
+**THE CONTRACT IS DELIBERATELY NO LONGER SHARED.** Reference measurement put the
+face centre at h 0.604 and the spine below `SPINE_Z`. Those constants remain
+correct for the DONOR, which reads them, so `cage_lion.py` carries a local
+`HEAD_CAGE_Z = 0.604` and `lion_skeleton.py` writes spine positions literally.
+Editing `lion_contract.py` to "fix" this would silently reshape the fallback.
+Revisit only at donor retirement, and see the handoff for the proposed
+`*_DONOR` / `*_MASCOT` split.
 
 ## PRODUCTION MASCOT — reference-driven
 

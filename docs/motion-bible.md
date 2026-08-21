@@ -481,6 +481,34 @@ arrives.
 **If a brisker walk is wanted, change the CLIP** — bigger swing or shorter
 cycle. Raising the runtime speed only reintroduces skating.
 
+### Measured on the production mascot (2026-08-21)
+
+The walk was re-authored onto the reference-driven mascot after the tail, ears,
+rump, torso, limbs, paws and head all moved. Result, against the donor baseline:
+
+| Metric | Donor | Mascot |
+|---|---|---|
+| Support slide, worst paw | 0.46 mm | **0.166 mm** |
+| Rear paw slide | — | **0.04 mm** |
+| Vertical paw movement | 0.15 mm | 0.32 mm |
+| IK residual, all four paws | 0.00 mm | **0.00 mm** |
+| Feet planted, every sampled phase | 3 | **3** |
+| Stride / cycle / duty | 0.24 / 1.50 s / 0.75 | unchanged |
+
+Two ways the walk was broken while enlarging the paws, both worth not repeating:
+
+* **Lengthening a foot bone to follow bigger foot geometry** took support slide to
+  15.99 mm. The planted-contact point is measured at the bone, and a long bone
+  swings its own tip through an arc the IK target knows nothing about.
+* **Moving that bone's head forward** to sit inside the new paw was worse — a
+  battery FAIL and a 10.79 mm front IK residual — because a bone's head must
+  coincide with its parent's tail, and shifting it silently disconnects the chain
+  the solver runs along.
+
+Paws are weighted rigidly (1.0) to their bone, so the geometry travels with it
+whatever the bone's length. **Never reposition or lengthen a foot bone to follow
+the mesh.**
+
 ### Priority for a mascot
 
 Readability, softness and weight over zoological accuracy. What must hold:

@@ -234,3 +234,30 @@ character at all.
 Reduced motion falling all the way back is **too blunt** per the brief: the
 character should stay, with wandering and jumping disabled and breathing and
 blink kept. Outstanding.
+
+## Lock status — 2026-08-21
+
+The lock still holds: the prototype lion has not been promoted to
+`lion_master.blend`, and `lion_v2.glb` remains the shipping proxy.
+
+What has changed is that the production mascot now has a measured case for
+acceptance on two of the three axes the lock requires.
+
+**Silhouette / proportion — measured.** Weighted IoU 0.878 registered (front
+0.936, side 0.875, rear 0.825, 3/4 0.822), from 0.590 at the start of the rebuild.
+Mesh is 1,005 verts, 100% quads, watertight, zero slivers.
+
+**Motion — measured, and better than the proxy it would replace** on locomotion
+accuracy (walk support slide 0.166 mm against the donor's 0.46 mm), rig headroom
+(22.1 / 42.1 mm against 20.0 / 40.9) and mesh cleanliness (16 flipped faces
+against 24). Zero battery FAILs, 0.00 mm IK residual on all four paws.
+
+**Face, colour and surface — not started.** This is what still blocks promotion.
+The head is a smooth skull: no eye sockets, no brow plane, no cheek break, no
+mouth, and no texture or material work. The lock's requirement that the rebuilt
+lion match "silhouette, proportions, face, colors, and personality" is satisfied
+on the first two and untouched on the last three.
+
+Promotion criteria unchanged. Runtime spot-check at each pass: 191.6 KB GLB,
+Khronos-clean, both clips present, floor gap -11.5 mm, 29 draw calls, 121/121
+homepage QA checks green.

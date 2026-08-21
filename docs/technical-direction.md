@@ -101,6 +101,30 @@ drifted). Legs 0.36 H → 0.19 H; mane width 0.61 → 0.67 H; head width 0.35 �
 
 Missing: cream chest V; rump haunch.
 
+**The table above describes the TECHNICAL DONOR.** The production mascot is graded
+separately, against measured silhouette bands rather than sub-point judgement.
+Status 2026-08-21 — weighted IoU **0.878** registered (0.869 unregistered):
+
+| View | IoU | reading |
+|---|---|---|
+| front | **0.936** | 4.5% missing, 1.4% extra |
+| side | **0.875** | 7.6% missing, 5.6% extra |
+| rear | 0.825 | 17.6% extra, almost all of it the unfixable 18% front/rear artwork disagreement |
+| three-quarter | 0.822 | |
+
+| Sub-point | Status |
+|---|---|
+| 2A head/face | **head position DONE** — dropped 0.131 to the measured face centre h 0.604, which is also where the mane's aperture was already being built. Face itself NOT STARTED (GATE 15). |
+| 2B mane | PART — macro form and per-band width profile fitted; no chin lobe, so it still reads as a hood rather than a mane |
+| 2C body | **DONE** — torso lowered 0.045 off the measured top/bottom edge pair; rib, haunch and rump all driven from the reference |
+| 2D legs | **DONE** — shafts compressed with the torso; front-view widths within 0.03 H |
+| 2E paws | **DONE** — rebuilt from 0.087 H to 0.258 H at ground contact against a reference 0.258; needed elliptical limb rings |
+| 2F tail | **DONE** — thin shaft hugging the rump into a distinct oval tuft at z 0.075-0.235 |
+| 2G ears | **DONE** — now break the mane outline at absolute h 0.74-0.86 and read from front and side |
+| chest cream V | PLAN — coloration, not geometry, per the brief |
+
+Mesh: 1,005 verts, 100% quads, watertight, 0 loose, 0 non-manifold, **0 slivers**.
+
 ### GATE 4 — Retopology · **DONE**
 Quadriflow gives 100% quads and 0.07% silhouette deviation, but no authored
 loops. Chosen technique: **build the base cage as lofted quad rings** —

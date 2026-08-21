@@ -125,7 +125,8 @@ videos as app UI.
 | `public/assets/worlds/river-garden/home_environment.glb` | 3.10 MB | 85,000 tris · 29 materials · 10 markers · baked AO in vertex colours · no lights, no cameras |
 | `public/assets/lion/rigged/lion_v2.glb` | 2.14 MB | **proxy character in production use.** 2 meshes, 2 materials, 41 joints, 10 clips, `COLOR_0` |
 | `public/assets/lion/rigged/locomotion.json` | — | measured walk stride + cycle length. Generated; do not hand-edit. |
-| `public/assets/lion/cage/lion_cage_rigged.glb` | 63.5 KB | **production cage.** 961 verts, 1,918 tris, 35 deform joints, 0 control bones |
+| `public/assets/lion/cage/lion_cage_anim.glb` | 191.6 KB | **production mascot.** 1,005 verts, 2,006 tris, 35 deform joints, 0 control bones, clips `Idle` + `Walk`. Khronos-clean. |
+| `public/assets/lion/cage/lion_cage_rigged.glb` | 63.5 KB | rigged cage without clips, kept for rig review |
 | `public/assets/lion/cage/lion_cage.glb` | 63.3 KB | cage before rigging, kept for topology review |
 | `public/assets/lion/retopo/lion_retopo.glb` | 278.5 KB | superseded Quadriflow pass |
 | `public/assets/lion/rigged/lion.glb` | 2.51 MB | superseded first rig |
