@@ -1,6 +1,14 @@
 """
 loft_lion_volume.py — a reference-driven volume, lofted with CadQuery.
 
+STATUS: FROZEN — MEASUREMENT JIG ONLY
+
+This script has completed its purpose. It stays for measured cross-sections,
+width/height and length relationships, reference-plane alignment and repeatable
+measurement. Do NOT extend it toward character modelling: no CAD detail, no face
+topology, no mane, no joint loops, no skinning, no morph targets. Those belong in
+Blender. See docs/asset-roles.md.
+
 WHAT THIS IS, AND WHAT IT IS NOT
 
 It is a precise solid lofted through cross-sections whose dimensions are READ OFF
