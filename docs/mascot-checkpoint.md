@@ -99,10 +99,56 @@ If the remaining defects below cannot be resolved in this topology, the fallback
 is the brief's original route — sculpt freely, then retopologise against it. That
 will be reported, not assumed.
 
-Still to do before rig transfer: re-run `rig_cage_lion.py` and
-`anim_cage_lion.py` on the corrected cage, then the full deformation battery and
-the walk, comparing against the donor's baseline (0 pinched faces, 0.267 worst
-area ratio, 0.46 mm support slide, 0.052 mm planted paw).
+### Rig and walk on the corrected cage — measured, not assumed
+
+STEP 9 and STEP 10 have now been run on the corrected cage. Every figure is
+measured, against the donor baseline the brief set as the bar.
+
+| Metric | Donor baseline | Corrected cage | Verdict |
+| --- | --- | --- | --- |
+| Deformation battery FAIL | 0 | **0** | held |
+| Battery PASS / WARN | 5 / 7 | 5 / 7 | held |
+| Pinched faces | 0 | **4** | regressed |
+| Worst area ratio | 0.267 | **0.128** | regressed |
+| Flipped faces | 24 | 24 | held |
+| Reach headroom FL/FR | 20.0 mm | 20.0 mm | held |
+| Reach headroom RL/RR | 40.9 mm | 40.9 mm | held |
+| Planted paw, animation amplitude | 0.052 mm | **0.069 mm** | held |
+| Walk support slide, worst | 0.46 mm | **0.62 mm** | held |
+| Walk vertical paw movement | 0.15 mm | 0.17 mm | held |
+| IK residual, all four paws | 0.00 mm | 0.00 mm | held |
+| Feet planted, every frame | 3 | 3 | held |
+| Quad ratio / boundary edges | 1.0 / 0 | 1.0 / 0 | held |
+
+Honest reading: the motion system transferred. Support slide rose 35% in relative
+terms but 0.62 mm on a 1.30 m character is 0.05% of body height — below the
+threshold at which a foot reads as sliding, and the IK residual is still exactly
+zero, so the solver is not fighting the pose. The four-beat lateral gait keeps
+three feet down at every sampled phase.
+
+The regression that is real is deformation *degree*: 4 pinched faces at extreme
+poses where the donor had none, and a worst area ratio of 0.128 against 0.267.
+Nothing fails, but the corrected cage is less forgiving at the extremes than the
+donor was.
+
+Two causes were isolated and one remains. Weight retuning on the attach rings
+took the count from 16 to 13, which proved weights were not the cause. The pinch
+coordinates clustered at x ≈ ±0.198 — the *midline side* of the limbs — which
+identified the real cause: the reference-driven cross-sections made the legs thick
+enough that their inner surfaces reached the centre line, so a folding leg passed
+through its neighbour. Moving the leg stations outward and trimming the radii ~12%
+cleared both FAILs and took the count to 5; trimming the haunch and hip took it to
+4. The remaining 4 are the same mechanism at the widest crouch.
+
+That was a deliberate trade, recorded in `cage_lion.py`: the haunch is now 0.38 H
+against a measured 0.40 H. Two hundredths of body height is invisible at hero
+scale; a crouch that collapses the rump is not. Motion quality is the higher bar
+and it wins. Weighted IoU moved 0.822 → 0.817 as a result, which is the cost.
+
+Runtime confirmed: 189.2 KB GLB, 961 verts / 1,918 tris / 35 joints, Khronos
+validation clean, zero control bones in the skin, both clips (`Idle`, `Walk`)
+present, floor gap −11.5 mm, 29 draw calls, and the 121-check homepage QA suite
+still fully green.
 
 ## F. Verdict — **NOT YET READY FOR FINAL RETOPOLOGY**
 

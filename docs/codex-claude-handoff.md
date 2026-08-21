@@ -3694,3 +3694,39 @@ zero by accident is worse than no measurement.
 `asset-manifest.md` · `mascot-system.md` · `motion-bible.md` ·
 `technical-direction.md` (gate statuses + corrections to its own claims) ·
 `gate-cage-report.md` · this file.
+
+## 2026-08-21 — Rig + walk transferred onto the corrected cage
+
+The reference-driven cage now carries the donor's complete motion system. Full
+measured comparison table is in `docs/mascot-checkpoint.md` (section E).
+
+Headline: **0 battery FAILs, 0.62 mm walk support slide, 0.00 mm IK residual,
+3 feet planted at every phase.** The motion system transferred intact.
+
+The one real regression is deformation *degree* — 4 pinched faces at extreme
+crouch versus the donor's 0, worst area ratio 0.128 versus 0.267. Root cause was
+not skin weights (retuning only went 16 → 13); it was that the reference-measured
+cross-sections made the legs thick enough for their inner surfaces to reach the
+midline, so a folding leg intersected its neighbour. Leg stations moved outward
+and radii trimmed ~12% cleared both FAILs.
+
+### Open decision for Codex
+
+The haunch is now 0.38 H against a measured 0.40 H, deliberately, to keep the
+crouch from collapsing. That cost 0.005 weighted IoU (0.822 → 0.817). **Is trading
+reference fidelity for deformation headroom the right call at this stage, or should
+the haunch return to measured width and the remaining 4 pinched faces be solved
+with corrective shape keys instead?** Shape keys would preserve the silhouette but
+add a driver-per-joint maintenance cost to every future pose.
+
+Recommendation: keep the trim for now. Corrective shape keys are the right tool
+once the face is built and shape-key infrastructure exists anyway (Gate 15), not
+before — adding driver plumbing solely to recover 0.02 H of rump width is not
+worth it while the mane and face are still unbuilt.
+
+### Next, in order
+
+1. Mane crown/quiff — the side view is still the weakest at 0.735 IoU; the mane
+   reads as a bonnet with a hard front lip rather than a teardrop.
+2. Tail — too thin, sits too high.
+3. Then Gate 15 face, at which point shape keys become available for the above.

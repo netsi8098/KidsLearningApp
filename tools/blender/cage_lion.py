@@ -114,6 +114,13 @@ BODY = [
     # 2. The rear body is WIDER than it was. Rear view measures 0.40-0.41 H
     #    across at haunch height; the table gave 0.34.
     #
+    # Haunch and hip were then pulled back from rx 0.205/0.200 to 0.190/0.188.
+    # At the measured width the haunch's own surface is the widest point on the
+    # animal, and in a deep crouch the pelvis and spine_01 diverge by 10 degrees
+    # across it — at that radius the shear pinched faces to 0.05 of rest area.
+    # 0.38 H against a measured 0.40 is invisible at hero scale; a crouch that
+    # collapses the rump is not. Motion quality is the higher bar and it wins.
+    #
     # Stations under the mane (rib_front forward) are not measurable from any
     # view and keep their previous values.
     ("rump_cap",   (0.000, -0.452, 0.272), (0, 1, 0.10), 0.090, 0.050),
@@ -121,8 +128,8 @@ BODY = [
     # Haunch: three rings carrying real mass. The rear silhouette needs a
     # pelvis -> glute -> thigh flow, and jump take-off reads off this shape.
     ("haunch_back", (0.000, -0.386, 0.288), (0, 1, 0.03), 0.185, 0.098),
-    ("haunch",     (0.000, -0.336, 0.300), (0, 1, 0), 0.205, 0.120),
-    ("hip",        (0.000, -0.282, 0.312), (0, 1, 0), 0.200, 0.132),
+    ("haunch",     (0.000, -0.336, 0.300), (0, 1, 0), 0.190, 0.120),
+    ("hip",        (0.000, -0.282, 0.312), (0, 1, 0), 0.188, 0.132),
     ("lumbar_02",  (0.000, -0.216, 0.326), (0, 1, 0), 0.172, 0.140),
     ("lumbar_01",  (0.000, -0.148, 0.340), (0, 1, 0), 0.156, 0.145),
     ("waist",      (0.000, -0.076, 0.352), (0, 1, 0), 0.150, 0.150),
@@ -173,45 +180,58 @@ def front_limb(sx):
 
     The paws are both an art feature and a locomotion one: ground-contact shape
     is what makes a planted paw look planted.
+
+    One correction on top of the measurement. Matching the measured SOLID width
+    exactly put each shaft's inner surface within 8mm of the midline — because in
+    the drawing the near and far legs overlap, so the silhouette reads solid even
+    though the legs are separated in 3D. Geometrically that is defensible; for
+    deformation it is not: a leg whose radius reaches its own offset from centre
+    passes through its neighbour when it folds, and the battery pinched at exactly
+    that point in deep-crouch and rear-leg-compressed.
+
+    So the shafts are moved outward and trimmed ~12%, keeping the measured OUTER
+    span (the silhouette edge, which is what reads) and restoring a real 70mm
+    midline gap. Solid width lands at 0.34 H against a measured 0.37 — most of the
+    gain kept, the collision removed.
     """
     return [
-        ("scapula",  (sx * 0.110, 0.224, 0.300), (0, -0.10, -1), 0.100),
-        ("upper_02", (sx * 0.116, 0.214, 0.252), (0, -0.16, -1), 0.098),
-        ("upper_01", (sx * 0.120, 0.202, 0.206), (0, -0.20, -1), 0.094),
+        ("scapula",  (sx * 0.118, 0.224, 0.300), (0, -0.10, -1), 0.092),
+        ("upper_02", (sx * 0.122, 0.214, 0.252), (0, -0.16, -1), 0.090),
+        ("upper_01", (sx * 0.124, 0.202, 0.206), (0, -0.20, -1), 0.086),
         # Elbow: three rings tight together, and the joint is PRE-BENT backward.
         # Straight limbs give IK zero extension headroom.
-        ("elbow_up", (sx * 0.122, 0.182, 0.178), (0, -0.10, -1), 0.096),
-        ("elbow",    (sx * 0.122, 0.176, 0.160), (0, 0.06, -1), 0.098),
-        ("elbow_lo", (sx * 0.122, 0.182, 0.142), (0, 0.18, -1), 0.094),
-        ("forearm",  (sx * 0.122, 0.206, 0.108), (0, 0.22, -1), 0.088),
-        ("wrist_up", (sx * 0.124, 0.213, 0.080), (0, 0.12, -1), 0.084),
-        ("wrist",    (sx * 0.124, 0.216, 0.064), (0, 0.04, -1), 0.086),
+        ("elbow_up", (sx * 0.126, 0.182, 0.178), (0, -0.10, -1), 0.088),
+        ("elbow",    (sx * 0.126, 0.176, 0.160), (0, 0.06, -1), 0.090),
+        ("elbow_lo", (sx * 0.126, 0.182, 0.142), (0, 0.18, -1), 0.086),
+        ("forearm",  (sx * 0.126, 0.206, 0.108), (0, 0.22, -1), 0.080),
+        ("wrist_up", (sx * 0.128, 0.213, 0.080), (0, 0.12, -1), 0.076),
+        ("wrist",    (sx * 0.128, 0.216, 0.064), (0, 0.04, -1), 0.078),
         # Paw: broad upper mass, then a flattened sole.
-        ("paw_top",  (sx * 0.126, 0.222, 0.046), (0, 0.30, -1), 0.100),
-        ("paw_mid",  (sx * 0.126, 0.232, 0.026), (0, 0.45, -1), 0.118),
-        ("paw_sole", (sx * 0.126, 0.234, 0.008), (0, 0.10, -1), 0.114),
+        ("paw_top",  (sx * 0.130, 0.222, 0.046), (0, 0.30, -1), 0.092),
+        ("paw_mid",  (sx * 0.130, 0.232, 0.026), (0, 0.45, -1), 0.106),
+        ("paw_sole", (sx * 0.130, 0.234, 0.008), (0, 0.10, -1), 0.102),
     ]
 
 
 def rear_limb(sx):
     return [
-        ("hip",      (sx * 0.108, -0.292, 0.298), (0, 0, -1), 0.114),
-        ("thigh_02", (sx * 0.112, -0.284, 0.248), (0, 0.10, -1), 0.110),
-        ("thigh_01", (sx * 0.116, -0.268, 0.206), (0, 0.22, -1), 0.104),
+        ("hip",      (sx * 0.124, -0.292, 0.298), (0, 0, -1), 0.100),
+        ("thigh_02", (sx * 0.126, -0.284, 0.248), (0, 0.10, -1), 0.098),
+        ("thigh_01", (sx * 0.128, -0.268, 0.206), (0, 0.22, -1), 0.092),
         # Stifle (knee) — points FORWARD.
-        ("knee_up",  (sx * 0.118, -0.244, 0.182), (0, 0.20, -1), 0.100),
-        ("knee",     (sx * 0.118, -0.236, 0.164), (0, 0.05, -1), 0.098),
-        ("knee_lo",  (sx * 0.118, -0.242, 0.146), (0, -0.14, -1), 0.094),
-        ("shin",     (sx * 0.118, -0.268, 0.116), (0, -0.26, -1), 0.086),
+        ("knee_up",  (sx * 0.128, -0.244, 0.182), (0, 0.20, -1), 0.090),
+        ("knee",     (sx * 0.128, -0.236, 0.164), (0, 0.05, -1), 0.088),
+        ("knee_lo",  (sx * 0.128, -0.242, 0.146), (0, -0.14, -1), 0.084),
+        ("shin",     (sx * 0.128, -0.268, 0.116), (0, -0.26, -1), 0.078),
         # Hock — points BACKWARD. This reversal is the whole reason a rear leg
         # does not behave like a human leg, and it also gives the chain the reach
         # headroom the planted-paw proof depends on.
-        ("hock_up",  (sx * 0.118, -0.284, 0.094), (0, -0.20, -1), 0.082),
-        ("hock",     (sx * 0.118, -0.290, 0.078), (0, 0.05, -1), 0.084),
-        ("hock_lo",  (sx * 0.118, -0.276, 0.060), (0, 0.32, -1), 0.080),
-        ("ankle",    (sx * 0.120, -0.256, 0.044), (0, 0.34, -1), 0.084),
-        ("paw_top",  (sx * 0.122, -0.244, 0.028), (0, 0.30, -1), 0.098),
-        ("paw_sole", (sx * 0.122, -0.238, 0.008), (0, 0.10, -1), 0.112),
+        ("hock_up",  (sx * 0.128, -0.284, 0.094), (0, -0.20, -1), 0.074),
+        ("hock",     (sx * 0.128, -0.290, 0.078), (0, 0.05, -1), 0.076),
+        ("hock_lo",  (sx * 0.128, -0.276, 0.060), (0, 0.32, -1), 0.072),
+        ("ankle",    (sx * 0.130, -0.256, 0.044), (0, 0.34, -1), 0.076),
+        ("paw_top",  (sx * 0.132, -0.244, 0.028), (0, 0.30, -1), 0.090),
+        ("paw_sole", (sx * 0.132, -0.238, 0.008), (0, 0.10, -1), 0.100),
     ]
 
 

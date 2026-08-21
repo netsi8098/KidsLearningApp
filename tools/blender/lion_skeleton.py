@@ -146,13 +146,17 @@ JAW_RINGS = {
 }
 
 FRONT_WEIGHTS = {
-    # The armpit was the last pinch in the battery, at the attach ring. Holding
-    # more of it with the CHEST and letting the scapula ring carry the transition
-    # keeps the shoulder skin on the body when the limb swings up, instead of
-    # shearing between two bones that diverge by 56 degrees.
-    "attach":   {"chest": 0.74, "scapula_F{SD}": 0.26},
-    "scapula":  {"chest": 0.26, "scapula_F{SD}": 0.74},
-    "upper_02": {"scapula_F{SD}": 0.34, "upper_front_F{SD}": 0.66},
+    # Softened again after the body was corrected. The legs are now ~40% thicker
+    # and the haunch 0.06 H wider, so a limb folding has far more material to
+    # compress and the old split sheared: front-leg-back went to FAIL with a
+    # pinch at (0.143, 0.145, 0.286), right on the attach ring.
+    #
+    # More of the transition is handed to the body side and spread across three
+    # rings instead of two. This is the authored map earning its keep — the fix
+    # is a table edit, not a geometry compromise.
+    "attach":   {"chest": 0.84, "scapula_F{SD}": 0.16},
+    "scapula":  {"chest": 0.36, "scapula_F{SD}": 0.64},
+    "upper_02": {"scapula_F{SD}": 0.44, "upper_front_F{SD}": 0.56},
     "upper_01": {"upper_front_F{SD}": 1.0},
     # Three rings across the elbow rather than a switch at one — this is what
     # stops the joint creasing when it folds past 50 degrees.
@@ -162,15 +166,19 @@ FRONT_WEIGHTS = {
     "forearm":  {"forearm_F{SD}": 1.0},
     "wrist_up": {"forearm_F{SD}": 0.70, "wrist_F{SD}": 0.30},
     "wrist":    {"forearm_F{SD}": 0.28, "wrist_F{SD}": 0.72},
-    "paw_top":  {"wrist_F{SD}": 0.36, "paw_F{SD}": 0.64},
+    "paw_top":  {"wrist_F{SD}": 0.46, "paw_F{SD}": 0.54},
     "paw_mid":  {"paw_F{SD}": 1.0},
     "paw_sole": {"paw_F{SD}": 1.0},
 }
 
 REAR_WEIGHTS = {
-    "attach":   {"pelvis": 0.58, "thigh_R{SD}": 0.42},
-    "hip":      {"pelvis": 0.16, "thigh_R{SD}": 0.84},
-    "thigh_02": {"thigh_R{SD}": 1.0},
+    # Same treatment for the rear. The haunch now carries real mass (0.205 rx
+    # against 0.176), and with the hip ring 84% thigh it swung away from the
+    # pelvis-held ring beside it — deep-crouch and rear-leg-compressed both
+    # pinched at (+/-0.198, -0.2, 0.2), the haunch's widest point.
+    "attach":   {"pelvis": 0.80, "thigh_R{SD}": 0.20},
+    "hip":      {"pelvis": 0.36, "thigh_R{SD}": 0.64},
+    "thigh_02": {"pelvis": 0.12, "thigh_R{SD}": 0.88},
     "thigh_01": {"thigh_R{SD}": 1.0},
     "knee_up":  {"thigh_R{SD}": 0.74, "shin_R{SD}": 0.26},
     "knee":     {"thigh_R{SD}": 0.50, "shin_R{SD}": 0.50},
@@ -180,7 +188,7 @@ REAR_WEIGHTS = {
     "hock":     {"shin_R{SD}": 0.42, "hock_R{SD}": 0.58},
     "hock_lo":  {"hock_R{SD}": 1.0},
     "ankle":    {"hock_R{SD}": 0.46, "ankle_R{SD}": 0.54},
-    "paw_top":  {"ankle_R{SD}": 0.40, "paw_R{SD}": 0.60},
+    "paw_top":  {"ankle_R{SD}": 0.50, "paw_R{SD}": 0.50},
     "paw_sole": {"paw_R{SD}": 1.0},
 }
 
