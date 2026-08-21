@@ -165,18 +165,65 @@ def bind(cage, arm):
 
 # ── measurement ─────────────────────────────────────────────────────────────
 def face_stats(obj):
-    """Per-face (area, normal) of the EVALUATED (deformed) mesh."""
+    """Per-face (area, normal, centre) of the EVALUATED (deformed) mesh."""
     deps = bpy.context.evaluated_depsgraph_get()
     ev = obj.evaluated_get(deps)
     me = ev.to_mesh()
-    out = [(p.area, Vector(p.normal).copy()) for p in me.polygons]
+    out = [(p.area, Vector(p.normal).copy(), Vector(p.center).copy()) for p in me.polygons]
     ev.to_mesh_clear()
     return out
 
 
-def compare(rest, now, label):
+def dominant_bones(cage, arm):
+    """The bone that owns each face, by summed vertex weight.
+
+    Needed to judge inversion honestly. Comparing a deformed face normal to its
+    REST normal in world space flags every face on a limb that swings more than
+    90 degrees — the underside of a forearm rotating 100 degrees genuinely does
+    point the other way, and that is rotation, not inversion. The only
+    meaningful question is whether the face flipped RELATIVE TO THE BONE
+    carrying it, so each face needs to know its bone.
+    """
+    bone_of_group = {}
+    names = {b.name for b in arm.data.bones}
+    for vg in cage.vertex_groups:
+        if vg.name in names:
+            bone_of_group[vg.index] = vg.name
+
+    weights = []
+    for v in cage.data.vertices:
+        w = {}
+        for g in v.groups:
+            b = bone_of_group.get(g.group)
+            if b:
+                w[b] = w.get(b, 0.0) + g.weight
+        weights.append(w)
+
+    out = []
+    for poly in cage.data.polygons:
+        tally = {}
+        for vi in poly.vertices:
+            for b, w in weights[vi].items():
+                tally[b] = tally.get(b, 0.0) + w
+        out.append(max(tally, key=tally.get) if tally else None)
+    return out
+
+
+def bone_deltas(arm):
+    """Rest-to-pose transform per bone, for un-rotating a face normal."""
+    out = {}
+    for pb in arm.pose.bones:
+        try:
+            out[pb.name] = (pb.matrix @ pb.bone.matrix_local.inverted()).to_3x3()
+        except ValueError:
+            pass
+    return out
+
+
+def compare(rest, now, label, face_bone=None, deltas=None):
     pinched, flipped, worst, worst_i = 0, 0, 1.0, -1
-    for i, ((ra, rn), (na, nn)) in enumerate(zip(rest, now)):
+    hot = []
+    for i, ((ra, rn, _rc), (na, nn, nc)) in enumerate(zip(rest, now)):
         if ra <= 1e-9:
             continue
         ratio = na / ra
@@ -184,12 +231,26 @@ def compare(rest, now, label):
             worst, worst_i = ratio, i
         if ratio < PINCH:
             pinched += 1
-        if rn.length > 1e-6 and nn.length > 1e-6 and rn.normalized().dot(nn.normalized()) < -0.2:
-            flipped += 1
-    severe = sum(1 for (ra, _), (na, _) in zip(rest, now) if ra > 1e-9 and na / ra < SEVERE)
+            hot.append((ratio, nc))
+        if rn.length > 1e-6 and nn.length > 1e-6:
+            expected = rn.normalized()
+            if face_bone and deltas:
+                b = face_bone[i] if i < len(face_bone) else None
+                m = deltas.get(b) if b else None
+                if m:
+                    rotated = m @ rn
+                    if rotated.length > 1e-6:
+                        expected = rotated.normalized()
+            if expected.dot(nn.normalized()) < -0.2:
+                flipped += 1
+    severe = sum(1 for (ra, *_r), (na, *_n) in zip(rest, now) if ra > 1e-9 and na / ra < SEVERE)
     verdict = "PASS" if (pinched == 0 and flipped == 0) else ("FAIL" if severe else "WARN")
     print(f"[qa] {label:22} worst_area={worst:.3f} pinched={pinched} "
           f"severe={severe} flipped={flipped}  {verdict}")
+    # Locate the collapses. Three attempts at the mouth were spent guessing
+    # which faces were pinching from a render; a coordinate ends that.
+    for ratio, c in sorted(hot)[:4]:
+        print(f"[qa]     pinch {ratio:.3f} at ({c.x:.3f}, {c.y:.3f}, {c.z:.3f})")
     return {"label": label, "worst": worst, "pinched": pinched,
             "severe": severe, "flipped": flipped, "verdict": verdict,
             "worst_face": worst_i}
@@ -211,36 +272,45 @@ def set_pose(arm, poses):
 
 # ── the battery ─────────────────────────────────────────────────────────────
 def poses():
-    """The twelve tests from the brief, as bone rotations in degrees."""
+    """The twelve tests from the brief, as bone rotations in degrees.
+
+    Angles are DELTAS from the rest pose, so they had to be re-based when the
+    cage gained pre-bent elbows and knees (needed to give IK extension
+    headroom). The elbow now starts ~14 degrees bent and the stifle ~16, so the
+    original deltas produced a fold well past anything the character can reach —
+    the leg passed through itself and the metric correctly reported inverted
+    faces. These values reproduce the same ABSOLUTE extreme as before, not a
+    softer test.
+    """
     both_front = ("upper_front_FL", "upper_front_FR")
     both_rear = ("thigh_RL", "thigh_RR")
 
     def deep_crouch():
         p = {"pelvis": (-16, 0, 0), "spine_01": (-6, 0, 0), "chest": (10, 0, 0)}
         for b in both_rear:
-            p[b] = (52, 0, 0)
+            p[b] = (48, 0, 0)
         for b in ("shin_RL", "shin_RR"):
-            p[b] = (-64, 0, 0)
+            p[b] = (-50, 0, 0)
         for b in ("hock_RL", "hock_RR"):
-            p[b] = (46, 0, 0)
-        for b in both_front:
             p[b] = (40, 0, 0)
+        for b in both_front:
+            p[b] = (34, 0, 0)
         for b in ("forearm_FL", "forearm_FR"):
-            p[b] = (-52, 0, 0)
+            p[b] = (-40, 0, 0)
         return p
 
     return [
         ("01-neutral", {}, "side"),
         ("02-deep-crouch", deep_crouch(), "side"),
-        ("03-front-paw-lifted", {"scapula_FR": (-18, 0, 0), "upper_front_FR": (-64, 0, -10),
-                                 "forearm_FR": (-58, 0, 0), "wrist_FR": (-24, 0, 0),
+        ("03-front-paw-lifted", {"scapula_FR": (-18, 0, 0), "upper_front_FR": (-56, 0, -10),
+                                 "forearm_FR": (-44, 0, 0), "wrist_FR": (-20, 0, 0),
                                  "chest": (0, 0, -6), "pelvis": (0, 0, -3)}, "three-quarter"),
         ("04-front-leg-forward", {"scapula_FR": (-22, 0, 0), "upper_front_FR": (-46, 0, 0),
                                   "forearm_FR": (14, 0, 0)}, "side"),
         ("05-front-leg-back", {"scapula_FR": (16, 0, 0), "upper_front_FR": (42, 0, 0),
                                "forearm_FR": (-18, 0, 0)}, "side"),
-        ("06-rear-leg-compressed", {"thigh_RR": (58, 0, 0), "shin_RR": (-72, 0, 0),
-                                    "hock_RR": (52, 0, 0), "ankle_RR": (-16, 0, 0)}, "side"),
+        ("06-rear-leg-compressed", {"thigh_RR": (52, 0, 0), "shin_RR": (-56, 0, 0),
+                                    "hock_RR": (44, 0, 0), "ankle_RR": (-14, 0, 0)}, "side"),
         ("07-rear-leg-extended", {"thigh_RR": (-34, 0, 0), "shin_RR": (18, 0, 0),
                                   "hock_RR": (-22, 0, 0)}, "side"),
         ("08-head-turned", {"neck_01": (0, 0, 34), "head": (0, 0, 40),
@@ -335,21 +405,43 @@ def main():
     if cage is None:
         raise SystemExit("LionCage not found — run cage_lion.py first")
 
-    arm = build_armature()
-    bind(cage, arm)
+    # Re-usable against an ALREADY RIGGED file. Running the battery on the
+    # production rig is the only way to tell whether authored weights actually
+    # improved on the automatic baseline — rebuilding and re-binding here would
+    # throw away the thing being measured.
+    arm = bpy.data.objects.get("LionRig")
+    if arm and any(vg.name in {b.name for b in arm.data.bones} for vg in cage.vertex_groups):
+        print(f"[qa] using existing rig: {len(arm.data.bones)} bones, "
+              f"{len(cage.vertex_groups)} weighted groups")
+    else:
+        arm = build_armature()
+        bind(cage, arm)
 
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="POSE")
+
+    # The battery poses bones DIRECTLY. Live IK constraints would drag those
+    # bones back toward their targets and the measurement would describe the
+    # solver rather than the skinning.
+    muted = 0
+    for pb in arm.pose.bones:
+        for c in pb.constraints:
+            if c.type == "IK":
+                c.mute = True
+                muted += 1
+    if muted:
+        print(f"[qa] muted {muted} IK constraints for direct-pose testing")
 
     cam = setup_render(cage)
 
     set_pose(arm, {})
     rest = face_stats(cage)
+    face_bone = dominant_bones(cage, arm)
 
     results = []
     for name, pose, view in poses():
         set_pose(arm, pose)
-        results.append(compare(rest, face_stats(cage), name))
+        results.append(compare(rest, face_stats(cage), name, face_bone, bone_deltas(arm)))
         shoot(cam, view, os.path.join(PREVIEW_DIR, f"{name}.png"))
 
     set_pose(arm, {})

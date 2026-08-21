@@ -146,17 +146,23 @@ BODY_INDEX = {name: i for i, (name, *_rest) in enumerate(BODY)}
 # boundary on the body, so these start at ring 1.
 def front_limb(sx):
     return [
-        ("scapula",  (sx * 0.104, 0.222, 0.300), (0, 0, -1), 0.076),
-        ("upper_02", (sx * 0.108, 0.216, 0.252), (0, 0, -1), 0.072),
-        ("upper_01", (sx * 0.110, 0.212, 0.206), (0, 0, -1), 0.070),
-        # Elbow: three rings tight together. A single ring here creases; the
-        # count came out of the bend test, not out of a rule of thumb.
-        ("elbow_up", (sx * 0.110, 0.210, 0.178), (0, 0, -1), 0.072),
-        ("elbow",    (sx * 0.110, 0.208, 0.160), (0, 0, -1), 0.074),
-        ("elbow_lo", (sx * 0.110, 0.208, 0.142), (0, 0, -1), 0.070),
-        ("forearm",  (sx * 0.110, 0.210, 0.108), (0, 0, -1), 0.064),
-        ("wrist_up", (sx * 0.110, 0.212, 0.080), (0, 0, -1), 0.060),
-        ("wrist",    (sx * 0.110, 0.214, 0.064), (0, 0, -1), 0.061),
+        ("scapula",  (sx * 0.104, 0.224, 0.300), (0, -0.10, -1), 0.076),
+        ("upper_02", (sx * 0.108, 0.214, 0.252), (0, -0.16, -1), 0.072),
+        ("upper_01", (sx * 0.110, 0.202, 0.206), (0, -0.20, -1), 0.070),
+        # Elbow: three rings tight together, and the joint is PRE-BENT backward.
+        #
+        # The first cage ran the front leg dead straight from shoulder to wrist.
+        # Straight limbs give inverse kinematics zero extension headroom, so
+        # raising the body 50mm simply lifted the paws off the ground — the
+        # planted-paw proof measured 47mm of front drift for exactly that reason.
+        # A rest pose with a shallow bend is standard rig practice and it is what
+        # gives the solver somewhere to go in both directions.
+        ("elbow_up", (sx * 0.110, 0.182, 0.178), (0, -0.10, -1), 0.072),
+        ("elbow",    (sx * 0.110, 0.176, 0.160), (0, 0.06, -1), 0.074),
+        ("elbow_lo", (sx * 0.110, 0.182, 0.142), (0, 0.18, -1), 0.070),
+        ("forearm",  (sx * 0.110, 0.206, 0.108), (0, 0.22, -1), 0.064),
+        ("wrist_up", (sx * 0.110, 0.213, 0.080), (0, 0.12, -1), 0.060),
+        ("wrist",    (sx * 0.110, 0.216, 0.064), (0, 0.04, -1), 0.061),
         # Paw: broad upper mass, then a flattened sole. Toe suggestion comes
         # from the two widest rings, not from separate floating socks.
         ("paw_top",  (sx * 0.112, 0.222, 0.046), (0, 0.30, -1), 0.076),
@@ -171,16 +177,19 @@ def rear_limb(sx):
         ("thigh_02", (sx * 0.106, -0.284, 0.248), (0, 0.10, -1), 0.086),
         ("thigh_01", (sx * 0.108, -0.268, 0.206), (0, 0.22, -1), 0.080),
         # Stifle (knee) — points FORWARD.
-        ("knee_up",  (sx * 0.108, -0.254, 0.182), (0, 0.18, -1), 0.077),
-        ("knee",     (sx * 0.108, -0.248, 0.164), (0, 0.05, -1), 0.075),
-        ("knee_lo",  (sx * 0.108, -0.250, 0.146), (0, -0.10, -1), 0.070),
-        ("shin",     (sx * 0.108, -0.262, 0.116), (0, -0.22, -1), 0.063),
+        ("knee_up",  (sx * 0.108, -0.244, 0.182), (0, 0.20, -1), 0.077),
+        ("knee",     (sx * 0.108, -0.236, 0.164), (0, 0.05, -1), 0.075),
+        ("knee_lo",  (sx * 0.108, -0.242, 0.146), (0, -0.14, -1), 0.070),
+        ("shin",     (sx * 0.108, -0.268, 0.116), (0, -0.26, -1), 0.063),
         # Hock — points BACKWARD. This reversal is the whole reason a rear leg
         # does not behave like a human leg, and the walk, crouch, take-off and
-        # landing all depend on it existing in the cage.
-        ("hock_up",  (sx * 0.108, -0.274, 0.094), (0, -0.18, -1), 0.061),
-        ("hock",     (sx * 0.108, -0.278, 0.078), (0, 0.05, -1), 0.063),
-        ("hock_lo",  (sx * 0.108, -0.270, 0.060), (0, 0.28, -1), 0.058),
+        # landing all depend on it existing in the cage. The zigzag is also what
+        # gives the chain reach headroom: summed segment length exceeds the
+        # straight-line hip-to-paw distance, and that surplus is how far the body
+        # can rise before the paw is dragged off the ground.
+        ("hock_up",  (sx * 0.108, -0.284, 0.094), (0, -0.20, -1), 0.061),
+        ("hock",     (sx * 0.108, -0.290, 0.078), (0, 0.05, -1), 0.063),
+        ("hock_lo",  (sx * 0.108, -0.276, 0.060), (0, 0.32, -1), 0.058),
         ("ankle",    (sx * 0.110, -0.256, 0.044), (0, 0.34, -1), 0.061),
         ("paw_top",  (sx * 0.112, -0.244, 0.028), (0, 0.30, -1), 0.074),
         ("paw_sole", (sx * 0.112, -0.238, 0.008), (0, 0.10, -1), 0.080),
@@ -218,12 +227,23 @@ class Cage:
     def __init__(self):
         self.bm = bmesh.new()
         self.body = []          # body[ring][seg] -> BMVert
+        # (group_name, [BMVert, ...]) for every authored ring.
+        #
+        # This is what makes AUTHORED skinning possible later. Heat-map weighting
+        # has to guess which bone owns a vertex from proximity, and it guesses
+        # badly wherever two bones pass close to each other — the armpit, the
+        # inner thigh, the jaw. But the cage already KNOWS: this vertex is ring
+        # "elbow_lo" of the front-right limb. Recording it here means the rig can
+        # look the answer up instead of inferring it.
+        self.rings = []
 
     # -- body tube ----------------------------------------------------------
     def build_body(self):
-        for _name, centre, tangent, rx, rz in BODY:
+        for name, centre, tangent, rx, rz in BODY:
             pts = ring_points(centre, tangent, rx, rz, NSEG)
-            self.body.append([self.bm.verts.new(p) for p in pts])
+            verts = [self.bm.verts.new(p) for p in pts]
+            self.body.append(verts)
+            self.rings.append((f"body:{name}", verts))
         for r in range(len(self.body) - 1):
             a, b = self.body[r], self.body[r + 1]
             for s in range(NSEG):
@@ -304,7 +324,7 @@ class Cage:
                 return f
         return None
 
-    def grow(self, boundary, stations, flip=False):
+    def grow(self, boundary, stations, flip=False, prefix="limb"):
         """Quad an appendage onto a patch boundary, station by station.
 
         Each new ring's vertices are placed by taking each previous vertex's
@@ -316,8 +336,9 @@ class Cage:
         prev = boundary
         prev_c = sum((v.co for v in prev), Vector()) / len(prev)
         rings = [boundary]
+        self.rings.append((f"{prefix}:attach", list(boundary)))
 
-        for _name, centre, tangent, radius in stations:
+        for name, centre, tangent, radius in stations:
             right, up = ring_frame(tangent)
             c = Vector(centre)
             new = []
@@ -338,6 +359,7 @@ class Cage:
                 else:
                     self.bm.faces.new((prev[k], prev[m], new[m], new[k]))
             rings.append(new)
+            self.rings.append((f"{prefix}:{name}", new))
             prev, prev_c = new, c
         return rings
 
@@ -425,9 +447,66 @@ class Cage:
               f"-> {len(region)} centre faces")
         return region
 
+    def open_cavity(self, region, depth, shrink=0.58):
+        """Turn a socket into a real opening with an interior.
+
+        A jaw cannot open a DENT. The mouth was a recessed patch, and rotating
+        the jaw under it could only crease the surface — the deformation battery
+        reported the mouth collapsing to 8% of its rest area, correctly.
+
+        A mouth needs the upper and lower lips to be separate surfaces that part.
+        Extruding the socket centre inward gives exactly that: the rim becomes
+        the lips, the extrusion walls become the inside of the mouth, and the
+        pushed-back cap closes it off so the mesh stays watertight. Then the
+        upper rim can weight to the skull and the lower rim to the jaw, and they
+        genuinely separate.
+        """
+        if not region:
+            return
+        n = Vector((0.0, 0.0, 0.0))
+        for f in region:
+            n += f.normal
+        if n.length < 1e-6:
+            return
+        n.normalize()
+
+        ret = bmesh.ops.extrude_face_region(self.bm, geom=list(region))
+        new_verts = [g for g in ret["geom"] if isinstance(g, bmesh.types.BMVert)]
+        if not new_verts:
+            return
+        centre = sum((v.co for v in new_verts), Vector()) / len(new_verts)
+        for v in new_verts:
+            v.co = centre + (v.co - centre) * shrink - n * depth
+
+        # Remove the ORIGINAL faces so the mouth is genuinely open. The extrusion
+        # already built the walls, so the surface remains closed.
+        #
+        # `FACES`, not `FACES_ONLY`: the socket region has interior vertices and
+        # edges used by nothing except the faces being removed. FACES_ONLY keeps
+        # them, leaving one loose vertex and six wire edges behind — which is
+        # exactly what the integrity check reported.
+        bmesh.ops.delete(self.bm, geom=list(region), context="FACES")
+
+        # Record the interior so the rig can weight it EXPLICITLY. Left to
+        # nearest-neighbour inheritance, the cavity's back cap ended up split
+        # between the skull and the jaw, and opening the mouth pinched it to 7%
+        # of rest area. The inside of a mouth below the palate belongs to the
+        # jaw and should rotate with it rigidly.
+        self.rings.append(("face:mouth_cavity", list(new_verts)))
+        print(f"[cage] mouth cavity: {len(new_verts)} interior verts, depth {depth}")
+
     # -- finish -------------------------------------------------------------
     def finish(self, name="LionCage"):
         bmesh.ops.recalc_face_normals(self.bm, faces=list(self.bm.faces))
+        # Indices are only meaningful after this; without it every ring group
+        # would be written against stale or -1 indices. They must also be
+        # SNAPSHOTTED here — reading v.index after bm.free() returns nothing,
+        # which is how the first attempt recorded zero groups.
+        self.bm.verts.index_update()
+        # `is_valid` guards the vertices open_patch removed — each patch centre
+        # is deleted, but the body ring list still holds a reference to it.
+        ring_idx = [(gname, [v.index for v in verts if v.is_valid])
+                    for gname, verts in self.rings]
         me = bpy.data.meshes.new(name)
         self.bm.to_mesh(me)
         self.bm.free()
@@ -435,6 +514,14 @@ class Cage:
             p.use_smooth = True
         obj = bpy.data.objects.new(name, me)
         bpy.context.scene.collection.objects.link(obj)
+
+        for gname, idx in ring_idx:
+            idx = [i for i in idx if 0 <= i < len(me.vertices)]
+            if not idx:
+                continue
+            vg = obj.vertex_groups.get(gname) or obj.vertex_groups.new(name=gname)
+            vg.add(idx, 1.0, "REPLACE")
+        print(f"[cage] recorded {len(obj.vertex_groups)} ring groups")
         return obj
 
 
@@ -456,22 +543,22 @@ def build():
     #   right ear  centre seg  2 =  45 deg (up and right)     columns  1, 2, 3
     #   left  ear  centre seg  6 = 135 deg (up and left)      columns  5, 6, 7
     fr = cage.open_patch(BODY_INDEX["rib_front"], 13)
-    cage.cap_loop(cage.grow(fr, front_limb(+1))[-1])
+    cage.cap_loop(cage.grow(fr, front_limb(+1), prefix="frontR")[-1])
     fl = cage.open_patch(BODY_INDEX["rib_front"], 9)
-    cage.cap_loop(cage.grow(fl, front_limb(-1))[-1])
+    cage.cap_loop(cage.grow(fl, front_limb(-1), prefix="frontL")[-1])
 
     rr = cage.open_patch(BODY_INDEX["haunch_back"], 13)
-    cage.cap_loop(cage.grow(rr, rear_limb(+1))[-1])
+    cage.cap_loop(cage.grow(rr, rear_limb(+1), prefix="rearR")[-1])
     rl = cage.open_patch(BODY_INDEX["haunch_back"], 9)
-    cage.cap_loop(cage.grow(rl, rear_limb(-1))[-1])
+    cage.cap_loop(cage.grow(rl, rear_limb(-1), prefix="rearL")[-1])
 
     tl = cage.open_patch(BODY_INDEX["rump"], 3)
-    cage.cap_loop(cage.grow(tl, TAIL)[-1])
+    cage.cap_loop(cage.grow(tl, TAIL, prefix="tail")[-1])
 
     er = cage.open_patch(BODY_INDEX["head_mid"], 1)
-    cage.cap_loop(cage.grow(er, ear(+1))[-1])
+    cage.cap_loop(cage.grow(er, ear(+1), prefix="earR")[-1])
     el = cage.open_patch(BODY_INDEX["head_mid"], 5)
-    cage.cap_loop(cage.grow(el, ear(-1))[-1])
+    cage.cap_loop(cage.grow(el, ear(-1), prefix="earL")[-1])
 
     # Caps FIRST. The mouth socket sits within 0.036 of the nose ring, so with
     # the muzzle still open its inset ran along an open boundary and shredded the
@@ -483,7 +570,8 @@ def build():
     # Facial deformation loops, authored on a CLOSED surface.
     cage.socket((0.095, 0.578, HEAD_Z + 0.048), (0.016, 0.011), 0.013, side=+1)
     cage.socket((-0.095, 0.578, HEAD_Z + 0.048), (0.016, 0.011), 0.013, side=-1)
-    cage.socket((0.0, 0.610, HEAD_Z - 0.112), (0.015, 0.010), 0.016, side=None)
+    mouth = cage.socket((0.0, 0.610, HEAD_Z - 0.112), (0.015, 0.010), 0.010, side=None)
+    cage.open_cavity(mouth, 0.052)
     # Brow ridges get one ring each — enough for a BrowUp shape key to have
     # something to move without adding density the rest of the forehead cannot use.
     for sx in (-1, 1):

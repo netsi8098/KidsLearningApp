@@ -116,3 +116,116 @@ paw proof.
 * ears read from side now but the inner-ear region is not modelled;
 * 4 sliver faces in cap fans;
 * mane still the 31-lock proxy, deliberately untouched.
+
+---
+
+# GATES 5–7 — production armature, authored skinning, four-leg IK
+
+## Authored skinning, not heat maps
+
+Automatic weighting infers ownership from proximity, and proximity cannot
+distinguish "near the scapula" from "belongs to the scapula". That is why the
+auto-weight baseline lost volume in exactly the armpit and inner thigh.
+
+The cage does not have to guess. It is built from named rings and now records
+them as vertex groups, so ownership is **looked up**:
+
+    "frontR:elbow_lo"  ->  upper_front 0.24, forearm 0.76
+
+Joints blend across three rings rather than switching at one. Two things a
+cross-section cannot express are handled positionally instead:
+
+* **Jaw** — a muzzle ring contains both the upper lip and the chin, so the split
+  comes from height, with a lateral taper toward the mouth corner.
+* **Mouth cavity** — explicitly weighted to the jaw, because the inside of a
+  mouth rotates with it.
+
+The 95 ring groups are consumed and removed; the shipped GLB carries 35 bone
+groups and nothing else.
+
+## The mouth had to become a real opening
+
+A jaw cannot open a dent. The socket was a recessed patch, and rotating the jaw
+under it could only crease the surface — the battery measured the mouth
+collapsing to **6.8%** of rest area and was right to. Extruding the socket
+centre inward makes the rim into lips, the extrusion walls into the inside of
+the mouth, and the pushed-back cap keeps the surface watertight.
+
+Result: **0.068 → 0.515.**
+
+## Deformation battery, final
+
+**7 PASS · 5 WARN · 0 FAIL · 0 pinched faces across all twelve poses.**
+
+| | auto-weight baseline | authored |
+|---|---|---|
+| FAIL poses | 4 → 0 | 0 |
+| Pinched faces | 10 | **0** |
+| Worst area ratio | 0.115 | **0.267** |
+| Real inversions | — | 18 |
+
+The inversion metric had to be corrected too. Comparing a deformed normal to its
+rest normal *in world space* flags every face on a limb that swings past 90
+degrees — the underside of a forearm rotating 100 degrees genuinely does point
+the other way, and that is rotation, not inversion. Each face now finds its
+dominant bone and is judged against its rest normal **rotated by that bone**.
+The count fell from 54 spurious to 18 real.
+
+## Planted-paw proof
+
+The first version of this test moved `root` and reported drift exactly equal to
+the translation. That was the test's fault: the IK targets are parented to
+`root` — correctly, because `root` carries the whole character when it walks
+somewhere — so nothing had been asked to stay still. A planted foot is defined
+relative to the world while the **body** moves, so the body is moved by the
+pelvis.
+
+**Reach headroom** is a rig characteristic and is now measured and reported: a
+chain can only reach the sum of its segment lengths, so the surplus over the
+straight-line hip-to-paw distance is all the extension available.
+
+| | front | rear |
+|---|---|---|
+| Reach headroom | 20.0 mm | 40.9 mm |
+
+The front legs were originally bound **dead straight**, giving 11 mm of headroom,
+and the test then asked for a 50 mm body rise and blamed the IK. Both limbs are
+now bound pre-bent — the elbow points back, the stifle forward, the hock back.
+
+| | worst paw drift |
+|---|---|
+| Extreme amplitudes (75–90 mm body moves) | 28.0 mm |
+| **Animation amplitudes (8 mm bob, 12 mm rock, 18 mm advance)** | **2.86 mm** |
+
+Rear paws hold to 0.03–0.22 mm at animation amplitudes. Extreme-amplitude drift
+is dominated by the reach limit above, which is documented rather than hidden —
+the walk and jump clips must stay inside it.
+
+## Rig, runtime, and separation of concerns
+
+44 bones authored, **35 deforming**. The eight IK targets and pole targets are
+excluded from the skin by `export_def_bones`, so no control widget reaches the
+production asset: **0 control bones in the skin**. Mid-limb joints carry hinge
+limits and locked Y/Z so IK cannot solve an elbow sideways.
+
+`lion_cage_rigged.glb` — 961 verts, 1,918 tris, 35 joints, **63.5 KB**, Khronos
+validator clean, loads at `/world3d?mesh=cage` with no errors. App regression:
+121/121 homepage QA.
+
+Also fixed: the HUD's `grounded` boolean tested a legitimately varying
+measurement against an arbitrary 2 cm and reported "not grounded" for a correctly
+seated character. It now reports the floor gap in millimetres (−11.5 mm for the
+cage) and notes when the seating code has compensated.
+
+## Verdict
+
+**Cage, skeleton, skinning and IK are proven. Ready for locomotion.**
+
+Next on the critical path: idle → four-beat walk with per-paw state
+visualisation at 0.25× → stop/turn/navigation → three-leg wave → jump.
+
+### Known, carried forward
+* deep-crouch and mouth-open retain 6 real inversions each at extreme angles
+* 4 sliver faces in cap fans
+* mane still the 31-lock proxy, untouched by design
+* rib/haunch shape refinement, cream chest V, inner-ear region

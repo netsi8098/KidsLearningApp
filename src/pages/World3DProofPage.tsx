@@ -24,7 +24,7 @@ export default function World3DProofPage() {
      Blender proves nothing about how it skins and shades at runtime. */
   const meshParam = new URLSearchParams(window.location.search).get('mesh');
   const lionUrl = meshParam === 'cage'
-    ? '/assets/lion/cage/lion_cage.glb'
+    ? '/assets/lion/cage/lion_cage_rigged.glb'
     : undefined;
   const [showHud, setShowHud] = useState(true);
 
@@ -125,7 +125,10 @@ export default function World3DProofPage() {
               <div>
                 lion height: {stats.lionHeight ? `${stats.lionHeight.toFixed(3)} m` : '— (hidden)'}
               </div>
-              <div>grounded   : {stats.lionGrounded === null ? '—' : String(stats.lionGrounded)}</div>
+              <div>
+                floor gap  : {stats.lionFloorGap == null ? '—' : `${(stats.lionFloorGap * 1000).toFixed(1)} mm`}
+                {stats.lionGrounded === false && ' (seated)'}
+              </div>
               <div>clips      : {stats.lionClips?.join(', ') ?? '—'}</div>
               <div>playing    : {clip ?? 'auto (brain)'}</div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>

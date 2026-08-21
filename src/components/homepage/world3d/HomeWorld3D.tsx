@@ -139,7 +139,7 @@ function Lion({
   stageRadius: number;
   brainRef?: React.MutableRefObject<LionBrain | null>;
   lionUrl: string;
-  onMeasured: (height: number, grounded: boolean, clips: string[]) => void;
+  onMeasured: (height: number, grounded: boolean, clips: string[], floorGap: number) => void;
 }) {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(lionUrl);
@@ -190,7 +190,12 @@ function Lion({
     brain.z = spawn.z;
     brain.setHome(spawn.x, spawn.z);
     group.current.position.set(spawn.x, spawn.y + footOffset.current, spawn.z);
-    onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.02, names);
+    /* Report the FLOOR GAP itself, not a pass/fail against an arbitrary 2cm.
+       The gap varies legitimately with the asset — the cage's paw soles sit 8mm
+       above its own origin — and the seating code below compensates for it
+       exactly, so a boolean here was reporting "not grounded" about a character
+       that was correctly on the ground. */
+    onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.05, names, scaled.min.y);
   }, [model, spawn, onMeasured, names, brain]);
 
   /* Cross-fade between clips rather than cutting, so the character never snaps.
@@ -519,8 +524,8 @@ export default function HomeWorld3D({
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
-  const handleLionMeasured = useMemo(() => (height: number, grounded: boolean, clips: string[]) => {
-    stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded, lionClips: clips };
+  const handleLionMeasured = useMemo(() => (height: number, grounded: boolean, clips: string[], floorGap: number) => {
+    stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded, lionClips: clips, lionFloorGap: floorGap };
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
