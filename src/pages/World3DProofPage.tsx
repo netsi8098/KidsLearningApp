@@ -8,14 +8,18 @@
  *
  * Route: /world3d
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeWorld3D, { type WorldStats } from '../components/homepage/world3d/HomeWorld3D';
+import type { LionBrain } from '../components/homepage/world3d/lionBrain';
 
 export default function World3DProofPage() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<WorldStats | null>(null);
   const [showLion, setShowLion] = useState(true);
+  const [clip, setClip] = useState<string | null>(null);
+  const [wander, setWander] = useState(true);
+  const brain = useRef<LionBrain | null>(null);
   const [showHud, setShowHud] = useState(true);
 
   const onStats = useCallback((s: WorldStats) => setStats({ ...s }), []);
@@ -26,7 +30,7 @@ export default function World3DProofPage() {
 
   return (
     <div className="min-h-dvh relative overflow-hidden" style={{ background: '#8fd0f0' }}>
-      <HomeWorld3D showLion={showLion} onStats={onStats} />
+      <HomeWorld3D showLion={showLion} lionClip={clip} wander={wander} brainRef={brain} onStats={onStats} />
 
       {/* DOM overlay — proves UI composites over the 3D world exactly as the
           real homepage will, with the canvas behind and controls above. */}
@@ -38,7 +42,41 @@ export default function World3DProofPage() {
         >
           ← Back
         </button>
-        <div className="flex gap-2 pointer-events-auto">
+        <div className="flex gap-2 pointer-events-auto flex-wrap justify-end" style={{ maxWidth: 900 }}>
+          {['Idle', 'Walk', 'Wave', 'Sit', 'Jump', 'Celebrate', 'Nod', 'LookAround', 'Talk', 'Sleep'].map((c) => (
+            <button
+              key={c}
+              onClick={() => { setWander(false); setClip(c); }}
+              className="rounded-full px-3 py-2 text-xs font-bold"
+              style={{
+                background: clip === c ? '#4ECDC4' : 'rgba(255,255,255,0.92)',
+                color: clip === c ? 'white' : '#2D2D3A',
+              }}
+            >
+              {c}
+            </button>
+          ))}
+          <button
+            onClick={() => { setClip(null); setWander((v) => !v); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: wander ? '#FF8C42' : 'rgba(255,255,255,0.92)', color: wander ? 'white' : '#2D2D3A' }}
+          >
+            {wander ? 'Wander ON' : 'Wander OFF'}
+          </button>
+          <button
+            onClick={() => { setClip(null); brain.current?.walkTo(-1.1, 0.5); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(255,255,255,0.92)', color: '#2D2D3A' }}
+          >
+            Walk left
+          </button>
+          <button
+            onClick={() => { setClip(null); brain.current?.greet(0, 0.9); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(255,255,255,0.92)', color: '#2D2D3A' }}
+          >
+            Greet
+          </button>
           <button
             onClick={() => setShowLion((v) => !v)}
             className="rounded-full px-3 py-2 text-xs font-bold"
@@ -81,6 +119,9 @@ export default function World3DProofPage() {
               <div>
                 lion height: {stats.lionHeight ? `${stats.lionHeight.toFixed(3)} m` : '— (hidden)'}
               </div>
+              <div>grounded   : {stats.lionGrounded === null ? '—' : String(stats.lionGrounded)}</div>
+              <div>clips      : {stats.lionClips?.join(', ') ?? '—'}</div>
+              <div>playing    : {clip ?? 'auto (brain)'}</div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>
               {markerRows.length === 0 && <div>none found</div>}
               {markerRows.map(([name, v]) => (

@@ -38,8 +38,8 @@ CAMERA_NAME = "CAM_Home_Main"
 MAX_TRIS = 95_000
 MAX_MATERIALS = 32
 
-ISLAND_R = 3.10
-WALK_R = 2.05
+ISLAND_R = 2.15
+WALK_R = 1.35
 
 failures = []
 notes = []

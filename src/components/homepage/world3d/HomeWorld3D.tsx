@@ -14,14 +14,16 @@
  */
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Preload } from '@react-three/drei';
+import { useGLTF, useAnimations, Preload } from '@react-three/drei';
+import { EffectComposer, Bloom, DepthOfField, N8AO, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import { SkeletonUtils } from 'three-stdlib';
+import { LionBrain, type LionClip } from './lionBrain';
 
 const ENV_URL = '/assets/worlds/river-garden/home_environment.glb';
-/* Retopologised blockout: one continuous quad mesh, 15.8k tris, 278KB — against
-   2.4MB for the old 96-part rigid assembly. Unrigged, so it stands as a static
-   proxy for scale and composition checking until the skeleton lands. */
-const LION_URL = '/assets/lion/retopo/lion_retopo.glb';
+/* Rigged lion: one continuous skinned quad mesh plus separate eye, tooth and
+   claw geometry, 41 joints, ten authored clips. */
+const LION_URL = '/assets/lion/rigged/lion_v2.glb';
 
 /**
  * Total lion height in metres, matching the world scale contract in
@@ -30,8 +32,14 @@ const LION_URL = '/assets/lion/retopo/lion_retopo.glb';
  * 3.5m tall — four times oversized — so it is normalised here from its measured
  * bounding box rather than by a hard-coded multiplier, which keeps working if
  * the lion asset is re-exported at a different size.
+ *
+ * Raised from 1.10 for the hero composition. In the approved reference frame
+ * the lion is roughly 40% of the frame height and the island reads as a small
+ * dome beneath it; at 1.10m with the establishing camera it was nearer 15% and
+ * the character disappeared into the landscape. Scale and camera distance were
+ * tuned TOGETHER — see cameraDolly — rather than inflating the character alone.
  */
-const LION_TARGET_HEIGHT = 1.10;
+const LION_TARGET_HEIGHT = 1.30;
 
 /** Anchors authored in Blender and read back from the GLB. */
 export interface WorldMarkers {
@@ -47,6 +55,7 @@ export interface WorldStats {
   cameraFov: number | null;
   lionHeight: number | null;
   lionGrounded: boolean | null;
+  lionClips?: string[];
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -83,7 +92,14 @@ function Environment({ onReady }: { onReady: (data: {
       const mesh = obj as THREE.Mesh;
       if (mesh.isMesh) {
         drawCalls += 1;
-        mesh.castShadow = true;
+        /* Only compact geometry casts. Enabling castShadow on everything put
+           the 30m distant hills and the 34m river plane into the shadow map,
+           and they occluded the sun for the ENTIRE stage — the whole island
+           rendered as a uniform grey slab bounded by the shadow frustum.
+           Background masses receive shadow but must never cast it. */
+        mesh.geometry?.computeBoundingSphere();
+        const r = mesh.geometry?.boundingSphere?.radius ?? 0;
+        mesh.castShadow = r > 0 && r < 4.0;
         mesh.receiveShadow = true;
         const geo = mesh.geometry;
         if (geo?.index) triangles += geo.index.count / 3;
@@ -94,7 +110,7 @@ function Environment({ onReady }: { onReady: (data: {
     });
 
     const cam = (cameras?.[0] as THREE.PerspectiveCamera) ?? null;
-    return { markers, camera: cam, triangles: Math.round(triangles), drawCalls, materials: materialSet.size };
+    return { markers, camera: cam, scene, triangles: Math.round(triangles), drawCalls, materials: materialSet.size };
   }, [scene, cameras]);
 
   useEffect(() => { onReady(prepared); }, [prepared, onReady]);
@@ -106,52 +122,192 @@ function Environment({ onReady }: { onReady: (data: {
 
 function Lion({
   spawn,
+  bounds,
+  ground,
+  clipOverride,
+  wander,
+  stageRadius,
+  brainRef,
   onMeasured,
 }: {
   spawn: THREE.Vector3 | null;
-  onMeasured: (height: number, grounded: boolean) => void;
+  bounds: { cx: number; cz: number; r: number } | null;
+  ground: THREE.Object3D | null;
+  clipOverride: string | null;
+  wander: boolean;
+  stageRadius: number;
+  brainRef?: React.MutableRefObject<LionBrain | null>;
+  onMeasured: (height: number, grounded: boolean, clips: string[]) => void;
 }) {
-  const { scene } = useGLTF(LION_URL);
   const group = useRef<THREE.Group>(null);
+  const { scene, animations } = useGLTF(LION_URL);
 
-  const clone = useMemo(() => scene.clone(true), [scene]);
+  /* SkeletonUtils.clone is required for skinned meshes — a plain clone copies
+     the meshes but leaves them bound to the ORIGINAL skeleton, so the copy
+     either does not deform or deforms in lockstep with every other instance. */
+  const model = useMemo(() => SkeletonUtils.clone(scene), [scene]);
+  const { actions, names, mixer } = useAnimations(animations, model);
+
+  const brain = useMemo(
+    () => new LionBrain(bounds ?? { cx: 0, cz: 0, r: 1.2 }),
+    [bounds],
+  );
+  const [activeClip, setActiveClip] = useState<LionClip>('Idle');
+  const footOffset = useRef(0);
+
+  useEffect(() => { if (brainRef) brainRef.current = brain; }, [brain, brainRef]);
+  useEffect(() => { brain.wander = wander; }, [brain, wander]);
+  useEffect(() => { brain.stageRadius = stageRadius; }, [brain, stageRadius]);
+
+  // Real clip lengths, so a "play Wave then carry on" task ends when the wave
+  // actually ends rather than after a number someone typed.
+  useEffect(() => {
+    const d: Partial<Record<LionClip, number>> = {};
+    animations.forEach((a) => { d[a.name as LionClip] = a.duration; });
+    brain.setDurations(d);
+  }, [animations, brain]);
 
   useEffect(() => {
     if (!spawn || !group.current) return;
-    // Measure as loaded, normalise to the world scale contract, THEN seat the
-    // feet on the marker. Order matters: scaling after positioning would move
-    // the feet off the ground again.
-    const raw = new THREE.Box3().setFromObject(clone);
-    const rawSize = new THREE.Vector3();
-    raw.getSize(rawSize);
+    const raw = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    raw.getSize(size);
 
-    const scale = rawSize.y > 0 ? LION_TARGET_HEIGHT / rawSize.y : 1;
-    clone.scale.setScalar(scale);
-    clone.updateMatrixWorld(true);
+    const scale = size.y > 0 ? LION_TARGET_HEIGHT / size.y : 1;
+    model.scale.setScalar(scale);
+    model.updateMatrixWorld(true);
 
-    const scaled = new THREE.Box3().setFromObject(clone);
+    const scaled = new THREE.Box3().setFromObject(model);
     const scaledSize = new THREE.Vector3();
     scaled.getSize(scaledSize);
 
-    // Seat the feet on the marker rather than assuming the asset origin is at
+    // Seat the FEET on the marker rather than assuming the asset origin is at
     // ground level — that assumption is what makes characters hover or sink.
-    group.current.position.set(spawn.x, spawn.y - scaled.min.y, spawn.z);
-    onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.01);
-  }, [clone, spawn, onMeasured]);
+    footOffset.current = -scaled.min.y;
+    brain.x = spawn.x;
+    brain.z = spawn.z;
+    brain.setHome(spawn.x, spawn.z);
+    group.current.position.set(spawn.x, spawn.y + footOffset.current, spawn.z);
+    onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.02, names);
+  }, [model, spawn, onMeasured, names, brain]);
 
-  /* The character is modelled facing +Y in Blender, which after the glTF Y-up
-     conversion points it straight away from the production camera. Turn it to
-     face the viewer. */
+  /* Cross-fade between clips rather than cutting, so the character never snaps.
+     Wave, Jump and Celebrate are one-shots: looping them makes the lion twitch
+     forever instead of performing once and returning to rest. */
+  useEffect(() => {
+    const next = actions[activeClip];
+    if (!next) return;
+    const once = activeClip === 'Wave' || activeClip === 'Jump' || activeClip === 'Nod';
+    next.reset();
+    next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, once ? 1 : Infinity);
+    next.clampWhenFinished = once;
+    next.fadeIn(0.35).play();
+    return () => { next.fadeOut(0.35); };
+  }, [actions, activeClip]);
+
+  useEffect(() => {
+    model.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.castShadow = true;
+      m.receiveShadow = true;
+      /* The reference character is not smooth yellow plastic — it reads as felt
+         or short plush, and that difference is a SHEEN layer, not a texture. A
+         fabric sheen adds a soft retroreflective rim at grazing angles, which is
+         exactly the velvety edge the reference has and the single cheapest thing
+         that stops a stylised character looking injection-moulded.
+
+         MeshPhysicalMaterial costs more per pixel than Standard, so it is
+         applied only to the two character materials — never to the 29 in the
+         environment. The wet parts (eyes, nose, teeth, tongue) keep a hard
+         specular instead: sheen on an eyeball would kill the catchlight. */
+      const mats = (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[];
+      m.material = mats.map((src) => {
+        if (!src) return src;
+        const gloss = /gloss/i.test(src.name);
+        const next = new THREE.MeshPhysicalMaterial({
+          color: src.color,
+          vertexColors: src.vertexColors,
+          roughness: gloss ? 0.16 : 0.86,
+          metalness: 0,
+          sheen: gloss ? 0 : 0.9,
+          sheenRoughness: 0.55,
+          sheenColor: new THREE.Color('#ffd9a8'),
+          clearcoat: gloss ? 0.85 : 0,
+          clearcoatRoughness: 0.08,
+          flatShading: false,
+        });
+        next.name = src.name;
+        return next;
+      }) as unknown as THREE.Material;
+      if (Array.isArray(m.material) && (m.material as THREE.Material[]).length === 1) {
+        m.material = (m.material as THREE.Material[])[0];
+      }
+      /* Skinned geometry keeps the BIND-POSE bounds, which are wrong once bones
+         move. Three.js then fits the shadow camera to a bogus volume and the
+         whole ground renders as one grey slab of shadow. Recompute the bounds
+         and take these meshes out of frustum culling — the character is always
+         on screen anyway. */
+      const sk = o as THREE.SkinnedMesh;
+      if (sk.isSkinnedMesh) {
+        sk.frustumCulled = false;
+        sk.geometry.computeBoundingBox();
+        sk.geometry.computeBoundingSphere();
+      }
+    });
+  }, [model]);
+
+  /* Ground following. The island is a squashed dome, so walking on a fixed Y
+     would sink the lion at the centre and float it at the rim. One downward ray
+     per frame against the environment is cheap and, unlike an analytic dome
+     formula copied from the build script, cannot drift out of sync with the
+     asset that actually shipped. */
+  const ray = useMemo(() => new THREE.Raycaster(), []);
+  const down = useMemo(() => new THREE.Vector3(0, -1, 0), []);
+  const from = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame((_, dt) => {
+    if (!group.current) return;
+    brain.step(dt);
+    const clip = (clipOverride as LionClip | null) ?? brain.clip;
+    if (clip !== activeClip && actions[clip]) setActiveClip(clip);
+
+    let y = group.current.position.y;
+    if (ground) {
+      from.set(brain.x, 6, brain.z);
+      ray.set(from, down);
+      const hit = ray.intersectObject(ground, true)[0];
+      if (hit) y = hit.point.y + footOffset.current;
+    }
+    group.current.position.set(brain.x, y, brain.z);
+    /* Modelled facing +Y, which after the glTF Y-up conversion points straight
+       away from the production camera. Math.PI is that correction; the brain's
+       yaw is added on top of it. */
+    group.current.rotation.y = Math.PI + brain.yaw;
+    mixer.update(0);
+  });
+
   return (
-    <group ref={group} rotation={[0, Math.PI, 0]}>
-      <primitive object={clone} />
+    <group ref={group}>
+      <primitive object={model} />
     </group>
   );
 }
 
 /* ── Camera adopted from the GLB ─────────────────────────────────────────── */
 
-function AdoptedCamera({ source }: { source: THREE.PerspectiveCamera | null }) {
+function AdoptedCamera({ source, target, dolly = 1 }: {
+  source: THREE.PerspectiveCamera | null;
+  target: THREE.Vector3 | null;
+  /**
+   * Fraction of the authored camera distance to keep. 1 is exactly what Blender
+   * framed. The homepage uses a smaller value so the mascot reads as a hero
+   * rather than a figure in a landscape — it moves the camera ALONG the authored
+   * view axis, so the approved angle and lens are preserved and only the
+   * distance changes.
+   */
+  dolly?: number;
+}) {
   const { camera, size } = useThree();
 
   useEffect(() => {
@@ -162,12 +318,13 @@ function AdoptedCamera({ source }: { source: THREE.PerspectiveCamera | null }) {
     // the reference; re-deriving it here by eye would throw that away.
     cam.position.setFromMatrixPosition(source.matrixWorld);
     cam.quaternion.setFromRotationMatrix(source.matrixWorld);
+    if (target && dolly !== 1) cam.position.lerpVectors(target, cam.position, dolly);
     cam.fov = source.fov;
     cam.near = 0.05;
     cam.far = 300;
     cam.aspect = size.width / size.height;
     cam.updateProjectionMatrix();
-  }, [source, camera, size]);
+  }, [source, camera, size, target, dolly]);
 
   return null;
 }
@@ -183,6 +340,84 @@ function PerfProbe({ onSample }: { onSample: (calls: number, tris: number) => vo
     }
   });
   return null;
+}
+
+/**
+ * Projects the Blender-authored anchors into screen space.
+ *
+ * This is what makes the DOM interface belong to the world instead of merely
+ * covering it: the speech bubble sits where MARK_SpeechAnchor is, so it tracks
+ * the lion's head as the camera or viewport changes, rather than at a CSS
+ * percentage that happens to look right on one screen size.
+ */
+function AnchorProjector({
+  markers, onAnchors,
+}: {
+  markers: WorldMarkers;
+  onAnchors?: (a: Record<string, { x: number; y: number }>) => void;
+}) {
+  const { camera, size } = useThree();
+  const last = useRef<string>('');
+  const v = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame(() => {
+    if (!onAnchors) return;
+    const out: Record<string, { x: number; y: number }> = {};
+    for (const [name, p] of Object.entries(markers)) {
+      v.copy(p).project(camera);
+      out[name] = { x: (v.x * 0.5 + 0.5) * 100, y: (-v.y * 0.5 + 0.5) * 100 };
+    }
+    // Only publish on real change — this runs every frame and each publish is a
+    // React state update in the parent.
+    const key = JSON.stringify(out, (_k, val) =>
+      typeof val === 'number' ? Math.round(val * 10) / 10 : val);
+    if (key !== last.current) { last.current = key; onAnchors(out); }
+  });
+
+  void size;
+  return null;
+}
+
+/**
+ * The look pass.
+ *
+ * Three findings from the reference, in order of how much they matter:
+ *
+ *  1. AMBIENT OCCLUSION does the heavy lifting. Everything in the scene was
+ *     resting weakly on the ground because a directional shadow alone gives no
+ *     contact darkening in creases — under a paw, where a trunk meets grass,
+ *     between mane clumps. N8AO is used rather than the classic SSAO because it
+ *     is temporally stable, and a flickering AO on a children's homepage is
+ *     worse than none.
+ *  2. A SHALLOW depth of field separates the hero from the background. The
+ *     reference is unmistakably a rendered frame with a lens; a pinhole camera
+ *     is what makes real-time scenes read as "a 3D model of a place".
+ *  3. Gentle bloom on the brightest highlights only, plus the faintest vignette.
+ *     High thresholds — bloom that catches the sky turns the whole frame milky.
+ *
+ * Everything here is off on low-end devices and under reduced-motion; see
+ * RiverGarden3DWorld.
+ */
+function LookPass({ focusZ }: { focusZ: number }) {
+  return (
+    <EffectComposer multisampling={4} enableNormalPass>
+      <N8AO
+        aoRadius={0.55}
+        distanceFalloff={0.9}
+        intensity={2.4}
+        color="#3a3350"
+        halfRes
+      />
+      <DepthOfField
+        focusDistance={focusZ}
+        focalLength={0.06}
+        bokehScale={2.6}
+        height={520}
+      />
+      <Bloom luminanceThreshold={0.86} luminanceSmoothing={0.28} intensity={0.42} mipmapBlur />
+      <Vignette offset={0.36} darkness={0.34} eskil={false} />
+    </EffectComposer>
+  );
 }
 
 /* ── Lighting ────────────────────────────────────────────────────────────── */
@@ -205,13 +440,20 @@ function Lighting() {
         color="#fff7e6"
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={14}
-        shadow-camera-bottom={-14}
+        /* Tightened to the visible stage: a wider frustum spends shadow-map
+           resolution on water nobody looks at. */
+        shadow-camera-left={-9}
+        shadow-camera-right={9}
+        shadow-camera-top={9}
+        shadow-camera-bottom={-9}
         shadow-camera-near={0.5}
-        shadow-camera-far={40}
-        shadow-bias={-0.0008}
+        shadow-camera-far={34}
+        /* normalBias, not a negative depth bias. The river is a single large
+           flat plane, and a negative bias made it shadow ITSELF across its whole
+           surface — the water rendered as a grey slab with a hard rectangular
+           edge at the shadow-camera boundary. */
+        shadow-bias={-0.0001}
+        shadow-normalBias={0.035}
       />
       <directionalLight position={[-7.0, 5.0, -6.0]} intensity={0.45} color="#dbeeff" />
     </>
@@ -222,21 +464,40 @@ function Lighting() {
 
 export interface HomeWorld3DProps {
   showLion?: boolean;
+  /** Pin the lion to one clip. Leave null to let the brain decide. */
+  lionClip?: string | null;
+  /** Autonomous wandering around the island. */
+  wander?: boolean;
+  /** Receives the brain so a page can command the lion (walkTo, wave, ...). */
+  brainRef?: React.MutableRefObject<LionBrain | null>;
+  /** Screen-space positions (in %) of the Blender anchors, updated live. */
+  onAnchors?: (anchors: Record<string, { x: number; y: number }>) => void;
+  /** Fraction of the authored camera distance. See AdoptedCamera. */
+  cameraDolly?: number;
+  /** How much of the island the lion roams, 0..1. See LionBrain.stageRadius. */
+  stageRadius?: number;
+  /** Ambient occlusion, depth of field, bloom and vignette. See LookPass. */
+  effects?: boolean;
   onStats?: (stats: WorldStats) => void;
   className?: string;
 }
 
-export default function HomeWorld3D({ showLion = true, onStats, className }: HomeWorld3DProps) {
+export default function HomeWorld3D({
+  showLion = true, lionClip = null, wander = true, brainRef, onAnchors,
+  cameraDolly = 1, stageRadius = 1, effects = false, onStats, className,
+}: HomeWorld3DProps) {
   const [markers, setMarkers] = useState<WorldMarkers>({});
   const [glbCamera, setGlbCamera] = useState<THREE.PerspectiveCamera | null>(null);
+  const [envScene, setEnvScene] = useState<THREE.Object3D | null>(null);
   const stats = useRef<Partial<WorldStats>>({});
 
   const handleEnvReady = useMemo(() => (data: {
-    markers: WorldMarkers; camera: THREE.PerspectiveCamera | null;
+    markers: WorldMarkers; camera: THREE.PerspectiveCamera | null; scene: THREE.Object3D;
     triangles: number; drawCalls: number; materials: number;
   }) => {
     setMarkers(data.markers);
     setGlbCamera(data.camera);
+    setEnvScene(data.scene);
     stats.current = {
       ...stats.current,
       markers: data.markers,
@@ -249,10 +510,24 @@ export default function HomeWorld3D({ showLion = true, onStats, className }: Hom
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
-  const handleLionMeasured = useMemo(() => (height: number, grounded: boolean) => {
-    stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded };
+  const handleLionMeasured = useMemo(() => (height: number, grounded: boolean, clips: string[]) => {
+    stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded, lionClips: clips };
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
+
+  /* The walkable area comes from the MARK_WalkLeft / MARK_WalkRight anchors the
+     environment was authored with, so re-tuning the island in Blender moves the
+     lion's range automatically instead of silently leaving it walking off the
+     edge or pacing a strip in the middle. */
+  const walkBounds = useMemo(() => {
+    const l = markers.MARK_WalkLeft;
+    const r = markers.MARK_WalkRight;
+    const spawn = markers.MARK_LionSpawn;
+    if (!l || !r) return null;
+    const cx = (l.x + r.x) / 2;
+    const cz = spawn ? spawn.z : (l.z + r.z) / 2;
+    return { cx, cz, r: Math.max(0.4, Math.hypot(r.x - l.x, r.z - l.z) / 2) };
+  }, [markers]);
 
   return (
     <div className={className} style={{ position: 'absolute', inset: 0 }}>
@@ -274,11 +549,22 @@ export default function HomeWorld3D({ showLion = true, onStats, className }: Hom
         <Suspense fallback={null}>
           <Environment onReady={handleEnvReady} />
           {showLion && (
-            <Lion spawn={markers.MARK_LionSpawn ?? null} onMeasured={handleLionMeasured} />
+            <Lion
+              spawn={markers.MARK_LionSpawn ?? null}
+              bounds={walkBounds}
+              ground={envScene}
+              clipOverride={lionClip}
+              wander={wander}
+              stageRadius={stageRadius}
+              brainRef={brainRef}
+              onMeasured={handleLionMeasured}
+            />
           )}
           <Preload all />
         </Suspense>
-        <AdoptedCamera source={glbCamera} />
+        {effects && <LookPass focusZ={0.62} />}
+        <AdoptedCamera source={glbCamera} target={markers.MARK_CameraTarget ?? null} dolly={cameraDolly} />
+        <AnchorProjector markers={markers} onAnchors={onAnchors} />
         <PerfProbe onSample={(calls, tris) => {
           stats.current = { ...stats.current, drawCalls: calls, triangles: tris };
           onStats?.(stats.current as WorldStats);

@@ -12,6 +12,8 @@ import AuthModal from '../components/AuthModal';
 import ThemePicker from '../components/homepage/ThemePicker';
 import { getThemeById, DEFAULT_THEME_ID } from '../data/homepageThemes';
 import RiverGardenWorld from '../components/homepage/worlds/RiverGardenWorld';
+import RiverGarden3DWorld from '../components/homepage/worlds/RiverGarden3DWorld';
+import type { LionBrain } from '../components/homepage/world3d/lionBrain';
 import SunnyMeadowWorld from '../components/homepage/worlds/SunnyMeadowWorld';
 import TreehouseWorld from '../components/homepage/worlds/TreehouseWorld';
 import SkyIslandsWorld from '../components/homepage/worlds/SkyIslandsWorld';
@@ -97,6 +99,7 @@ function ShieldLockIcon() {
 /** Theme id → code-built world component */
 const WORLD_BY_THEME: Record<string, (p: { children: ReactNode }) => JSX.Element> = {
   'river-garden': RiverGardenWorld,
+  'river-garden-3d': RiverGarden3DWorld,
   'sunny-meadow': SunnyMeadowWorld,
   'treehouse': TreehouseWorld,
   'sky-islands': SkyIslandsWorld,
@@ -202,7 +205,12 @@ export default function WelcomePage() {
     setShowCreate(true);
   }
 
+  const lionBrain = useRef<LionBrain | null>(null);
+
   function greetFromMascot(playVoice = true) {
+    /* In the 3D world the lion IS the mascot, so the same greeting drives the
+       rigged character: it turns to the camera and plays the authored Wave. */
+    lionBrain.current?.greet(0, 0.9);
     setMascotState('waving');
     setMascotReactionKey((value) => value + 1);
     setMascotSpeechKey((value) => value + 1);
@@ -440,6 +448,10 @@ export default function WelcomePage() {
      the title, subtitle and a fake Parent pill painted into the JPEG, which
      double-rendered against the real UI. */
   const World = WORLD_BY_THEME[activeTheme.id] ?? RiverGardenWorld;
+  /* In the 3D world the character is real geometry in the scene, so the DOM
+     mascot must NOT also be drawn — two lions is the "UI pasted on scenery"
+     failure the brief rules out. The slot carries only the speech bubble. */
+  const is3D = activeTheme.id === 'river-garden-3d';
 
   /* The character acknowledges the interface: it leans toward whichever card
      the user is pointing at and settles back to its welcome loop otherwise. */
@@ -500,9 +512,18 @@ export default function WelcomePage() {
     />
   );
 
+  /* The 3D world swaps in this slot ITSELF once it knows it really rendered in
+     3D. Deciding here by theme id broke the no-WebGL fallback: the painted
+     world came up with no character at all. */
+  const mascotInScene = is3D ? (
+    <div className="relative flex items-end justify-center">
+      <SpeechBubble />
+    </div>
+  ) : undefined;
+
   return (
     <>
-      <World mascot={mascot} title={title}>
+      <World mascot={mascot} mascotInScene={mascotInScene} title={title} brainRef={lionBrain}>
         {topControls}
         <div className="flex-1 min-h-[8px]" />
         {/* Card shelf: cards rest ON a world-native ledge, with the surface

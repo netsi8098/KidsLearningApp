@@ -102,6 +102,11 @@ export default function RiverGardenWorld({ mascot, title, children }: WorldProps
             aria-hidden="true"
             draggable={false}
             className="absolute inset-0 h-full w-full select-none object-contain drop-shadow-[0_18px_17px_rgba(27,113,112,0.24)]"
+            /* stage.webp was never produced for this world. Without a handler
+               the browser paints a broken-image box with a border exactly where
+               the island should be — visible on the live homepage. Hide it
+               until the plate exists; the backplate still carries the scene. */
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
           />
           <div className="absolute left-1/2 top-[30%] z-[2] -translate-x-1/2 -translate-y-[77%]">
             {mascot}

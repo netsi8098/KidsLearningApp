@@ -11,13 +11,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'sounds/*.mp3'],
       /* One workbox block only. These were previously declared twice, and the
-         second literal silently won — dropping the 5MB cache ceiling back to
+         second literal silently won — dropping the enlarged cache ceiling back to
          workbox's 2MB default. Nothing exceeded it yet, but the world plates and
-         lion pose art are exactly that size class and would have been dropped
+         production lion GLB are exactly that size class and would have been dropped
          from the offline precache without any error. */
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
+        maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,ico,png,webp,svg,glb,mp3,wav}'],
       },
       manifest: {
         name: 'Kids Learning Fun',

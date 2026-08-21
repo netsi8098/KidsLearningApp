@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ args: ['--enable-unsafe-swiftshader','--use-gl=angle'] });
+const c = await b.newContext({ viewport:{width:1600,height:900}, serviceWorkers:'block' });
+await c.addInitScript(() => localStorage.setItem('klf-homepage-theme','river-garden-3d'));
+const p = await c.newPage();
+const errs=[]; p.on('pageerror', e=>errs.push(e.message));
+p.on('console', m => { if (m.type()==='error' && !/ERR_NAME_NOT_RESOLVED/.test(m.text())) errs.push('C: '+m.text().slice(0,180)); });
+await p.goto('http://localhost:4173/', { waitUntil:'networkidle' });
+await p.waitForTimeout(9000);
+await p.screenshot({ path:'/tmp/look.png' });
+console.log(errs.length ? errs.slice(0,4).join('\n') : 'no errors');
+await b.close();

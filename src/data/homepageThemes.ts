@@ -78,6 +78,22 @@ export const themes: HomepageTheme[] = [
     previewImage: '/assets/worlds/river-garden/backplate.webp',
   },
   {
+    id: 'river-garden-3d',
+    name: 'River Garden 3D',
+    tagline: 'The garden as a real place — Leo walks around the island',
+    skyGradient: ['#8FD0F0', '#C8E6C9'],
+    groundGradient: ['#6BCB77', '#2E7D32'],
+    accentColors: {
+      primary: '#4ECDC4',
+      secondary: '#A78BFA',
+      warm: '#FFE66D',
+      glow: '#A8E6CF',
+    },
+    mood: 'peaceful',
+    previewBg: '#8FD0F0',
+    previewImage: '/assets/worlds/river-garden/backplate.webp',
+  },
+  {
     id: 'treehouse',
     name: 'Treehouse Village',
     tagline: 'A cozy treehouse with warm lanterns and falling leaves',

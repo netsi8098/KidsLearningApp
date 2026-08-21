@@ -35,10 +35,10 @@ from mathutils import Vector
 
 # ── Scale contract ──────────────────────────────────────────────────────────
 LION_SHOULDER_H = 0.85          # metres — drives every other proportion
-ISLAND_R = 3.10                 # island radius at the grass rim
+ISLAND_R = 2.15                 # island radius at the grass rim
 ISLAND_TOP_Z = 0.00             # island grass sits at world zero
 WATER_Z = -0.62                 # river surface below the island rim
-WALK_R = 2.05                   # radius the lion may roam on the island
+WALK_R = 1.35                   # radius the lion may roam on the island
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BLEND_OUT = os.path.join(REPO, "art", "blender", "home_environment.blend")
@@ -794,7 +794,12 @@ def build_camera(col):
 def build_markers(col):
     """Named anchors the runtime consumes instead of magic coordinates."""
     m = {}
-    m["spawn"] = empty("MARK_LionSpawn", (0.0, 0.0, island_surface_z(0.0, 0.0)), col, "SPHERE", 0.22)
+    # Set BACK from the island centre. At the hero camera distance a lion on the
+    # centre mark stands directly behind the player cards, and its chest and
+    # front paws are covered — which the art direction rules out. Moving the
+    # mark rather than nudging the card layout keeps one authority for where the
+    # character stands.
+    m["spawn"] = empty("MARK_LionSpawn", (0.0, 0.42, island_surface_z(0.0, 0.42)), col, "SPHERE", 0.22)
     m["greeting"] = empty("MARK_LionGreeting", (0.0, -0.55, island_surface_z(0.0, -0.55)), col, "SPHERE", 0.20)
     m["walk_l"] = empty("MARK_WalkLeft", (-WALK_R, -0.20, island_surface_z(-WALK_R, -0.20)), col, "PLAIN_AXES")
     m["walk_r"] = empty("MARK_WalkRight", (WALK_R, -0.20, island_surface_z(WALK_R, -0.20)), col, "PLAIN_AXES")
@@ -806,6 +811,18 @@ def build_markers(col):
     # where React will place the title and the card row.
     m["title"] = empty("MARK_TitleZone", (0.0, -2.05, ISLAND_TOP_Z - 0.30), col, "CUBE", 0.30)
     m["cards"] = empty("MARK_CardShelfZone", (0.0, -4.60, WATER_Z + 0.30), col, "CUBE", 0.42)
+
+    # Hero framing anchors. MARK_TitleZone and MARK_CardShelfZone were authored
+    # against the wide establishing camera; the homepage dollies in so the
+    # mascot reads as a hero, and at that distance the island's front edge —
+    # where those two sit — is off the bottom of the screen entirely. Clamping
+    # their projection would have been a lie dressed as an anchor, so the hero
+    # composition gets its own authored anchors: title in the sky above the
+    # lion, cards on the near slope of the island.
+    m["title_hero"] = empty("MARK_TitleZoneHero",
+                            (0.0, -0.30, island_surface_z(0, 0) + 2.12), col, "CUBE", 0.26)
+    m["cards_hero"] = empty("MARK_CardShelfZoneHero",
+                            (0.0, -1.55, island_surface_z(0.0, -1.55) + 0.10), col, "CUBE", 0.34)
     return m
 
 

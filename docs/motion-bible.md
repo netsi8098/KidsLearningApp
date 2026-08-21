@@ -375,11 +375,13 @@ import StartupSequence from '../startup/StartupSequence';
 
 ---
 
-## Real-Time Mascot Locomotion
+## Temporary 2.5D Mascot Locomotion
 
-The homepage lion is one persistent `THREE.SkinnedMesh`. World-level travel and
-rig-level articulation must run together; never replace locomotion with image
-swaps, sprite frames, video playback, or a whole-character bob.
+The current homepage lion is a subdivided plane textured with the approved PNG and
+deformed as a `THREE.SkinnedMesh`. It is an interactive fallback, not a production
+quadruped. Do not extend this plane rig as the final character solution. World-level
+travel and fallback articulation must still run together; never replace locomotion
+with image swaps, sprite frames, video playback, or a whole-character bob.
 
 ### Sunny Meadow Play Loop
 
@@ -416,6 +418,14 @@ control torso weight, head follow, eyes, legs, paws, tail, and mane concurrently
 - Rive concurrent state blending: https://rive.app/docs/editor/state-machine/states
 - Three.js `SkinnedMesh` and skeleton architecture: https://archive.threejs.org/docs/api/en/objects/SkinnedMesh.html
 - Motion frame callbacks and motion values: https://motion.dev/docs/react-use-animation-frame and https://motion.dev/docs/react-motion-value
+
+### Production Replacement
+
+The production path is Blender armature and shape-key authoring, GLB export, then
+R3F/Drei loading and Three.js animation mixing. The exact bone, clip, morph, export,
+validation, feature flag, and acceptance contract is in
+`docs/rigged-lion-production.md`. Keep the fallback enabled until the approved GLB
+passes `npm run lion:validate` and responsive visual QA.
 
 ---
 
