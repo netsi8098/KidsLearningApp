@@ -128,6 +128,7 @@ function Lion({
   wander,
   stageRadius,
   brainRef,
+  lionUrl,
   onMeasured,
 }: {
   spawn: THREE.Vector3 | null;
@@ -137,10 +138,11 @@ function Lion({
   wander: boolean;
   stageRadius: number;
   brainRef?: React.MutableRefObject<LionBrain | null>;
+  lionUrl: string;
   onMeasured: (height: number, grounded: boolean, clips: string[]) => void;
 }) {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF(LION_URL);
+  const { scene, animations } = useGLTF(lionUrl);
 
   /* SkeletonUtils.clone is required for skinned meshes — a plain clone copies
      the meshes but leaves them bound to the ORIGINAL skeleton, so the copy
@@ -478,13 +480,20 @@ export interface HomeWorld3DProps {
   stageRadius?: number;
   /** Ambient occlusion, depth of field, bloom and vignette. See LookPass. */
   effects?: boolean;
+  /**
+   * Which character asset to load. Overridable so a review surface can stand
+   * the raw production CAGE in the real world under the real lights — the only
+   * honest test of a retopology pass is the runtime, not Blender.
+   */
+  lionUrl?: string;
   onStats?: (stats: WorldStats) => void;
   className?: string;
 }
 
 export default function HomeWorld3D({
   showLion = true, lionClip = null, wander = true, brainRef, onAnchors,
-  cameraDolly = 1, stageRadius = 1, effects = false, onStats, className,
+  cameraDolly = 1, stageRadius = 1, effects = false, lionUrl = LION_URL,
+  onStats, className,
 }: HomeWorld3DProps) {
   const [markers, setMarkers] = useState<WorldMarkers>({});
   const [glbCamera, setGlbCamera] = useState<THREE.PerspectiveCamera | null>(null);
@@ -557,6 +566,7 @@ export default function HomeWorld3D({
               wander={wander}
               stageRadius={stageRadius}
               brainRef={brainRef}
+              lionUrl={lionUrl}
               onMeasured={handleLionMeasured}
             />
           )}

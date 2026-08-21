@@ -20,6 +20,12 @@ export default function World3DProofPage() {
   const [clip, setClip] = useState<string | null>(null);
   const [wander, setWander] = useState(true);
   const brain = useRef<LionBrain | null>(null);
+  /* ?mesh=cage swaps in the raw production cage. Reviewing a retopology pass in
+     Blender proves nothing about how it skins and shades at runtime. */
+  const meshParam = new URLSearchParams(window.location.search).get('mesh');
+  const lionUrl = meshParam === 'cage'
+    ? '/assets/lion/cage/lion_cage.glb'
+    : undefined;
   const [showHud, setShowHud] = useState(true);
 
   const onStats = useCallback((s: WorldStats) => setStats({ ...s }), []);
@@ -30,7 +36,7 @@ export default function World3DProofPage() {
 
   return (
     <div className="min-h-dvh relative overflow-hidden" style={{ background: '#8fd0f0' }}>
-      <HomeWorld3D showLion={showLion} lionClip={clip} wander={wander} brainRef={brain} onStats={onStats} />
+      <HomeWorld3D showLion={showLion} lionClip={clip} wander={wander} brainRef={brain} lionUrl={lionUrl} onStats={onStats} />
 
       {/* DOM overlay — proves UI composites over the 3D world exactly as the
           real homepage will, with the canvas behind and controls above. */}
