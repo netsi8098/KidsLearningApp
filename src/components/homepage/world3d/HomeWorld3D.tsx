@@ -186,6 +186,20 @@ function Lion({
     // Seat the FEET on the marker rather than assuming the asset origin is at
     // ground level — that assumption is what makes characters hover or sink.
     footOffset.current = -scaled.min.y;
+
+    /* Match translation to the clip rather than to a constant. The rig script
+       measures the walk stride off the authored action and writes it beside the
+       GLB; multiplying by the scale just applied gives the world stride, and
+       stride / cycle is the only speed at which a planted paw does not slide. */
+    const locoUrl = lionUrl.replace(/[^/]+\.glb$/, 'locomotion.json');
+    fetch(locoUrl)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((loco) => {
+        if (loco?.strideModelUnits && loco?.cycleSeconds) {
+          brain.setLocomotion(loco.strideModelUnits * scale, loco.cycleSeconds);
+        }
+      })
+      .catch(() => { /* fallback speed already set */ });
     brain.x = spawn.x;
     brain.z = spawn.z;
     brain.setHome(spawn.x, spawn.z);
@@ -196,7 +210,7 @@ function Lion({
        exactly, so a boolean here was reporting "not grounded" about a character
        that was correctly on the ground. */
     onMeasured(scaledSize.y, Math.abs(scaled.min.y) < 0.05, names, scaled.min.y);
-  }, [model, spawn, onMeasured, names, brain]);
+  }, [model, spawn, onMeasured, names, brain, lionUrl]);
 
   /* Cross-fade between clips rather than cutting, so the character never snaps.
      Wave, Jump and Celebrate are one-shots: looping them makes the lion twitch

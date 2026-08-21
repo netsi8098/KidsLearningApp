@@ -1,0 +1,6 @@
+{
+  "clip": "Walk",
+  "strideModelUnits": 0.21592,
+  "cycleSeconds": 2.0,
+  "note": "Stride is the paw's fore-aft excursion in the model's OWN units, measured from the authored clip. The runtime must multiply it by whatever scale it applied to the asset, then divide by cycleSeconds, to get world walk speed."
+}

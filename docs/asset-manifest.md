@@ -115,3 +115,25 @@ videos as app UI.
 - Record source, license and date for any third-party asset.
 - Current PWA maximum file size to precache is 5 MB, configured once in
   `vite.config.ts`.
+
+---
+
+## 3D assets — 2026-08-21
+
+| Path | Size | Contents |
+|---|---|---|
+| `public/assets/worlds/river-garden/home_environment.glb` | 3.10 MB | 85,000 tris · 29 materials · 10 markers · baked AO in vertex colours · no lights, no cameras |
+| `public/assets/lion/rigged/lion_v2.glb` | 2.14 MB | **proxy character in production use.** 2 meshes, 2 materials, 41 joints, 10 clips, `COLOR_0` |
+| `public/assets/lion/rigged/locomotion.json` | — | measured walk stride + cycle length. Generated; do not hand-edit. |
+| `public/assets/lion/cage/lion_cage_rigged.glb` | 63.5 KB | **production cage.** 961 verts, 1,918 tris, 35 deform joints, 0 control bones |
+| `public/assets/lion/cage/lion_cage.glb` | 63.3 KB | cage before rigging, kept for topology review |
+| `public/assets/lion/retopo/lion_retopo.glb` | 278.5 KB | superseded Quadriflow pass |
+| `public/assets/lion/rigged/lion.glb` | 2.51 MB | superseded first rig |
+
+**Missing art, still tracked:** `assets/worlds/river-garden/stage.webp` and
+`assets/worlds/sky-islands/stage.webp` were never produced. Both worlds now fail
+the image silently instead of painting a broken-image box on the live homepage.
+
+Every GLB passes `gltf-transform validate` with no errors or warnings.
+`@gltf-transform/cli` is installed for the compression pass (meshopt, KTX2) —
+not yet applied, since there are no textures yet.

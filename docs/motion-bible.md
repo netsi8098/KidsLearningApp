@@ -439,3 +439,57 @@ HIERARCHY:  primary(attention) > secondary(decorative) > ambient(background)
 STAGGER:    cascade(50ms) | center-out(40ms) | random(60ms)
 MODES:      full | bedtime(1.5x slower, no springs) | reduced(opacity only)
 ```
+
+---
+
+## Quadruped gait — 2026-08-21
+
+### The walk was a trot, and the code said otherwise
+
+The original Walk clip moved **diagonal pairs** and carried a comment asserting
+that was correct quadruped motion. It is not. Diagonal pairs are a **trot**.
+
+A quadruped **walk** is a four-beat **lateral** sequence:
+
+    back-left → front-left → back-right → front-right
+
+each a quarter of the cycle apart, with **two to three feet planted at all
+times**. The body rocks gently toward whichever side is supporting.
+
+### As authored
+
+| | |
+|---|---|
+| Cycle | 48 frames @ 24 fps = 2.0 s |
+| Phase offsets | BL 0.00 · FL 0.25 · BR 0.50 · FR 0.75 |
+| Duty factor | 75% stance / 25% swing per limb |
+| Knee / hock | flexes **only during swing** — a joint that bends while the paw is planted is the classic skating tell |
+| Body | one left-right rock per cycle, two vertical dips |
+| Head | counter-rotates to stay level |
+
+### Speed must come from the clip
+
+Stride ÷ cycle is the only speed at which a planted paw does not slide. It is
+measured off the authored action by the rig script and written to
+`locomotion.json`; the runtime scales it and divides.
+
+`WALK_SPEED = 0.52` was derived on paper from an earlier 32-frame two-stride
+cycle and never updated when the clip was rewritten — roughly 4× too fast. The
+constant is now `WALK_SPEED_FALLBACK` and is only used before the measurement
+arrives.
+
+**If a brisker walk is wanted, change the CLIP** — bigger swing or shorter
+cycle. Raising the runtime speed only reintroduces skating.
+
+### Priority for a mascot
+
+Readability, softness and weight over zoological accuracy. What must hold:
+four distinct contacts, a high duty factor, overlapping support, believable
+lateral weight shift, planted-foot phases, a stable head, and coherent
+spine/pelvis motion.
+
+### Owed
+
+Per-paw `CONTACT / STANCE / LIFT / SWING / PLACEMENT` visualisation in debug
+mode, inspected at 0.25×. `WalkStart` / `WalkStop` / `TurnLeft` / `TurnRight`
+with head lead, shoulder turn and paw reposition.

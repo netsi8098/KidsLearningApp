@@ -272,3 +272,69 @@ be upgraded inside the preserved rig/export/runtime architecture.
 - authored Wave action after scene-root validator fix: PASS.
 - production character likeness and ground contact: FAIL, intentionally open.
 
+
+---
+
+## Re-audit — 2026-08-21
+
+### Scene files, in pipeline order
+
+| `.blend` | Produced by | Contains |
+|---|---|---|
+| `lion_silhouette.blend` | `build_lion_silhouette.py` | proxy blockout: skin-modifier body + 31 curve-lock mane |
+| `lion_retopo.blend` | `retopo_lion.py` | Quadriflow pass on the proxy |
+| `lion_detailed.blend` | `detail_lion.py` | proxy + face/paw features + vertex-colour coat |
+| `lion_rigged.blend` | `rig_lion.py` | proxy rigged, 41 bones, 10 clips |
+| `lion_cage.blend` | `cage_lion.py` | **production cage**, 959 quads, 95 ring groups |
+| `lion_cage_qa.blend` | `deform_qa_lion.py` | cage + QA armature |
+| `lion_rigged_cage.blend` | `rig_cage_lion.py` | **production rig**, authored weights, 4 IK chains |
+| `home_environment.blend` | `build_home_environment.py` | world, 85k tris, 29 materials, 10 markers |
+
+Superseded and kept only as history: `lion.blend`, `lion 2.blend`,
+`lion_clay_sculpt_v1.blend`, `lion_proportion_study*.blend`,
+`lion_reference_stage.blend`.
+
+### Shared contracts — read these before touching any stage
+
+| Module | Owns |
+|---|---|
+| `lion_contract.py` | every proportion, measured off the approved turnaround |
+| `lion_skeleton.py` | bone table **and** the authored ring→bone skin map |
+
+These exist because the constants were previously **copied** into three scripts
+and drifted: after the belly moved 0.41 → 0.21, `detail_lion.py` was still
+probing for a head at z = 0.80. Nothing errors when that happens — features
+simply land nowhere and it only shows up in a render.
+
+### Validators
+
+| Check | Runs |
+|---|---|
+| `validate_home_environment.py` | 57 scene assertions |
+| `scripts/validate-environment-glb.mjs` | 22 GLB assertions, dependency-free |
+| `cage_lion.py :: integrity()` | loose verts, non-manifold, boundary, degenerate, slivers, valence — **with coordinates** |
+| `deform_qa_lion.py` | 12-pose battery: per-face area ratio + bone-relative normal inversion |
+| `rig_cage_lion.py` | reach headroom + planted-paw drift at two amplitude bands |
+| `gltf-transform validate` | Khronos spec |
+| `assert_production_clean()` in both rig scripts | refuses to export development geometry |
+
+### Traps this pipeline has already hit
+
+Recorded so they are not rediscovered:
+
+1. **A wireframe modifier is in the evaluated mesh.** `to_mesh()` goes through
+   the viewport depsgraph, so any measurement reads the wireframe strips. Set
+   `show_viewport = False`, `show_render = True`.
+2. **`bm.free()` invalidates every BMVert reference.** Snapshot indices first.
+   Also guard with `v.is_valid` — `open_patch` deletes patch centres.
+3. **`FACES_ONLY` leaves orphans.** Deleting a face region with `FACES_ONLY`
+   keeps its interior verts and edges as loose geometry. Use `FACES`.
+4. **`grid_fill` fails silently.** It half-filled several caps and produced
+   slivers. Replaced by a deterministic all-quad cap.
+5. **`vertex_group_smooth` only polls in weight-paint or edit mode.**
+6. **A bone head buried inside the body** hands that bone a share of the torso
+   under heat weighting.
+7. **IK constraints override FK actions.** The proxy's clips are authored in FK;
+   live IK pinned the legs and the walk stride measured 18 mm instead of 230 mm.
+   Constraints now default to `influence = 0`.
+8. **`export_def_bones=True`** or every IK/pole control ships as a skin joint.

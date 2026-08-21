@@ -32,6 +32,7 @@ Outputs:
   public/assets/lion/rigged/lion_v2.glb
 """
 
+import json
 import math
 import os
 
@@ -151,6 +152,20 @@ def add_ik(arm):
         c.pole_subtarget = pole
         c.pole_angle = math.radians(-90)
         c.chain_count = 2          # lower + upper only; the body stays free
+        # OFF by default, and this is not a detail.
+        #
+        # Every clip on this rig is authored in FK — the actions key
+        # `upper_front_*` / `thigh_*` rotations directly. A live IK constraint
+        # overrides its chain, so the legs were being pinned to targets that
+        # never move while the FK keys were discarded. Measuring the walk stride
+        # exposed it: 18mm of paw travel per cycle where the authored swing
+        # should give ~230mm, i.e. the walk was almost entirely neutered by the
+        # rig's own constraints.
+        #
+        # The constraints stay defined so a future pass can author foot
+        # placement through them (which is the better technique for locomotion),
+        # but until a clip animates their influence they must not fight FK.
+        c.influence = 0.0
 
     bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -446,6 +461,52 @@ def author_actions(arm):
     return made
 
 
+def measure_walk_stride(arm, action_name="Walk", fps=24.0):
+    """Measure the walk stride from the CLIP, not from a formula.
+
+    `WALK_SPEED` in lionBrain.ts was 0.52 m/s, derived on paper from a 32-frame
+    two-stride cycle. The clip is now 48 frames with four lateral beats, and
+    nobody updated the constant — which means the runtime translates about four
+    times faster than the legs cycle, and the paws skate.
+
+    The fix is to stop deriving it. For an in-place cycle the paw's total
+    fore-aft excursion IS the stride length, so it can be sampled directly off
+    the authored action. Emitting it as data next to the GLB means the constant
+    can never drift from the clip again.
+    """
+    act = bpy.data.actions.get(action_name)
+    if act is None:
+        raise SystemExit(f"[rig] no action {action_name!r} to measure")
+    arm.animation_data.action = act
+    lo, hi = (int(round(v)) for v in act.frame_range)
+    cycle = max(1, hi - lo) / fps
+
+    spans = []
+    # This rig's leg chains end at `front_paw_*` / `rear_paw_*`. The first
+    # attempt looked for `paw_FL` — the CAGE rig's naming — found nothing, and
+    # silently measured a stride of zero. Missing a bone must be loud, not
+    # averaged away.
+    for paw in ("front_paw_L", "rear_paw_L"):
+        pb = arm.pose.bones.get(paw)
+        if pb is None:
+            raise SystemExit(
+                f"[rig] no bone {paw!r} to measure stride from; bones are: "
+                + ", ".join(sorted(b.name for b in arm.data.bones)))
+        ys = []
+        for f in range(lo, hi + 1):
+            bpy.context.scene.frame_set(f)
+            ys.append((arm.matrix_world @ pb.tail).y)
+        if ys:
+            spans.append(max(ys) - min(ys))
+    bpy.context.scene.frame_set(lo)
+    if not spans:
+        raise SystemExit("[rig] stride measurement found no paw bones")
+    stride = sum(spans) / len(spans)
+    print(f"[rig] walk stride per paw: "
+          + ", ".join(f"{v:.4f}" for v in spans) + f"  ->  {stride:.4f} over {cycle:.3f}s")
+    return stride, cycle
+
+
 def join_by_material(arm, meshes):
     """Merge the skinned meshes into one object per material.
 
@@ -590,6 +651,20 @@ def main():
         export_animations=True, export_animation_mode="ACTIONS",
         export_bake_animation=True, export_skins=True,
     )
+
+    stride, cycle = measure_walk_stride(arm)
+    loco = os.path.join(os.path.dirname(GLB_OUT), "locomotion.json")
+    with open(loco, "w") as fh:
+        json.dump({
+            "clip": "Walk",
+            "strideModelUnits": round(stride, 5),
+            "cycleSeconds": round(cycle, 4),
+            "note": ("Stride is the paw's fore-aft excursion in the model's OWN "
+                     "units, measured from the authored clip. The runtime must "
+                     "multiply it by whatever scale it applied to the asset, then "
+                     "divide by cycleSeconds, to get world walk speed."),
+        }, fh, indent=2)
+    print(f"[rig] locomotion.json stride={stride:.4f} model units, cycle={cycle:.3f}s")
 
     size = os.path.getsize(GLB_OUT)
     deform = [b.name for b in arm.data.bones]

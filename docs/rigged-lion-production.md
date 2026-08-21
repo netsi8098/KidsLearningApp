@@ -149,3 +149,96 @@ from the approved reference.
 - Drei `useGLTF`: https://drei.docs.pmnd.rs/loaders/gltf-use-gltf
 - Drei `useAnimations`: https://drei.docs.pmnd.rs/abstractions/use-animations
 - Three.js `AnimationMixer`: https://threejs.org/docs/#api/en/animation/AnimationMixer
+
+---
+
+## Update — 2026-08-21 : production cage supersedes the remesh path
+
+### Two characters exist right now
+
+| Asset | Size | Status |
+|---|---|---|
+| `lion/rigged/lion_v2.glb` | 2.14 MB | **PROXY** — what the homepage renders. Voxel-remesh body, curve-lock mane, 41 bones, 10 clips. |
+| `lion/cage/lion_cage_rigged.glb` | 63.5 KB | **PRODUCTION** — authored cage, 35 deform joints, no clips yet. |
+
+The proxy stays until locomotion is proven on the cage. Do not add art to the
+proxy.
+
+### Why the remesh path was abandoned
+
+Quadriflow aligns quads to **curvature**. It cannot place three loops in an
+elbow because it cannot know where the elbow is — a remesher sees a bulge. Every
+automatic route produced topology that looked correct and pinched the moment a
+joint bent.
+
+### The cage — `tools/blender/cage_lion.py`
+
+Built the way a box-modeller builds a quadruped:
+
+* torso, neck and head are **one tube of cross-sectional rings**, each placed and
+  sized against `lion_contract.py`;
+* every limb, the tail and both ears **grow out of a 3×3 patch** of that tube —
+  the four patch faces are deleted and the eight boundary vertices become the
+  appendage's first ring. Nothing bridged, nothing stitched, so limb loops flow
+  into the torso by construction;
+* joints carry as many rings as the deformation battery required, named
+  individually (`elbow_up` / `elbow` / `elbow_lo`);
+* the **hock reverses direction** — a rear leg is not a human leg;
+* both limbs are bound **pre-bent**, because a straight limb gives IK zero
+  extension headroom;
+* the mouth is a **real cavity**, not a dent: a jaw cannot open a dent.
+
+961 verts · 959 faces · 100% quads · watertight · poles only at nose tip, four
+paw soles, two ear tips, tail tip — **none in a bending joint**.
+
+### Skinning is authored — `tools/blender/lion_skeleton.py`
+
+The cage records its rings as vertex groups, so bone ownership is **looked up**
+rather than inferred from proximity:
+
+    "frontR:elbow_lo"  ->  upper_front 0.24, forearm 0.76
+
+Joints blend across three rings. Two things a cross-section cannot express are
+positional: the **jaw** (split by height, tapered toward the mouth corner,
+because a muzzle ring contains both the upper lip and the chin) and the **mouth
+cavity** (explicit to the jaw).
+
+The 95 ring groups are consumed and removed. The GLB ships 35 bone groups.
+
+### Rig — `tools/blender/rig_cage_lion.py`
+
+44 bones authored, 35 deforming. The 8 IK/pole controls are excluded from the
+skin by `export_def_bones`: **0 control bones in the shipped asset.** Mid-limb
+hinge limits with locked Y/Z so IK cannot solve an elbow sideways.
+
+### Measured state
+
+| Deformation battery | auto baseline | authored |
+|---|---|---|
+| FAIL poses | 4 | **0** |
+| Pinched faces | 10 | **0** |
+| Worst area ratio | 0.115 | **0.267** |
+
+| Reach headroom | front | rear |
+|---|---|---|
+| | 20.0 mm | 40.9 mm |
+
+| Paw drift | worst |
+|---|---|
+| Animation amplitudes | **2.86 mm** |
+| Rear paws | 0.03–0.22 mm |
+| Extreme body moves (75–90 mm) | 28.0 mm — reach-limited |
+
+Khronos glTF validator: clean.
+
+### Locomotion is measured, not derived
+
+`rig_lion.py` samples the paw's fore-aft excursion from the authored Walk action
+and writes `public/assets/lion/rigged/locomotion.json`. The runtime multiplies
+the stride by the scale it applied and divides by the cycle length — the only
+speed at which a planted paw does not slide.
+
+Current proxy: stride **0.216** model units over **2.0 s** → ~0.127 m/s at the
+1.30 m runtime scale. Slow and deliberate. If a brisker walk is wanted, the CLIP
+needs a bigger swing or a shorter cycle; raising the runtime speed would only
+reintroduce skating.

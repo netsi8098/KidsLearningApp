@@ -167,3 +167,70 @@ The next pass must be a continuous clay sculpt/modeling pass in Blender using th
 camera overlays in `lion_reference_stage.blend`. Do not continue polishing this
 with more disconnected primitives. Do not rig, retopologize, export, or integrate
 until a new neutral clay turntable passes the identity and ground-contact gate.
+
+---
+
+## Update — 2026-08-21
+
+### The world is live in the product
+
+`river-garden-3d` is a registered theme in `src/data/homepageThemes.ts` and
+renders through `RiverGarden3DWorld`, which implements the same `WorldProps`
+contract as every painted world. Selectable from the existing ThemePicker.
+**Not the default** — see the payload note below.
+
+### Markers, and which ones the UI uses
+
+The environment GLB carries ten authored anchors. `AnchorProjector` projects
+them to screen space every frame.
+
+| Marker | Used by |
+|---|---|
+| `MARK_CameraTarget` | camera dolly pivot |
+| `MARK_LionSpawn` | character placement, and the brain's home mark |
+| `MARK_WalkLeft` / `MARK_WalkRight` | derive the walkable radius |
+| `MARK_SpeechAnchor` | speech bubble — **projected live** |
+| `MARK_TitleZoneHero` | title — **projected live** |
+| `MARK_TitleZone` | the original wide-framing title anchor, unused at hero distance |
+| `MARK_CardShelfZone` / `…Hero` | **not used** — see below |
+| `MARK_LionGreeting` | reserved |
+
+**Player cards are deliberately not marker-anchored.** Anchoring them to
+`MARK_CardShelfZone` put them mid-island directly over the character's chest and
+front paws. They sit at the bottom of the viewport, as in the reference frame.
+
+### Camera
+
+The Blender camera is adopted wholesale — position, rotation and lens — then
+dollied **along its own authored view axis**, so the approved angle and focal
+length survive and only distance changes. Dolly is keyed off
+`min(width, height × 1.25)`: 0.53 desktop / 0.48 tablet / 0.44 phone. Keying on
+width alone put a tall tablet in portrait at the closest setting and cropped the
+character.
+
+### Look pass
+
+Screen-space AO (temporally stable — a flickering occlusion pass on a children's
+homepage is worse than none), shallow depth of field, high-threshold bloom, faint
+vignette. Gated on `hardwareConcurrency >= 6 && width >= 700`.
+
+Guard-rails, recorded and **not yet fully honoured**: AO must not compensate for
+wrong paw placement; DOF must never soften the player cards; bloom must not wash
+the pastel palette. Not yet profiled on real low-end hardware.
+
+### Payload
+
+`three` is lazy-loaded in its own chunk. The main JS bundle is unchanged at
+515 KB. The 3D path costs ~3.1 MB (world) + ~2.1 MB (character) on first use,
+which is why it is opt-in rather than default.
+
+### Fallback
+
+No WebGL, a lost context, or `prefers-reduced-motion` falls back to the painted
+`RiverGardenWorld`. The world itself makes that choice, and swaps the DOM mascot
+back in — deciding it in the page by theme id meant the fallback rendered with no
+character at all.
+
+Reduced motion falling all the way back is **too blunt** per the brief: the
+character should stay, with wandering and jumping disabled and breathing and
+blink kept. Outstanding.

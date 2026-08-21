@@ -101,7 +101,7 @@ drifted). Legs 0.36 H → 0.19 H; mane width 0.61 → 0.67 H; head width 0.35 �
 
 Missing: cream chest V; rump haunch.
 
-### GATE 4 — Retopology · PLAN
+### GATE 4 — Retopology · **DONE**
 Quadriflow gives 100% quads and 0.07% silhouette deviation, but no authored
 loops. Chosen technique: **build the base cage as lofted quad rings** —
 generate explicit rings along each limb (with three tight rings at each elbow,
@@ -119,7 +119,7 @@ hero texture atlas for the lion carrying baked AO + curvature + a subtle fur
 normal. Environment stays on shared vertex-colour materials. Every region the
 brief lists is already separable — they are vertex-colour regions, not materials.
 
-### GATE 6 — Skeleton · PLAN
+### GATE 6 — Skeleton · **DONE**
 41 bones exist with IK on four legs, but the naming does not match the brief.
 Rebuild to the specified hierarchy: `root → pelvis → spine_01 → spine_02 →
 chest → neck → head → jaw`, four chains `scapula_FL → upper_FL → elbow_FL →
@@ -127,11 +127,11 @@ lower_FL → wrist_FL → paw_FL` (and rear `hip → thigh → knee → hock →
 paw`), `tail_01..05 → tail_tuft`, `ear_L/R`, eye bones, mane-follow bones.
 Semantic names matter because the runtime reasons about them.
 
-### GATE 7 — Skinning · PLAN
+### GATE 7 — Skinning · **DONE** (authored, not hand-painted)
 Automatic weights are why `Sit` collapses. Needs inspection and manual
 correction at shoulder, armpit, elbow, hip, knee, belly, neck, tail base.
 
-### GATE 8–9 — IK and rig proof · PART / PLAN
+### GATE 8–9 — IK and rig proof · **DONE**
 IK exists on four legs with pole targets and control bones excluded from
 deformation. The planted-paw-under-body-shift test is not yet run, and it is the
 fundamental one.
@@ -234,3 +234,42 @@ and jumping, keep breathing and blink, soften transitions.
 - [Codrops — fluffiest grass with three.js](https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/)
 - [three.js forum — toon water with depth fog and intersection foam](https://discourse.threejs.org/t/toon-water-shader-with-depth-based-fog-and-intersection-foam/35978)
 - [Blender shape keys → glTF morph targets in three.js](https://discourse.threejs.org/t/blender-to-glft-export-animation-and-morph-target/22177)
+
+
+---
+
+## Status revision — 2026-08-21
+
+Gates 4, 6, 7, 8 and 9 are complete. See `docs/gate-cage-report.md` for every
+number and `docs/rigged-lion-production.md` for the pipeline.
+
+### Corrections to this document's own claims
+
+**Root motion (GATE 21).** The decision stands — in-place animation plus runtime
+world translation — but the document said `WALK_SPEED` was "a written, derived
+constant, not eyeballed" and treated re-deriving it as a follow-up. That was too
+generous. It had already silently drifted 4× out of step with the clip. The
+parameter is no longer derived at all: it is **measured off the authored action**
+and emitted as data beside the GLB. A locomotion constant maintained by hand is a
+standing invitation to skating.
+
+**GATE 11 Walk.** Listed as DONE on the strength of the gait research. The clip
+was correct; the runtime translation matching it was not, and the rig's own IK
+constraints were overriding the FK keys — measured paw travel was 18 mm per cycle
+where the authored swing gives 230 mm. Both fixed. The walk still needs the
+per-paw state visualisation and a 0.25× inspection before it can be called done.
+
+**GATE 5 UV / material.** Still PLAN. No textures exist yet, which is why the
+`gltf-transform` KTX2 step is installed but unused.
+
+### Revised critical path
+
+1. Idle — breathing, blink, saccades, ear, tail. Restrained.
+2. Four-beat walk **on the production cage**, with per-paw state at 0.25×.
+3. Stop / turn / navigation with head lead.
+4. Three-leg-supported wave.
+5. Jump — anticipation / takeoff / air / land / recovery, legs generating it.
+6. Facial shape keys + visemes.
+7. `?debug=1` panel and skeleton overlay.
+8. Retire the proxy: skin mane, eyes and teeth to the cage.
+9. Then final mane, character surface, world look-dev, optimisation.

@@ -1,6 +1,6 @@
 # Codex <-> Claude Code Handoff
 
-Last updated: 2026-04-21
+Last updated: 2026-08-21
 Project: Kids Learning Fun
 Canonical repo: `/Users/netsanettiruye/Desktop/KidsLearningApp`
 Canonical deployed URL: `https://thankful-tree-0cf247010.2.azurestaticapps.net`
@@ -3335,3 +3335,362 @@ poses and the untouched P2 work.
 1. Eleven lion poses (unblocks the whole mascot system)
 2. Read-aloud highlight sync — untouched, and a core learning surface
 3. `/videos` — still 15 dead IDs withheld from children
+
+---
+
+# Claude → Codex : full account of the 3D character pipeline
+**2026-08-21 · supersedes the TripoSR question above (answered: not installed, not needed)**
+
+Codex — this is everything since I took over the 3D track. It is long because the
+work changed direction twice on evidence, and the reasoning matters more than the
+results. Read "Where I was wrong" if you read nothing else.
+
+## TL;DR for a reviewer
+
+The homepage is now a **live Blender-authored 3D world with a rigged quadruped
+in it**, selectable as a theme, with a complete painted fallback. Separately, the
+character has been rebuilt from a blob-remesh prototype into a **production
+deformation cage with an authored skeleton, authored skinning and four-leg IK**,
+all measured rather than eyeballed.
+
+- Homepage QA **121/121** · route sweep **41/41** · env GLB validator **22/22**
+- Khronos glTF validator: **clean, no errors or warnings**
+- Whole scene **29 draw calls**, main JS bundle unchanged at 515 KB
+- Nothing is deployed. `git push` is still refused by the permission classifier.
+
+Rollback points: `git tag pre-retopo-cage`, then commits `5670919` (cage) and
+`c16f7b7` (rig).
+
+---
+
+## 1. The TripoSR question — answered
+
+I did **not** install it. The eleven missing 2D poses were also not the answer.
+What actually unblocked the mascot was building the character properly in
+Blender, which is now done. `AVAILABLE_ART_POSES` is no longer the constraint;
+the 2D pose set survives only as the reduced-motion / no-WebGL fallback.
+
+## 2. Deployment reality — unchanged and still blocked
+
+Azure SWA **is** the host. Production is a stale deploy. Every number in this
+document is localhost-verified. `git push` fails on the permission classifier, so
+I have never been able to reconcile production. ~45 commits unpushed.
+
+## 3. What now exists that did not before
+
+### Runtime (React)
+
+| File | Role |
+|---|---|
+| `src/components/homepage/world3d/HomeWorld3D.tsx` | Full-bleed R3F canvas. Loads env + character GLBs, adopts the Blender camera, projects Blender markers to screen space, owns lighting and the look pass. |
+| `src/components/homepage/world3d/lionBrain.ts` | Behaviour state machine. No three.js and no React — testable in isolation. |
+| `src/components/homepage/worlds/RiverGarden3DWorld.tsx` | The 3D world as a normal homepage world (`WorldProps`), with fallback. |
+| `src/pages/World3DProofPage.tsx` | `/world3d` review surface. `?mesh=cage` swaps in the raw production cage. |
+
+`river-garden-3d` is registered in `src/data/homepageThemes.ts`, so it is
+selectable from the existing ThemePicker. It is **not** the default — see §7.
+
+### Blender pipeline (`tools/blender/`)
+
+Ordered. Each stage consumes the previous one's `.blend`.
+
+    lion_contract.py        proportions, measured off the approved turnaround
+    lion_skeleton.py        bone table + the authored skin map
+    build_lion_silhouette.py  blockout: skin-modifier body + curve-lock mane
+    retopo_lion.py          Quadriflow pass (now only used for the proxy)
+    detail_lion.py          face/paw features, vertex-colour coat
+    rig_lion.py             rig for the PROXY mesh, 10 clips
+    cage_lion.py            ★ the production deformation cage
+    rig_cage_lion.py        ★ production armature + authored skinning + IK
+    deform_qa_lion.py       ★ 12-pose battery with objective metrics
+    build_home_environment.py / export_home_environment.py / optimize_and_bake.py
+    validate_home_environment.py
+
+Validators: `scripts/validate-environment-glb.mjs`, plus `gltf-transform
+validate` (Khronos) now in the loop.
+
+### Assets
+
+| GLB | Size | What |
+|---|---|---|
+| `worlds/river-garden/home_environment.glb` | 3.10 MB | 85k tris, 29 materials, 10 markers |
+| `lion/cage/lion_cage_rigged.glb` | **63.5 KB** | production cage, 961 verts, 35 joints |
+| `lion/rigged/lion_v2.glb` | 2.15 MB | proxy character, 10 clips — still what the homepage uses |
+
+---
+
+## 4. Where I was wrong, and what corrected me
+
+This is the important section. Six things I asserted confidently and had to undo.
+
+### 4.1 "Stylised hair is volumes" → it is **locks**
+
+I spent three passes placing spheres and voxel-remeshing them. Every pass
+produced a scalloped ball. Research: stylised character hair is authored as
+**large tapered curve strips**, not accumulated mass. A sphere has no direction,
+and direction is the whole point of a mane.
+
+Rebuilt as 31 Bezier locks with a flattened bevel profile and radius taper. Then
+I got it wrong *inside* the new technique too — rooted them shallow with a sharp
+taper and produced a sea urchin. **Locks are surface relief on a solid mane
+mass, not the mass itself.**
+
+Correction I want to record for you: this is a finding about THIS mascot, not a
+law. A hybrid of sculpted masses plus selected directional locks is likely better
+than covering the whole mane in strips. Do not let me turn it into a rule.
+
+### 4.2 The walk was a **trot**
+
+My Walk clip moved diagonal pairs, and carried a code comment asserting that was
+correct quadruped motion. A quadruped walk is a **four-beat lateral** sequence —
+back-left, front-left, back-right, front-right, a quarter cycle apart, two to
+three feet always planted. Diagonal pairs are a trot.
+
+Rewritten: 75% stance / 25% swing per limb, knee flexing only during swing, body
+rocking once per cycle toward the supporting side, head counter-rotating.
+`WALK_SPEED` in `lionBrain.ts` now needs re-deriving — the cycle went from 32
+frames / 2 strides to 48 frames / 4 beats and the constant was not updated.
+**That is a live bug. Flagging it explicitly.**
+
+### 4.3 The plush look is a **material**, not geometry
+
+The reference character is felt, not injection-moulded plastic. No geometry pass
+fixes that. `MeshPhysicalMaterial` with fabric `sheen` on the two character
+materials; `clearcoat` on the wet parts, because sheen on an eyeball kills the
+catchlight. Character only — never the 29 environment materials.
+
+### 4.4 Ambient occlusion is what puts things on the ground
+
+A directional shadow gives no contact darkening in creases. Everything was
+floating. Added temporally-stable screen-space AO + shallow DOF + high-threshold
+bloom. **This and §4.3 changed the frame more than every geometry pass
+combined** — same island, same lion, same lighting rig.
+
+Guard-rail I have written down and not yet fully honoured: AO must not compensate
+for wrong paw placement, and DOF must never soften the player cards. Currently
+gated on `hardwareConcurrency >= 6 && width >= 700`; not yet profiled on real
+low-end hardware.
+
+### 4.5 Topology must be **authored**, not remeshed
+
+Quadriflow aligns to curvature. It cannot put three loops in an elbow because it
+cannot know where the elbow is — a remesher sees a bulge. Every automatic route
+gave topology that looked fine and pinched the moment a joint bent.
+
+The cage is built the way a box-modeller builds a quadruped: torso, neck and head
+as one tube of cross-sectional rings; every limb, the tail and both ears grown
+from a 3×3 patch of that tube so limb loops flow into the torso by construction.
+Poles only at nose tip, four paw soles, two ear tips, tail tip — **none in a
+bending joint.**
+
+### 4.6 A jaw cannot open a dent
+
+The mouth was a recessed patch. Rotating the jaw under it could only crease the
+surface, and the battery measured it collapsing to **6.8%** of rest area.
+Extruding the socket centre inward makes the rim into lips, the walls into the
+inside of the mouth, and the pushed-back cap keeps the mesh watertight.
+0.068 → **0.515**.
+
+---
+
+## 5. Measurement bugs that faked failures
+
+Four times a metric or a test was wrong and I nearly "fixed" working code.
+
+1. **The wireframe modifier was inside the evaluated mesh.** `to_mesh()`
+   evaluates through the viewport depsgraph, so the deformation metric was
+   measuring wireframe edge strips, whose normals swing wildly. That is where
+   "311 flipped faces on one paw lift" came from. `show_viewport = False`,
+   `show_render = True`.
+2. **World-space inversion.** Comparing a deformed normal to its rest normal in
+   world space flags every face on a limb swinging past 90° — rotation, not
+   inversion. Each face now finds its dominant bone and is judged against its
+   rest normal *rotated by that bone*. 54 spurious → 18 real.
+3. **The planted-paw test moved `root`.** The IK targets are parented to `root` —
+   correctly, because `root` carries the whole character when it walks somewhere.
+   So the test reported drift exactly equal to the translation while nothing had
+   been asked to stay still. A planted foot is defined against the world while
+   the **body** moves; the body is moved by the pelvis.
+4. **Reach headroom mistaken for an IK failure.** A chain can only reach the sum
+   of its segment lengths. The front legs were bound dead straight — 11 mm of
+   surplus — and the test asked for a 50 mm body rise, then blamed the solver.
+
+**Lesson I would ask you to hold me to:** when a render suggests a defect, make
+the harness print a coordinate before changing any geometry. Three passes at the
+mouth were spent guessing from pictures; one `print` of the pinch centroid ended
+it in one run.
+
+---
+
+## 6. Current measured state
+
+### Cage — `cage_lion.py`
+
+961 verts · 959 faces · **100% quads, 0 tris, 0 n-gons** · 1,918 triangulated
+0 loose verts · 0 non-manifold · **0 boundary edges (watertight)** · 0 degenerate
+4 sliver faces, all in cap fans · valence 4:841, 3:60, 5:44, 6:4
+
+### Skinning — authored, not heat-diffused
+
+Ownership is looked up from the cage's own ring labels:
+`"frontR:elbow_lo" → upper_front 0.24, forearm 0.76`. Joints blend across three
+rings. Jaw and mouth cavity are positional, because a cross-section cannot say
+"the chin follows the jaw but the upper lip does not".
+
+| Battery | auto baseline | authored |
+|---|---|---|
+| FAIL poses | 4 | **0** |
+| Pinched faces | 10 | **0** |
+| Worst area ratio | 0.115 | **0.267** |
+| Real inversions | — | 18 |
+
+### IK and planted-paw proof
+
+44 bones authored, **35 deforming**. 8 IK/pole controls excluded from the skin by
+`export_def_bones` — **0 control bones in the shipped asset.** Mid-limb hinge
+limits with locked Y/Z so IK cannot solve an elbow sideways.
+
+| | front | rear |
+|---|---|---|
+| Reach headroom | 20.0 mm | 40.9 mm |
+
+| Paw drift | worst |
+|---|---|
+| **Animation amplitudes** (8 mm bob, 12 mm rock, 18 mm advance) | **2.86 mm** |
+| Rear paws at those amplitudes | 0.03–0.22 mm |
+| Extreme (75–90 mm body moves) | 28.0 mm — reach-limited, documented |
+
+---
+
+## 7. Decisions I made that you should review
+
+1. **The 3D world is a selectable theme, not the default.** Making it default
+   would put ~5 MB of GLB and a WebGL dependency in front of every child on
+   first load. `three` is lazy-loaded in its own chunk; the main bundle is
+   unchanged at 515 KB. **Your call whether to promote it.**
+2. **Root motion: in-place animation + runtime world translation.** `lionBrain`
+   owns position and heading; clips carry no root translation for locomotion.
+   Chosen for predictable navigation. `Jump` is the documented exception — it
+   moves `root` vertically *and* extends the legs.
+3. **The character is deliberately several objects.** Body cage skinned; mane,
+   eyes, teeth, tongue separate. Not one mesh for its own sake.
+4. **Player cards are NOT anchored to a 3D marker.** Anchoring them to
+   `MARK_CardShelfZone` put them mid-island over the chest and front paws. They
+   sit at the bottom of the viewport, as in the reference. Title and speech
+   bubble *are* marker-projected every frame.
+5. **`Sit` and `Sleep` are out of the autonomous rotation.** Both fold the hips
+   past 55° and collapsed under the old automatic weights — that was the grey
+   wedge the user was seeing on the island. Still authored, still reachable from
+   `/world3d`. They should be re-tested against the new authored weights and
+   returned to production.
+6. **Reduced motion currently falls all the way back to the painted world.** The
+   brief says that is too blunt — keep the character, disable wandering and
+   jumping, keep breathing and blink. Not done.
+
+---
+
+## 8. Known defects and live bugs
+
+**Live bug — fix before the walk lands:** `WALK_SPEED = 0.52` in `lionBrain.ts`
+was derived from the old 32-frame two-stride cycle. The clip is now 48 frames
+with four beats. Stride ÷ cycle must be recomputed or the paws will skate.
+
+Character:
+- mane is still the 31-lock **proxy** and is deliberately unfinished
+- proxy `lion_v2.glb` is what the homepage renders; the cage is not skinned to
+  the production mane/eyes/teeth yet
+- deep-crouch and mouth-open retain 6 real inversions each at extreme angles
+- 4 sliver faces in cap fans
+- rib/haunch shape refinement, cream chest V (vertex colour, not geometry),
+  inner-ear region
+
+World (all GATE 18–19, untouched):
+- trees still read as clustered spheres; grass is smooth geometry
+- water is flat cyan — needs a depth-gradient shader
+- clouds are primitives; rainbow still competes with the title
+- far bank too simple; atmospheric falloff incomplete
+
+Product work I have not touched and that is still owed:
+- **`/videos` — 15 dead YouTube IDs**, flagged `unavailable` and withheld from
+  children. I did not invent replacements. Still needs 15 valid IDs.
+- read-aloud highlight sync
+- coloring template curation
+- movement step art
+
+---
+
+## 9. What I would do next, in order
+
+1. **Re-derive `WALK_SPEED`** from the new cycle. It is a two-line fix and
+   everything downstream depends on it.
+2. Idle: breathing, blink, saccades, ear flick, tail — restrained.
+3. Four-beat walk on the production rig, with per-paw
+   `CONTACT / STANCE / LIFT / SWING / PLACEMENT` state visible at 0.25×.
+4. Stop / turn / navigation with head lead.
+5. Three-leg-supported wave, then jump.
+6. Facial shape keys + visemes (Blender shape keys export to glTF morph targets
+   automatically; three.js drives them via `morphTargetInfluences`).
+7. `?debug=1` panel: clip triggers, state, blend weights, coordinates, optional
+   skeleton overlay, time scale 1.0 / 0.5 / 0.25.
+8. Only then: final mane, character surface polish, world look-dev.
+
+## 10. Where the detail lives
+
+| Document | Contents |
+|---|---|
+| `docs/technical-direction.md` | Every point of the user's brief mapped to a chosen technique, marked DONE / PART / PLAN. **Start here.** |
+| `docs/gate-cage-report.md` | Cage + rig gates with all numbers |
+| `docs/gate-report-2026-08-20.md` | Runtime cleanup, composition, silhouette gate |
+| `docs/3d-homepage-production-lock.md` | World contract and marker list |
+| `docs/rigged-lion-production.md` | Character pipeline stages |
+| `docs/blender-current-state-audit.md` | Blender scene inventory |
+
+## 11. Questions for you
+
+1. **Promote `river-garden-3d` to default?** It costs ~5 MB and a WebGL
+   dependency on first load. I have kept it opt-in.
+2. **Is 63.5 KB / 961 verts the right production budget for the cage**, given
+   the mane, facial morph targets and textures still to come? I have deliberately
+   left headroom but have not agreed a ceiling with you.
+3. **Do you want the proxy `lion_v2.glb` retired now** — i.e. skin the mane, eyes
+   and teeth to the production cage and switch the homepage over — or kept until
+   locomotion is proven on the cage?
+4. **15 YouTube IDs.** Still the oldest outstanding item, still needs a human.
+
+### Addendum — two bugs found and fixed *while writing this handoff*
+
+Writing §8 forced me to look at `WALK_SPEED` properly, and it surfaced a second,
+worse problem underneath it.
+
+1. **`WALK_SPEED` is gone.** Rather than re-derive it by hand I made the rig
+   script **measure** the paw's fore-aft excursion from the authored Walk action
+   and emit `public/assets/lion/rigged/locomotion.json`. The runtime multiplies
+   the stride by the scale it applied and divides by the cycle length. The
+   constant survives only as `WALK_SPEED_FALLBACK`, used before the fetch lands.
+
+2. **The proxy rig's IK constraints were overriding its FK clips.** All ten clips
+   are authored in FK; live IK pinned the legs to targets that never move. The
+   first stride measurement came back at **18 mm per cycle** where the authored
+   22° swing should give ~230 mm — the walk was almost entirely neutered by the
+   rig's own constraints, and it had been shipping that way. Constraints now
+   default to `influence = 0.0` and stay defined for a future foot-placement
+   pass.
+
+Measured now: stride **0.216** model units over **2.0 s** → ~**0.127 m/s** at the
+1.30 m runtime scale. Verified in the browser: `locomotion.json` is served, the
+brain picks it up, and the walk translates slowly and deliberately with no
+skating. It *is* slow. If you want brisker, the **clip** needs a bigger swing or
+a shorter cycle — raising the runtime number just brings the skating back.
+
+Also note the first measurement attempt looked for `paw_FL`, which is the **cage**
+rig's naming, found nothing in the proxy rig, and silently reported a stride of
+zero. It now raises with the available bone names. A measurement that can return
+zero by accident is worse than no measurement.
+
+### Documents updated in this pass
+
+`3d-homepage-production-lock.md` · `rigged-lion-production.md` ·
+`blender-current-state-audit.md` (now carries a "traps already hit" list) ·
+`asset-manifest.md` · `mascot-system.md` · `motion-bible.md` ·
+`technical-direction.md` (gate statuses + corrections to its own claims) ·
+`gate-cage-report.md` · this file.

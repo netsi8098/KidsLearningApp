@@ -19,13 +19,21 @@ export type LionClip =
   | 'Celebrate' | 'Nod' | 'LookAround' | 'Talk' | 'Sleep';
 
 /**
- * Metres per second. The Walk action is 32 frames at 24fps (1.33s) and contains
- * two strides; each stride advances roughly 0.34m at the authored 22-degree
- * swing on a 1.10m-tall cub. 0.67m / 1.33s ≈ 0.50 m/s. Tuned to 0.52 against
- * the rendered result — a value derived on paper still has to be checked, since
- * the effective stride depends on where the IK targets actually plant.
+ * Fallback metres per second, used only until the measured value arrives.
+ *
+ * This constant used to be the actual walk speed, derived on paper from a
+ * 32-frame two-stride cycle. The clip was later rewritten as a 48-frame
+ * four-beat lateral walk and nobody updated the number, so the runtime
+ * translated roughly four times faster than the legs cycled and the paws
+ * skated. Deriving locomotion speed by hand is a standing invitation to that
+ * bug.
+ *
+ * The real value is now MEASURED off the authored clip by the rig script and
+ * emitted to `locomotion.json` beside the GLB. The runtime multiplies the
+ * stride by whatever scale it applied to the asset and divides by the cycle
+ * length. See `setLocomotion`.
  */
-export const WALK_SPEED = 0.52;
+export const WALK_SPEED_FALLBACK = 0.24;
 const TURN_SPEED = 3.4;      // rad/s — turns finish inside one stride
 const ARRIVE_EPS = 0.05;     // m
 const FACE_EPS = 0.20;       // rad; start walking once roughly aimed
@@ -73,9 +81,29 @@ export class LionBrain {
   private restFor = 0;
   private durations: Partial<Record<LionClip, number>> = {};
 
+  /** Metres per second, from the measured clip stride. See setLocomotion. */
+  private walkSpeed = WALK_SPEED_FALLBACK;
+
   constructor(private bounds: Bounds) {}
 
   setHome(x: number, z: number) { this.homeX = x; this.homeZ = z; }
+
+  /**
+   * Match translation to the clip.
+   *
+   * `strideWorld` is the paw's fore-aft excursion per cycle in WORLD units —
+   * the measured model-space stride multiplied by the scale the runtime applied
+   * to the asset. Divided by the cycle length that is, by definition, the speed
+   * at which a planted paw does not slide.
+   */
+  setLocomotion(strideWorld: number, cycleSeconds: number) {
+    if (strideWorld > 0 && cycleSeconds > 0) {
+      this.walkSpeed = strideWorld / cycleSeconds;
+    }
+  }
+
+  /** Current walk speed in metres per second. */
+  get speed() { return this.walkSpeed; }
 
   /** Real clip lengths, read from the GLB once it has loaded. */
   setDurations(d: Partial<Record<LionClip, number>>) {
@@ -215,7 +243,7 @@ export class LionBrain {
     // Hold position until roughly aimed, so the lion never crab-walks sideways.
     if (Math.abs(diff) > FACE_EPS) return;
 
-    const travel = Math.min(WALK_SPEED * d, dist);
+    const travel = Math.min(this.walkSpeed * d, dist);
     const next = this.clampToIsland(this.x + (dx / dist) * travel, this.z + (dz / dist) * travel);
     this.x = next.x;
     this.z = next.z;
