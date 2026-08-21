@@ -142,37 +142,66 @@ def widest_depth_u():
     return best_u, best_h
 
 
-def build_hood(naz=40, nring=26):
-    """Two-view construction: the side view sets height, the front sets width.
+def build_hood(nh=22, nring=26):
+    """Two-view construction, with rings shaped BY the front silhouette.
 
-    Three sweeps failed because each guessed a parameterisation and then checked
-    it — a tube that enclosed the head, a collar, a megaphone. The brief names the
-    actual requirement: "the mesh should be designed so that matching the front
-    view does not destroy the side view." So constrain BOTH at once.
+    The previous version placed each ring as an ellipse and then looked up the
+    allowed width at each vertex's height — but it still multiplied by cos(angle),
+    so the only vertices that ever reached the measured width were the two on the
+    ring's own centre line. An ellipse has one horizontal semi-axis; it cannot
+    reproduce a width PROFILE. And the reference mane has a very distinct one:
 
-    For every ring at depth u the vertical extent comes straight from the side
-    view's mane column. Then, for each vertex on that ring, its own HEIGHT is
-    looked up in the front view's mane width profile, and that is the width it is
-    allowed. Both projections are therefore correct by construction rather than
-    by iteration.
+        h 0.62   0.708 H   <- widest
+        h 0.66   0.688
+        h 0.74   0.437     <- sharp waist
+        h 0.86   0.412
+        h 0.94   0.206
+        h 0.98   0.037     <- narrow crown tip
 
-    The front portion is an annulus: at the face's depth the mane exists only
-    outside the face, which is what makes it a hood with an opening instead of a
-    shell over the head.
+    That waist and the crown lobe above it are most of the character, and an
+    ellipse averages them away — which is why the crown never appeared.
+
+    So each ring is parameterised by HEIGHT instead of by angle: walk up the +x
+    side taking the measured half-width at every height, then back down the -x
+    side. The ring becomes the front silhouette at that depth, and the union over
+    depth reproduces the front view by construction.
     """
     prof_side = MODEL["views"]["side"]["mane_depth"]
     u0 = LM["mane_span_side"]["front_u"]
     u1 = LM["mane_span_side"]["rear_u"]
     u_wide, _ = widest_depth_u()
-    r_out = polar_radius()
     fc = LM["face_centre_front"]
     face_r = LM["body_widest_front"]["width"] * 0.53
 
+    # Smoothed width profile.
+    #
+    # The raw per-scanline measurement carries the drawing's own noise: individual
+    # painted locks, anti-aliasing, and rows where the silhouette breaks into up
+    # to five runs. Sampling it directly put all of that into the surface as
+    # ripples. LEVEL 1 is the macro form, so it takes a profile smoothed over
+    # 0.05 H; the deliberate relief is LEVEL 2's job and is added on top.
+    raw = MODEL["views"]["front"]["mane_width"]
+    hs = sorted(float(k) for k in raw)
+    vals = [raw[f"{h:.3f}"]["half_w"] for h in hs]
+    win = max(3, int(0.05 * len(hs)))
+    smooth_vals = []
+    for i in range(len(vals)):
+        a, b = max(0, i - win // 2), min(len(vals), i + win // 2 + 1)
+        smooth_vals.append(sum(vals[a:b]) / (b - a))
+    table = list(zip(hs, smooth_vals))
+
     def front_half_w(h):
-        return nearest(MODEL["views"]["front"]["mane_width"], f"{h:.3f}")["half_w"]
+        if h <= table[0][0]:
+            return table[0][1]
+        if h >= table[-1][0]:
+            return table[-1][1]
+        for (h0, v0), (h1, v1) in zip(table, table[1:]):
+            if h0 <= h <= h1:
+                k = (h - h0) / max(1e-9, h1 - h0)
+                return v0 + (v1 - v0) * k
+        return table[-1][1]
 
     def taper(u):
-        """How much of the front-view width this depth is allowed."""
         if u <= u_wide:
             k = (u - u0) / max(1e-6, u_wide - u0)
             k = k * k * (3.0 - 2.0 * k)
@@ -198,41 +227,56 @@ def build_hood(naz=40, nring=26):
     for i in range(nring + 1):
         t = i / nring
         u = u0 + (u1 - u0) * t
-        e = nearest(prof_side, f"{u:.4f}")
-        top, bot = e["top"], e["lowest"]
-        cz, rz = (top + bot) / 2.0, max(0.02, (top - bot) / 2.0)
+        # Same treatment for the side profile: average a small neighbourhood of
+        # columns so a single ragged lock in the drawing does not become a dent.
+        us_all = sorted(float(k) for k in prof_side)
+        near = sorted(us_all, key=lambda k: abs(k - u))[:7]
+        hi = sum(prof_side[f"{k:.4f}"]["top"] for k in near) / len(near)
+        lo = sum(prof_side[f"{k:.4f}"]["lowest"] for k in near) / len(near)
+        if hi - lo < 0.03:                      # the tapered ends
+            hi, lo = (hi + lo) / 2 + 0.015, (hi + lo) / 2 - 0.015
+        cz = (hi + lo) / 2.0
         y = (0.5 - u) * SIDE_LEN
         tp = taper(u)
-        # Aperture fades out behind the face.
-        ap = max(0.0, 1.0 - t / 0.42)
-        ap = ap * ap * (3.0 - 2.0 * ap)
+
+        # Azimuth runs -90 (bottom) to +90 (top) up the +x side, then on to +270
+        # coming back down the -x side, so the clump table's angles still mean
+        # what they say.
+        samples = []
+        for j in range(nh + 1):
+            k = j / nh
+            samples.append((+1, lo + (hi - lo) * k, math.radians(-90.0 + 180.0 * k)))
+        for j in range(nh - 1, 0, -1):
+            k = j / nh
+            samples.append((-1, lo + (hi - lo) * k, math.radians(90.0 + 180.0 * (1.0 - k))))
 
         o_row, i_row = [], []
-        for k in range(naz):
-            a = 2.0 * math.pi * k / naz
-            z = cz + rz * math.sin(a)
-            allowed = front_half_w(max(0.0, z)) * tp * (1.0 + clump_gain(a, t))
-            x = allowed * math.cos(a)
-            o_row.append(bm.verts.new((x, y, z)))
+        for sign, z, a in samples:
+            w = front_half_w(max(0.0, z)) * tp * (1.0 + clump_gain(a, t))
+            o_row.append(bm.verts.new((sign * max(w, 0.004), y, z)))
+            ap = max(0.0, 1.0 - t / 0.42)
+            ap = ap * ap * (3.0 - 2.0 * ap)
             fr = face_r * ap
-            i_row.append(bm.verts.new((fr * math.cos(a) * 0.98, y,
-                                       fc["h"] + fr * math.sin(a) * 1.04)))
+            # Inner shell follows the face as a circle, in the same order.
+            ia = math.atan2(z - cz, sign * 1.0)
+            i_row.append(bm.verts.new((sign * fr * abs(math.cos(ia)) * 0.98, y,
+                                       fc["h"] + fr * math.sin(ia) * 1.04)))
         outer.append(o_row)
         inner.append(i_row)
 
+    n = len(outer[0])
     for r in range(nring):
         A, B = outer[r], outer[r + 1]
         C, D = inner[r], inner[r + 1]
-        for k in range(naz):
-            m = (k + 1) % naz
+        for k in range(n):
+            m = (k + 1) % n
             bm.faces.new((A[k], A[m], B[m], B[k]))
             bm.faces.new((C[k], D[k], D[m], C[m]))
 
-    # Front rim joins the two shells; the back closes outer to inner.
     for pair, flip in ((0, False), (nring, True)):
         A, B = outer[pair], inner[pair]
-        for k in range(naz):
-            m = (k + 1) % naz
+        for k in range(n):
+            m = (k + 1) % n
             if flip:
                 bm.faces.new((A[k], B[k], B[m], A[m]))
             else:
@@ -246,9 +290,9 @@ def build_hood(naz=40, nring=26):
         p.use_smooth = True
     obj = bpy.data.objects.new("LionMane", me)
     bpy.context.scene.collection.objects.link(obj)
-    print(f"[mane] two-view hood: {len(me.vertices)} verts, {len(me.polygons)} faces, "
-          f"u {u0:.2f}..{u1:.2f}, widest at u={u_wide:.2f}, "
-          f"face r={face_r:.3f} H, {len(CLUMPS)} clumps")
+    print(f"[mane] silhouette-ring hood: {len(me.vertices)} verts, "
+          f"{len(me.polygons)} faces, {n} per ring x {nring+1} rings, "
+          f"widest at u={u_wide:.2f}, {len(CLUMPS)} clumps")
     return obj
 
 
@@ -355,7 +399,7 @@ def smooth_and_subdivide(obj):
 
 def import_donor_body():
     """Bring in the proven cage so the hood is judged against a real head."""
-    donor = os.path.join(REPO, "art", "blender", "lion_anim_cage.blend")
+    donor = os.path.join(REPO, "art", "blender", "lion_cage.blend")
     before = set(bpy.data.objects)
     with bpy.data.libraries.load(donor, link=False) as (src, dst):
         dst.objects = [n for n in src.objects if n in ("LionCage",)]

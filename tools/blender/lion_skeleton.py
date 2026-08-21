@@ -82,8 +82,16 @@ def skeleton():
         B.append((f"paw_R{sd}", f"ankle_R{sd}",
                   (sx * 0.112, -0.244, 0.028), (sx * 0.112, -0.238, 0.008)))
 
+        # REQUIRED RIG ADJUSTMENT, documented rather than worked around.
+        #
+        # The ears were shortened and widened to match the reference (they were
+        # the tallest thing on the model — 4,157 extra silhouette pixels in the
+        # top front band). The ear bone ran to HEAD_Z + 0.238, which the corrected
+        # geometry no longer reaches, and its head sat 0.6mm under the skin. Both
+        # ends move: the tip follows the new ear, and the root moves inward so the
+        # bone is enclosed rather than lying on the surface.
         B.append((f"ear_{sd}", "head",
-                  (sx * 0.148, 0.474, HEAD_Z + 0.148), (sx * 0.178, 0.468, HEAD_Z + 0.238)))
+                  (sx * 0.132, 0.474, HEAD_Z + 0.126), (sx * 0.178, 0.468, HEAD_Z + 0.202)))
 
     tail = [(0.0, -0.424, SPINE_Z + 0.060), (0.0, -0.470, SPINE_Z + 0.088),
             (0.0, -0.512, SPINE_Z + 0.106), (0.0, -0.566, SPINE_Z + 0.118),

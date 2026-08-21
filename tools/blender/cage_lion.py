@@ -103,25 +103,37 @@ def ring_points(centre, normal, rx, rz, count, phase=0.0):
 # the ring's plane. Radii are read off the locked contract: BELLY_Z 0.21,
 # SPINE_Z 0.375, BODY_BACK_Y -0.37, BODY_FRONT_Y 0.21, HEAD_Y 0.44, HEAD_Z 0.735.
 BODY = [
-    ("rump_cap",   (0.000, -0.452, SPINE_Z - 0.010), (0, 1, 0.10), 0.086, 0.092),
-    ("rump",       (0.000, -0.424, SPINE_Z - 0.004), (0, 1, 0.06), 0.140, 0.150),
-    # Haunch. The rear was a smooth dome; these three rings give the rump a
-    # readable shoulder of its own, which the jump take-off needs to sell.
-    ("haunch_back", (0.000, -0.386, SPINE_Z + 0.002), (0, 1, 0.03), 0.168, 0.178),
-    ("haunch",     (0.000, -0.336, SPINE_Z + 0.000), (0, 1, 0), 0.176, 0.184),
-    ("hip",        (0.000, -0.282, SPINE_Z - 0.004), (0, 1, 0), 0.170, 0.176),
-    ("lumbar_02",  (0.000, -0.216, SPINE_Z - 0.006), (0, 1, 0), 0.156, 0.162),
-    ("lumbar_01",  (0.000, -0.148, SPINE_Z - 0.006), (0, 1, 0), 0.148, 0.154),
-    ("waist",      (0.000, -0.076, SPINE_Z - 0.004), (0, 1, 0), 0.146, 0.152),
-    # Rib cage. Three rings that swell then hold, so the barrel has a chest
-    # rather than being one constant tube from hip to shoulder.
-    ("rib_back",   (0.000,  0.000, SPINE_Z + 0.000), (0, 1, 0), 0.156, 0.164),
-    ("rib_mid",    (0.000,  0.072, SPINE_Z + 0.004), (0, 1, 0), 0.166, 0.176),
-    ("rib_front",  (0.000,  0.136, SPINE_Z + 0.008), (0, 1, 0.04), 0.168, 0.180),
-    ("chest",      (0.000,  0.192, SPINE_Z + 0.020), (0, 1, 0.14), 0.164, 0.176),
-    ("shoulder",   (0.000,  0.244, SPINE_Z + 0.052), (0, 1, 0.55), 0.150, 0.160),
-    # Neck. Enough rings to turn, tilt and nod without the tube creasing — the
-    # mane hides this region visually, which is exactly why it has to be right.
+    # MEASURED against the reference's side-view body profile, behind the mane
+    # where the barrel is actually visible. Two errors it exposed:
+    #
+    # 1. The back line SLOPES DOWN toward the tail. Reference: 0.526 H just
+    #    behind the mane, 0.487 at the lumbar, 0.445 at the hip, ~0.40 at the
+    #    rump. The previous table held it at 0.52-0.56 flat all the way back,
+    #    which is exactly the "horizontal cylinder with a mane placed on top"
+    #    read — and it was 0.14 H too high at the haunch.
+    # 2. The rear body is WIDER than it was. Rear view measures 0.40-0.41 H
+    #    across at haunch height; the table gave 0.34.
+    #
+    # Stations under the mane (rib_front forward) are not measurable from any
+    # view and keep their previous values.
+    ("rump_cap",   (0.000, -0.452, 0.272), (0, 1, 0.10), 0.090, 0.050),
+    ("rump",       (0.000, -0.424, 0.278), (0, 1, 0.06), 0.145, 0.078),
+    # Haunch: three rings carrying real mass. The rear silhouette needs a
+    # pelvis -> glute -> thigh flow, and jump take-off reads off this shape.
+    ("haunch_back", (0.000, -0.386, 0.288), (0, 1, 0.03), 0.185, 0.098),
+    ("haunch",     (0.000, -0.336, 0.300), (0, 1, 0), 0.205, 0.120),
+    ("hip",        (0.000, -0.282, 0.312), (0, 1, 0), 0.200, 0.132),
+    ("lumbar_02",  (0.000, -0.216, 0.326), (0, 1, 0), 0.172, 0.140),
+    ("lumbar_01",  (0.000, -0.148, 0.340), (0, 1, 0), 0.156, 0.145),
+    ("waist",      (0.000, -0.076, 0.352), (0, 1, 0), 0.150, 0.150),
+    # Rib cage: swell then hold, so the barrel has a chest rather than one
+    # constant tube from hip to shoulder.
+    ("rib_back",   (0.000,  0.000, 0.368), (0, 1, 0), 0.156, 0.160),
+    ("rib_mid",    (0.000,  0.072, 0.379), (0, 1, 0), 0.166, 0.176),
+    ("rib_front",  (0.000,  0.136, 0.383), (0, 1, 0.04), 0.168, 0.180),
+    # Chest rises INTO the mane rather than running level into it.
+    ("chest",      (0.000,  0.192, 0.402), (0, 1, 0.16), 0.166, 0.182),
+    ("shoulder",   (0.000,  0.244, 0.438), (0, 1, 0.55), 0.152, 0.164),
     ("neck_base",  (0.000,  0.296, SPINE_Z + 0.116), (0, 0.72, 1), 0.126, 0.130),
     ("neck_02",    (0.000,  0.334, SPINE_Z + 0.196), (0, 0.55, 1), 0.116, 0.120),
     ("neck_01",    (0.000,  0.372, SPINE_Z + 0.272), (0, 0.85, 1), 0.116, 0.120),
@@ -129,13 +141,14 @@ BODY = [
     ("head_back",  (0.000,  0.442, HEAD_Z - 0.010), (0, 1, 0.16), 0.206, 0.202),
     ("head_mid",   (0.000,  0.494, HEAD_Z + 0.004), (0, 1, 0), 0.212, 0.204),
     ("brow",       (0.000,  0.548, HEAD_Z - 0.004), (0, 1, -0.06), 0.194, 0.188),
-    ("cheek",      (0.000,  0.588, HEAD_Z - 0.024), (0, 1, -0.12), 0.158, 0.152),
-    # Muzzle. Forward reach pulled in from 0.672 to 0.645 and the front rings
-    # flattened (rz below rx), because the profile review said it still read as
-    # a slightly spherical snout.
-    ("muzzle_02",  (0.000,  0.618, HEAD_Z - 0.046), (0, 1, -0.16), 0.122, 0.106),
-    ("muzzle_01",  (0.000,  0.638, HEAD_Z - 0.056), (0, 1, -0.10), 0.098, 0.082),
-    ("nose",       (0.000,  0.650, HEAD_Z - 0.058), (0, 1, 0), 0.040, 0.034),
+    # Cheek mass connecting eye -> muzzle -> lower face -> mane.
+    ("cheek",      (0.000,  0.588, HEAD_Z - 0.024), (0, 1, -0.12), 0.172, 0.160),
+    # Muzzle shortened again. Measured projection beyond the mane is 0.106 H;
+    # the front ring moves from 0.650 to 0.632 and the rings flatten further
+    # (rz below rx), so it reads broader and softer rather than longer.
+    ("muzzle_02",  (0.000,  0.612, HEAD_Z - 0.048), (0, 1, -0.16), 0.128, 0.104),
+    ("muzzle_01",  (0.000,  0.628, HEAD_Z - 0.058), (0, 1, -0.10), 0.102, 0.080),
+    ("nose",       (0.000,  0.632, HEAD_Z - 0.060), (0, 1, 0), 0.042, 0.034),
 ]
 
 BODY_INDEX = {name: i for i, (name, *_rest) in enumerate(BODY)}
@@ -145,54 +158,60 @@ BODY_INDEX = {name: i for i, (name, *_rest) in enumerate(BODY)}
 # Each entry: (name, centre, tangent, radius). Ring 0 is always the patch
 # boundary on the body, so these start at ring 1.
 def front_limb(sx):
+    """MEASURED against the reference's leg band.
+
+    Front view, solid width across the leg band:
+
+        h 0.03   reference 0.450 H   model was 0.327
+        h 0.09   reference 0.369 H   model was 0.254
+        h 0.12   reference 0.385 H   model was 0.250
+
+    The shafts were roughly 40% too thin and the paws 30% too small — enough that
+    the legs read as pegs and the whole lower body lost the reference's soft cub
+    weight. It was also the single largest silhouette error left, 11,581 missing
+    pixels in one side-view band.
+
+    The paws are both an art feature and a locomotion one: ground-contact shape
+    is what makes a planted paw look planted.
+    """
     return [
-        ("scapula",  (sx * 0.104, 0.224, 0.300), (0, -0.10, -1), 0.076),
-        ("upper_02", (sx * 0.108, 0.214, 0.252), (0, -0.16, -1), 0.072),
-        ("upper_01", (sx * 0.110, 0.202, 0.206), (0, -0.20, -1), 0.070),
+        ("scapula",  (sx * 0.110, 0.224, 0.300), (0, -0.10, -1), 0.100),
+        ("upper_02", (sx * 0.116, 0.214, 0.252), (0, -0.16, -1), 0.098),
+        ("upper_01", (sx * 0.120, 0.202, 0.206), (0, -0.20, -1), 0.094),
         # Elbow: three rings tight together, and the joint is PRE-BENT backward.
-        #
-        # The first cage ran the front leg dead straight from shoulder to wrist.
-        # Straight limbs give inverse kinematics zero extension headroom, so
-        # raising the body 50mm simply lifted the paws off the ground — the
-        # planted-paw proof measured 47mm of front drift for exactly that reason.
-        # A rest pose with a shallow bend is standard rig practice and it is what
-        # gives the solver somewhere to go in both directions.
-        ("elbow_up", (sx * 0.110, 0.182, 0.178), (0, -0.10, -1), 0.072),
-        ("elbow",    (sx * 0.110, 0.176, 0.160), (0, 0.06, -1), 0.074),
-        ("elbow_lo", (sx * 0.110, 0.182, 0.142), (0, 0.18, -1), 0.070),
-        ("forearm",  (sx * 0.110, 0.206, 0.108), (0, 0.22, -1), 0.064),
-        ("wrist_up", (sx * 0.110, 0.213, 0.080), (0, 0.12, -1), 0.060),
-        ("wrist",    (sx * 0.110, 0.216, 0.064), (0, 0.04, -1), 0.061),
-        # Paw: broad upper mass, then a flattened sole. Toe suggestion comes
-        # from the two widest rings, not from separate floating socks.
-        ("paw_top",  (sx * 0.112, 0.222, 0.046), (0, 0.30, -1), 0.076),
-        ("paw_mid",  (sx * 0.112, 0.232, 0.026), (0, 0.45, -1), 0.086),
-        ("paw_sole", (sx * 0.112, 0.234, 0.008), (0, 0.10, -1), 0.082),
+        # Straight limbs give IK zero extension headroom.
+        ("elbow_up", (sx * 0.122, 0.182, 0.178), (0, -0.10, -1), 0.096),
+        ("elbow",    (sx * 0.122, 0.176, 0.160), (0, 0.06, -1), 0.098),
+        ("elbow_lo", (sx * 0.122, 0.182, 0.142), (0, 0.18, -1), 0.094),
+        ("forearm",  (sx * 0.122, 0.206, 0.108), (0, 0.22, -1), 0.088),
+        ("wrist_up", (sx * 0.124, 0.213, 0.080), (0, 0.12, -1), 0.084),
+        ("wrist",    (sx * 0.124, 0.216, 0.064), (0, 0.04, -1), 0.086),
+        # Paw: broad upper mass, then a flattened sole.
+        ("paw_top",  (sx * 0.126, 0.222, 0.046), (0, 0.30, -1), 0.100),
+        ("paw_mid",  (sx * 0.126, 0.232, 0.026), (0, 0.45, -1), 0.118),
+        ("paw_sole", (sx * 0.126, 0.234, 0.008), (0, 0.10, -1), 0.114),
     ]
 
 
 def rear_limb(sx):
     return [
-        ("hip",      (sx * 0.102, -0.292, 0.298), (0, 0, -1), 0.088),
-        ("thigh_02", (sx * 0.106, -0.284, 0.248), (0, 0.10, -1), 0.086),
-        ("thigh_01", (sx * 0.108, -0.268, 0.206), (0, 0.22, -1), 0.080),
+        ("hip",      (sx * 0.108, -0.292, 0.298), (0, 0, -1), 0.114),
+        ("thigh_02", (sx * 0.112, -0.284, 0.248), (0, 0.10, -1), 0.110),
+        ("thigh_01", (sx * 0.116, -0.268, 0.206), (0, 0.22, -1), 0.104),
         # Stifle (knee) — points FORWARD.
-        ("knee_up",  (sx * 0.108, -0.244, 0.182), (0, 0.20, -1), 0.077),
-        ("knee",     (sx * 0.108, -0.236, 0.164), (0, 0.05, -1), 0.075),
-        ("knee_lo",  (sx * 0.108, -0.242, 0.146), (0, -0.14, -1), 0.070),
-        ("shin",     (sx * 0.108, -0.268, 0.116), (0, -0.26, -1), 0.063),
+        ("knee_up",  (sx * 0.118, -0.244, 0.182), (0, 0.20, -1), 0.100),
+        ("knee",     (sx * 0.118, -0.236, 0.164), (0, 0.05, -1), 0.098),
+        ("knee_lo",  (sx * 0.118, -0.242, 0.146), (0, -0.14, -1), 0.094),
+        ("shin",     (sx * 0.118, -0.268, 0.116), (0, -0.26, -1), 0.086),
         # Hock — points BACKWARD. This reversal is the whole reason a rear leg
-        # does not behave like a human leg, and the walk, crouch, take-off and
-        # landing all depend on it existing in the cage. The zigzag is also what
-        # gives the chain reach headroom: summed segment length exceeds the
-        # straight-line hip-to-paw distance, and that surplus is how far the body
-        # can rise before the paw is dragged off the ground.
-        ("hock_up",  (sx * 0.108, -0.284, 0.094), (0, -0.20, -1), 0.061),
-        ("hock",     (sx * 0.108, -0.290, 0.078), (0, 0.05, -1), 0.063),
-        ("hock_lo",  (sx * 0.108, -0.276, 0.060), (0, 0.32, -1), 0.058),
-        ("ankle",    (sx * 0.110, -0.256, 0.044), (0, 0.34, -1), 0.061),
-        ("paw_top",  (sx * 0.112, -0.244, 0.028), (0, 0.30, -1), 0.074),
-        ("paw_sole", (sx * 0.112, -0.238, 0.008), (0, 0.10, -1), 0.080),
+        # does not behave like a human leg, and it also gives the chain the reach
+        # headroom the planted-paw proof depends on.
+        ("hock_up",  (sx * 0.118, -0.284, 0.094), (0, -0.20, -1), 0.082),
+        ("hock",     (sx * 0.118, -0.290, 0.078), (0, 0.05, -1), 0.084),
+        ("hock_lo",  (sx * 0.118, -0.276, 0.060), (0, 0.32, -1), 0.080),
+        ("ankle",    (sx * 0.120, -0.256, 0.044), (0, 0.34, -1), 0.084),
+        ("paw_top",  (sx * 0.122, -0.244, 0.028), (0, 0.30, -1), 0.098),
+        ("paw_sole", (sx * 0.122, -0.238, 0.008), (0, 0.10, -1), 0.112),
     ]
 
 
@@ -205,10 +224,15 @@ def ear(sx):
     spike) and sit forward of the mane plane.
     """
     return [
-        ("root",  (sx * 0.148, 0.474, HEAD_Z + 0.148), (sx * 0.38, -0.12, 1), 0.056),
-        ("mid",   (sx * 0.164, 0.472, HEAD_Z + 0.188), (sx * 0.30, -0.10, 1), 0.060),
-        ("upper", (sx * 0.174, 0.470, HEAD_Z + 0.220), (sx * 0.22, -0.08, 1), 0.050),
-        ("tip",   (sx * 0.178, 0.468, HEAD_Z + 0.238), (sx * 0.16, -0.06, 1), 0.026),
+        # Lowered. The silhouette QA found the ears the tallest thing on the
+        # model — 4,157 extra pixels in the top front band and 4,493 at the rear
+        # — where the reference has them topping out just under the mane crown.
+        # Wider and shorter also makes them read from the side, which is the
+        # correction the brief asks for.
+        ("root",  (sx * 0.150, 0.474, HEAD_Z + 0.132), (sx * 0.40, -0.12, 1), 0.060),
+        ("mid",   (sx * 0.170, 0.472, HEAD_Z + 0.166), (sx * 0.32, -0.10, 1), 0.064),
+        ("upper", (sx * 0.182, 0.470, HEAD_Z + 0.194), (sx * 0.24, -0.08, 1), 0.054),
+        ("tip",   (sx * 0.188, 0.468, HEAD_Z + 0.208), (sx * 0.18, -0.06, 1), 0.028),
     ]
 
 
