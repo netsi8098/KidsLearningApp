@@ -24,7 +24,17 @@ from PIL import Image
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VIEWS = os.path.join(REPO, "art", "blender", "references", "turnaround-views")
-SIL = os.path.join(REPO, "art", "blender", "references", "silhouette-qa")
+# Which render folder to grade. Defaults to the CAD volume; pass a name to grade
+# any asset rendered by tools/blender/silhouette_render.py.
+NAME = sys.argv[1] if len(sys.argv) > 1 else "qa"
+# Which reference mask to grade against.
+#   subject -> the whole silhouette, body + mane
+#   body    -> the measured gold/cream region only
+# Grading a body-only render against the full silhouette reports the missing mane
+# as a body defect, which is not a useful signal.
+PART = sys.argv[2] if len(sys.argv) > 2 else "subject"
+SIL = os.path.join(REPO, "art", "blender", "references",
+                   "silhouette-qa" if NAME == "qa" else f"silhouette-{NAME}")
 HPX, GROUND_ROW = 520, 620
 
 
@@ -56,8 +66,11 @@ def band_profile(ref, mod, bands=10):
 
 def main():
     report, overlays = {}, {}
-    for view in ("front", "side", "rear"):
-        ref = load(os.path.join(VIEWS, f"{view}-norm.png"))
+    views = [v for v in ("front", "side", "rear", "three-quarter")
+             if os.path.exists(os.path.join(SIL, f"model-{v}.png"))]
+    for view in views:
+        rname = f"{view}-norm.png" if PART == "subject" else f"{view}-{PART}-norm.png"
+        ref = load(os.path.join(VIEWS, rname))
         mod = load(os.path.join(SIL, f"model-{view}.png"))
         if ref.shape != mod.shape:
             raise SystemExit(f"{view}: shape mismatch {ref.shape} vs {mod.shape}")
@@ -75,21 +88,27 @@ def main():
         rgb[..., 1] = np.where(ref & mod, 210, 0)       # green = agreement
         rgb[..., 2] = np.where(mod & ~ref, 235, 0)      # blue  = extra
         overlays[view] = Image.fromarray(rgb)
-        overlays[view].save(os.path.join(SIL, f"overlay-{view}.png"))
+        overlays[view].save(os.path.join(SIL, f"overlay-{PART}-{view}.png"))
 
-    sheet = Image.new("RGB", (700 * 3, 700), (10, 10, 12))
-    for i, view in enumerate(("front", "side", "rear")):
+    sheet = Image.new("RGB", (700 * len(views), 700), (10, 10, 12))
+    for i, view in enumerate(views):
         sheet.paste(overlays[view], (i * 700, 0))
-    sheet.save(os.path.join(SIL, "overlay-sheet.png"))
+    sheet.save(os.path.join(SIL, f"overlay-{PART}-sheet.png"))
 
-    with open(os.path.join(SIL, "silhouette_report.json"), "w") as fh:
+    with open(os.path.join(SIL, f"silhouette_report_{PART}.json"), "w") as fh:
         json.dump(report, fh, indent=2)
 
-    print("===SILHOUETTE_QA===")
+    print(f"===SILHOUETTE_QA=== [{NAME} vs {PART}]")
     for view, r in report.items():
         print(f"{view:6} IoU={r['iou']:.4f}  missing={r['missing_pct']:5.2f}%  "
               f"extra={r['extra_pct']:5.2f}%")
+    # Authority order from the brief: front hero, then side, then 3/4, with the
+    # rear allowed tolerance for the documented 18% mane-width disagreement.
+    WEIGHT = {"front": 0.35, "side": 0.30, "three-quarter": 0.25, "rear": 0.10}
+    tw = sum(WEIGHT[v] for v in report)
+    weighted = sum(report[v]["iou"] * WEIGHT[v] for v in report) / tw
     print(f"MEAN_IOU={np.mean([r['iou'] for r in report.values()]):.4f}")
+    print(f"WEIGHTED_IOU={weighted:.4f}   (front .35 side .30 3/4 .25 rear .10)")
     print("\nworst bands (largest disagreement, by height):")
     for view, r in report.items():
         worst = sorted(r["bands"], key=lambda b: b["iou"])[:3]

@@ -149,3 +149,48 @@ ready.
 
 CadQuery lives in an isolated venv at `/tmp/cqenv` (not a project dependency —
 it is a modelling-time tool and must never reach the web bundle).
+
+---
+
+## Measurement result — where identity actually fails
+
+With the mane/body colour split measured, the reference gives separate numbers
+for the skull and the mane:
+
+| | measured | current donor cage |
+|---|---|---|
+| face width (front, inside the mane) | 0.462 H | 0.458 H |
+| mane width | 0.708 H at h=0.62 | ~0.74 H |
+| mane vertical band | h 0.19 – 0.98 | ~0.22 – 1.00 |
+| mane fore-aft extent (side) | u 0.08 – 0.49 | ~0.10 – 0.50 |
+| muzzle projection beyond mane | 0.106 H | ~0.12 H |
+| total length | 1.344 H | 1.365 H |
+
+**The donor cage is dimensionally close.** Every gross proportion is within a few
+percent. So the identity failure is not the cross-section *dimensions* — it is
+the secondary **form**: a mane that reads as a scalloped ball instead of a
+teardrop, a chest that does not rise into it, a flat rump, and ears that vanish
+in profile.
+
+That changes the plan for the better: the cross-section table does not need
+wholesale replacement, which is also what preserves the joint contract. The work
+is form, and it is exactly tasks 11–13.
+
+### And it changes the ORDER
+
+Graded against the full reference silhouette, the donor cage scores a weighted
+IoU of **0.590** with **38% missing** — but the cage carries no mane at all, so
+that number is mostly measuring an absent object.
+
+Grading the cage body against the measured *body* mask instead gives 0.472, and
+that is also misleading in the opposite direction: the reference's visible gold
+face is only the part showing through the mane opening, while the cage's skull is
+a whole head. The extra shows up at h 0.6–1.0 in every view.
+
+Neither number is a fair test, and the reason is the same in both cases:
+**identity cannot be measured until the mane exists.** So the mane foundation
+comes before further body refinement, and body form is then tuned against a
+metric that means something.
+
+Baseline recorded for comparison: donor cage, full silhouette, weighted IoU
+**0.590** (front 0.600, side 0.518, 3/4 0.618, rear 0.700).
