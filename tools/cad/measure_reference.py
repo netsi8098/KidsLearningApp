@@ -235,6 +235,33 @@ def main():
     body_us = [lm["body_span_side"]["front_u"], lm["body_span_side"]["rear_u"]]
     lm["muzzle_projection_H"] = round((mane_us[0] - body_us[0]) * s["length_H"], 4)
     lm["side_length_H"] = s["length_H"]
+
+    # Polar profile of the mane about the FACE CENTRE, front view.
+    #
+    # A mane is a radial fan around the face opening, not a tube swept backward.
+    # Sweeping a tube produced a lampshade with visible ring seams three times
+    # over. What the construction actually needs is: for each azimuth around the
+    # face, how far out does the mane reach? That is directly measurable.
+    fm = np.asarray(Image.open(f"{OUT_DIR}/front-mane-norm.png").convert("L")) > 110
+    fb = np.asarray(Image.open(f"{OUT_DIR}/front-body-norm.png").convert("L")) > 110
+    bys, bxs = np.nonzero(fb)
+    # Face centre = centroid of the gold region ABOVE the mane's lower band, so
+    # the legs and chest do not drag it downward.
+    hi_row = GROUND_ROW - int(lm["mane_band"]["low"] * HPX)
+    sel = bys < hi_row
+    fcx = float(bxs[sel].mean()) if sel.any() else float(bxs.mean())
+    fcy = float(bys[sel].mean()) if sel.any() else float(bys.mean())
+    polar = {}
+    mys, mxs = np.nonzero(fm)
+    ang = np.degrees(np.arctan2(-(mys - fcy), mxs - fcx)) % 360.0
+    rad = np.hypot(mxs - fcx, mys - fcy) / HPX
+    for a0 in range(0, 360, 5):
+        m = (ang >= a0) & (ang < a0 + 5)
+        if m.any():
+            polar[str(a0)] = round(float(np.percentile(rad[m], 97)), 5)
+    lm["face_centre_front"] = {"x_H": round((fcx - CANVAS / 2) / HPX, 5),
+                               "h": round((GROUND_ROW - fcy) / HPX, 5)}
+    lm["mane_polar_front"] = polar
     model["landmarks"] = lm
 
     with open(os.path.join(OUT_DIR, "reference_model.json"), "w") as fh:
@@ -249,6 +276,15 @@ def main():
     print(f"  body fore-aft (side)  u {lm['body_span_side']['front_u']:.2f} .. {lm['body_span_side']['rear_u']:.2f}")
     print(f"  muzzle beyond mane    {lm['muzzle_projection_H']:.3f} H")
     print(f"  side length           {lm['side_length_H']:.3f} H")
+    fc = lm["face_centre_front"]
+    print(f"  face centre (front)   x={fc['x_H']:+.3f} h={fc['h']:.3f}")
+    pol = lm["mane_polar_front"]
+    print("  mane polar radius about the face centre:")
+    for a in (0, 45, 90, 135, 180, 225, 270, 315):
+        print(f"      {a:3d}deg  {pol.get(str(a), 0.0):.3f} H", end="")
+        if a in (135, 315):
+            print()
+    print()
     print(f"\nwrote {OUT_DIR}/reference_model.json")
 
 

@@ -194,3 +194,67 @@ metric that means something.
 
 Baseline recorded for comparison: donor cage, full silhouette, weighted IoU
 **0.590** (front 0.600, side 0.518, 3/4 0.618, rear 0.700).
+
+---
+
+## Mane foundation (Level 1 + 2) — four attempts, and what each taught
+
+Measured result: **weighted IoU 0.590 → 0.768** from the mane alone.
+
+| view | donor (no mane) | + mane foundation |
+|---|---|---|
+| front | 0.600 | **0.811** |
+| side | 0.518 | **0.703** |
+| three-quarter | 0.618 | **0.782** |
+| rear | 0.700 | **0.781** |
+| **weighted** | **0.590** | **0.768** |
+
+Envelope matches the measurement exactly: width 0.7077 H, depth 0.5577 H, height
+0.7910 H — all +0.0%.
+
+### The four attempts
+
+1. **Tube swept backward, capped.** Enclosed the whole head. I had asserted the
+   face would project through the front cap; a cap is a surface, so it does not.
+   The character read as an egg with a muzzle poking out of the bottom.
+2. **Tube with a face aperture.** A lampshade collar with visible ring seams.
+   Dimensions were right, form was not.
+3. **Radial fan around the aperture.** A megaphone — flaring backward away from
+   the head, because the widest ring landed 45% of the way back. No single view
+   states where along its depth a mane is widest; I had guessed.
+4. **Two-view construction.** The side view sets each ring's vertical extent; then
+   every vertex on that ring looks up **its own height** in the front view's mane
+   width profile and takes that as its allowed width. Both projections are
+   correct by construction rather than by iteration — which is precisely the
+   brief's "matching the front view must not destroy the side view."
+
+Supporting measurements added along the way, because each failure was a missing
+measurement rather than a missing idea:
+
+* **polar radius against azimuth** about the measured face centre, mirror-averaged
+  (the drawing is asymmetric — 0.261 H at 45° against 0.338 H at its mirror — and
+  the character must not be);
+* **widest depth station**, taken as the side view's tallest mane column, which is
+  the honest proxy for where the mass sits;
+* the mane's full vertical extent per column (`lowest`, not `first_bottom` — a
+  column through the mane hits the hood, then a gap at the face, then the chest
+  ruff, so the first run describes only the upper mass).
+
+Level 2 clumps are placed in the mane's **own** coordinates — azimuth and flow
+position — not as 3D directions. In that frame the parameterisation already
+follows the mane's flow, so a bump becomes a lock. Applied as 3D radial
+displacement they flattened against the hood's curvature and vanished entirely
+once the result was normalised back to size.
+
+Order matters and cost a pass: fit to the measurement **last**. Catmull-Clark plus
+a relax pass pull a tube inward, so fitting first left the final width 17% under
+the measurement even though the pre-modifier mesh was exact.
+
+### Still wrong
+
+* **No crown or quiff.** The reference has real mane mass above the ears; this
+  has none, and it is most of the 16.6% still missing in front view.
+* **The front rim reads as a raised lip** around the face rather than tucking in.
+* **Side view reads as a cape hanging vertically**, not the reference's teardrop
+  sweeping up over the crown and back.
+* Rear view resolves into two wing-like masses.
