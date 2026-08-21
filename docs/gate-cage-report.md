@@ -424,3 +424,54 @@ control bones in the skin, both clips present, floor gap -11.5 mm, 29 draw calls
 4. **Tuft slightly high and forward** of the reference's.
 5. **No face.** Still Gate 15, still deliberately not started, and still a large
    part of why this does not yet read as *the* mascot.
+
+### Proportion correction — the barrel rode too high
+
+Measuring the reference side view's TOP and BOTTOM edge at each fore-aft station,
+rather than only its outline, found the largest remaining error and it was not a
+shape error at all:
+
+| y | ref back | model back | ref belly | model belly |
+| --- | --- | --- | --- | --- |
+| 0.00 | 0.485 | 0.542 | 0.175 | 0.225 |
+| -0.05 | 0.473 | 0.525 | 0.190 | 0.221 |
+| -0.10 | 0.471 | 0.512 | 0.171 | 0.217 |
+
+Both edges wrong by the same amount in the same direction means the barrel is the
+right size in the wrong place: it sat ~0.045 H too high on legs correspondingly
+~20% too long. The reference is a chunkier, shorter-legged cub than the model was,
+and that single fact was producing the blue band along the back AND the red band
+under the belly — two defects that looked unrelated on the overlay.
+
+Torso ring centres and rz were reset from the measured top/bottom pairs, both limb
+shafts compressed to keep the paws on the ground, and the spine, scapula and limb
+bones moved with them. The spine positions are now written out literally instead of
+derived from `SPINE_Z`, because `SPINE_Z` lives in the contract that the technical
+donor also reads — changing it would silently reshape the proven fallback.
+
+| Metric | Donor | Before | After | |
+| --- | --- | --- | --- | --- |
+| Side IoU | — | 0.781 | **0.801** | first time above 0.80 |
+| Weighted IoU | — | 0.846 | **0.849** | improved |
+| Battery FAIL | 0 | 0 | **0** | held |
+| Worst area ratio | 0.267 | 0.128 | **0.165** | improved |
+| Pinched faces | 0 | 2 | **6** | regressed |
+| Reach headroom FL/FR | 20.0 mm | 20.0 mm | **22.1 mm** | improved |
+| Reach headroom RL/RR | 40.9 mm | 40.9 mm | **42.1 mm** | improved |
+| Planted paw, animation | 0.052 mm | 0.070 mm | **0.062 mm** | improved |
+| Walk support slide | 0.46 mm | 0.64 mm | 0.64 mm | held |
+| IK residual | 0.00 mm | 0.00 mm | **0.00 mm** | held |
+
+Read honestly, this trade went the right way on severity and the wrong way on
+count. The WORST pinch improved from 0.128 to 0.165 of rest area — closer to the
+donor's 0.267 than at any point in this rebuild — while the NUMBER of mildly
+flagged faces rose from 2 to 6. Reach headroom and planted-paw accuracy both
+improved, because shorter, more-bent limbs give the IK chain more room to extend.
+Nothing fails, and the walk is unchanged at 0.64 mm with zero IK residual.
+
+The remaining 6 pinches are the same ring-spacing mechanism found earlier:
+compressing a shaft moves its rings closer together, smaller faces score worse on
+an area ratio. Setting the belly to the middle of its measured range (0.172 rather
+than the 0.160 low end) needed less compression and took the count 7 → 6 while
+improving worst area 0.139 → 0.165. Further recovery belongs with the leg-volume
+pass, which will re-space those rings anyway.

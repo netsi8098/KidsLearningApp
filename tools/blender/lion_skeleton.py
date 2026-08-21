@@ -43,11 +43,30 @@ def skeleton():
     B = []
 
     B.append(("root", None, (0.0, -0.10, 0.010), (0.0, -0.10, 0.110)))
-    B.append(("pelvis", "root", (0.0, -0.336, SPINE_Z + 0.000), (0.0, -0.216, SPINE_Z - 0.006)))
-    B.append(("spine_01", "pelvis", (0.0, -0.216, SPINE_Z - 0.006), (0.0, -0.076, SPINE_Z - 0.004)))
-    B.append(("spine_02", "spine_01", (0.0, -0.076, SPINE_Z - 0.004), (0.0, 0.072, SPINE_Z + 0.004)))
-    B.append(("chest", "spine_02", (0.0, 0.072, SPINE_Z + 0.004), (0.0, 0.244, SPINE_Z + 0.052)))
-    B.append(("neck_01", "chest", (0.0, 0.244, SPINE_Z + 0.052), (0.0, 0.372, SPINE_Z + 0.272)))
+    # DOCUMENTED RIG ADJUSTMENT #3 — the torso dropped, so the spine drops with it.
+    #
+    # Measuring the reference side view's TOP and BOTTOM edge at each fore-aft
+    # station (not just the outline) showed the whole barrel riding too high:
+    #
+    #     y        ref top   model top   |  ref belly  model belly
+    #     0.00      0.485      0.542     |    0.175      0.225
+    #    -0.05      0.473      0.525     |    0.190      0.221
+    #    -0.10      0.471      0.512     |    0.171      0.217
+    #
+    # Both edges are wrong by the same amount in the same direction, which is not
+    # a shape error at all — it means the barrel sits ~0.045 H too high on legs
+    # that are correspondingly ~20% too long. The reference is a chunkier,
+    # shorter-legged cub than the model was.
+    #
+    # These positions are written out rather than derived from SPINE_Z because
+    # SPINE_Z belongs to the CONTRACT, which the technical donor also reads.
+    # Changing it would silently reshape the donor, and the donor is the proven
+    # fallback — it must not move. See docs/asset-roles.md.
+    B.append(("pelvis", "root", (0.0, -0.336, 0.280), (0.0, -0.216, 0.318)))
+    B.append(("spine_01", "pelvis", (0.0, -0.216, 0.318), (0.0, -0.076, 0.329)))
+    B.append(("spine_02", "spine_01", (0.0, -0.076, 0.329), (0.0, 0.072, 0.348)))
+    B.append(("chest", "spine_02", (0.0, 0.072, 0.348), (0.0, 0.244, 0.404)))
+    B.append(("neck_01", "chest", (0.0, 0.244, 0.404), (0.0, 0.372, SPINE_Z + 0.272)))
     B.append(("head", "neck_01", (0.0, 0.372, SPINE_Z + 0.272), (0.0, 0.494, HEAD_Z + 0.004)))
     # Hinged at the BACK of the muzzle so opening swings the chin down instead of
     # scaling the whole snout forward.
@@ -58,27 +77,27 @@ def skeleton():
         # inside the chest, heat weighting handed this bone a share of the rib
         # cage and lifting one paw inverted a third of the mesh.
         B.append((f"scapula_F{sd}", "chest",
-                  (sx * 0.098, 0.232, 0.352), (sx * 0.104, 0.222, 0.300)))
+                  (sx * 0.098, 0.232, 0.326), (sx * 0.104, 0.222, 0.269)))
         # Follows the cage's PRE-BENT elbow: shoulder 0.224 -> elbow 0.190 ->
         # wrist 0.216. Binding a limb straight leaves IK unable to extend, and
         # the bend depth is what sets the reach headroom the rig reports.
         B.append((f"upper_front_F{sd}", f"scapula_F{sd}",
-                  (sx * 0.104, 0.224, 0.300), (sx * 0.110, 0.176, 0.160)))
+                  (sx * 0.104, 0.224, 0.269), (sx * 0.110, 0.176, 0.146)))
         B.append((f"forearm_F{sd}", f"upper_front_F{sd}",
-                  (sx * 0.110, 0.176, 0.160), (sx * 0.110, 0.216, 0.064)))
+                  (sx * 0.110, 0.176, 0.146), (sx * 0.110, 0.216, 0.062)))
         B.append((f"wrist_F{sd}", f"forearm_F{sd}",
-                  (sx * 0.110, 0.216, 0.064), (sx * 0.112, 0.222, 0.046)))
+                  (sx * 0.110, 0.216, 0.062), (sx * 0.112, 0.222, 0.046)))
         B.append((f"paw_F{sd}", f"wrist_F{sd}",
                   (sx * 0.112, 0.222, 0.046), (sx * 0.112, 0.238, 0.008)))
 
         B.append((f"thigh_R{sd}", "pelvis",
-                  (sx * 0.102, -0.292, 0.298), (sx * 0.108, -0.236, 0.164)))
+                  (sx * 0.102, -0.292, 0.288), (sx * 0.108, -0.236, 0.159)))
         B.append((f"shin_R{sd}", f"thigh_R{sd}",
-                  (sx * 0.108, -0.236, 0.164), (sx * 0.108, -0.290, 0.078)))
+                  (sx * 0.108, -0.236, 0.159), (sx * 0.108, -0.290, 0.076)))
         B.append((f"hock_R{sd}", f"shin_R{sd}",
-                  (sx * 0.108, -0.290, 0.078), (sx * 0.110, -0.256, 0.044)))
+                  (sx * 0.108, -0.290, 0.076), (sx * 0.110, -0.256, 0.043)))
         B.append((f"ankle_R{sd}", f"hock_R{sd}",
-                  (sx * 0.110, -0.256, 0.044), (sx * 0.112, -0.244, 0.028)))
+                  (sx * 0.110, -0.256, 0.043), (sx * 0.112, -0.244, 0.028)))
         B.append((f"paw_R{sd}", f"ankle_R{sd}",
                   (sx * 0.112, -0.244, 0.028), (sx * 0.112, -0.238, 0.008)))
 
