@@ -133,6 +133,32 @@ def main():
     # rear allowed tolerance for the documented 18% mane-width disagreement.
     WEIGHT = {"front": 0.35, "side": 0.30, "three-quarter": 0.25, "rear": 0.10}
     tw = sum(WEIGHT[v] for v in report)
+    # CLIPPING WARNING. A reference mask that touches the canvas edge is TRUNCATED,
+    # and the bands where it does are not measurable — the true extent there is a
+    # lower bound, not a value. The side turnaround is clipped at both edges: the
+    # mane's chin lobe on the front, the tail tuft on the rear. Two consequences
+    # worth keeping visible. The reference body LENGTH is a lower bound, so any
+    # "length over height" check against it is loose. And in a clipped band the
+    # only meaningful target is "reach the edge" — which is still legitimate for
+    # IoU, because the model render is clipped by the same canvas, but it must not
+    # be read as having matched a measured shape.
+    clipped = {}
+    for view in report:
+        rname = f"{view}-norm.png" if PART == "subject" else f"{view}-{PART}-norm.png"
+        r = load(os.path.join(VIEWS, rname))
+        hits = []
+        for side, col in (("front-edge", 0), ("rear-edge", -1)):
+            rows = np.where(r[:, col])[0]
+            if len(rows):
+                hits.append(f"{side} z {(GROUND_ROW - rows.max()) / HPX:.3f}"
+                            f"-{(GROUND_ROW - rows.min()) / HPX:.3f}")
+        if hits:
+            clipped[view] = hits
+    if clipped:
+        print("REFERENCE CLIPPED AT CANVAS EDGE (bands not measurable):")
+        for v, h in clipped.items():
+            print(f"  {v}: " + "; ".join(h))
+
     print("registration (centroid, px): " + "  ".join(
         f"{v}={report[v]['registration_px']:+d}" for v in report))
     print("unregistered IoU:           " + "  ".join(

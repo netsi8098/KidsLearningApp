@@ -33,6 +33,10 @@ import os as _os
 _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 from lion_contract import HEAD_Z, SPINE_Z  # noqa: E402
 
+# The cage's head sits at the MEASURED face centre, not the contract's
+# HEAD_Z. The contract is shared with the technical donor and must not move.
+HEAD_CAGE_Z = 0.604
+
 
 def skeleton():
     """(name, parent, head, tail) for the production deform skeleton.
@@ -66,8 +70,13 @@ def skeleton():
     B.append(("spine_01", "pelvis", (0.0, -0.216, 0.318), (0.0, -0.076, 0.329)))
     B.append(("spine_02", "spine_01", (0.0, -0.076, 0.329), (0.0, 0.072, 0.348)))
     B.append(("chest", "spine_02", (0.0, 0.072, 0.348), (0.0, 0.244, 0.404)))
-    B.append(("neck_01", "chest", (0.0, 0.244, 0.404), (0.0, 0.372, SPINE_Z + 0.272)))
-    B.append(("head", "neck_01", (0.0, 0.372, SPINE_Z + 0.272), (0.0, 0.494, HEAD_Z + 0.004)))
+    # DOCUMENTED RIG ADJUSTMENT #4 — the head bone drops 0.131 with the head.
+    # face_centre_front measures h = 0.604; the cage was building its head around
+    # the contract's HEAD_Z = 0.735. See the HEAD_CAGE_Z note in cage_lion.py.
+    # As with the spine, HEAD_Z in the contract is left alone because the donor
+    # reads it. Bone names and count are unchanged; only rest positions move.
+    B.append(("neck_01", "chest", (0.0, 0.244, 0.404), (0.0, 0.372, 0.496)))
+    B.append(("head", "neck_01", (0.0, 0.372, 0.496), (0.0, 0.494, HEAD_CAGE_Z + 0.004)))
     # Hinged at the BACK of the muzzle so opening swings the chin down instead of
     # scaling the whole snout forward.
     B.append(("jaw", "head", (0.0, 0.520, HEAD_Z - 0.060), (0.0, 0.640, HEAD_Z - 0.090)))
@@ -127,7 +136,7 @@ def skeleton():
         # deg) so they break the mane silhouette where the reference wants them.
         # Bone names and count are unchanged; only the rest positions move.
         B.append((f"ear_{sd}", "head",
-                  (sx * 0.170, 0.470, HEAD_Z + 0.076), (sx * 0.256, 0.460, HEAD_Z + 0.070)))
+                  (sx * 0.150, 0.484, HEAD_CAGE_Z + 0.150), (sx * 0.242, 0.468, HEAD_CAGE_Z + 0.196)))
 
     # DOCUMENTED RIG ADJUSTMENT — tail chain relocated, not distorted.
     #
@@ -167,11 +176,20 @@ BODY_WEIGHTS = {
     "rib_mid":     {"spine_02": 0.60, "chest": 0.40},
     "rib_front":   {"chest": 1.0},
     "chest":       {"chest": 1.0},
-    "shoulder":    {"chest": 0.70, "neck_01": 0.30},
-    "neck_base":   {"chest": 0.28, "neck_01": 0.72},
-    "neck_02":     {"neck_01": 1.0},
-    "neck_01":     {"neck_01": 0.60, "head": 0.40},
-    "head_base":   {"neck_01": 0.18, "head": 0.82},
+    # Ramp softened after the head dropped 0.131 and the neck became much shorter.
+    # The gradient used to be 0.30 -> 0.72 -> 1.00 over three rings; when the neck
+    # spanned 0.24 of height that was fine, but compressed to 0.11 the same
+    # differential shears across a third of the distance, and pose 08-head-turned
+    # went from WARN to FAIL with a 0.097 area ratio on the lower neck.
+    #
+    # Widening the ramp to 0.22 -> 0.54 -> 0.84 -> 1.00 spreads the same total
+    # rotation over four rings instead of effectively two. The chest share on
+    # `shoulder` also rises, which relieves the second pinch at the withers.
+    "shoulder":    {"chest": 0.78, "neck_01": 0.22},
+    "neck_base":   {"chest": 0.46, "neck_01": 0.54},
+    "neck_02":     {"chest": 0.16, "neck_01": 0.84},
+    "neck_01":     {"neck_01": 0.62, "head": 0.38},
+    "head_base":   {"neck_01": 0.22, "head": 0.78},
     "head_back":   {"head": 1.0},
     "head_mid":    {"head": 1.0},
     "brow":        {"head": 1.0},

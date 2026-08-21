@@ -116,6 +116,28 @@ def ring_points(centre, normal, rx, rz, count, phase=0.0):
     return pts
 
 
+# DOCUMENTED RIG ADJUSTMENT #4 — the head was 0.131 H too high.
+#
+# `face_centre_front` in the measured reference model puts the face centre at
+# h = 0.604. The cage was building its head around the contract's HEAD_Z = 0.735.
+#
+# Two independent measurements agree that 0.604 is right. The mane band runs
+# 0.190 to 0.981, centre 0.586 — so in the reference the face sits at the MIDDLE
+# of the mane's disc, which is how a lion's mane actually reads, and is why the
+# reference's forward-most side-view mass is at z 0.515-0.605 rather than at the
+# model's z 0.78. And the mane's own inner aperture was ALREADY built at
+# fc["h"] = 0.604 in mane_foundation, so the hood's hole and the head it was meant
+# to frame sat 0.131 apart. That mismatch is the real reason the face kept reading
+# as swallowed by the mane, and its inner rim as a hard edge.
+#
+# With the head at 0.604 the nose lands at y 0.674, which is exactly where the
+# reference's side-view front boundary is clipped by the canvas — an independent
+# check that came out right without being fitted to.
+#
+# HEAD_Z itself is NOT changed: the contract is shared with the technical donor,
+# which must not move. Same reasoning as the spine positions in lion_skeleton.
+HEAD_CAGE_Z = 0.604
+
 # ── the body tube ───────────────────────────────────────────────────────────
 # (name, centre, tangent, rx, rz)
 #
@@ -161,21 +183,21 @@ BODY = [
     # Chest rises INTO the mane rather than running level into it.
     ("chest",      (0.000,  0.192, 0.358), (0, 1, 0.16), 0.166, 0.182),
     ("shoulder",   (0.000,  0.244, 0.404), (0, 1, 0.55), 0.152, 0.164),
-    ("neck_base",  (0.000,  0.296, 0.470), (0, 0.72, 1), 0.126, 0.130),
-    ("neck_02",    (0.000,  0.334, SPINE_Z + 0.196), (0, 0.55, 1), 0.116, 0.120),
-    ("neck_01",    (0.000,  0.372, SPINE_Z + 0.272), (0, 0.85, 1), 0.116, 0.120),
-    ("head_base",  (0.000,  0.412, HEAD_Z - 0.086), (0, 1, 0.62), 0.170, 0.168),
-    ("head_back",  (0.000,  0.442, HEAD_Z - 0.010), (0, 1, 0.16), 0.206, 0.202),
-    ("head_mid",   (0.000,  0.494, HEAD_Z + 0.004), (0, 1, 0), 0.212, 0.204),
-    ("brow",       (0.000,  0.548, HEAD_Z - 0.004), (0, 1, -0.06), 0.194, 0.188),
+    ("neck_base",  (0.000,  0.296, 0.438), (0, 0.72, 1), 0.126, 0.130),
+    ("neck_02",    (0.000,  0.334, 0.470), (0, 0.55, 1), 0.116, 0.120),
+    ("neck_01",    (0.000,  0.372, 0.496), (0, 0.85, 1), 0.116, 0.120),
+    ("head_base",  (0.000,  0.412, HEAD_CAGE_Z - 0.086), (0, 1, 0.62), 0.170, 0.168),
+    ("head_back",  (0.000,  0.442, HEAD_CAGE_Z - 0.010), (0, 1, 0.16), 0.206, 0.202),
+    ("head_mid",   (0.000,  0.494, HEAD_CAGE_Z + 0.004), (0, 1, 0), 0.212, 0.204),
+    ("brow",       (0.000,  0.548, HEAD_CAGE_Z - 0.004), (0, 1, -0.06), 0.194, 0.188),
     # Cheek mass connecting eye -> muzzle -> lower face -> mane.
-    ("cheek",      (0.000,  0.588, HEAD_Z - 0.024), (0, 1, -0.12), 0.172, 0.160),
+    ("cheek",      (0.000,  0.588, HEAD_CAGE_Z - 0.024), (0, 1, -0.12), 0.172, 0.160),
     # Muzzle shortened again. Measured projection beyond the mane is 0.106 H;
     # the front ring moves from 0.650 to 0.632 and the rings flatten further
     # (rz below rx), so it reads broader and softer rather than longer.
-    ("muzzle_02",  (0.000,  0.612, HEAD_Z - 0.048), (0, 1, -0.16), 0.128, 0.104),
-    ("muzzle_01",  (0.000,  0.628, HEAD_Z - 0.058), (0, 1, -0.10), 0.102, 0.080),
-    ("nose",       (0.000,  0.632, HEAD_Z - 0.060), (0, 1, 0), 0.042, 0.034),
+    ("muzzle_02",  (0.000,  0.612, HEAD_CAGE_Z - 0.048), (0, 1, -0.16), 0.128, 0.104),
+    ("muzzle_01",  (0.000,  0.628, HEAD_CAGE_Z - 0.058), (0, 1, -0.10), 0.102, 0.080),
+    ("nose",       (0.000,  0.632, HEAD_CAGE_Z - 0.060), (0, 1, 0), 0.042, 0.034),
 ]
 
 BODY_INDEX = {name: i for i, (name, *_rest) in enumerate(BODY)}
@@ -374,10 +396,20 @@ def ear(sx):
         # different colour. So the reference is explicit: ears reach half-width
         # 0.31-0.32 while the mane behind them is only 0.18-0.22. The ears carry
         # that band's width and the mane must NOT be inflated to fake it.
-        ("root",  (sx * 0.238, 0.470, HEAD_Z + 0.078), (sx * 1.00, -0.09,  0.10), 0.052),
-        ("mid",   (sx * 0.260, 0.465, HEAD_Z + 0.074), (sx * 1.00, -0.09,  0.06), 0.054),
-        ("upper", (sx * 0.278, 0.460, HEAD_Z + 0.070), (sx * 1.00, -0.09,  0.02), 0.044),
-        ("tip",   (sx * 0.294, 0.456, HEAD_Z + 0.068), (sx * 1.00, -0.09, -0.02), 0.026),
+        # THIRD ear pass, forced by the head drop. The ears were offset FROM the
+        # head, so lowering the head 0.131 carried them out of the very band they
+        # existed to fill — front h 0.7-0.9 went to 6,826 missing pixels against 2
+        # extra, and front IoU fell 0.937 -> 0.911.
+        #
+        # The reference wants them at ABSOLUTE h 0.74-0.86, which is on the upper
+        # head and consistent with everything else: face centre 0.604, head radius
+        # ~0.21, so the head top is 0.81. The offsets relative to HEAD_CAGE_Z are
+        # therefore LARGER than before, not smaller. The patch also returns to 45
+        # degrees, which is only safe now that ring_frame is orthonormal.
+        ("root",  (sx * 0.196, 0.478, HEAD_CAGE_Z + 0.158), (sx * 1.00, -0.09, 0.45), 0.054),
+        ("mid",   (sx * 0.226, 0.472, HEAD_CAGE_Z + 0.180), (sx * 1.00, -0.09, 0.36), 0.056),
+        ("upper", (sx * 0.254, 0.466, HEAD_CAGE_Z + 0.200), (sx * 1.00, -0.09, 0.26), 0.048),
+        ("tip",   (sx * 0.272, 0.460, HEAD_CAGE_Z + 0.214), (sx * 1.00, -0.09, 0.18), 0.026),
     ]
 
 
@@ -785,8 +817,8 @@ def build():
     #   right leg  centre seg 14 = 315 deg (down and right)   columns 13,14,15
     #   left  leg  centre seg 10 = 225 deg (down and left)    columns  9,10,11
     #   tail       centre seg  4 =  90 deg (straight up)      columns  3, 4, 5
-    #   right ear  centre seg  1 =  22.5 deg (side, right)    columns  0, 1, 2
-    #   left  ear  centre seg  7 = 157.5 deg (side, left)     columns  6, 7, 8
+    #   right ear  centre seg  2 =  45 deg (upper side, right) columns  1, 2, 3
+    #   left  ear  centre seg  6 = 135 deg (upper side, left)  columns  5, 6, 7
     #
     # The ears moved out of columns 1-3 / 5-7 so they no longer share a column
     # with the tail patch (3,4,5) — and 22.5 degrees is where the reference puts
@@ -804,9 +836,9 @@ def build():
     tl = cage.open_patch(BODY_INDEX["rump"], 3)
     cage.cap_loop(cage.grow(tl, TAIL, prefix="tail")[-1])
 
-    er = cage.open_patch(BODY_INDEX["head_mid"], 0)
+    er = cage.open_patch(BODY_INDEX["head_mid"], 1)
     cage.cap_loop(cage.grow(er, ear(+1), prefix="earR")[-1])
-    el = cage.open_patch(BODY_INDEX["head_mid"], 6)
+    el = cage.open_patch(BODY_INDEX["head_mid"], 5)
     cage.cap_loop(cage.grow(el, ear(-1), prefix="earL")[-1])
 
     # Caps FIRST. The mouth socket sits within 0.036 of the nose ring, so with
@@ -817,14 +849,14 @@ def build():
     cage.cap_front()
 
     # Facial deformation loops, authored on a CLOSED surface.
-    cage.socket((0.095, 0.578, HEAD_Z + 0.048), (0.016, 0.011), 0.013, side=+1)
-    cage.socket((-0.095, 0.578, HEAD_Z + 0.048), (0.016, 0.011), 0.013, side=-1)
-    mouth = cage.socket((0.0, 0.610, HEAD_Z - 0.112), (0.015, 0.010), 0.010, side=None)
+    cage.socket((0.095, 0.578, HEAD_CAGE_Z + 0.048), (0.016, 0.011), 0.013, side=+1)
+    cage.socket((-0.095, 0.578, HEAD_CAGE_Z + 0.048), (0.016, 0.011), 0.013, side=-1)
+    mouth = cage.socket((0.0, 0.610, HEAD_CAGE_Z - 0.112), (0.015, 0.010), 0.010, side=None)
     cage.open_cavity(mouth, 0.052)
     # Brow ridges get one ring each — enough for a BrowUp shape key to have
     # something to move without adding density the rest of the forehead cannot use.
     for sx in (-1, 1):
-        cage.socket((sx * 0.072, 0.552, HEAD_Z + 0.108), (0.014,), 0.0, side=sx)
+        cage.socket((sx * 0.072, 0.552, HEAD_CAGE_Z + 0.108), (0.014,), 0.0, side=sx)
 
 
 
@@ -972,8 +1004,8 @@ def render_wires(obj):
     # Topology close-ups, so the loops around each joint can actually be judged.
     cd.lens = 135.0
     closeups = {
-        "eye": (0.075, 0.585, HEAD_Z + 0.02, 210),
-        "mouth": (0.0, 0.640, HEAD_Z - 0.10, 195),
+        "eye": (0.075, 0.585, HEAD_CAGE_Z + 0.02, 210),
+        "mouth": (0.0, 0.640, HEAD_CAGE_Z - 0.10, 195),
         "shoulder": (0.120, 0.215, 0.300, 235),
         "elbow": (0.120, 0.205, 0.160, 240),
         "hip": (0.115, -0.290, 0.295, 300),

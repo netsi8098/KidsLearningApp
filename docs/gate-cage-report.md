@@ -548,3 +548,64 @@ rebuild:
 
 Runtime: 191.8 KB GLB, 1,005 verts / 2,006 tris / 35 joints, Khronos clean, zero
 control bones in the skin, both clips, floor gap -11.5 mm, 121/121 green.
+
+### The head was 0.131 H too high — the biggest identity error of all
+
+`face_centre_front` in the measured reference model puts the face centre at
+h = 0.604. The cage was building its head around the contract's HEAD_Z = 0.735.
+
+Three independent things agree that 0.604 is right:
+
+1. The mane band runs 0.190 to 0.981, centre 0.586. In the reference the face sits
+   at the MIDDLE of the mane's disc — which is how a lion's mane actually reads,
+   and explains why the reference's forward-most side-view mass is at z 0.515-0.605
+   while the model's was at z 0.78.
+2. The mane's own inner aperture was ALREADY being built at `fc["h"]` = 0.604 in
+   `mane_foundation`. The hood's hole and the head it was meant to frame sat 0.131
+   apart. That latent mismatch is the real reason the face kept reading as
+   swallowed by the mane and its inner rim as a hard edge — a defect chased twice
+   before without finding the cause.
+3. With the head at 0.604 the nose lands at y 0.674, which is exactly where the
+   reference's side-view front boundary is clipped by the canvas. That check was
+   not fitted to; it came out right on its own.
+
+`HEAD_Z` in the contract is unchanged, for the same reason `SPINE_Z` was: the
+technical donor reads it and must not move. The cage uses a local `HEAD_CAGE_Z`.
+
+Side IoU 0.838 → **0.875**. But front fell 0.937 → 0.911, because the ears were
+offset FROM the head and dropped out of the band they existed to fill — front
+h 0.7-0.9 went to 6,826 missing pixels against 2 extra. The reference wants ears at
+ABSOLUTE h 0.74-0.86, which is on the upper head and consistent with everything
+else (face centre 0.604 + head radius ~0.21 = head top 0.81). Raising them
+recovered front to 0.936, and the patch could return to 45 degrees now that
+`ring_frame` is orthonormal.
+
+One battery FAIL appeared and was fixed at the source. Pose 08-head-turned failed
+at 0.097 area ratio on the lower neck: the neck weight ramp was 0.30 → 0.72 → 1.00
+over three rings, which was fine when the neck spanned 0.24 of height but shears
+across a third of that distance once compressed to 0.11. Widening the ramp to
+0.22 → 0.54 → 0.84 → 1.00 spreads the same rotation over four rings.
+
+### Where the mascot stands now
+
+| Metric | Donor | Now | |
+| --- | --- | --- | --- |
+| Weighted IoU | — | **0.878** | from 0.590 at the start of the rebuild |
+| Front IoU | — | **0.936** | |
+| Side IoU | — | **0.875** | |
+| Rear IoU | — | 0.825 | carries the documented 18% source-artwork disagreement |
+| 3/4 IoU | — | 0.822 | |
+| Battery | 0 FAIL | **0 FAIL**, 6 PASS / 6 WARN | best of the rebuild |
+| Worst area ratio | 0.267 | 0.165 | |
+| Pinched faces | 0 | 4 | |
+| Flipped faces | 24 | **16** | better than donor |
+| Slivers | — | **0** | |
+| Walk support slide | 0.46 mm | **0.166 mm** | better than donor |
+| IK residual, all four | 0.00 mm | **0.00 mm** | held |
+| Reach headroom | 20.0 / 40.9 mm | **22.1 / 42.1 mm** | better than donor |
+| Planted paw, animation | 0.052 mm | 0.105 mm | |
+| Feet planted per frame | 3 | 3 | held |
+
+`rig_overlay_check` remains REVIEW, all flagged joints rear-leg or pelvis, from the
+documented rear-limb trim. Runtime: 191.6 KB GLB, Khronos clean, both clips, floor
+gap -11.5 mm, 29 draw calls, 121/121 homepage checks green.
