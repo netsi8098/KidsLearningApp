@@ -4,6 +4,17 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  server: {
+    // Honour a port assigned by the environment. Vite does not read PORT on its
+    // own, so a dev-server harness that assigns one would otherwise be ignored:
+    // Vite would fall back to 5173, find it busy, silently move to the next
+    // free port, and the harness would open the wrong URL.
+    port: Number(process.env.PORT) || 5173,
+    // Only pin the port when one was explicitly assigned. A silent shift is
+    // what breaks the caller; a plain `npm run dev` keeps Vite's forgiving
+    // auto-increment. 5173 is also what the backend's CORS_ORIGIN defaults to.
+    strictPort: Boolean(process.env.PORT),
+  },
   plugins: [
     react(),
     tailwindcss(),
