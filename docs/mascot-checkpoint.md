@@ -205,10 +205,13 @@ contact, the largest single error in the asset.
    `face_model.json`, and the forms the loops frame — eyes as a measured
    sclera/iris/pupil/catchlight stack, brows, nose pad, mouth line — are built
    by `face_lion.py`. See the 2026-09-03 entries in `codex-claude-handoff.md`.
-   Still outstanding for Gate 15: the **shape-key set** (`Blink_*`, `BrowUp_*`,
-   `Smile`, `JawOpen`, visemes), the cream **muzzle patch**, and an **eyelid rim**
-   — without a dark liner the sclera reads as an unbounded white blob rather
-   than an eye.
+   The **eyelid arc** landed 2026-09-03 and is what turned the sclera from an
+   unbounded white blob into an eye. It is an ARC, not a rim: measured span
+   180 deg centred +52 deg (0 outboard, 90 up), stroke 0.0055 H at the peak
+   tapering to 0.0025 at the ends, nothing below. Still outstanding for
+   Gate 15: the **shape-key set** (`Blink_*`, `BrowUp_*`, `Smile`, `JawOpen`,
+   visemes), the cream **muzzle patch**, and skinning the face parts to
+   `head`/`jaw`.
 2. **The mane has no chin lobe.** Its front rim is a flat wall at y 0.566 where the
    reference recedes to 0.44-0.48 around the face and then juts forward below it.
    Silhouette-neutral (the union still matches) but it is why the mane reads as a

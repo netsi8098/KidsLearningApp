@@ -313,6 +313,103 @@ def main():
                 iris[side]["rgb"] = [int(v) for v in med]
                 iris[side]["srgb01"] = [round(float(v) / 255.0, 4) for v in med]
 
+    # ---- the UPPER LID ARC ----------------------------------------------
+    #
+    # The eye's dark outline is not a ring. Magnified, the reference draws a
+    # thick arc across the TOP that tapers at both ends and stops: there is no
+    # lower lid line, the white simply meets the coat. Building a full rim
+    # would be wrong, and a sector sweep confirms the asymmetry — coverage runs
+    # high from 0 deg (outboard) round through 90 (up) to about 220 (inboard
+    # and just below), and collapses across 240-320 (the bottom).
+    #
+    # VALUE CANNOT SEPARATE THE LID FROM THE PUPIL. The first attempt masked
+    # "dark, not white, not pupil, not amber" and reported a 1 px ring of
+    # mid-brown (64,34,15). That was the lid's ANTI-ALIASED EDGE: its core
+    # measures v < 0.15, the same window as the pupil, so excluding the pupil
+    # by value excluded most of the lid too. A vertical scan down the eye
+    # centre shows the real thing — 3 px of near-black above the white.
+    #
+    # They are separate CONNECTED COMPONENTS, so that is what separates them:
+    # the pupil is the dark blob containing the eye centre, the lid is any
+    # other dark blob in the opening.
+    lid = {}
+    dark_eye = subj & (val < 0.42) & (sat > 0.40)
+    for side in ("left", "right"):
+        b = eye_almond[side]
+        x0 = int(round(b["x_in_H"] * frame.height_px + frame.axis_col))
+        x1 = int(round(b["x_out_H"] * frame.height_px + frame.axis_col))
+        y0 = int(round(frame.ground - b["h_top"] * frame.height_px))
+        y1 = int(round(frame.ground - b["h_bot"] * frame.height_px))
+        win = np.zeros(subj.shape, bool)
+        win[max(y0 - 3, 0):y1 + 4, max(x0 - 3, 0):x1 + 4] = True
+        pu = pupils[side]
+        seed = (int(round(frame.ground - pu["h"] * frame.height_px)),
+                int(round(pu["x_H"] * frame.height_px + frame.axis_col)))
+        parts = []
+        for pix in components(win & dark_eye, 20):
+            if np.any((pix[:, 0] == seed[0]) & (pix[:, 1] == seed[1])):
+                continue          # that is the pupil
+            parts.append(pix)
+        if not parts:
+            continue
+        arc = max(parts, key=len)
+        rec = blob(frame, arc)
+
+        # ANGULAR PROFILE, which is the only description a builder can use.
+        # A bounding box is useless for an arc: the first version reported
+        # `thickness_H` 0.0704 for a stroke that is actually 0.005, because a
+        # curve over the top of a circle has a tall box. So the arc is swept in
+        # 30 degree sectors — 0 deg outboard, 90 up — and each sector's median
+        # radial stroke recorded.
+        am = np.zeros(subj.shape, bool)
+        am[arc[:, 0], arc[:, 1]] = True
+        cx = b["x_H"] * frame.height_px + frame.axis_col
+        cy = frame.ground - b["h"] * frame.height_px
+        rw = b["half_w_H"] * frame.height_px
+        rh = b["half_h_H"] * frame.height_px
+        sx = 1.0 if b["x_H"] > 0 else -1.0
+        sectors = {}
+        for a0 in range(0, 360, 30):
+            strokes = []
+            for a in np.arange(a0, a0 + 30, 2.0):
+                th = math.radians(a)
+                dx, dy = math.cos(th) * sx, -math.sin(th)
+                hits = 0
+                for t in np.arange(0.80, 1.25, 0.01):
+                    py = int(round(cy + dy * rh * t))
+                    px_ = int(round(cx + dx * rw * t))
+                    if (0 <= py < am.shape[0] and 0 <= px_ < am.shape[1]
+                            and am[py, px_]):
+                        hits += 1
+                if hits:
+                    strokes.append(hits * 0.01 * (rw + rh) / 2.0)
+            sectors[a0] = (round(float(np.median(strokes)) / frame.height_px, 5)
+                           if len(strokes) >= 8 else 0.0)
+        rec["stroke_by_sector_H"] = sectors
+        covered = [a for a, s in sectors.items() if s > 0]
+        rec["covered_sectors_deg"] = covered
+        peak_a = max(sectors, key=lambda a: sectors[a])
+        # Sector centre, wrapped so a run through 0 reads as a run, not a split.
+        wrapped = [a if a <= 180 else a - 360 for a in covered]
+        rec["arc_centre_deg"] = round(float(np.mean(wrapped)) + 15.0, 1)
+        rec["arc_span_deg"] = 30 * len(covered)
+        rec["stroke_peak_H"] = sectors[peak_a]
+        # The stroke at the arc's ENDS, which is what a plain concentric margin
+        # would have to be; the difference from the peak is the offset.
+        ends = [sectors[a] for a in covered
+                if abs(((a + 15) - rec["arc_centre_deg"] + 180) % 360 - 180) > 60]
+        rec["stroke_end_H"] = round(float(np.median(ends)), 5) if ends else 0.0
+        rec["covers_frac_of_eye_width"] = round(
+            rec["half_w_H"] / b["half_w_H"], 4)
+        lid[side] = rec
+    if len(lid) == 2:
+        lid["arc_centre_deg"] = round((lid["left"]["arc_centre_deg"]
+                                       + lid["right"]["arc_centre_deg"]) / 2, 1)
+        lid["stroke_peak_H"] = round((lid["left"]["stroke_peak_H"]
+                                      + lid["right"]["stroke_peak_H"]) / 2, 5)
+        lid["stroke_end_H"] = round((lid["left"]["stroke_end_H"]
+                                     + lid["right"]["stroke_end_H"]) / 2, 5)
+
     # ---- face aperture --------------------------------------------------
     # The gold region the mane encircles. Everything facial lives inside it,
     # and it is what separates a brow from the mane it is painted to match.
@@ -467,7 +564,7 @@ def main():
                            "x_H = lateral offset / subject height"},
         "face_aperture": ap,
         "eye": {"pupil": pupils, "sclera": sclera, "almond": eye_almond,
-                "iris": iris or None},
+                "iris": iris or None, "lid": lid or None},
         "brow": brows,
         "nose_pad": nose,
         "nostril": nostrils,
@@ -574,6 +671,16 @@ def main():
     if len(iris) > 2:
         print(f"IRIS     x=±{iris['x_H_abs']:.4f} h={iris['h']:.4f} "
               f"r={d['iris_r_H']:.4f}")
+    if len(lid) > 2:
+        r = lid["right"]
+        print(f"LID      arc centre {r['arc_centre_deg']:+.0f}deg "
+              f"(0=outboard, 90=up)  span {r['arc_span_deg']}deg  "
+              f"stroke peak {r['stroke_peak_H']:.4f} -> ends "
+              f"{r['stroke_end_H']:.4f}  rgb={r['rgb']}")
+        print(f"         covered sectors {r['covered_sectors_deg']} "
+              f"— nothing below, so it is an ARC not a rim")
+    else:
+        print("LID      NOT FOUND")
     print(f"PUPIL_R  {d['pupil_r_H']:.4f}   almond centre "
           f"x=±{d['almond_centre_x_H_abs']:.4f} h={d['almond_centre_h']:.4f}")
     print(f"PUPIL_OFF inboard {d['pupil_offset_right']['inboard_H']:+.4f}  "

@@ -120,16 +120,25 @@ def shared_mat(name, roughness, specular):
     return m
 
 
-def paint(obj, srgb01, gloss):
+# Three finishes, and the third exists because of a measured colour that would
+# not render. `ink` is for the near-blacks — pupil (9,6,0), lid (39,17,3),
+# mouth (27,8,2). At the semi-gloss numbers those came out mid-GREY: a black
+# dome with any specular reflects the sky and the fill straight back, and the
+# darker the base the more completely the reflection is all you see. On a
+# stylised eye the only highlight should be the catchlight, so the ink is
+# rough and almost non-specular.
+FINISH = {
+    "gloss": (0.30, 0.42),
+    "matte": (0.52, 0.24),
+    "ink":   (0.62, 0.03),
+}
+
+
+def paint(obj, srgb01, finish="matte"):
     me = obj.data
     me.materials.clear()
-    # 0.12 roughness made the pupil a mirror — a black chrome dome that
-    # reflected the key light as a bright band across the whole iris. An eye
-    # wants ONE small highlight, which is what the catchlight is for, so the
-    # surface itself is only semi-gloss.
-    me.materials.append(shared_mat("Face_Gloss" if gloss else "Face_Matte",
-                                   0.30 if gloss else 0.52,
-                                   0.42 if gloss else 0.24))
+    rough, spec = FINISH[finish]
+    me.materials.append(shared_mat(f"Face_{finish.capitalize()}", rough, spec))
     attr = me.color_attributes.get(COLOR_ATTR)
     if attr is None:
         attr = me.color_attributes.new(name=COLOR_ATTR, type="FLOAT_COLOR",
@@ -223,7 +232,7 @@ def plane_basis(normal):
     return side, up, n
 
 
-def disc(name, centre, normal, rx, rz, srgb01, gloss=True, segments=16,
+def disc(name, centre, normal, rx, rz, srgb01, finish="gloss", segments=16,
          roll_deg=0.0, flat=None):
     """An elliptical, flattened dome lying on a surface, facing along `normal`.
 
@@ -252,7 +261,7 @@ def disc(name, centre, normal, rx, rz, srgb01, gloss=True, segments=16,
                   (0.0, 0.0, 0.0, 1.0)))
     o.matrix_world = mat @ Matrix.Diagonal((rx, rz, dome, 1.0))
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    paint(o, srgb01, gloss)
+    paint(o, srgb01, finish)
     return o, dome
 
 
@@ -327,35 +336,86 @@ def build_eyes(cage, fm, parts, report):
         # Each part is now placed clear of the dome in front of it, plus a
         # small margin. Total protrusion is reported so it cannot creep.
         cursor = 0.0
+
+        # THE LID ARC — the thing that makes a white blob read as an eye.
+        #
+        # It is an ARC, not a rim. Magnified, the reference draws a dark stroke
+        # from about -30 deg through the top to +150 (0 = outboard, 90 = up)
+        # and simply stops: there is no lower lid line, the sclera meets the
+        # coat. Measured span 180 deg, centre +60 deg, stroke 0.0055 H at the
+        # peak tapering to 0.0025 at the ends, colour (39,17,3).
+        #
+        # Built as a dark disc BEHIND the sclera, larger by the end stroke and
+        # shifted along the arc centre by the difference. That gives peak =
+        # margin + shift at +60, margin at the two ends, and margin - shift
+        # (i.e. nothing) at -120 — the measured profile, from two numbers,
+        # with no arc geometry to model.
+        lid_m = fm["eye"].get("lid")
+        if lid_m:
+            ls = symmetrise(lid_m)
+            margin = lid_m["stroke_end_H"]
+            shift = max(lid_m["stroke_peak_H"] - margin, 0.0)
+            a = math.radians(lid_m["arc_centre_deg"])
+            lx = al["x_H"] + math.cos(a) * shift * sx
+            lz = al["h"] + math.sin(a) * shift
+            # A DISC BEHIND ANOTHER MUST ALSO BE NO TALLER.
+            #
+            # The first attempt set the lid back 0.0002 and gave it flat=0.30.
+            # `dome = min(rx, rz) * flat`, so on a radius slightly larger than
+            # the sclera's that is a 0.0137 dome against the sclera's 0.0031 —
+            # the lid stood 10 mm proud and rendered as a plain dark disc with
+            # the entire eye hidden inside it. Being *behind* in position is
+            # not enough when the thing behind is fatter.
+            #
+            # Same flatness as the sclera, so the two profiles are parallel,
+            # and set back far enough to clear the difference. There is room:
+            # p0 is already 0.0155 above the socket floor.
+            o, _ = disc(f"EyeLid_{tag}",
+                        on_plane(p0, n, lx, lz) - n * 0.0012, n,
+                        al["half_w_H"] + margin, al["half_h_H"] + margin,
+                        ls["srgb01"], finish="ink", flat=FLAT)
+            parts.append(o)
+            report.append(
+                f"lid {tag}: arc centre {lid_m['arc_centre_deg']:+.0f}deg, "
+                f"span {lid_m['right']['arc_span_deg']}deg, margin "
+                f"{margin:.4f} + shift {shift:.4f} -> peak "
+                f"{margin + shift:.4f} (measured {lid_m['stroke_peak_H']:.4f})")
+
         o, dome = disc(f"Sclera_{tag}",
                        on_plane(p0, n, al["x_H"], al["h"]) + n * cursor, n,
-                       al["half_w_H"], al["half_h_H"], sc["srgb01"])
+                       al["half_w_H"], al["half_h_H"], sc["srgb01"],
+                       finish="matte")
         parts.append(o)
         cursor += dome + 0.0004
 
         o, dome = disc(f"Iris_{tag}",
                        on_plane(p0, n, ir["x_H"], ir["h"]) + n * cursor, n,
-                       ir["half_w_H"], ir["half_h_H"], ir["srgb01"])
+                       ir["half_w_H"], ir["half_h_H"], ir["srgb01"],
+                       finish="gloss")
         parts.append(o)
         cursor += dome + 0.0004
 
         o, dome = disc(f"Pupil_{tag}",
                        on_plane(p0, n, pu["x_H"], pu["h"]) + n * cursor, n,
-                       pu["half_w_H"], pu["half_h_H"], pu["srgb01"])
+                       pu["half_w_H"], pu["half_h_H"], pu["srgb01"],
+                       finish="ink")
         parts.append(o)
         cursor += dome + 0.0003
 
-        # Catchlight: up and INBOARD of the pupil. Placed relative to the
-        # measured pupil rather than at its own measurement — it is a specular
-        # highlight in the artwork, so its position is a lighting choice, and
-        # this is the one thing on the face that is a choice. Up-and-inboard
-        # reads as a light above and in front, which is the world's key light.
-        cl_x = pu["x_H"] - sx * pu["half_w_H"] * 0.42
+        # Catchlight: up and OUTBOARD of the pupil.
+        #
+        # This was built up-and-INBOARD on the reasoning that it reads as a
+        # key light above and in front. Magnifying the reference eye settled
+        # it: the highlight sits on the outboard side of the pupil, the same
+        # side the lid arc is thickest and the sclera crescent widest. All
+        # three agree on one light, up and to the outside, and guessing put
+        # this one against the other two.
+        cl_x = pu["x_H"] + sx * pu["half_w_H"] * 0.42
         cl_z = pu["h"] + pu["half_h_H"] * 0.46
         r = pu["half_w_H"] * 0.34
         o, dome = disc(f"Catchlight_{tag}",
                        on_plane(p0, n, cl_x, cl_z) + n * cursor, n, r, r,
-                       [1.0, 1.0, 1.0], segments=10)
+                       [1.0, 1.0, 1.0], finish="gloss", segments=10)
         parts.append(o)
         protrusion = cursor + dome
 
@@ -406,7 +466,7 @@ def build_brows(cage, fm, parts, report):
         # `roll_deg` is CCW about the outward normal. On the +x side, lifting
         # the inboard (-x) end is a CCW roll; mirrored on the other side.
         o, _ = disc(f"Brow_{tag}", p0, n, b["half_w_H"], b["half_h_H"] * 0.52,
-                    b["srgb01"], gloss=False, segments=14,
+                    b["srgb01"], finish="matte", segments=14,
                     roll_deg=rise * sx, flat=0.55)
         parts.append(o)
         report.append(f"brow {tag}: at x={b['x_H']:+.4f} h={b['h']:.4f} "
@@ -434,8 +494,8 @@ def build_nose_and_mouth(cage, fm, parts, report):
     # The nose sits on a convex pad that curves the other way and has no such
     # problem. This is a fit to the surface, not a change to the measurement:
     # the mouth's measured WIDTH, position and colour are untouched.
-    for key, name, gloss, flat_z in (("nose_pad", "NosePad", True, 1.00),
-                                     ("mouth_line", "MouthLine", False, 0.62)):
+    for key, name, finish, flat_z in (("nose_pad", "NosePad", "gloss", 1.00),
+                                      ("mouth_line", "MouthLine", "ink", 0.62)):
         b = fm.get(key)
         if not b:
             report.append(f"{key}: NOT MEASURED — skipped")
@@ -444,7 +504,8 @@ def build_nose_and_mouth(cage, fm, parts, report):
         lift = lift_for(key.replace("_line", ""))
         p0 = p0 + n * lift
         o, _ = disc(name, p0, n, b["half_w_H"], b["half_h_H"] * flat_z,
-                    b["srgb01"], gloss=gloss, flat=0.42 if gloss else 0.14)
+                    b["srgb01"], finish=finish,
+                    flat=0.42 if finish == "gloss" else 0.14)
         parts.append(o)
         report.append(f"{key}: at x={b['x_H']:+.4f} h={b['h']:.4f} "
                       f"w={b['half_w_H'] * 2:.4f} rgb={b['rgb']} "
@@ -525,7 +586,7 @@ def main():
     # which is the coat colour beside the features being placed on it.
     if cage.data.materials:
         cage.data.materials.clear()
-    paint(cage, fm["face_aperture"]["srgb01"], gloss=False)
+    paint(cage, fm["face_aperture"]["srgb01"], finish="matte")
 
     parts, report = [], []
     build_eyes(cage, fm, parts, report)

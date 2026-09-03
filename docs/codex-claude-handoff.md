@@ -4069,3 +4069,121 @@ nose pad has already subdivided, which is where 8 of the 12 slivers were.
    currently parented to the cage object, which is correct for review and wrong
    for a head turn.
 5. Mane chin lobe; leg volume.
+
+## 2026-09-03 (later still) — the eyelid arc, and it is an arc
+
+Item 1 of the previous "next, in order". The sclera read as an unbounded white
+blob because nothing contained it; it now reads as an eye.
+
+### The rim is not a rim
+
+Magnifying one reference eye settled the shape before any code was written.
+The dark stroke runs from about -30 deg through the top to +150 (0 = outboard,
+90 = up) and then simply stops: **there is no lower lid line**, the white meets
+the coat directly. A concentric rim — the obvious build — would have been
+wrong all the way round the bottom.
+
+A 30-degree sector sweep confirms it, and gives the numbers to build from:
+
+| sector | 0 | 30 | 60 | 90 | 120 | 150-320 | 330 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| stroke H | 0.0032 | 0.0055 | 0.0046 | 0.0041 | 0.0027 | **none** | 0.0023 |
+
+Measured: span 180 deg, centre **+52 deg** (up and outboard), peak stroke
+**0.0055 H** tapering to **0.0025** at the ends, colour **(39,17,3)**.
+
+### Built from two numbers, with no arc geometry
+
+A dark disc BEHIND the sclera, larger by the end stroke and shifted along the
+arc centre by the difference:
+
+    margin = 0.0013,  shift = 0.0042
+    peak  = margin + shift = 0.0055   (measured 0.0055)
+    ends  = margin         = 0.0013
+    below = margin - shift < 0        -> nothing shows, which is the reference
+
+That reproduces the measured profile without modelling a swept arc, and it
+tapers on its own.
+
+### Value cannot separate a lid from a pupil
+
+The first attempt masked "dark, not white, not pupil, not amber" and reported a
+1 px ring of mid-brown (64,34,15) — a full ring, uniform, and the wrong colour.
+That was the lid's ANTI-ALIASED EDGE. Its core measures v < 0.15, the same
+window as the pupil, so excluding the pupil by value excluded most of the lid
+with it. A vertical scan down the eye centre showed the real thing: 3 px of
+near-black above the white.
+
+They are separate CONNECTED COMPONENTS, so that is what separates them now —
+the pupil is the dark blob containing the eye centre, the lid is any other dark
+blob in the opening. Colour went (64,34,15) -> **(39,17,3)** and the shape went
+from a ring to an arc.
+
+### And a bounding box cannot describe an arc
+
+The first record of the lid carried `thickness_H = 0.0704` for a stroke that is
+actually 0.0055, because a curve over the top of a circle has a tall box. That
+field is gone; the angular profile replaced it.
+
+### Three more things this pass corrected
+
+1. **The catchlight was on the wrong side.** It was built up-and-INBOARD on the
+   reasoning that it reads as a key light above and in front. The reference
+   puts it up-and-OUTBOARD — the same side the lid arc is thickest and the
+   sclera crescent widest. All three agree on one light up and to the outside,
+   and the guess had this one fighting the other two.
+
+2. **A disc behind another must also be no taller.** The lid was set back
+   0.0002 with `flat=0.30`, and since `dome = min(rx, rz) * flat` that is a
+   0.0137 dome against the sclera's 0.0031 — the lid stood 10 mm proud and
+   rendered as a plain dark disc with the whole eye hidden inside it. Being
+   behind in POSITION is not enough when the thing behind is fatter. Same
+   flatness as the sclera now, set back far enough to clear the difference.
+
+3. **The near-blacks rendered mid-GREY.** Pupil (9,6,0), lid (39,17,3) and
+   mouth (27,8,2) all came out grey at the semi-gloss numbers: a dark dome with
+   any specular reflects the sky and fill straight back, and the darker the
+   base the more completely the reflection is all you see. A third `ink` finish
+   (roughness 0.62, specular 0.03) renders them as the values they measure. On
+   a stylised eye the only highlight should be the catchlight.
+
+### The eye socket moved onto the almond
+
+The cage's eye socket was centred on the PUPIL, which sits 0.0136 inboard and
+0.0113 below the almond's centre — the pupil is deliberately off-centre inside
+the opening, so a loop centred on it is not centred on the eye. The socket
+exists for `Blink_L/R` to slide loops across the OPENING, and `face_lion.py`
+already built the eye forms on the almond centre. The loop now agrees with them.
+
+**Worth knowing before the blink shape key:** at the almond the socket resolves
+to **2 centre faces**, against 3 at the old pupil position. The head's faces
+are large relative to a 0.089 H eye. Two concentric insets on two faces is a
+workable lid loop but it is thin, and whether a blink slides convincingly on it
+is the first thing to check when the shape keys land — not something to
+conclude from the vert count.
+
+### Every metric held again
+
+| | before | after |
+| --- | --- | --- |
+| Weighted silhouette IoU | 0.8772 | **0.8772** |
+| Front IoU | 0.9358 | **0.9358** |
+| Deformation battery | 12 PASS / 0 FAIL | **12 PASS / 0 FAIL** |
+| Pinched / flipped | 0 / 0 | **0 / 0** |
+| Worst area ratio | 0.260 | **0.261** |
+| Reach headroom | 22.1 / 42.1 mm | **22.1 / 42.1 mm** |
+| Walk support slide | 0.166 mm | **0.166 mm** |
+| IK residual | 0.00 mm | **0.00 mm** |
+| Rig overlay | 62 / 3, REVIEW | **62 / 3, REVIEW** |
+| Cage verts | 1,007 | **999** |
+| Slivers / boundary edges | 0 / 0 | **0 / 0** |
+
+Face parts 12 -> 14, face verts 1,168 -> 1,396, `lion_face.glb` 131 -> 146 KB.
+
+### Next, in order
+
+1. The cream **muzzle patch** — measured at h 0.4162-0.5072, rgb (247,209,154).
+2. The **shape keys**, which is the rest of Gate 15.
+3. Skin the face parts to `head`/`jaw`; they are parented to the cage object,
+   which is right for review and wrong for a head turn.
+4. Mane chin lobe; leg volume.

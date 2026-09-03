@@ -246,8 +246,19 @@ def face_measurement():
     is what proves it rather than what assumes it.
     """
     fm = json.load(open(FACE_JSON))
+    # THE EYE SOCKET BELONGS ON THE ALMOND, NOT THE PUPIL.
+    #
+    # It was placed at the pupil, which is 0.0136 inboard and 0.0113 below the
+    # almond's centre — the pupil is deliberately off-centre inside the
+    # opening, so a loop centred on it is not centred on the eye. The socket
+    # exists for `Blink_L/R` to slide loops over the eyeball, and what a lid
+    # slides across is the OPENING. `face_lion.py` already builds the eye
+    # forms on the almond centre; this makes the loop agree with them.
+    al = fm["eye"]["almond"]
+    almond_x = (abs(al["left"]["x_H"]) + abs(al["right"]["x_H"])) / 2.0
+    almond_h = (al["left"]["h"] + al["right"]["h"]) / 2.0
     out = {
-        "eye": (abs(fm["eye"]["pupil"]["x_H_abs"]), fm["eye"]["pupil"]["h"]),
+        "eye": (almond_x, almond_h),
         "mouth": (0.0, fm["mouth_line"]["h"]),
         "nose_pad": (0.0, fm["nose_pad"]["h"]),
     }
