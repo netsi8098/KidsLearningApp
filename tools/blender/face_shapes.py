@@ -374,11 +374,14 @@ def render_morphs(cage, contract):
     return shots
 
 
-def main():
-    fm = json.load(open(FACE_JSON))
-    contract = json.load(open(CONTRACT))["morphTargets"]
+def build_morphs(cage, fm, contract):
+    """Author all 16 contract morphs and report them. Reusable.
 
-    cage = cage_object()
+    Split out of `main()` so `assemble_lion.py` can build the morphs onto the
+    RIGGED cage instead of the bare one. Everything after this — the neutral
+    assertion, the float report, the previews, the export — is `main()`'s
+    business, because the assembler does its own.
+    """
     report = []
 
     # ---- geometry the morphs are anchored to ---------------------------
@@ -604,6 +607,15 @@ def main():
         raise SystemExit(f"[shapes] {len(missing)} contract morphs not built: {missing}")
     if dead:
         raise SystemExit(f"[shapes] {len(dead)} morphs displace nothing: {dead}")
+    return report
+
+
+def main():
+    fm = json.load(open(FACE_JSON))
+    contract = json.load(open(CONTRACT))["morphTargets"]
+    cage = cage_object()
+
+    build_morphs(cage, fm, contract)
 
     assert_neutral_is_neutral()
     report_decal_float(cage, contract)

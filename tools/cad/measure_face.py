@@ -604,6 +604,18 @@ def main():
                 abs(abs(muzzle["x_in_H"]) - abs(muzzle["x_out_H"])), 5)
             break
 
+    # ---- the MANE's colour ---------------------------------------------
+    # Not a facial feature, but it is measured off the same view with the same
+    # method, and the assembler needs it: appended from its own blend the mane
+    # arrives with no material and the assembled character shipped with a WHITE
+    # mane framing a gold face. `measure_reference.py` established the mane
+    # cluster as hue < 30 deg with value < 0.65; this takes its median colour.
+    mane_mask = subj & (hue < 30.0) & (val < 0.65)
+    mane = None
+    comps = components(mane_mask, 2000)
+    if comps:
+        mane = blob(frame, comps[0])
+
     model = {
         "frame": {"view": "front", "source": "front.png",
                   "top": frame.top, "ground": frame.ground,
@@ -624,6 +636,7 @@ def main():
         "nostril": nostrils,
         "mouth_line": mouth,
         "muzzle_patch": muzzle,
+        "mane": mane,
     }
 
     # Derived numbers a builder wants without recomputing them.
@@ -766,6 +779,9 @@ def main():
               f"centre h={muzzle['centre_h']:.4f} "
               f"half_h={muzzle['half_h_H_span']:.4f}  "
               f"asym={muzzle['asymmetry_H']:.4f}  rgb={muzzle['rgb']}")
+    if mane:
+        print(f"MANE     rgb={mane['rgb']} area={mane['area_px']} "
+              f"h {mane['h_bot']:.4f}-{mane['h_top']:.4f}")
     print(f"EYE_SEP  {d['eye_separation_H']:.4f}")
     print(f"FACE_CENTRE_H {d['face_centre_h']:.4f}  "
           f"(reference_model face_centre_front = 0.604)")

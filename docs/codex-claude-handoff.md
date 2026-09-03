@@ -4463,3 +4463,138 @@ Brow_R, Catchlight_L, … Sclera_R, LionCage`.
    muzzle's 65.6 mm float and the brows' 15 mm are the same defect.
 3. Muzzle lobes and a curved mouth line; whiskers.
 4. Mane chin lobe; leg volume.
+
+## 2026-09-03 (sixth pass) — one assembled GLB, and what it exposed
+
+`tools/blender/assemble_lion.py` produces `public/assets/lion/cage/lion.glb`:
+**3.01 MB, 17 meshes all skinned to one 35-joint skin, 44 bones, Idle + Walk,
+and all 16 contract morph targets.** The proxy at
+`public/assets/lion/rigged/lion.glb` is untouched.
+
+### Reordering the pipeline beat merging two files
+
+The obvious route was to merge — append the face objects into the rigged blend
+and copy the cage's shape keys across by vertex index. That works only while
+the two cages have identical vertex order, which is true today and is exactly
+the coupling that breaks quietly later.
+
+`face_lion` and `face_shapes` both act on "whichever cage is in the scene", so
+pointing them at the RIGGED blend composes by construction:
+
+    cage_lion -> rig_cage_lion -> anim_cage_lion -> assemble_lion
+                                                    |- face_lion build fns
+                                                    |- face_shapes.build_morphs
+                                                    |- skin, append the mane
+                                                    '- export ONE glb
+
+`face_shapes.main()` was split so `build_morphs()` is reusable. Nothing is
+copied between blends except the mane, where appending is safe because geometry
+carries no vertex-order assumption — a shape key does, which is why the cage's
+morphs are rebuilt rather than transferred.
+
+### Four things wrong on the first run
+
+1. **The face was built against a POSED cage.** `Object.ray_cast` uses
+   EVALUATED geometry, so with the armature in pose position at whatever frame
+   the file was saved on, every part landed on a deformed surface. It showed as
+   asymmetry the bare cage does not have — eye planes at z 0.6715 and 0.6620
+   with normals (+0.22,+0.95,+0.23) and (+0.41,+0.83,−0.38), where at rest both
+   sides agree to 0.0001. Fixed by building in `pose_position = "REST"` and
+   restoring `"POSE"` before export.
+
+2. **`assert_neutral_is_neutral` cannot pass on a skinned mesh in pose
+   position.** It compares the evaluated mesh with the base mesh, and on a
+   skinned mesh the armature is part of that evaluation — so it was failing on
+   the deformation, not on a stuck key. Rest position makes the armature an
+   identity transform and the check means what it says again (worst deviation
+   2.64e-07).
+
+3. **The coat shipped WHITE.** `paint()` lives in `face_lion.main()`, not in
+   the `build_*` functions, so calling them directly left the body colourless
+   under a painted face. The mane had the same problem for a different reason —
+   appended from its own blend it arrives with no material — and shipped a
+   white mane framing a gold face. Both now painted from measured medians:
+   coat (242,180,75), mane (117,55,9). The mane's colour is a new measurement,
+   taken the same way as everything else.
+
+4. **THE MOUTH LINE WAS SKINNED TO THE WRONG BONE, and the rule was the bug.**
+   The build log said `MouthLine -> jaw`; the vertex group said `head`. Its
+   centre sits EXACTLY at the measured mouth line, so `centre_z < split_h`
+   decided it on floating-point noise. Measured: rotating the jaw −30° moved
+   the mouth line 0.0000.
+
+   The deeper problem is that rigid whole-object weighting cannot express the
+   two decals that STRADDLE the jaw line at all. The muzzle spans h 0.3955 to
+   0.6315 — chin to above the nose — so all-`head` leaves the chin behind when
+   the jaw opens and all-`jaw` drags the cream mass over the nose.
+
+   Those two are now weighted per VERTEX, blended across a band equal to the
+   mouth's own measured half-height (±0.0135), the way the cage's own lips are.
+   Everything else stays rigid to `head`, which is right for a solid form that
+   rotates whole. Verified: a −30° jaw now moves the mouth line 19.2 mm.
+
+### Verified, by pose rather than by inspection
+
+* the whole face travels with the skull on a `head` rotation;
+* a −30° `jaw` opens a real mouth, with the chin and lower muzzle following and
+  the cavity reading dark behind the lip line;
+* `blink_L` at full value on a mid-Walk frame — morphs and skinning coexist;
+* `smile` at full value on a turned head.
+
+Renders in `docs/assets/lion-assembled.png`.
+
+### What one GLB did NOT fix — the naming divergence
+
+`validate-lion-glb.mjs` still fails, and assembly was never going to change
+that. **The contract describes the PROXY's skeleton, not the cage's.** Only
+**11 of 45** bones match — `pelvis, spine_01, chest, head, jaw, ear_L, ear_R,
+tail_01..04` — because the two rigs name the same anatomy differently:
+
+| contract (proxy) | cage rig |
+| --- | --- |
+| `front_shoulder_L` | `scapula_FL` |
+| `front_upper_L` | `upper_front_FL` |
+| `front_lower_L` | `forearm_FL` |
+| `front_wrist_L` | `wrist_FL` |
+| `front_paw_L` | `paw_FL` |
+| `rear_thigh_L` … | `thigh_RL`, `shin_RL`, `hock_RL`, `ankle_RL`, `paw_RL` |
+| `neck` | `neck_01` |
+
+Three are genuine gaps rather than renames: **`root`** (a control bone, excluded
+from the skin by `export_def_bones`), **`eye_L`/`eye_R`** (the cage has no eye
+bones — gaze is not riggable, and `RiggedLionCharacter` wants eye bones for
+controlled convergence), and **`mane_L`/`mane_top`/`mane_R`** (no mane
+follow-through, so the mane is static on a moving head). The cage also has
+`spine_02`, `tail_05` and `tail_06` that the contract does not know about, and
+6 tail segments against the contract's 4.
+
+Clips: **2 of 13**. `WalkStart`, `WalkStop`, `TurnLeft/Right`, `Wave`, the five
+Jump phases and `Celebrate` are Gates 10-14 and were never authored on the cage.
+
+**This is a decision, not a task, and it is not mine to take.** Three routes:
+
+1. **Rename the cage rig to the contract.** Touches `rig_cage_lion.py`,
+   `lion_skeleton.py` (the authored ring→bone skin map is keyed by these
+   names), `anim_cage_lion.py` and `deform_qa_lion.py`. The skin map is the
+   risk: it is looked up by name, so a rename must be exact or weights land on
+   the wrong bone silently.
+2. **Update the contract to the cage.** Breaks the proxy, which currently
+   passes and is still what the homepage renders.
+3. **Two contracts**, one per asset, with the runtime choosing by which asset
+   it loaded. Most work, least risk, and honest about there being two
+   characters until the proxy retires.
+
+Recommendation: **(3) now, (1) at proxy retirement.** The proxy is still the
+shipping character; invalidating its contract to make the cage pass would trade
+a real green check for a paper one. A second contract file costs little and
+lets the cage be validated on its own terms today.
+
+### Next, in order
+
+1. That naming decision.
+2. **Project the decals onto the surface** — the muzzle's 65.6 mm float shows
+   as a hard circular seam in the assembled renders, and the brows' 15 mm as an
+   edge that crosses the silhouette.
+3. Clips for Gates 10-14 on the cage; eye bones; mane follow-through bones.
+4. Mane chin lobe — it still reads as a hood rather than a mane, which the
+   assembled render makes plainer than the face-only ones did.

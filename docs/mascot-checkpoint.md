@@ -210,8 +210,12 @@ contact, the largest single error in the asset.
    unbounded white blob into an eye. It is an ARC, not a rim: measured span
    180 deg centred +52 deg (0 outboard, 90 up), stroke 0.0055 H at the peak
    tapering to 0.0025 at the ends, nothing below. Still outstanding for
-   Gate 15: assembling one GLB (cage + armature + clips + face + morphs) and
-   skinning the face parts to `head`/`jaw`. The **16 contract morph targets**
+   Gate 15: nothing — the face is built and assembled. `lion.glb` (2026-09-03)
+   is one file: cage + 44-bone armature + Idle/Walk + 15 face parts + the mane,
+   all 17 meshes skinned to one 35-joint skin, with all 16 contract morphs.
+   What remains is not Gate 15 but the **bone-naming divergence** (11 of 45
+   contract bones match — see the sixth-pass entry in
+   `codex-claude-handoff.md`) and the 11 missing clips from Gates 10-14. The **16 contract morph targets**
    landed 2026-09-03 — `blink_L/R`, `eyes_wide/narrow`, `smile`,
    `mouth_wide/narrow/round`, `viseme_MBP/FV/OU`, `brow_up_L/R`,
    `brow_down_L/R`, `cheeks_up` — all present in the GLB and each verified by
