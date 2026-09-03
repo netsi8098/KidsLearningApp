@@ -6,6 +6,14 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
+  // Nothing here may run unbounded. A video grows for as long as its browser
+  // context lives, so these timeouts — not the video options — are what stop a
+  // hung run from writing an arbitrarily large file.
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
+  globalTimeout: process.env.CI ? 30 * 60_000 : 15 * 60_000,
+  // Keep artifacts in one predictable, git-ignored place beside this config.
+  outputDir: './test-results',
   reporter: [
     ['html', { outputFolder: '../coverage/e2e-report' }],
     ['list'],
@@ -15,7 +23,13 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: {
+      mode: 'retain-on-failure',
+      // Square bound: Playwright scales the frame down to fit while preserving
+      // aspect ratio, so this shrinks every project's video without distorting
+      // mobile or desktop. Default would be 800x800.
+      size: { width: 640, height: 640 },
+    },
   },
   projects: [
     // Child-facing app
@@ -55,12 +69,14 @@ export default defineConfig({
       command: 'npm run dev',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
       cwd: '..',
     },
     {
       command: 'npm run dev',
       url: 'http://localhost:5174',
       reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
       cwd: '../admin',
     },
   ],
