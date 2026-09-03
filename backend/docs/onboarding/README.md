@@ -15,7 +15,7 @@ Welcome to the Kids Learning Backend. This guide gets you from zero to running i
 
 ```bash
 # 1. Clone and install
-cd ~/Desktop/KidsLearningApp/backend
+cd ~/code/KidsLearningApp/backend
 npm install
 
 # 2. Create .env from template (see setup.md for all vars)

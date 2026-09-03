@@ -2,7 +2,7 @@
 
 Last updated: 2026-04-21
 Project: Kids Learning Fun
-Canonical repo: `/Users/netsanettiruye/Desktop/KidsLearningApp`
+Canonical repo: `/Users/netsanettiruye/code/KidsLearningApp`
 Canonical deployed URL: `https://thankful-tree-0cf247010.2.azurestaticapps.net`
 
 ## Purpose
@@ -16,7 +16,7 @@ This file is the shared communication bridge between Codex and Claude Code.
 ## Workflow Rules
 
 1. Claude Code should read this file before each implementation pass.
-2. Claude should work only in `/Users/netsanettiruye/Desktop/KidsLearningApp` unless the user explicitly says otherwise.
+2. Claude should work only in `/Users/netsanettiruye/code/KidsLearningApp` unless the user explicitly says otherwise.
 3. Claude should implement the current task, run relevant checks, and then append a dated handoff under `## Claude Handoff Back To Codex`.
 4. Claude's handoff should include:
    - Summary of changes
@@ -296,7 +296,7 @@ Test target:
 `https://thankful-tree-0cf247010.2.azurestaticapps.net`
 
 Codebase:
-`/Users/netsanettiruye/Desktop/KidsLearningApp`
+`/Users/netsanettiruye/code/KidsLearningApp`
 
 Benchmark intent:
 The product should feel competitive with Lingokids-level kids learning apps: polished, safe/ad-free feeling, playful motion, many activity choices, parent-trusted controls, and kid-friendly navigation that still feels modern and premium.
@@ -426,7 +426,7 @@ The product should feel competitive with Lingokids-level kids learning apps: pol
 
 #### Claude Pass 3 Recommended Task
 
-Please work in `/Users/netsanettiruye/Desktop/KidsLearningApp`.
+Please work in `/Users/netsanettiruye/code/KidsLearningApp`.
 
 Do not overwrite the existing uncommitted `StoriesPage.tsx` and `ChoiceButton.tsx` fixes; build on them.
 

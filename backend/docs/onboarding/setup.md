@@ -3,7 +3,7 @@
 ## 1. Clone and Install
 
 ```bash
-cd ~/Desktop/KidsLearningApp/backend
+cd ~/code/KidsLearningApp/backend
 npm install
 ```
 
