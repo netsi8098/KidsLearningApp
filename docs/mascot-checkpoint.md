@@ -213,9 +213,12 @@ contact, the largest single error in the asset.
    Gate 15: nothing — the face is built and assembled. `lion.glb` (2026-09-03)
    is one file: cage + 44-bone armature + Idle/Walk + 15 face parts + the mane,
    all 17 meshes skinned to one 35-joint skin, with all 16 contract morphs.
-   What remains is not Gate 15 but the **bone-naming divergence** (11 of 45
-   contract bones match — see the sixth-pass entry in
-   `codex-claude-handoff.md`) and the 11 missing clips from Gates 10-14. The **16 contract morph targets**
+   The bone-naming divergence is now resolved by decision: the cage has its own
+   contract at `src/data/lionCageRigContract.json` and passes it
+   (`npm run lion:validate:cage`), with the eye bones, mane follow-through
+   bones and 11 Gates 10-14 clips tracked as `plannedBones`/`plannedClips`
+   rather than silent gaps. See the ninth-pass entry in
+   `codex-claude-handoff.md`. The **16 contract morph targets**
    landed 2026-09-03 — `blink_L/R`, `eyes_wide/narrow`, `smile`,
    `mouth_wide/narrow/round`, `viseme_MBP/FV/OU`, `brow_up_L/R`,
    `brow_down_L/R`, `cheeks_up` — all present in the GLB and each verified by

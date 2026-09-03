@@ -14,6 +14,8 @@
     "ai:check": "curl -fsS http://localhost:5555/health",
     "lion:build": "blender --background --factory-startup --python tools/blender/build_rigged_lion.py",
     "lion:validate": "node scripts/validate-lion-glb.mjs",
+    "lion:validate:cage": "node scripts/validate-lion-glb.mjs public/assets/lion/cage/lion.glb",
+    "lion:assemble": "blender --background art/blender/lion_anim_cage.blend --factory-startup --python tools/blender/assemble_lion.py",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

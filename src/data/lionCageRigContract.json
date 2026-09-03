@@ -1,0 +1,268 @@
+{
+  "$comment": [
+    "Rig contract for the PRODUCTION CAGE character, lion/cage/lion.glb.",
+    "",
+    "WHY A SECOND CONTRACT. lionRigContract.json describes the PROXY's",
+    "skeleton. The two rigs name the same anatomy differently -",
+    "front_shoulder_L against scapula_FL, front_lower_L against forearm_FL,",
+    "neck against neck_01 - so only 11 of its 45 bones matched the cage and",
+    "the cage could not be validated at all. Repointing the proxy's contract",
+    "would have invalidated the character that currently ships to make the",
+    "one that does not pass; renaming the cage rig would have to rewrite the",
+    "authored ring-to-bone skin map in lion_skeleton.py, which is looked up",
+    "BY NAME and would land weights on the wrong bone if a rename were",
+    "inexact. So each asset is validated on its own terms until the proxy",
+    "retires, at which point the cage's naming becomes the only naming.",
+    "",
+    "GENERATED FROM INTENT, NOT FROM THE ARTIFACT. `bones` is",
+    "lion_skeleton.skeleton() - the authored table the rig is built from -",
+    "not a scrape of the exported GLB. A contract read back off its own",
+    "output can never fail."
+  ],
+  "assetPath": "/assets/lion/cage/lion.glb",
+  "assetVersion": 1,
+  "describes": "production cage",
+  "forwardAxis": "+Z",
+  "upAxis": "+Y",
+  "groundPlane": 0,
+  "armatureNode": "LionRig",
+  "bones": [
+    {
+      "name": "pelvis",
+      "parent": null
+    },
+    {
+      "name": "spine_01",
+      "parent": "pelvis"
+    },
+    {
+      "name": "spine_02",
+      "parent": "spine_01"
+    },
+    {
+      "name": "chest",
+      "parent": "spine_02"
+    },
+    {
+      "name": "neck_01",
+      "parent": "chest"
+    },
+    {
+      "name": "head",
+      "parent": "neck_01"
+    },
+    {
+      "name": "jaw",
+      "parent": "head"
+    },
+    {
+      "name": "scapula_FL",
+      "parent": "chest"
+    },
+    {
+      "name": "upper_front_FL",
+      "parent": "scapula_FL"
+    },
+    {
+      "name": "forearm_FL",
+      "parent": "upper_front_FL"
+    },
+    {
+      "name": "wrist_FL",
+      "parent": "forearm_FL"
+    },
+    {
+      "name": "paw_FL",
+      "parent": "wrist_FL"
+    },
+    {
+      "name": "thigh_RL",
+      "parent": "pelvis"
+    },
+    {
+      "name": "shin_RL",
+      "parent": "thigh_RL"
+    },
+    {
+      "name": "hock_RL",
+      "parent": "shin_RL"
+    },
+    {
+      "name": "ankle_RL",
+      "parent": "hock_RL"
+    },
+    {
+      "name": "paw_RL",
+      "parent": "ankle_RL"
+    },
+    {
+      "name": "ear_L",
+      "parent": "head"
+    },
+    {
+      "name": "scapula_FR",
+      "parent": "chest"
+    },
+    {
+      "name": "upper_front_FR",
+      "parent": "scapula_FR"
+    },
+    {
+      "name": "forearm_FR",
+      "parent": "upper_front_FR"
+    },
+    {
+      "name": "wrist_FR",
+      "parent": "forearm_FR"
+    },
+    {
+      "name": "paw_FR",
+      "parent": "wrist_FR"
+    },
+    {
+      "name": "thigh_RR",
+      "parent": "pelvis"
+    },
+    {
+      "name": "shin_RR",
+      "parent": "thigh_RR"
+    },
+    {
+      "name": "hock_RR",
+      "parent": "shin_RR"
+    },
+    {
+      "name": "ankle_RR",
+      "parent": "hock_RR"
+    },
+    {
+      "name": "paw_RR",
+      "parent": "ankle_RR"
+    },
+    {
+      "name": "ear_R",
+      "parent": "head"
+    },
+    {
+      "name": "tail_01",
+      "parent": "pelvis"
+    },
+    {
+      "name": "tail_02",
+      "parent": "tail_01"
+    },
+    {
+      "name": "tail_03",
+      "parent": "tail_02"
+    },
+    {
+      "name": "tail_04",
+      "parent": "tail_03"
+    },
+    {
+      "name": "tail_05",
+      "parent": "tail_04"
+    },
+    {
+      "name": "tail_06",
+      "parent": "tail_05"
+    }
+  ],
+  "clips": [
+    "Idle",
+    "Walk"
+  ],
+  "plannedClips": [
+    "WalkStart",
+    "WalkStop",
+    "TurnLeft",
+    "TurnRight",
+    "Wave",
+    "JumpAnticipation",
+    "JumpTakeoff",
+    "JumpAirborne",
+    "JumpLand",
+    "JumpRecovery",
+    "Celebrate"
+  ],
+  "morphTargets": [
+    "blink_L",
+    "blink_R",
+    "eyes_wide",
+    "eyes_narrow",
+    "smile",
+    "mouth_wide",
+    "mouth_narrow",
+    "mouth_round",
+    "viseme_MBP",
+    "viseme_FV",
+    "viseme_OU",
+    "brow_up_L",
+    "brow_up_R",
+    "brow_down_L",
+    "brow_down_R",
+    "cheeks_up"
+  ],
+  "plannedBones": [
+    {
+      "name": "eye_L",
+      "why": "gaze; RiggedLionCharacter wants eye bones for controlled convergence"
+    },
+    {
+      "name": "eye_R",
+      "why": "gaze; RiggedLionCharacter wants eye bones for controlled convergence"
+    },
+    {
+      "name": "mane_L",
+      "why": "mane follow-through; the mane is currently rigid to head"
+    },
+    {
+      "name": "mane_top",
+      "why": "mane follow-through; the mane is currently rigid to head"
+    },
+    {
+      "name": "mane_R",
+      "why": "mane follow-through; the mane is currently rigid to head"
+    }
+  ],
+  "excludedBones": [
+    {
+      "name": "root",
+      "why": "transform handle under the belly. Root motion is deliberately unused - clips are in-place and LionBrain owns world position - and export_def_bones keeps it out of the skin."
+    },
+    {
+      "name": "ik_FL",
+      "why": "IK target, must never deform"
+    },
+    {
+      "name": "ik_FR",
+      "why": "IK target, must never deform"
+    },
+    {
+      "name": "ik_RL",
+      "why": "IK target, must never deform"
+    },
+    {
+      "name": "ik_RR",
+      "why": "IK target, must never deform"
+    },
+    {
+      "name": "pole_FL",
+      "why": "IK pole, must never deform"
+    },
+    {
+      "name": "pole_FR",
+      "why": "IK pole, must never deform"
+    },
+    {
+      "name": "pole_RL",
+      "why": "IK pole, must never deform"
+    },
+    {
+      "name": "pole_RR",
+      "why": "IK pole, must never deform"
+    }
+  ],
+  "maxMeshes": 4,
+  "maxBytes": 4194304
+}

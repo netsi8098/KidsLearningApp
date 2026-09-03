@@ -4745,3 +4745,95 @@ and `EyeLid_R` — GLB node names describing one member of five. Renamed
 2. Project the decals onto the surface (the muzzle's 65.6 mm float).
 3. Clips for Gates 10-14; eye bones; mane follow-through bones.
 4. The proxy's -17.2 mm floor gap, or retire the proxy.
+
+## 2026-09-03 (ninth pass) — decision taken: a second contract for the cage
+
+`src/data/lionCageRigContract.json`. Both characters now validate, each on its
+own terms:
+
+```
+npm run lion:validate        # proxy  -> lionRigContract.json
+npm run lion:validate:cage   # cage   -> lionCageRigContract.json
+npm run lion:assemble        # rebuild lion/cage/lion.glb
+```
+
+    Lion GLB contract passed: public/assets/lion/cage/lion.glb
+    contract: src/data/lionCageRigContract.json (production cage)
+    35 bones, 2 clips, 16 morph targets, 4 meshes, 3.14 MB.
+    9 control bones correctly absent from the skin.
+
+The proxy's run is byte-for-byte what it was: 45 bones, 13 clips, 16 morphs.
+The default contract is still the proxy's, so existing callers and CI validate
+exactly what they validated before; the cage is selected by `--contract`, or
+automatically for any asset under `lion/cage/`.
+
+### Generated from intent, not from the artifact
+
+`bones` is `lion_skeleton.skeleton()` — the authored table the rig is actually
+built from — with `root` removed and `pelvis` reparented, because
+`export_def_bones` keeps the transform handle out of the skin. It is not a
+scrape of the exported GLB: **a contract read back off its own output can never
+fail.** The authored hierarchy was diffed against the GLB first and agrees on
+all 35 bones.
+
+### Known gaps are tracked, not hidden, and not build-breaking
+
+`plannedBones` and `plannedClips` print as notes and do not fail:
+
+* 5 planned bones — `eye_L`/`eye_R` (gaze; `RiggedLionCharacter` wants eye
+  bones for controlled convergence) and `mane_L`/`mane_top`/`mane_R` (mane
+  follow-through; the mane is rigid to `head` today).
+* 11 planned clips — Gates 10-14.
+
+They must not fail a build for work nobody claimed was done, and they must not
+be forgotten either.
+
+### `excludedBones` is a real check, not bookkeeping
+
+9 bones are asserted ABSENT from the skin — `root`, 4 IK targets, 4 poles —
+because `export_def_bones` exists to fix a specific documented regression:
+leaving them deformable "drove a long dark spike through the chest, because
+automatic weighting happily assigned mesh to a control bone floating in
+mid-air". Asserting absence catches that coming back. Plus `maxMeshes: 4` and
+`maxBytes: 4 MB`, so the draw-call and size work cannot silently regress.
+
+### Proved it can fail
+
+A contract that cannot fail is decoration. Three negative tests:
+
+| test | result |
+| --- | --- |
+| faceless cage vs cage contract | fails — 16 facial morphs missing |
+| cage asset vs proxy contract | fails — 34 bones, 3 parents, 11 clips |
+| proxy vs cage contract | fails — 24 bones, 3 parents, 1 leaked control, mesh budget |
+
+### Two bugs found doing it
+
+1. **My own arg parsing swallowed the asset path.** With no `--contract`,
+   `contractFlag` is −1, so `contractFlag + 1` is 0 and the positional filter
+   dropped argument 0 — `validate <cage.glb>` silently validated the PROXY and
+   printed a pass for a file it never opened. The worst kind of green.
+
+2. **The shipping proxy carries 8 control bones in its skin.**
+   `lion_v2.glb` — the character the homepage actually renders — has
+   `ik_front_L/R`, `ik_rear_L/R` and `pole_front_L/R`, `pole_rear_L/R` as skin
+   joints. Checked before reporting it as the documented spike bug, and it is
+   NOT: **0 of 26,033 vertices carry non-zero weight on any of them**, largest
+   weight 0.0000. So it is 8 wasted joint slots out of 41 — a fifth of the skin
+   budget — rather than a visual defect. Not fixed; the proxy is retiring, and
+   the cage contract now makes the same mistake impossible to ship again.
+
+### State of the tree
+
+Unchanged by this pass: typecheck **52** errors, `npm test` **29 failed / 727
+passed**, all pre-existing and none touching world3d or the lion.
+
+### Next, in order
+
+1. Project the decals onto the surface — the muzzle's 65.6 mm float is now the
+   most visible remaining defect.
+2. Clips for Gates 10-14 on the cage, then `plannedClips` shrinks.
+3. Eye bones and mane follow-through, then `plannedBones` empties.
+4. At proxy retirement: rename the cage rig to one scheme and collapse the two
+   contracts back to one. The cage's naming should win — it is the character
+   that survives.
