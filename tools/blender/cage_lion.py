@@ -537,10 +537,32 @@ def ear(sx):
         # ~0.21, so the head top is 0.81. The offsets relative to HEAD_CAGE_Z are
         # therefore LARGER than before, not smaller. The patch also returns to 45
         # degrees, which is only safe now that ring_frame is orthonormal.
-        ("root",  (sx * 0.196, 0.478, HEAD_CAGE_Z + 0.158), (sx * 1.00, -0.09, 0.45), 0.054),
-        ("mid",   (sx * 0.226, 0.472, HEAD_CAGE_Z + 0.180), (sx * 1.00, -0.09, 0.36), 0.056),
-        ("upper", (sx * 0.254, 0.466, HEAD_CAGE_Z + 0.200), (sx * 1.00, -0.09, 0.26), 0.048),
-        ("tip",   (sx * 0.272, 0.460, HEAD_CAGE_Z + 0.214), (sx * 1.00, -0.09, 0.18), 0.026),
+        # THIRD correction, and the same trade read the other way round.
+        #
+        # Per-object band measurement on the assembled character, which is the
+        # only way to tell an ear deficit from a mane one:
+        #
+        #     front band    reference   cage(+ears)   mane    outer     delta
+        #     0.75-0.80       0.631       0.561       0.461   cage     -0.070
+        #     0.80-0.85       0.600       0.565       0.417   cage     -0.035
+        #     0.85-0.90       0.467       0.549       0.424   cage     +0.082
+        #
+        # Narrow in the two bands that want an ear and WIDE in the band above
+        # them is the signature of an ear sitting too high, not one sized
+        # wrongly — the width is real, it is just in the wrong band. The tip
+        # station is at z 0.818 and its cap carries it past 0.844, into a band
+        # where the reference has only mane.
+        #
+        # So the stations drop 0.048 and push out 12%: the width moves from
+        # 0.85-0.90 down into 0.75-0.85 and grows to meet the measurement
+        # there. RADIUS is untouched at 0.026-0.056 — a laterally-grown ear
+        # spends radius on Y and Z equally, so fattening it would put the
+        # thickness straight back into the band being cleared. Moving and
+        # widening does not.
+        ("root",  (sx * 0.220, 0.478, HEAD_CAGE_Z + 0.110), (sx * 1.00, -0.09, 0.45), 0.054),
+        ("mid",   (sx * 0.253, 0.472, HEAD_CAGE_Z + 0.132), (sx * 1.00, -0.09, 0.36), 0.056),
+        ("upper", (sx * 0.285, 0.466, HEAD_CAGE_Z + 0.152), (sx * 1.00, -0.09, 0.26), 0.048),
+        ("tip",   (sx * 0.305, 0.460, HEAD_CAGE_Z + 0.166), (sx * 1.00, -0.09, 0.18), 0.026),
     ]
 
 

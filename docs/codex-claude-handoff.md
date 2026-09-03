@@ -5141,3 +5141,96 @@ changed, so every deformation and silhouette figure holds.
 2. Mane chin lobe; the flat tab at the top of the aperture.
 3. Clips for Gates 10-14; eye bones; mane follow-through bones.
 4. `conform()` the brows, which still float 11.7 and 15.3 mm.
+
+## 2026-09-03 (fourteenth pass) — proportions: ears corrected, legs deliberately not
+
+Measured against the turnaround with `band_spans` and a per-object band probe,
+because the front silhouette alone cannot tell an ear deficit from a mane one.
+
+### The front view is short in EVERY band
+
+    band        ref_w  mod_w      dw
+    0.95-1.00   0.248  0.152   -0.096    mane crown tip
+    0.90-0.95   0.427  0.348   -0.079    mane crown
+    0.80-0.85   0.621  0.563   -0.058    ear height
+    0.75-0.80   0.631  0.562   -0.069    ear height
+    0.65-0.70   0.704  0.681   -0.023    widest mane — nearly right
+    0.25-0.30   0.477  0.398   -0.079    legs
+    0.20-0.25   0.465  0.404   -0.062    legs
+
+The widest mane band is the closest because `fit_to_measured` normalises
+exactly that band, which is the behaviour its own docstring describes.
+
+### The ears: measured as MISPLACED, not mis-sized
+
+Per-object, on the assembled character:
+
+    band        reference  cage(+ears)   mane    outer      delta
+    0.75-0.80     0.631      0.561      0.461   cage      -0.070
+    0.80-0.85     0.600      0.565      0.417   cage      -0.035
+    0.85-0.90     0.467      0.549      0.424   cage      +0.082
+
+Narrow in the two bands that want an ear and WIDE in the band above them is the
+signature of an ear sitting too high — the width is real, it is in the wrong
+band. The tip station sat at z 0.818 and its cap carried past 0.844, into a
+band where the reference has only mane.
+
+Stations dropped 0.048 and pushed out 12%. Radius untouched, because a
+laterally-grown ear spends radius on Y and Z equally and fattening it would put
+the thickness straight back into the band being cleared. After:
+
+    0.75-0.80   -0.070 -> **+0.002**
+    0.80-0.85   -0.035 -> **+0.016**
+    0.85-0.90   +0.082 -> -0.044   (now mane-only; the crown is separately short)
+
+**And it cost 0.0024 weighted IoU: 0.8519 -> 0.8495.** The loss is almost
+entirely rear view (0.8298 -> 0.8158), where wider ears add extra material.
+Kept anyway, and the reasoning is on the record: the band it targets is now
+exact, front IoU barely moved (-0.0012), the rear carries weight 0.10 and a
+documented unfixable 18% front/rear disagreement in the source artwork, and the
+cage's own rule is that "an ear inside the mane outline is not an ear".
+Matching band WIDTH is not the same as matching band SHAPE, which is why the
+targeted metric improved and the pixel metric did not.
+
+### The legs: the deficit is real and must NOT be closed
+
+The front view wants 0.079 H more width at h 0.25-0.30. From radius alone that
+is 0.092 -> 0.120, which puts each shaft's inner surface PAST the midline —
+precisely the collision the documented 12% trim exists to prevent.
+
+Tested rather than argued. +8% radius and +0.012 outward on the upper stations:
+
+    | | baseline | +8% |
+    | worst area ratio | 0.252 | **0.222** |
+    | pinched faces    | **0** | **1**     |
+    | flipped faces    | 0     | 0         |
+
+So 8% reintroduces pinching and buys only about 18% of the gap; closing it
+fully needs ~30%. **Reverted.**
+
+The reason the deficit exists is already in `front_limb`'s docstring: in the
+drawing the near and far legs OVERLAP, so the front view reads a solid band
+even though the legs are separated in 3D. That solid width is not a 3D width,
+and matching it in 3D is geometrically wrong. The earlier pass reached this
+conclusion and traded correctly; this pass re-derived it with numbers and
+confirms the trade. **Not a defect to chase.**
+
+### State
+
+Weighted IoU 0.8495. Battery 0 pinched / 0 flipped, worst area ratio 0.252.
+Reach 22.1 / 42.1 mm, support slide 0.166 mm, both unchanged. Asset 3.92 MB,
+4 meshes, both contracts passing.
+
+### What is left on proportions
+
+1. **The mane crown is short** — -0.096 and -0.079 in the top two bands, and
+   after the ear move 0.85-0.90 is -0.044 with only mane in it. That is
+   `mane_foundation`, not the cage.
+2. **Three-quarter is the weakest view** at 0.8001, and h 0.1-0.2 there is
+   IoU 0.558 with BOTH missing and extra — the legs are misplaced in depth as
+   well as thin, which the side view's gap deltas also show (ref_gap 0.246
+   against mod_gap 0.290 at h 0.05-0.10).
+3. Head-to-body is NOT confirmed as wrong. Every torso band is within 0.023,
+   so the "head too large" read is more likely the mane's crown deficit plus
+   the leg overlap than an actual head-size error. Worth stating, because it is
+   the opposite of what the renders suggested.
