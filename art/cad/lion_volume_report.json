@@ -1,0 +1,26 @@
+{
+  "solids_unioned": 5,
+  "fused_solid_count": 1,
+  "body_stations": 97,
+  "volume": 0.216824,
+  "bbox": {
+    "x": [
+      -0.3567,
+      0.3567
+    ],
+    "y": [
+      -0.6721,
+      0.6721
+    ],
+    "z": [
+      -0.0,
+      1.0015
+    ]
+  },
+  "height": 1.0015,
+  "length": 1.3442,
+  "width": 0.7135,
+  "stl_bytes": 5930784,
+  "step_bytes": 732528,
+  "role": "volume reference for Blender sculpt + retopology; NOT the production asset"
+}

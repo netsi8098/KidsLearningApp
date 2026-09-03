@@ -375,6 +375,60 @@ import StartupSequence from '../startup/StartupSequence';
 
 ---
 
+## Temporary 2.5D Mascot Locomotion
+
+The current homepage lion is a subdivided plane textured with the approved PNG and
+deformed as a `THREE.SkinnedMesh`. It is an interactive fallback, not a production
+quadruped. Do not extend this plane rig as the final character solution. World-level
+travel and fallback articulation must still run together; never replace locomotion
+with image swaps, sprite frames, video playback, or a whole-character bob.
+
+### Sunny Meadow Play Loop
+
+1. Keep the first 5.2 seconds planted so the greeting, gaze, speech, and wave
+   remain readable.
+2. Walk across the hill with alternating leg IK and small terrain-following root
+   travel.
+3. Pause and compress into a visible anticipation crouch.
+4. Hop along a bounded arc. Legs tuck while airborne; the tail and mane react to
+   lift and direction.
+5. Land with brief squash, mane follow-through, and tail counterbalance.
+6. Rest, walk home, and blend back to the living idle.
+
+`LionLocomotionContext` carries a mutable per-frame locomotion sample from the
+Framer Motion world loop into the Three.js render loop without a React render on
+every frame. Root motion is limited to scene travel. The existing bones still
+control torso weight, head follow, eyes, legs, paws, tail, and mane concurrently.
+
+### Contact Rules
+
+- The Sunny Meadow paw baseline and live grass baseline are both the painted hill
+  crest at `54%` of the viewport height.
+- Flowers are anchored by their SVG root to measured hill-contour baselines. Do
+  not position flower centers with arbitrary `top` values.
+- The ground shadow follows horizontal travel but stays on the terrain. During a
+  hop it shrinks and fades rather than rising with the character.
+- Mobile travel is narrower than desktop travel. The hop remains clearly visible
+  at both widths while staying inside the title composition.
+- `prefers-reduced-motion` disables travel, hopping, and procedural scenery sway.
+
+### Technical References
+
+- Rive IK constraints for planted feet: https://rive.app/docs/editor/constraints/ik-constraint
+- Rive concurrent state blending: https://rive.app/docs/editor/state-machine/states
+- Three.js `SkinnedMesh` and skeleton architecture: https://archive.threejs.org/docs/api/en/objects/SkinnedMesh.html
+- Motion frame callbacks and motion values: https://motion.dev/docs/react-use-animation-frame and https://motion.dev/docs/react-motion-value
+
+### Production Replacement
+
+The production path is Blender armature and shape-key authoring, GLB export, then
+R3F/Drei loading and Three.js animation mixing. The exact bone, clip, morph, export,
+validation, feature flag, and acceptance contract is in
+`docs/rigged-lion-production.md`. Keep the fallback enabled until the approved GLB
+passes `npm run lion:validate` and responsive visual QA.
+
+---
+
 ## Quick Reference Card
 
 ```
@@ -385,3 +439,85 @@ HIERARCHY:  primary(attention) > secondary(decorative) > ambient(background)
 STAGGER:    cascade(50ms) | center-out(40ms) | random(60ms)
 MODES:      full | bedtime(1.5x slower, no springs) | reduced(opacity only)
 ```
+
+---
+
+## Quadruped gait — 2026-08-21
+
+### The walk was a trot, and the code said otherwise
+
+The original Walk clip moved **diagonal pairs** and carried a comment asserting
+that was correct quadruped motion. It is not. Diagonal pairs are a **trot**.
+
+A quadruped **walk** is a four-beat **lateral** sequence:
+
+    back-left → front-left → back-right → front-right
+
+each a quarter of the cycle apart, with **two to three feet planted at all
+times**. The body rocks gently toward whichever side is supporting.
+
+### As authored
+
+| | |
+|---|---|
+| Cycle | 48 frames @ 24 fps = 2.0 s |
+| Phase offsets | BL 0.00 · FL 0.25 · BR 0.50 · FR 0.75 |
+| Duty factor | 75% stance / 25% swing per limb |
+| Knee / hock | flexes **only during swing** — a joint that bends while the paw is planted is the classic skating tell |
+| Body | one left-right rock per cycle, two vertical dips |
+| Head | counter-rotates to stay level |
+
+### Speed must come from the clip
+
+Stride ÷ cycle is the only speed at which a planted paw does not slide. It is
+measured off the authored action by the rig script and written to
+`locomotion.json`; the runtime scales it and divides.
+
+`WALK_SPEED = 0.52` was derived on paper from an earlier 32-frame two-stride
+cycle and never updated when the clip was rewritten — roughly 4× too fast. The
+constant is now `WALK_SPEED_FALLBACK` and is only used before the measurement
+arrives.
+
+**If a brisker walk is wanted, change the CLIP** — bigger swing or shorter
+cycle. Raising the runtime speed only reintroduces skating.
+
+### Measured on the production mascot (2026-08-21)
+
+The walk was re-authored onto the reference-driven mascot after the tail, ears,
+rump, torso, limbs, paws and head all moved. Result, against the donor baseline:
+
+| Metric | Donor | Mascot |
+|---|---|---|
+| Support slide, worst paw | 0.46 mm | **0.166 mm** |
+| Rear paw slide | — | **0.04 mm** |
+| Vertical paw movement | 0.15 mm | 0.32 mm |
+| IK residual, all four paws | 0.00 mm | **0.00 mm** |
+| Feet planted, every sampled phase | 3 | **3** |
+| Stride / cycle / duty | 0.24 / 1.50 s / 0.75 | unchanged |
+
+Two ways the walk was broken while enlarging the paws, both worth not repeating:
+
+* **Lengthening a foot bone to follow bigger foot geometry** took support slide to
+  15.99 mm. The planted-contact point is measured at the bone, and a long bone
+  swings its own tip through an arc the IK target knows nothing about.
+* **Moving that bone's head forward** to sit inside the new paw was worse — a
+  battery FAIL and a 10.79 mm front IK residual — because a bone's head must
+  coincide with its parent's tail, and shifting it silently disconnects the chain
+  the solver runs along.
+
+Paws are weighted rigidly (1.0) to their bone, so the geometry travels with it
+whatever the bone's length. **Never reposition or lengthen a foot bone to follow
+the mesh.**
+
+### Priority for a mascot
+
+Readability, softness and weight over zoological accuracy. What must hold:
+four distinct contacts, a high duty factor, overlapping support, believable
+lateral weight shift, planted-foot phases, a stable head, and coherent
+spine/pelvis motion.
+
+### Owed
+
+Per-paw `CONTACT / STANCE / LIFT / SWING / PLACEMENT` visualisation in debug
+mode, inspected at 0.25×. `WalkStart` / `WalkStop` / `TurnLeft` / `TurnRight`
+with head lead, shoulder turn and paw reposition.

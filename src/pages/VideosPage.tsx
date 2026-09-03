@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useVideos } from '../hooks/useVideos';
 import { useMediaQueue } from '../hooks/useMediaQueue';
 import {
-  curatedVideos,
+  playableVideos,
   videoCategories,
   getVideosByCategory,
   searchVideos,
@@ -38,13 +38,13 @@ export default function VideosPage() {
       return searchVideos(searchQuery);
     }
     if (selectedCategory === 'all') {
-      return curatedVideos;
+      return playableVideos;
     }
     return getVideosByCategory(selectedCategory);
   }, [selectedCategory, searchQuery]);
 
   const favoriteVideos = useMemo(() => {
-    return curatedVideos.filter((v) => favoriteIds.has(v.id));
+    return playableVideos.filter((v) => favoriteIds.has(v.id));
   }, [favoriteIds]);
 
   const recentHistory = getRecentHistory();
@@ -61,9 +61,9 @@ export default function VideosPage() {
   // "Up Next" suggestions based on most recently watched category
   const upNextVideos = useMemo(() => {
     if (recentHistory.length === 0) return [];
-    const lastWatched = curatedVideos.find((v) => v.id === recentHistory[0]?.videoId);
+    const lastWatched = playableVideos.find((v) => v.id === recentHistory[0]?.videoId);
     if (!lastWatched) return [];
-    return curatedVideos
+    return playableVideos
       .filter((v) => v.category === lastWatched.category && v.id !== lastWatched.id && !watchedIds.has(v.id))
       .slice(0, 4);
   }, [recentHistory, watchedIds]);
@@ -406,7 +406,7 @@ export default function VideosPage() {
                       </p>
                       <div className="flex gap-3 overflow-x-auto -mx-4 px-4 pb-2 scrollbar-hide">
                         {recentHistory.slice(0, 8).map((item) => {
-                          const video = curatedVideos.find((v) => v.id === item.videoId);
+                          const video = playableVideos.find((v) => v.id === item.videoId);
                           if (!video) return null;
                           return (
                             <motion.div
@@ -583,7 +583,7 @@ export default function VideosPage() {
                           boxShadow: '0 2px 12px rgba(45,45,58,0.06)',
                         }}
                         onClick={() => {
-                          const video = curatedVideos.find((v) => v.id === item.videoId);
+                          const video = playableVideos.find((v) => v.id === item.videoId);
                           if (video) handlePlay(video);
                         }}
                         initial={{ x: -20, opacity: 0 }}

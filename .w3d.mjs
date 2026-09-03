@@ -1,0 +1,15 @@
+import { chromium } from '@playwright/test';
+const OUT='/tmp/claude-501/-Users-netsanettiruye/c2ef3cfa-0eac-4792-bb49-0b0bfdd3ff4b/scratchpad/shots';
+const b=await chromium.launch({args:['--enable-unsafe-swiftshader']});
+const ctx=await b.newContext({viewport:{width:1440,height:900}, serviceWorkers:'block'});
+const p=await ctx.newPage();
+const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:4173/world3d',{waitUntil:'networkidle'});
+await p.waitForTimeout(9000);
+await p.screenshot({path:`${OUT}/lion-rigged-idle.png`});
+console.log(await p.locator('[data-testid="world3d-hud"]').textContent().catch(()=>'no hud'));
+await p.getByRole('button',{name:'Wave'}).click().catch(()=>{});
+await p.waitForTimeout(2600);
+await p.screenshot({path:`${OUT}/lion-rigged-wave.png`});
+if(errs.length) console.log('ERR:',errs.slice(0,3));
+await b.close();

@@ -263,3 +263,59 @@ The system prevents mascot fatigue through three mechanisms:
 Reset session tracking with `resetSessionTracking()` when the user session changes (profile switch, app restart).
 
 Use `getMascotReactionForced()` to bypass overuse checks for system-critical displays (e.g., welcome screen, tutorial).
+
+---
+
+## Update — 2026-08-21 : the mascot is now geometry
+
+The 2D `LionMascot` state system is unchanged and still ships. What changed is
+that on the `river-garden-3d` world the character is a **rigged quadruped in the
+scene**, and the DOM mascot is suppressed so there is never a second lion.
+
+Which lion renders is decided by the WORLD, not by the page — deciding it by
+theme id meant the no-WebGL fallback rendered with no character at all. The
+`WorldProps` contract gained `mascotInScene`, and the world picks.
+
+### Behaviour lives in `lionBrain.ts`
+
+No three.js, no React, no scene access — so it is testable in isolation and the
+R3F component is a thin applier.
+
+Semantic API: `idle` `walkTo` `wave` `celebrate` `nod` `jump` `sit` `sleep`
+`talk` `greet`. Still to add: `lookAt` `notice` `turnTo` `speak` `stop`.
+
+Movement rules that matter:
+
+* **Turn before moving.** The lion holds position until roughly aimed, so it
+  never crab-walks sideways.
+* **Ground by raycast**, one downward ray per frame against the environment —
+  an analytic dome formula copied from the build script would drift from the
+  asset that actually shipped.
+* **Stage discipline.** `stageRadius` bounds how much of the island the character
+  uses, and every stroll ends back on its mark facing the viewer. Free roaming is
+  right for the review route and wrong for a homepage: a mascot that wanders to
+  the back of the island and stands with its back to the child is scenery, not a
+  greeter. Homepage runs at 0.26.
+* **Locomotion speed is measured, never declared.** See
+  `locomotion.json` and `setLocomotion`.
+
+### Clips on the proxy
+
+`Idle` `Walk` `Wave` `Sit` `Jump` `Celebrate` `Nod` `LookAround` `Talk` `Sleep`.
+
+`Wave` is authored as a four-legged performance — weight shifts away from the
+waving side, the chest and pelvis compensate, and only then does the paw leave
+the ground. `Jump` moves `root` vertically **and** extends the legs.
+
+`Sit` and `Sleep` are **out of the autonomous rotation**. Both fold the hips past
+55° and collapsed under the old automatic weights — that was the grey wedge
+visible on the island. Still authored and reachable from `/world3d`; they should
+be re-tested against the production rig's authored weights and returned.
+
+### Not yet built
+
+Facial shape keys and visemes (`Blink_L/R`, `Squint`, `EyesWide`, `BrowUp_L/R`,
+`Smile`, `JawOpen`, `MouthWide/Narrow/Round`, `REST MBP FV AA E I O U L`), eye
+look-at, animation **layers** so speech, blink, eye direction, paw motion, tail
+and breathing run concurrently. Clip switching is currently exclusive, which the
+brief explicitly rules out for the greeting performance.

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SearchIcon, CheckIcon } from '../components/svg/CommonIcons';
 import { useApp } from '../context/AppContext';
 import { useHelpArticles, type HelpArticle, type HelpCategory } from '../hooks/useHelpArticles';

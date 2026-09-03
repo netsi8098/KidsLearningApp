@@ -24,6 +24,8 @@ export interface HomepageTheme {
   mood: 'cheerful' | 'peaceful' | 'magical' | 'cozy';
   /** Preview background color for theme picker card */
   previewBg: string;
+  /** Optional crop of the real world art for a truthful picker preview. */
+  previewImage?: string;
 }
 
 export const themes: HomepageTheme[] = [
@@ -41,6 +43,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'cheerful',
     previewBg: '#B8E4F0',
+    previewImage: '/assets/worlds/sunny-meadow/backplate-hill-v2.webp',
   },
   {
     id: 'sky-islands',
@@ -56,6 +59,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'magical',
     previewBg: '#2D1B69',
+    previewImage: '/assets/worlds/sky-islands/backplate.webp',
   },
   {
     id: 'river-garden',
@@ -71,6 +75,23 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'peaceful',
     previewBg: '#C8E6C9',
+    previewImage: '/assets/worlds/river-garden/backplate.webp',
+  },
+  {
+    id: 'river-garden-3d',
+    name: 'River Garden 3D',
+    tagline: 'The garden as a real place — Leo walks around the island',
+    skyGradient: ['#8FD0F0', '#C8E6C9'],
+    groundGradient: ['#6BCB77', '#2E7D32'],
+    accentColors: {
+      primary: '#4ECDC4',
+      secondary: '#A78BFA',
+      warm: '#FFE66D',
+      glow: '#A8E6CF',
+    },
+    mood: 'peaceful',
+    previewBg: '#8FD0F0',
+    previewImage: '/assets/worlds/river-garden/backplate.webp',
   },
   {
     id: 'treehouse',
@@ -86,6 +107,7 @@ export const themes: HomepageTheme[] = [
     },
     mood: 'cozy',
     previewBg: '#FF8C42',
+    previewImage: '/assets/worlds/treehouse/backplate.webp',
   },
 ];
 
@@ -94,12 +116,10 @@ export function getThemeById(id: string): HomepageTheme {
 }
 
 /** Default theme for new profiles */
-export const DEFAULT_THEME_ID = 'river-garden';
+export const DEFAULT_THEME_ID = 'sunny-meadow';
 
-/** Map theme IDs to clean hero image filenames (baked-in UI removed) */
-export const themeHeroImages: Record<string, string> = {
-  'sunny-meadow': '/assets/themes/sunny-meadow-hero-clean.jpg',
-  'sky-islands': '/assets/themes/sky-islands-hero-clean.jpg',
-  'river-garden': '/assets/themes/river-garden-hero-clean.jpg',
-  'treehouse': '/assets/themes/treehouse-hero-clean.jpg',
-};
+/* NOTE: the /assets/themes/*-hero*.jpg plates are no longer rendered.
+   Despite the "-clean" suffix they were never cleaned — each one still has the
+   title, subtitle and a fake "Parent" pill painted into the JPEG, so they
+   double-rendered against the real UI. Every theme is now a code-built world
+   under components/homepage/worlds/. The files are kept as reference art. */

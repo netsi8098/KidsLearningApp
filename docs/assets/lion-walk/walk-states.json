@@ -1,0 +1,134 @@
+[
+  {
+    "frame": 1,
+    "t": 0.0,
+    "planted": 3,
+    "paws": {
+      "RL": "CONTACT",
+      "FL": "SWING",
+      "RR": "STANCE",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 4,
+    "t": 0.083,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "SWING",
+      "RR": "STANCE",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 7,
+    "t": 0.167,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "SWING",
+      "RR": "STANCE",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 10,
+    "t": 0.25,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "CONTACT",
+      "RR": "SWING",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 13,
+    "t": 0.333,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "STANCE",
+      "RR": "SWING",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 16,
+    "t": 0.417,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "STANCE",
+      "RR": "SWING",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 19,
+    "t": 0.5,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "STANCE",
+      "RR": "CONTACT",
+      "FR": "SWING"
+    }
+  },
+  {
+    "frame": 22,
+    "t": 0.583,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "STANCE",
+      "RR": "STANCE",
+      "FR": "SWING"
+    }
+  },
+  {
+    "frame": 25,
+    "t": 0.667,
+    "planted": 3,
+    "paws": {
+      "RL": "STANCE",
+      "FL": "STANCE",
+      "RR": "STANCE",
+      "FR": "SWING"
+    }
+  },
+  {
+    "frame": 28,
+    "t": 0.75,
+    "planted": 3,
+    "paws": {
+      "RL": "SWING",
+      "FL": "STANCE",
+      "RR": "STANCE",
+      "FR": "CONTACT"
+    }
+  },
+  {
+    "frame": 31,
+    "t": 0.833,
+    "planted": 3,
+    "paws": {
+      "RL": "SWING",
+      "FL": "STANCE",
+      "RR": "STANCE",
+      "FR": "STANCE"
+    }
+  },
+  {
+    "frame": 34,
+    "t": 0.917,
+    "planted": 3,
+    "paws": {
+      "RL": "SWING",
+      "FL": "STANCE",
+      "RR": "STANCE",
+      "FR": "STANCE"
+    }
+  }
+]

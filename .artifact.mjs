@@ -1,0 +1,14 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ args: ['--enable-unsafe-swiftshader','--use-gl=angle'] });
+const c = await b.newContext({ viewport:{width:1920,height:1080}, serviceWorkers:'block' });
+await c.addInitScript(() => localStorage.setItem('klf-homepage-theme','river-garden-3d'));
+const p = await c.newPage();
+await p.goto('http://localhost:4173/world3d', { waitUntil:'networkidle' });
+await p.waitForTimeout(5000);
+await p.getByRole('button', { name:'Hide HUD' }).click();
+await p.waitForTimeout(400);
+await p.screenshot({ path:'/tmp/art_world.png' });
+await p.getByRole('button', { name:'Hide lion' }).click();
+await p.waitForTimeout(800);
+await p.screenshot({ path:'/tmp/art_nolion.png' });
+await b.close();

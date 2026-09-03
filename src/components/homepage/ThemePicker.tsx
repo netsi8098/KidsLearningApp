@@ -64,10 +64,16 @@ function ThemeCard({ theme, active, onSelect }: { theme: HomepageTheme; active: 
       {/* Preview gradient */}
       <div
         className="h-20 relative"
-        style={{ background: `linear-gradient(135deg, ${theme.skyGradient[0]}, ${theme.skyGradient[1]})` }}
+        style={{
+          background: theme.previewImage
+            ? `url(${theme.previewImage}) center 58% / cover no-repeat`
+            : `linear-gradient(135deg, ${theme.skyGradient[0]}, ${theme.skyGradient[1]})`,
+        }}
       >
         {/* Ground preview */}
-        <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: `linear-gradient(180deg, ${theme.groundGradient[0]}80, ${theme.groundGradient[1]})`, borderRadius: '40% 40% 0 0' }} />
+        {!theme.previewImage && (
+          <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: `linear-gradient(180deg, ${theme.groundGradient[0]}80, ${theme.groundGradient[1]})`, borderRadius: '40% 40% 0 0' }} />
+        )}
         {/* Active badge */}
         {active && (
           <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white flex items-center justify-center">

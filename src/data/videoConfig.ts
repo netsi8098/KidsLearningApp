@@ -16,6 +16,14 @@ export interface VideoItem {
   thumbnail: string;    // YouTube thumbnail URL (derived from id)
   duration?: string;    // e.g. "3:42"
   category: VideoCategory;
+  /**
+   * Set when the YouTube id no longer resolves (removed, private, or wrong).
+   * Flagged entries are withheld from every child-facing surface by the
+   * accessors below — a child must never be shown a card that leads to an
+   * unplayable video. Audited by `scripts/audit-video-ids.mjs`.
+   * Replace the `id` with a valid one and delete this flag to restore it.
+   */
+  unavailable?: true;
 }
 
 export type VideoCategory =
@@ -61,23 +69,23 @@ function thumb(id: string): string {
 export const curatedVideos: VideoItem[] = [
   // === LEARNING ===
   { id: 'ZanHgPprl-0', title: 'Head Shoulders Knees & Toes', channel: 'Super Simple Songs', thumbnail: thumb('ZanHgPprl-0'), duration: '3:44', category: 'learning' },
-  { id: 'eCbHpeOgPuw', title: 'Learn to Count 1-10', channel: 'Super Simple Songs', thumbnail: thumb('eCbHpeOgPuw'), duration: '3:15', category: 'learning' },
+  { id: 'eCbHpeOgPuw', title: 'Learn to Count 1-10', channel: 'Super Simple Songs', thumbnail: thumb('eCbHpeOgPuw'), duration: '3:15', category: 'learning', unavailable: true },
   { id: 'DR-cfDsHCGA', title: 'Learn Shapes for Kids', channel: 'BabyBus', thumbnail: thumb('DR-cfDsHCGA'), duration: '12:45', category: 'learning' },
-  { id: '2bLk6gXJNbw', title: 'First Words for Baby', channel: 'Super Simple Songs', thumbnail: thumb('2bLk6gXJNbw'), duration: '20:00', category: 'learning' },
+  { id: '2bLk6gXJNbw', title: 'First Words for Baby', channel: 'Super Simple Songs', thumbnail: thumb('2bLk6gXJNbw'), duration: '20:00', category: 'learning', unavailable: true },
 
   // === NURSERY RHYMES ===
   { id: 'yCjJyiqpAuU', title: 'Wheels on the Bus', channel: 'CoComelon', thumbnail: thumb('yCjJyiqpAuU'), duration: '3:20', category: 'nursery-rhymes' },
-  { id: '0j6k1SNgLcg', title: 'Twinkle Twinkle Little Star', channel: 'Super Simple Songs', thumbnail: thumb('0j6k1SNgLcg'), duration: '2:50', category: 'nursery-rhymes' },
-  { id: 'BsSz8MpUvKc', title: 'Old MacDonald Had a Farm', channel: 'Super Simple Songs', thumbnail: thumb('BsSz8MpUvKc'), duration: '4:10', category: 'nursery-rhymes' },
-  { id: 'gGKKOqnD-Yw', title: 'Baby Shark Dance', channel: 'Pinkfong', thumbnail: thumb('gGKKOqnD-Yw'), duration: '2:16', category: 'nursery-rhymes' },
+  { id: '0j6k1SNgLcg', title: 'Twinkle Twinkle Little Star', channel: 'Super Simple Songs', thumbnail: thumb('0j6k1SNgLcg'), duration: '2:50', category: 'nursery-rhymes', unavailable: true },
+  { id: 'BsSz8MpUvKc', title: 'Old MacDonald Had a Farm', channel: 'Super Simple Songs', thumbnail: thumb('BsSz8MpUvKc'), duration: '4:10', category: 'nursery-rhymes', unavailable: true },
+  { id: 'gGKKOqnD-Yw', title: 'Baby Shark Dance', channel: 'Pinkfong', thumbnail: thumb('gGKKOqnD-Yw'), duration: '2:16', category: 'nursery-rhymes', unavailable: true },
   { id: 'e_04ZrNroTo', title: 'Itsy Bitsy Spider', channel: 'CoComelon', thumbnail: thumb('e_04ZrNroTo'), duration: '3:00', category: 'nursery-rhymes' },
-  { id: 'fe4fOiaKo5o', title: 'Head Shoulders Knees & Toes', channel: 'Super Simple Songs', thumbnail: thumb('fe4fOiaKo5o'), duration: '2:30', category: 'nursery-rhymes' },
+  { id: 'fe4fOiaKo5o', title: 'Head Shoulders Knees & Toes', channel: 'Super Simple Songs', thumbnail: thumb('fe4fOiaKo5o'), duration: '2:30', category: 'nursery-rhymes', unavailable: true },
 
   // === ALPHABET ===
   { id: 'hq3yfQnllfQ', title: 'ABC Song', channel: 'Pinkfong', thumbnail: thumb('hq3yfQnllfQ'), duration: '2:30', category: 'alphabet' },
-  { id: 'Y88p4V_BCXE', title: 'Phonics Song with TWO Words', channel: 'ChuChu TV', thumbnail: thumb('Y88p4V_BCXE'), duration: '4:23', category: 'alphabet' },
+  { id: 'Y88p4V_BCXE', title: 'Phonics Song with TWO Words', channel: 'ChuChu TV', thumbnail: thumb('Y88p4V_BCXE'), duration: '4:23', category: 'alphabet', unavailable: true },
   { id: 'BELlZKpi1Zs', title: 'ABC Phonics Song', channel: 'Jack Hartmann', thumbnail: thumb('BELlZKpi1Zs'), duration: '5:10', category: 'alphabet' },
-  { id: '5XEN4mtV5x4', title: 'A is for Apple', channel: 'The Kiboomers', thumbnail: thumb('5XEN4mtV5x4'), duration: '2:50', category: 'alphabet' },
+  { id: '5XEN4mtV5x4', title: 'A is for Apple', channel: 'The Kiboomers', thumbnail: thumb('5XEN4mtV5x4'), duration: '2:50', category: 'alphabet', unavailable: true },
 
   // === NUMBERS ===
   { id: 'Yt8GFgxlITs', title: 'Numbers Song 1-20', channel: 'Jack Hartmann', thumbnail: thumb('Yt8GFgxlITs'), duration: '3:45', category: 'numbers' },
@@ -85,33 +93,39 @@ export const curatedVideos: VideoItem[] = [
   { id: '85M1yxIcHpw', title: '5 Little Ducks', channel: 'LittleBabyBum', thumbnail: thumb('85M1yxIcHpw'), duration: '3:30', category: 'numbers' },
 
   // === COLORS & SHAPES ===
-  { id: 'zBMOCqk-M3M', title: 'Colors Song', channel: 'Pinkfong', thumbnail: thumb('zBMOCqk-M3M'), duration: '2:30', category: 'colors-shapes' },
-  { id: 'jYAQzxgMb3I', title: 'Learn Colors with Balloons', channel: 'BabyBus', thumbnail: thumb('jYAQzxgMb3I'), duration: '8:00', category: 'colors-shapes' },
+  { id: 'zBMOCqk-M3M', title: 'Colors Song', channel: 'Pinkfong', thumbnail: thumb('zBMOCqk-M3M'), duration: '2:30', category: 'colors-shapes', unavailable: true },
+  { id: 'jYAQzxgMb3I', title: 'Learn Colors with Balloons', channel: 'BabyBus', thumbnail: thumb('jYAQzxgMb3I'), duration: '8:00', category: 'colors-shapes', unavailable: true },
   { id: 'OEbRDtCAFdU', title: 'Shapes Song for Kids', channel: 'The Kiboomers', thumbnail: thumb('OEbRDtCAFdU'), duration: '3:00', category: 'colors-shapes' },
-  { id: '4CWrFXBWIFo', title: 'Rainbow Colors Song', channel: 'Super Simple Songs', thumbnail: thumb('4CWrFXBWIFo'), duration: '2:15', category: 'colors-shapes' },
+  { id: '4CWrFXBWIFo', title: 'Rainbow Colors Song', channel: 'Super Simple Songs', thumbnail: thumb('4CWrFXBWIFo'), duration: '2:15', category: 'colors-shapes', unavailable: true },
 
   // === ANIMALS ===
-  { id: 'pWepfJ-8XR0', title: 'Animal Sounds Song', channel: 'Pinkfong', thumbnail: thumb('pWepfJ-8XR0'), duration: '3:00', category: 'animals' },
+  { id: 'pWepfJ-8XR0', title: 'Animal Sounds Song', channel: 'Pinkfong', thumbnail: thumb('pWepfJ-8XR0'), duration: '3:00', category: 'animals', unavailable: true },
   { id: 'OwRmivbNgQk', title: 'Animals for Kids', channel: 'National Geographic Kids', thumbnail: thumb('OwRmivbNgQk'), duration: '6:30', category: 'animals' },
   { id: 'p5qwOxlvyhk', title: 'Farm Animals for Toddlers', channel: 'BabyBus', thumbnail: thumb('p5qwOxlvyhk'), duration: '10:00', category: 'animals' },
-  { id: 'CI8RqEQmv4Y', title: 'Sea Animals Song', channel: 'Pinkfong', thumbnail: thumb('CI8RqEQmv4Y'), duration: '2:45', category: 'animals' },
+  { id: 'CI8RqEQmv4Y', title: 'Sea Animals Song', channel: 'Pinkfong', thumbnail: thumb('CI8RqEQmv4Y'), duration: '2:45', category: 'animals', unavailable: true },
 
   // === BEDTIME ===
   { id: 'GBkT19uH2RQ', title: 'Rock-a-bye Baby', channel: 'Super Simple Songs', thumbnail: thumb('GBkT19uH2RQ'), duration: '3:10', category: 'bedtime' },
-  { id: 'ufKmPvdEpfg', title: 'Calm Lullabies for Babies', channel: 'LittleBabyBum', thumbnail: thumb('ufKmPvdEpfg'), duration: '30:00', category: 'bedtime' },
-  { id: 'TpGSQOLh1ss', title: 'Hush Little Baby', channel: 'CoComelon', thumbnail: thumb('TpGSQOLh1ss'), duration: '3:15', category: 'bedtime' },
+  { id: 'ufKmPvdEpfg', title: 'Calm Lullabies for Babies', channel: 'LittleBabyBum', thumbnail: thumb('ufKmPvdEpfg'), duration: '30:00', category: 'bedtime', unavailable: true },
+  { id: 'TpGSQOLh1ss', title: 'Hush Little Baby', channel: 'CoComelon', thumbnail: thumb('TpGSQOLh1ss'), duration: '3:15', category: 'bedtime', unavailable: true },
 ];
 
-/** Get videos for a specific category */
+/** Every entry whose id still resolves — the only set shown to children. */
+export const playableVideos: VideoItem[] = curatedVideos.filter(v => !v.unavailable);
+
+/** Entries awaiting a replacement id. Surfaced to tooling, never to children. */
+export const unavailableVideos: VideoItem[] = curatedVideos.filter(v => v.unavailable);
+
+/** Get playable videos for a specific category */
 export function getVideosByCategory(category: VideoCategory): VideoItem[] {
-  return curatedVideos.filter(v => v.category === category);
+  return playableVideos.filter(v => v.category === category);
 }
 
 /** Search videos by title keyword */
 export function searchVideos(query: string): VideoItem[] {
   const lower = query.toLowerCase().trim();
-  if (!lower) return curatedVideos;
-  return curatedVideos.filter(
+  if (!lower) return playableVideos;
+  return playableVideos.filter(
     v => v.title.toLowerCase().includes(lower) ||
          v.channel.toLowerCase().includes(lower) ||
          v.category.includes(lower)

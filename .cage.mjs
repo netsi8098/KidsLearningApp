@@ -1,0 +1,13 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ args: ['--enable-unsafe-swiftshader','--use-gl=angle'] });
+const c = await b.newContext({ viewport:{width:1280,height:800}, serviceWorkers:'block' });
+const p = await c.newPage();
+const errs=[]; p.on('pageerror', e=>errs.push(e.message));
+p.on('console', m=>{ if(m.type()==='error' && !/ERR_NAME_NOT_RESOLVED/.test(m.text())) errs.push('C: '+m.text().slice(0,200)); });
+await p.goto('http://localhost:4173/world3d?mesh=cage', { waitUntil:'networkidle' });
+await p.waitForTimeout(7000);
+const hud = await p.locator('[data-testid="world3d-hud"]').innerText().catch(()=>'(no hud)');
+console.log(hud);
+await p.screenshot({ path:'/tmp/cage_runtime.png' });
+console.log('ERRORS:', errs.length ? errs.slice(0,3).join(' | ') : 'none');
+await b.close();

@@ -9,14 +9,11 @@ interface ColorRailProps {
   activeColor: string;
   onColorChange: (hex: string) => void;
   recentColors?: string[];
-  expanded?: boolean;
-  onExpandedChange?: (open: boolean) => void;
+  /** Opens the full wheel, which owns saved and recent swatches. */
   onColorWheelOpen?: () => void;
 }
 
-export default function ColorRail({ activeColor, onColorChange, recentColors = [], expanded = false, onExpandedChange, onColorWheelOpen }: ColorRailProps) {
-  const showMore = expanded;
-  const setShowMore = (v: boolean) => onExpandedChange?.(v);
+export default function ColorRail({ activeColor, onColorChange, onColorWheelOpen }: ColorRailProps) {
 
   return (
     <div className="relative">
@@ -43,39 +40,26 @@ export default function ColorRail({ activeColor, onColorChange, recentColors = [
           ))}
         </div>
 
-        {/* More colors button */}
-        <div className="w-px h-7 mx-1" style={{ background: 'rgba(255,255,255,0.15)' }} />
-        <motion.button
-          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
-          style={{ background: 'rgba(255,255,255,0.1)' }}
-          onClick={() => setShowMore(!showMore)}
-          whileTap={{ scale: 0.9 }}
-          aria-label="More colors"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="8" cy="8" r="7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" />
-            <circle cx="5" cy="6" r="1.5" fill="#FF6B6B" />
-            <circle cx="11" cy="6" r="1.5" fill="#4ECDC4" />
-            <circle cx="6.5" cy="11" r="1.5" fill="#FFD93D" />
-            <circle cx="9.5" cy="11" r="1.5" fill="#A78BFA" />
-          </svg>
-        </motion.button>
-      </div>
-
-        {/* Color wheel button */}
+        {/* Full picker — lives inside the rail so it reads as part of the
+            palette. It previously rendered as a sibling below the rail, leaving
+            a stray floating button under the artboard. */}
         {onColorWheelOpen && (
-          <motion.button
-            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
-            style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #45B7D1, #A78BFA)', padding: '1.5px' }}
-            onClick={onColorWheelOpen}
-            whileTap={{ scale: 0.9 }}
-            aria-label="Color wheel"
-          >
-            <div className="w-full h-full rounded-md flex items-center justify-center" style={{ background: 'rgba(30,30,45,0.9)' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg>
-            </div>
-          </motion.button>
+          <>
+            <div className="w-px h-7 mx-1" style={{ background: 'rgba(255,255,255,0.15)' }} />
+            <motion.button
+              className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFD93D, #6BCB77, #45B7D1, #A78BFA)', padding: '1.5px' }}
+              onClick={onColorWheelOpen}
+              whileTap={{ scale: 0.9 }}
+              aria-label="More colours"
+            >
+              <div className="w-full h-full rounded-md flex items-center justify-center" style={{ background: 'rgba(30,30,45,0.9)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg>
+              </div>
+            </motion.button>
+          </>
         )}
+      </div>
     </div>
   );
 }

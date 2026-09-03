@@ -1,0 +1,406 @@
+{
+  "front": {
+    "iou": 0.9358,
+    "iou_unregistered": 0.9292,
+    "registration_px": 3,
+    "missing_pct": 5.08,
+    "extra_pct": 1.43,
+    "ref_px": 142621,
+    "model_px": 137417,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.7926,
+        "missing": 852,
+        "extra": 664
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.9199,
+        "missing": 1083,
+        "extra": 86
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.8788,
+        "missing": 2065,
+        "extra": 2
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.9876,
+        "missing": 41,
+        "extra": 194
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.9937,
+        "missing": 41,
+        "extra": 78
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.9817,
+        "missing": 278,
+        "extra": 41
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.9076,
+        "missing": 1282,
+        "extra": 0
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.9721,
+        "missing": 348,
+        "extra": 4
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.969,
+        "missing": 44,
+        "extra": 324
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.8622,
+        "missing": 980,
+        "extra": 649
+      }
+    ]
+  },
+  "side": {
+    "iou": 0.872,
+    "iou_unregistered": 0.8699,
+    "registration_px": 1,
+    "missing_pct": 7.84,
+    "extra_pct": 5.69,
+    "ref_px": 175397,
+    "model_px": 171620,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.8399,
+        "missing": 653,
+        "extra": 704
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.9432,
+        "missing": 331,
+        "extra": 418
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.902,
+        "missing": 549,
+        "extra": 1004
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.9377,
+        "missing": 220,
+        "extra": 871
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.958,
+        "missing": 749,
+        "extra": 3
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.9166,
+        "missing": 1305,
+        "extra": 647
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.9617,
+        "missing": 40,
+        "extra": 911
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.8145,
+        "missing": 1924,
+        "extra": 3230
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.6736,
+        "missing": 5232,
+        "extra": 1821
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.8038,
+        "missing": 2479,
+        "extra": 365
+      }
+    ]
+  },
+  "rear": {
+    "iou": 0.8248,
+    "iou_unregistered": 0.8248,
+    "registration_px": 0,
+    "missing_pct": 3.02,
+    "extra_pct": 17.58,
+    "ref_px": 119952,
+    "model_px": 137414,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.8816,
+        "missing": 239,
+        "extra": 554
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.884,
+        "missing": 785,
+        "extra": 874
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.9422,
+        "missing": 397,
+        "extra": 492
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.8234,
+        "missing": 0,
+        "extra": 3339
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.7687,
+        "missing": 0,
+        "extra": 4366
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.6838,
+        "missing": 0,
+        "extra": 5421
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.8513,
+        "missing": 181,
+        "extra": 1717
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.8739,
+        "missing": 51,
+        "extra": 1502
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.9081,
+        "missing": 174,
+        "extra": 929
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.7083,
+        "missing": 1793,
+        "extra": 1892
+      }
+    ]
+  },
+  "three-quarter": {
+    "iou": 0.8222,
+    "iou_unregistered": 0.8215,
+    "registration_px": -1,
+    "missing_pct": 11.24,
+    "extra_pct": 7.95,
+    "ref_px": 184111,
+    "model_px": 178055,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.8273,
+        "missing": 361,
+        "extra": 1047
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.9457,
+        "missing": 429,
+        "extra": 349
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.9552,
+        "missing": 718,
+        "extra": 14
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.9408,
+        "missing": 680,
+        "extra": 378
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.8344,
+        "missing": 3258,
+        "extra": 96
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.8323,
+        "missing": 3927,
+        "extra": 0
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.9175,
+        "missing": 1678,
+        "extra": 319
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.8122,
+        "missing": 4352,
+        "extra": 636
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.6148,
+        "missing": 2837,
+        "extra": 6700
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.6706,
+        "missing": 2432,
+        "extra": 5100
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ args: ['--enable-unsafe-swiftshader','--use-gl=angle'] });
+const c = await b.newContext({ viewport:{width:1440,height:900}, serviceWorkers:'block' });
+const p = await c.newPage();
+await p.goto('http://localhost:4173/world3d', { waitUntil:'networkidle' });
+await p.waitForTimeout(4000);
+await p.getByRole('button', { name:'Hide lion' }).click();
+await p.waitForTimeout(1500);
+await p.screenshot({ path:'/tmp/nolion.png' });
+await b.close();

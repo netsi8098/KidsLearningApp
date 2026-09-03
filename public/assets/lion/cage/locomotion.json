@@ -1,0 +1,10 @@
+{
+  "clip": "Walk",
+  "strideModelUnits": 0.24,
+  "cycleSeconds": 1.5,
+  "dutyFactor": 0.75,
+  "sequence": "lateral: RL -> FL -> RR -> FR",
+  "supportEnd": 0.68,
+  "measuredSupportSlideMm": 0.166,
+  "note": "Stride is authored, not inferred: the IK targets travel it in a straight line during stance. The runtime must scale it by the factor applied to the asset and divide by cycleSeconds."
+}
