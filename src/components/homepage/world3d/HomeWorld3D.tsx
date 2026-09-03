@@ -18,12 +18,28 @@ import { useGLTF, useAnimations, Preload } from '@react-three/drei';
 import { EffectComposer, Bloom, DepthOfField, N8AO, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
-import { LionBrain, type LionClip } from './lionBrain';
+import { LionBrain, NECK_SHARE, type LionClip } from './lionBrain';
 
 const ENV_URL = '/assets/worlds/river-garden/home_environment.glb';
 /* Rigged lion: one continuous skinned quad mesh plus separate eye, tooth and
    claw geometry, 41 joints, ten authored clips. */
 const LION_URL = '/assets/lion/rigged/lion_v2.glb';
+
+/* The bone-local axis that pitches a bone in this rig. Measured, not assumed:
+   +10 degrees about local X moves the gaze +10 degrees of world pitch and zero
+   yaw on `eye_L`, `neck_01` and `head` alike. */
+const BONE_PITCH_AXIS = new THREE.Vector3(1, 0, 0);
+
+/* Clips that play ONCE and hold their last pose, rather than looping.
+   Every transition and performance clip belongs here: a looping WalkStart
+   would restart the gait forever and a looping JumpTakeoff would leave the
+   lion pogoing. Only Idle, Walk and the proxy's ambient clips repeat. */
+const ONE_SHOT = new Set<LionClip>([
+  'Wave', 'Jump', 'Nod', 'Celebrate',
+  'WalkStart', 'WalkStop', 'TurnLeft', 'TurnRight',
+  'JumpAnticipation', 'JumpTakeoff', 'JumpAirborne',
+  'JumpLand', 'JumpRecovery',
+]);
 
 /**
  * Total lion height in metres, matching the world scale contract in
@@ -69,7 +85,14 @@ export interface WorldStats {
   /* Where the eyes are aimed, in degrees of eye yaw/pitch plus the world point.
      Surfaced for the same reason as `lionBrainClip`: a gaze that is scheduled
      rather than commanded is otherwise unobservable from outside. */
-  lionGaze?: { yaw: number; pitch: number; at: string };
+  /* Eye yaw, head-assist yaw, and the total the gaze actually WANTED — so the
+     HUD can show whether the pair between them reaches the target or is still
+     short. Reporting only the clamped eye angle is what hid the problem the
+     assist exists to fix. */
+  /* `aimErr` is measured off the eye bone's world matrix, not computed from
+     the request — see the AIM ERROR block in `Lion`. It is the only figure
+     here that can disagree with what the runtime intended. */
+  lionGaze?: { yaw: number; pitch: number; head: number; want: number; aimErr: number; at: string };
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -158,7 +181,7 @@ function Lion({
   lionUrl: string;
   onMeasured: (height: number, grounded: boolean, clips: string[], floorGap: number) => void;
   onBrainClip: (clip: LionClip) => void;
-  onGaze: (g: { yaw: number; pitch: number; at: string }) => void;
+  onGaze: (g: { yaw: number; pitch: number; head: number; want: number; aimErr: number; at: string }) => void;
   interestMarkers: WorldMarkers;
 }) {
   const group = useRef<THREE.Group>(null);
@@ -278,6 +301,29 @@ function Lion({
       })
       .catch(() => { /* fallback speed already set */ });
 
+    /* WHERE THE EYES ARE, measured off the asset rather than assumed.
+       The brain needs both numbers to aim a gaze at a world point, and both
+       were previously wrong in ways only the aim error could see: the height
+       was a hand-written 0.85 subtracted from a world y — two different frames
+       — and the forward offset did not exist at all, so a quadruped whose eyes
+       sit 0.77 m ahead of its hips aimed from its hips and came out 4.9
+       degrees wide of a card 4.5 m away.
+
+       Taken from the MIDPOINT of the two eyes, so the lateral offset cancels
+       instead of biasing every gaze toward the left one. */
+    const eyeL = model.getObjectByName('eye_L');
+    const eyeR = model.getObjectByName('eye_R');
+    if (eyeL && eyeR) {
+      group.current.updateMatrixWorld(true);
+      const mid = new THREE.Vector3()
+        .setFromMatrixPosition(eyeL.matrixWorld)
+        .add(new THREE.Vector3().setFromMatrixPosition(eyeR.matrixWorld))
+        .multiplyScalar(0.5);
+      brain.setEyeHeight(mid.y - spawn.y);
+      const rel = mid.clone().sub(group.current.position);
+      brain.setEyeOffset(rel.dot(new THREE.Vector3(Math.sin(brain.yaw), 0, Math.cos(brain.yaw))));
+    }
+
     onMeasured(scaledSizeY, Math.abs(scaledMinY) < 0.05, names, scaledMinY);
   }, [model, spawn, onMeasured, names, brain, lionUrl, bindBox]);
 
@@ -287,7 +333,7 @@ function Lion({
   useEffect(() => {
     const next = actions[activeClip];
     if (!next) return;
-    const once = activeClip === 'Wave' || activeClip === 'Jump' || activeClip === 'Nod';
+    const once = ONE_SHOT.has(activeClip);
     next.reset();
     next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, once ? 1 : Infinity);
     next.clampWhenFinished = once;
@@ -364,12 +410,51 @@ function Lion({
       .map((n) => model.getObjectByName(n))
       .filter((o): o is THREE.Object3D => Boolean(o))
   ), [model]);
+  /* Resolved once. `getObjectByName` walks the graph, and doing that per frame
+     for five bones is a needless traversal of a 16,000-vertex hierarchy. An
+     empty array means the loaded asset lacks them — the proxy has no eye or
+     mane bones — and the corresponding block simply does not run. */
+  /* The REST rotation is captured alongside the bone, and that is not a
+     nicety — the eye bones' rest quaternion is NOT identity. Authored pointing
+     +Y out of the skull, they sit at -42.6 degrees about local X relative to
+     `head` in the exported GLB. The first version of this block lerped
+     `rotation.x` from that rest value toward the wanted pitch, which drove the
+     rest tilt out of the bone and swung both eyes 42.6 degrees on the first
+     frame the gaze ran. A bone whose rest transform is not identity has to be
+     driven RELATIVE to that transform: `rest * delta`, never `absolute`.
+
+     Captured here, at resolve time, because the memo runs on the freshly cloned
+     scene before the frame loop has written anything. Reading it later would
+     capture whatever the last frame left behind. */
+  const eyes = useMemo(() => (
+    ['eye_L', 'eye_R']
+      .map((n) => model.getObjectByName(n))
+      .filter((o): o is THREE.Object3D => Boolean(o))
+      .map((bone) => ({ bone, rest: bone.quaternion.clone() }))
+  ), [model]);
+  const neckBones = useMemo(() => (
+    ['neck_01', 'head']
+      .map((n) => model.getObjectByName(n))
+      .filter((o): o is THREE.Object3D => Boolean(o))
+  ), [model]);
+  const eyeAim = useRef({ yaw: 0, pitch: 0 });
+  const eyeFwd = useMemo(() => new THREE.Vector3(), []);
+  const eyeWorld = useMemo(() => new THREE.Vector3(), []);
+  const eyeMid = useMemo(() => new THREE.Vector3(), []);
+  const eyeWant = useMemo(() => new THREE.Vector3(), []);
+  const eyeQ = useMemo(() => new THREE.Quaternion(), []);
+  const eyeE = useMemo(() => new THREE.Euler(), []);
+  const headAssist = useRef({ yaw: 0, pitch: 0 });
+  const assistQ = useMemo(() => new THREE.Quaternion(), []);
+  const assistWorldQ = useMemo(() => new THREE.Quaternion(), []);
+  const assistAxis = useMemo(() => new THREE.Vector3(), []);
   const maneYaw = useRef(0);
   const maneQ = useMemo(() => new THREE.Quaternion(), []);
   const maneAxis = useMemo(() => new THREE.Vector3(0, 0, 1), []);
 
   const reportedClip = useRef<LionClip>('Idle');
   const reportedGaze = useRef<string>('');
+  const gazeReport = useRef(0);
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const down = useMemo(() => new THREE.Vector3(0, -1, 0), []);
   const from = useMemo(() => new THREE.Vector3(), []);
@@ -384,17 +469,6 @@ function Lion({
       onBrainClip(brain.clip);
     }
     const at = brain.gazeAt;
-    const atKey = at ? `${at.x.toFixed(2)},${at.z.toFixed(2)}` : 'ahead';
-    if (atKey !== reportedGaze.current) {
-      reportedGaze.current = atKey;
-      const g = brain.gaze;
-      onGaze({
-        yaw: (g.yaw * 180) / Math.PI,
-        pitch: (g.pitch * 180) / Math.PI,
-        at: atKey,
-      });
-    }
-
     let y = group.current.position.y;
     if (ground) {
       from.set(brain.x, 6, brain.z);
@@ -403,10 +477,44 @@ function Lion({
       if (hit) y = hit.point.y + footOffset.current;
     }
     group.current.position.set(brain.x, y, brain.z);
+    /* The ground the lion is actually standing on, every frame, because the
+       raycast above can move it on sloping terrain. The brain pitches its gaze
+       against `groundY + eyeHeight`. */
+    brain.setGroundY(y - footOffset.current);
     /* Modelled facing +Y, which after the glTF Y-up conversion points straight
        away from the production camera. Math.PI is that correction; the brain's
        yaw is added on top of it. */
     group.current.rotation.y = Math.PI + brain.yaw;
+
+    const split = brain.gazeSplit;
+
+    /* EYES, BEFORE the mixer. No clip keys `eye_L`/`eye_R`, so writing them
+       here does not fight it — and `mixer.update` is what pushes the skeleton
+       into the skin, so it has to happen first.
+
+       Lerped rather than snapped: eyes move fast but not instantly, and a hard
+       cut reads as a texture swap rather than a glance. */
+    if (eyes.length) {
+      /* Smoothed in the ANGLE, not by reading the bone back. The bone now
+         carries its rest rotation composed with the aim, so reading its
+         quaternion would smooth toward a value that includes the rest tilt. */
+      const k = 1 - Math.exp(-dt * 14);
+      eyeAim.current.yaw += (split.eyes.yaw - eyeAim.current.yaw) * k;
+      eyeAim.current.pitch += (split.eyes.pitch - eyeAim.current.pitch) * k;
+      /* MEASURED off the shipped GLB, not reasoned about: rotating `eye_L`
+         by +10 degrees about its local X moves the gaze +10 degrees of world
+         pitch and 0 of yaw, and +10 about local Z moves it +10 of yaw and 0
+         of pitch. Both are exactly 1:1 because the eye bone's rest forward is
+         the world +Z the character faces. The pitch term used to carry a
+         minus sign, which pointed the eyes as far the WRONG way as the target
+         was off — 11.7 degrees of aim error on a 5.3 degree request. */
+      eyeE.set(eyeAim.current.pitch, 0, eyeAim.current.yaw);
+      eyeQ.setFromEuler(eyeE);
+      for (let i = 0; i < eyes.length; i += 1) {
+        eyes[i].bone.quaternion.copy(eyes[i].rest).multiply(eyeQ);
+      }
+    }
+
     mixer.update(0);
 
     /* AFTER the mixer, and that is the whole difference from the gaze block.
@@ -415,10 +523,59 @@ function Lion({
        write before `update` would simply be overwritten. Composing onto the
        quaternion afterwards adds the runtime lag to the baked one instead of
        fighting it, and `multiply` rather than `set` is what makes it additive. */
+    /* HEAD-TURN ASSIST, after the mixer and for the mane's reason, not the
+       eyes': `neck_01` and `head` ARE keyed by Idle and Walk, so a write before
+       `update` would be overwritten. Composing afterwards ADDS the assist to
+       whatever the clip is doing, which is what lets the lion breathe and look
+       at the cards at once.
+
+       Smoothed harder than the eyes. A head is heavy; an instant turn reads as
+       a glitch where a quick eye flick reads as attention. */
+    if (neckBones.length) {
+      const hk = 1 - Math.exp(-dt * 6.0);
+      const wantYaw = split.neck.yaw + split.head.yaw;
+      const wantPitch = split.neck.pitch + split.head.pitch;
+      headAssist.current.yaw += (wantYaw - headAssist.current.yaw) * hk;
+      headAssist.current.pitch += (wantPitch - headAssist.current.pitch) * hk;
+      /* The bone matrices are stale the instant the mixer writes new local
+         rotations, and the yaw axis below is read out of them. */
+      group.current.updateMatrixWorld(true);
+      for (let i = 0; i < neckBones.length; i += 1) {
+        const share = i === 0 ? NECK_SHARE : 1 - NECK_SHARE;
+        const bone = neckBones[i];
+        /* YAW ABOUT WORLD UP, not about the bone's own Z.
+           `neck_01` and `head` run up and forward out of the chest — 55 and 43
+           degrees above horizontal — so their local Z is nowhere near
+           vertical, and turning about it is part yaw and part roll. Measured
+           on the GLB: 30 degrees about `head`'s local Z buys only 21.7 degrees
+           of gaze yaw and costs 3.8 degrees of unasked-for pitch, so the
+           assist quietly delivered three quarters of what it promised and the
+           eyes stayed short of the target. Expressing world up in the bone's
+           own frame makes it 1:1 with no pitch coupling.
+
+           The equivalent local-Z magnitudes stay inside the deformation
+           battery's validated `05-head-turn` pose (neck 32 / head 38): a full
+           30 degree assist is 13.7 and 16.3 degrees about world up, or 16.9
+           and 22.2 about local Z. */
+        bone.getWorldQuaternion(assistWorldQ).invert();
+        assistAxis.set(0, 1, 0).applyQuaternion(assistWorldQ).normalize();
+        assistQ.setFromAxisAngle(assistAxis, headAssist.current.yaw * share);
+        bone.quaternion.multiply(assistQ);
+        /* Pitch about the bone's own X, which measures 1:1 with no yaw
+           coupling on all three of `eye_L`, `neck_01` and `head`. */
+        assistQ.setFromAxisAngle(BONE_PITCH_AXIS, headAssist.current.pitch * share);
+        bone.quaternion.multiply(assistQ);
+      }
+    }
+
     if (maneBones.length) {
       const k = 1 - Math.exp(-dt * 5.5);
-      maneYaw.current += (brain.yaw - maneYaw.current) * k;
-      const lag = maneYaw.current - brain.yaw;
+      /* The mane trails the HEAD, not the body — so the assist is part of what
+         it lags behind, or a look at the cards would swing the skull and leave
+         the mane hanging behind it unmoved. */
+      const headYaw = brain.yaw + headAssist.current.yaw;
+      maneYaw.current += (headYaw - maneYaw.current) * k;
+      const lag = maneYaw.current - headYaw;
       if (Math.abs(lag) > 1e-4) {
         for (let i = 0; i < maneBones.length; i += 1) {
           // The crown takes less than the side lobes: it is anchored at the
@@ -427,6 +584,69 @@ function Lion({
           maneBones[i].quaternion.multiply(maneQ);
         }
       }
+    }
+
+    /* ── AIM ERROR ──────────────────────────────────────────────────────────
+       Reported LAST, from the bone's own world matrix, because every other
+       number here is something this code decided rather than something the
+       skeleton did.
+
+       That distinction is not academic. The eye bones' rest rotation is a
+       -42.6 degree tilt about local X, and the first version of the block
+       above drove `rotation.x` toward an ABSOLUTE pitch — which erased that
+       rest tilt and threw both eyes 42.6 degrees off on the first frame the
+       gaze ran. Every angle the HUD printed stayed correct throughout, because
+       the HUD was printing the request. This line prints the RESULT: the angle
+       between the eye bone's world forward and the direction from that eye to
+       the thing it is meant to be looking at.
+
+       ~1 degree of it is honest parallax — the brain aims from the body origin
+       and this measures from the left eye, 95 mm off-centre. Anything much
+       larger is a bug in the driving code, and anything close to the clamp
+       overshoot means the rig has simply run out of range. */
+    let aimErr = 0;
+    if (eyes.length && at) {
+      group.current.updateMatrixWorld(true);
+      const bone = eyes[0].bone;
+      /* From the MIDPOINT of the two eyes. Measuring from one of them puts a
+         constant lateral parallax into every reading, which is exactly the
+         kind of steady offset that gets mistaken for a bug in the aim. Both
+         eyes carry the same rest rotation and take the same delta, so their
+         forwards are parallel and either one gives the direction. */
+      bone.getWorldPosition(eyeWorld);
+      if (eyes.length > 1) {
+        eyes[1].bone.getWorldPosition(eyeMid);
+        eyeWorld.add(eyeMid).multiplyScalar(0.5);
+      }
+      // A bone's own +Y runs along it, which is how it was authored and how
+      // `review_render.py` poses it.
+      eyeFwd.set(0, 1, 0).transformDirection(bone.matrixWorld);
+      eyeWant.set(at.x, at.y, at.z).sub(eyeWorld).normalize();
+      aimErr = (eyeFwd.angleTo(eyeWant) * 180) / Math.PI;
+    }
+
+    /* Keyed on the aim as well as the target, so the report follows the eyes
+       through their lerp instead of printing the first frame of a 0.2 s move —
+       and THROTTLED, which is not optional. `onGaze` sets React state on the
+       page above; keying it on a value that jitters with the Idle head bob
+       fired a setState every frame and the whole scene stopped arriving. The
+       HUD only needs to be readable, so four updates a second is plenty. */
+    gazeReport.current -= dt;
+    const atKey = at ? `${at.x.toFixed(2)},${at.z.toFixed(2)}` : 'ahead';
+    const key = `${atKey}|${aimErr.toFixed(0)}`;
+    if (key !== reportedGaze.current && gazeReport.current <= 0) {
+      gazeReport.current = 0.25;
+      reportedGaze.current = key;
+      const sp = brain.gazeSplit;
+      const deg = (r: number) => (r * 180) / Math.PI;
+      onGaze({
+        yaw: deg(sp.eyes.yaw),
+        pitch: deg(sp.eyes.pitch),
+        head: deg(sp.neck.yaw + sp.head.yaw),
+        want: deg(brain.gazeWantYaw),
+        aimErr,
+        at: atKey,
+      });
     }
   });
 
@@ -665,7 +885,7 @@ export default function HomeWorld3D({
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
-  const handleGaze = useMemo(() => (g: { yaw: number; pitch: number; at: string }) => {
+  const handleGaze = useMemo(() => (g: { yaw: number; pitch: number; head: number; want: number; aimErr: number; at: string }) => {
     stats.current = { ...stats.current, lionGaze: g };
     onStats?.(stats.current as WorldStats);
   }, [onStats]);

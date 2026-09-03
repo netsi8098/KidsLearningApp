@@ -30,8 +30,34 @@ export type LionClip =
 
 /** The rig's measured gaze limit — see `LionBrain.gaze`. */
 export const GAZE_LIMIT = (28 * Math.PI) / 180;
-/** Eye height in metres on the 1.30 m character, for the pitch calculation. */
-const EYE_HEIGHT = 0.85;
+/**
+ * Fallback eye height above the lion's own feet, in metres on the 1.30 m
+ * character. Only used until the runtime measures the real one.
+ *
+ * This constant used to be the WHOLE pitch calculation, subtracted straight
+ * from a target's world y — and that mixed two different frames. The gaze
+ * targets are world-space markers read out of the environment GLB, while 0.85
+ * is a height ABOVE THE GROUND the lion is standing on. On the river-garden
+ * island the ground sits at y = 0.45, so every pitch was computed against an
+ * eye 0.45 m below the real one and came out several degrees shallow. The bug
+ * was invisible from inside: the brain reported the angle it had asked for,
+ * and only the aim error measured off the eye bone's world matrix in
+ * `HomeWorld3D` disagreed.
+ */
+const EYE_HEIGHT_FALLBACK = 0.85;
+
+/* How far the head may be recruited when the eyes run out. 30 degrees of yaw
+   sits inside the deformation battery's own `05-head-turn` pose, which is
+   validated at neck 32 / head 38 — so nothing here asks the skin to do
+   something untested. Pitch is held tighter at 16 because the battery's
+   head-tilt pose exercises ROLL, not pitch, so there is no measured envelope
+   to lean on. */
+export const HEAD_ASSIST_YAW = (30 * Math.PI) / 180;
+export const HEAD_ASSIST_PITCH = (16 * Math.PI) / 180;
+/* The battery's tested pose puts 32 of 70 degrees in the neck. Exported
+   because `HomeWorld3D` needs the same ratio to distribute the assist across
+   the two bones, and two copies of the number is one copy too many. */
+export const NECK_SHARE = 32 / 70;
 
 /**
  * Fallback metres per second, used only until the measured value arrives.
@@ -96,6 +122,9 @@ export class LionBrain {
   private restFor = 0;
   private durations: Partial<Record<LionClip, number>> = {};
   private available = new Set<LionClip>();
+  private eyeHeight = EYE_HEIGHT_FALLBACK;
+  private eyeForward = 0;
+  private groundY = 0;
   private gazeTarget: { x: number; y: number; z: number } | null = null;
   private interest: { x: number; y: number; z: number }[] = [];
   private gazeSwitch = 2.0;
@@ -107,6 +136,39 @@ export class LionBrain {
   constructor(private bounds: Bounds) {}
 
   setHome(x: number, z: number) { this.homeX = x; this.homeZ = z; }
+
+  /**
+   * The eye's height above the lion's own feet, measured off the loaded asset
+   * rather than assumed, and the world y of the ground it is standing on.
+   *
+   * Both are needed because a gaze target is a world point and an eye height
+   * is not. Keeping them separate means the ground can move — the runtime
+   * raycasts it every frame on sloping terrain — without re-measuring the
+   * skeleton.
+   */
+  setEyeHeight(aboveFeet: number) { this.eyeHeight = aboveFeet; }
+
+  setGroundY(y: number) { this.groundY = y; }
+
+  /**
+   * How far FORWARD of the body origin the eyes sit, along the lion's facing.
+   *
+   * On a quadruped this is not a rounding error. The rig's origin is between
+   * the hips and the eyes are 0.77 m ahead of it on a 1.30 m character, so a
+   * target 40 degrees off the BODY is 45 degrees off the EYES — and aiming the
+   * eyes at the body's bearing left them 4.9 degrees wide of a card 4.5 m
+   * away. Measured off the asset by the runtime; the fallback of 0 is simply
+   * the old behaviour.
+   */
+  setEyeOffset(forward: number) { this.eyeForward = forward; }
+
+  /** World y of the eyes, which is what a pitch to a world target needs. */
+  get eyeWorldY(): number { return this.groundY + this.eyeHeight; }
+
+  /** World x/z the gaze is measured FROM: the eyes, not the hips. */
+  private get eyeOriginX(): number { return this.x + Math.sin(this.yaw) * this.eyeForward; }
+
+  private get eyeOriginZ(): number { return this.z + Math.cos(this.yaw) * this.eyeForward; }
 
   /**
    * Match translation to the clip.
@@ -228,14 +290,66 @@ export class LionBrain {
   }
 
   get gaze(): { yaw: number; pitch: number } {
-    if (!this.gazeTarget) return { yaw: 0, pitch: 0 };
-    const dx = this.gazeTarget.x - this.x;
-    const dz = this.gazeTarget.z - this.z;
+    return this.gazeSplit.eyes;
+  }
+
+  /**
+   * The gaze, divided between the EYES and the HEAD.
+   *
+   * The eyes alone reach ±28 degrees, and wiring them up showed the cost of
+   * stopping there: the card shelf sits far enough off-axis that the eye yaw
+   * pinned at exactly -28.0, which is the rig refusing to look at the thing
+   * while reporting that it is looking as hard as it can.
+   *
+   * So the eyes take what they can and THE HEAD TAKES THE REST — the same
+   * face-before-move rule this class already applies to walking, applied to
+   * looking. Small glances stay pure eye movement, which is what a real glance
+   * is; only a large one recruits the neck.
+   *
+   *     required 15 deg  ->  eyes 15, head 0
+   *     required 40 deg  ->  eyes 28, head 12   (reaches the target)
+   *     required 80 deg  ->  eyes 28, head 30   (as far as the rig goes)
+   *
+   * The eye bones are children of `head`, so these compose by parenting: the
+   * caller applies each to its own bone and the total lands on the eyes for
+   * free.
+   *
+   * The head's share is split across `neck_01` and `head` in the ratio the
+   * DEFORMATION BATTERY already validates — its `05-head-turn` pose is
+   * neck 32 / head 38 — so the bend is distributed rather than kinking one
+   * joint. HEAD_ASSIST_YAW stays inside that tested envelope.
+   */
+  /** The yaw the gaze WANTED, before either limit. For the debug HUD. */
+  get gazeWantYaw(): number {
+    if (!this.gazeTarget) return 0;
+    return shortestAngle(this.yaw,
+      Math.atan2(this.gazeTarget.x - this.eyeOriginX,
+        this.gazeTarget.z - this.eyeOriginZ));
+  }
+
+  get gazeSplit(): {
+    eyes: { yaw: number; pitch: number };
+    neck: { yaw: number; pitch: number };
+    head: { yaw: number; pitch: number };
+  } {
+    const zero = { yaw: 0, pitch: 0 };
+    if (!this.gazeTarget) return { eyes: zero, neck: zero, head: zero };
+    const dx = this.gazeTarget.x - this.eyeOriginX;
+    const dz = this.gazeTarget.z - this.eyeOriginZ;
     const flat = Math.hypot(dx, dz);
-    const clamp = (a: number) => Math.max(-GAZE_LIMIT, Math.min(GAZE_LIMIT, a));
+    const wantYaw = shortestAngle(this.yaw, Math.atan2(dx, dz));
+    const wantPitch = Math.atan2(this.gazeTarget.y - this.eyeWorldY, flat || 1e-3);
+
+    const cap = (a: number, lim: number) => Math.max(-lim, Math.min(lim, a));
+    const eyeYaw = cap(wantYaw, GAZE_LIMIT);
+    const eyePitch = cap(wantPitch, GAZE_LIMIT);
+    const assistYaw = cap(wantYaw - eyeYaw, HEAD_ASSIST_YAW);
+    const assistPitch = cap(wantPitch - eyePitch, HEAD_ASSIST_PITCH);
+
     return {
-      yaw: clamp(shortestAngle(this.yaw, Math.atan2(dx, dz))),
-      pitch: clamp(Math.atan2(this.gazeTarget.y - EYE_HEIGHT, flat || 1e-3)),
+      eyes: { yaw: eyeYaw, pitch: eyePitch },
+      neck: { yaw: assistYaw * NECK_SHARE, pitch: assistPitch * NECK_SHARE },
+      head: { yaw: assistYaw * (1 - NECK_SHARE), pitch: assistPitch * (1 - NECK_SHARE) },
     };
   }
 

@@ -115,6 +115,13 @@ export default function World3DProofPage() {
             lookAt card
           </button>
           <button
+            onClick={() => { setClip(null); brain.current?.lookAt(-3.4, -1.2, 0.9); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+          >
+            lookAt far-left
+          </button>
+          <button
             onClick={() => { setClip(null); brain.current?.lookAhead(); }}
             className="rounded-full px-3 py-2 text-xs font-bold"
             style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
@@ -186,7 +193,7 @@ export default function World3DProofPage() {
               <div>brain clip : {stats.lionBrainClip ?? '—'}</div>
               <div>
                 gaze       : {stats.lionGaze
-                  ? `${stats.lionGaze.at}  (${stats.lionGaze.yaw.toFixed(1)}°, ${stats.lionGaze.pitch.toFixed(1)}°)`
+                  ? `${stats.lionGaze.at}  yaw: eye ${stats.lionGaze.yaw.toFixed(1)} + head ${stats.lionGaze.head.toFixed(1)} = ${(stats.lionGaze.yaw + stats.lionGaze.head).toFixed(1)} of ${stats.lionGaze.want.toFixed(1)}  pitch ${stats.lionGaze.pitch.toFixed(1)}  aim err ${stats.lionGaze.aimErr.toFixed(1)}`
                   : '—'}
               </div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>

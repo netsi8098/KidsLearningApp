@@ -6168,3 +6168,145 @@ on the files touched. No asset rebuilt — this pass is runtime only.
 2. The paw's rounded sole, with the walk QA in the loop.
 3. The mane still reads as a smooth hood from the FRONT — its locks run
    front-to-back, so the hero angle sees them end-on.
+
+## 2026-09-03 (twenty-seventh pass) — the head-turn assist, and four bugs it found
+
+The eyes run out at ±28°. When the required angle is larger, the head now takes
+the remainder, so the lion reaches a target instead of pinning its eyes at the
+limit and reporting that it is trying.
+
+    required 15°  ->  eyes 15, head 0        a glance is pure eye movement
+    required 40°  ->  eyes 28, head 12       reaches it
+    required 80°  ->  eyes 28, head 30       as far as the rig goes
+
+`HEAD_ASSIST_YAW` is 30° and `HEAD_ASSIST_PITCH` 16°. The yaw sits inside the
+deformation battery's validated `05-head-turn` pose (neck 32 / head 38); the
+pitch is held tighter because that pose exercises ROLL, not pitch, so there is
+no measured envelope to lean on. The split follows the battery's own 32-of-70
+ratio, and `NECK_SHARE` is now exported from `lionBrain` rather than written out
+a second time in `HomeWorld3D`.
+
+The assist composes onto the mixer's result — `quaternion.multiply` after
+`mixer.update`, the way the mane's runtime lag already does — because Idle and
+Walk both key `neck_01` and `head`. The eyes go the other way, BEFORE the
+mixer, because no clip keys them.
+
+### CORRECTION TO THE RECORD: commit 685f7c8 claimed work that was not there
+
+That commit's message says "HomeWorld3D resolves eye_L/eye_R once and lerps them
+toward the gaze each frame" and "ONE_SHOT also had to grow". **Neither change
+was in the file.** A Python `str.replace()` without an `assert` silently no-oped
+and the result was reported as landed. Typecheck passed because nothing
+referenced the missing variable, and the HUD kept printing gaze angles because
+the brain was still computing them — so from outside, a gaze that never touched
+the mesh looked identical to one that did. Both pieces are in now, verified by
+an explicit grep loop rather than by the edit script's say-so.
+
+Every `.replace()` in this pass carries an `assert`.
+
+### The instrument that made the rest of this findable
+
+The HUD's gaze line grew one more figure, and it is the only one that can
+disagree with the code:
+
+    gaze : 0.00,4.60  yaw: eye 0.0 + head 0.0 = 0.0 of 0.0  pitch -5.1  aim err 16.3
+
+`aim err` is measured off the eye bone's **world matrix** — the angle between
+where the bone actually points and the direction from the eyes to the target.
+Everything else on that line is a number the runtime chose. 16.3° on a request
+of 5.1° is the whole point: the gaze was being computed correctly and applied
+wrongly, three separate times over.
+
+### Four bugs, all of them invisible to the request-side numbers
+
+**1. The eye bones' rest rotation was being erased.** `eye_L` and `eye_R` sit at
+−42.6° about local X in the exported GLB. The driving code lerped `rotation.x`
+toward an ABSOLUTE pitch, which drove that rest tilt out of the bone and swung
+both eyes 42.6° on the first frame the gaze ran. A bone whose rest transform is
+not identity has to be driven RELATIVE to it: `rest * delta`, captured at
+resolve time, never absolute.
+
+**2. The pitch sign was inverted.** Measured on the shipped GLB: +10° about
+`eye_L`'s local X moves the gaze +10° of world pitch and 0° of yaw. The code
+applied `-pitch`, pointing the eyes as far the wrong way as the target was off
+— 11.7° of aim error on a 5.3° request.
+
+**3. Eye height and world y were two different frames.** `EYE_HEIGHT = 0.85` is
+a height above the lion's FEET, and it was being subtracted straight from a
+target's WORLD y. The river-garden island's ground is at y = 0.45, so every
+pitch was computed against an eye 0.45 m below the real one. The runtime now
+measures the eye position off the asset and tells the brain, so re-authoring the
+skull moves the gaze with it.
+
+**4. The head assist quietly delivered three quarters of what it promised.**
+`neck_01` and `head` run up and forward out of the chest — 55° and 43° above
+horizontal — so their local Z is nowhere near vertical and turning about it is
+part yaw, part roll. Measured: 30° about `head`'s local Z buys **21.7°** of gaze
+yaw and costs 3.8° of unasked-for pitch. The assist now yaws about WORLD UP
+expressed in the bone's own frame, which is 1:1 with no pitch coupling. The
+equivalent local-Z magnitudes — 16.9° neck, 22.2° head at full assist — stay
+inside the validated 32/38.
+
+**5. And one I introduced.** Keying the HUD report on a value that jitters with
+the Idle head bob fired a React `setState` every frame and the scene stopped
+arriving at all. The report is throttled to four a second.
+
+### A quadruped does not look from its hips
+
+With all four fixed, a 40°-off target still landed 4.9° wide. The brain was
+computing the bearing from the body origin, which on this rig is between the
+hips — and the eyes are **0.77 m ahead of it** on a 1.30 m character. A target
+40° off the body is 45° off the eyes. `setEyeOffset` moves the gaze origin
+forward along the lion's facing, measured off the MIDPOINT of the two eye bones
+so the lateral offset cancels instead of biasing every glance toward the left
+eye.
+
+### Measured, against the shipped GLB
+
+`tests/unit/services/lionGazeAim.test.ts` loads
+`public/assets/lion/cage/lion.glb`, applies the same composition the runtime
+applies, and measures the angle between the eye bone's world forward and the
+direction to the target:
+
+| case | aim error |
+|---|---|
+| card shelf, 4.6 m ahead and below the eye line | **< 0.001°** |
+| same target, lion turned 40° toward it | **< 0.001°** |
+| 40° off-axis, needs eyes 28 + head 12 | **1.37°** |
+| 100° off-axis, past the rig | overshoot **+ 0.25°** |
+
+The 1.37° is honest and is not worth closing: the bearing is computed from where
+the eyes are before the assist runs, and the assist then swings them a few
+centimetres around the neck. `AIM_TOL` is 1.5° — tight enough to have caught
+every bug above, all of which read 8–17°.
+
+`tests/unit/services/lionBrainGaze.test.ts` covers the split arithmetic
+separately, including the mirror case and the pitch limit. It exists because the
+browser could not prove the assist engages at all: every marker in the scene
+sits inside the eyes' own 28°, so the HUD read `head 0.0` — which is correct,
+and looks exactly like an assist that is broken.
+
+### Not verified in the browser, and saying so
+
+The in-app browser pane lost its WebGL context part-way through this pass
+(`THREE.WebGLRenderer: Context Lost.`) and every tab after that stuck on
+"loading GLB…". **`git stash`-ing this pass and loading HEAD reproduced it
+identically**, so it is the pane and not the change — but it does mean the
+runtime wiring was proved by the test above rather than on screen. The one clean
+browser load early in the pass is what produced the 16.3° reading that started
+the whole investigation.
+
+### State
+
+Repo baseline unmoved: typecheck 52, lint 5 pre-existing `react-hooks/
+immutability` in `HomeWorld3D` and none added, `npm test` 29 failed / **741**
+passed (was 727 — the 14 new passes are the two gaze test files). No asset
+rebuilt; this pass is runtime only.
+
+### Next, in order
+
+1. Look at it in a browser once the pane has a GPU again — the aim error is on
+   the HUD and should read under 2° on `lookAt card` and on the far-left button.
+2. The paw's rounded sole, with the walk QA in the loop.
+3. The mane still reads as a smooth hood from the FRONT — its locks run
+   front-to-back, so the hero angle sees them end-on.
