@@ -540,15 +540,69 @@ def main():
                             if blob(frame, p)["h"] < nose["h_bot"] + 0.008],
                     ap["h_bot"], nose["h_bot"] + 0.008, max_x=0.05)
 
-    # The pale muzzle patch is CREAM: low saturation, high value. The first
-    # filter looked for s 0.35-0.62 / v 0.55-0.78, which is mid-tone GOLD, and
-    # returned the chest bib at h 0.411 — a feature 0.14 H below the mouth.
-    # Measured down the midline the cream reads s 0.33-0.37, v 0.97-0.98.
-    cream = [p for p in components(subj & (sat < 0.45) & (val > 0.90), 200)
-             if in_face(p)]
-    muzzle = midline(frame, [p for p in cream
-                             if blob(frame, p)["h_top"] <= nose["h"]],
-                     ap["h_bot"], nose["h"], max_x=0.06)
+    # ---- the MUZZLE MASS ------------------------------------------------
+    #
+    # SATURATION IS THE DISCRIMINATOR, AND VALUE IS A TRAP. A horizontal scan
+    # across the muzzle shows a clean step with a gap nothing occupies:
+    #
+    #     muzzle   s 0.30-0.62
+    #     coat     s 0.71-0.91
+    #
+    # Two earlier filters both used value and both failed. `s 0.35-0.62 /
+    # v 0.55-0.78` is mid-tone GOLD and returned the chest bib, 0.14 H below
+    # the mouth. `s < 0.45 / v > 0.90` then found only the CHIN: the muzzle's
+    # two upper lobes are shaded under the nose, so they fell outside, and
+    # worse, the left lobe became a separate connected component — meaning
+    # "largest component" only ever had the lit side of the face. That is
+    # where the reported +0.0239 midline offset came from, and why the patch
+    # looked to sit below the mouth rather than around the nose.
+    #
+    # The whole mass is one region at s < 0.62 / v > 0.55, and it comes out
+    # symmetric on its own: x -0.1793 to +0.1830, an asymmetry of 0.0037. No
+    # mirroring needed, which is the check that the threshold is right.
+    #
+    # SEEDED ON THE CHIN, not the midline below the nose: the philtrum crease
+    # runs down the midline there and reads as nose, so a midline seed at
+    # nose height lands in no cream component at all.
+    cream_mask = subj & (sat < 0.62) & (val > 0.55)
+    seed_row = int(round(frame.ground - (mouth["h"] - 0.030) * frame.height_px))
+    seed_col = int(round(frame.axis_col))
+    muzzle = None
+    for pix in components(cream_mask, 300):
+        if np.any((pix[:, 0] == seed_row) & (pix[:, 1] == seed_col)):
+            muzzle = blob(frame, pix)
+            # PER-ROW PROFILE, and a percentile rather than the bounding box.
+            # The whiskers are thin pale lines radiating outward and they pass
+            # the same threshold, so the widest rows report 0.181 against a
+            # body that never exceeds 0.121. A bbox takes the spur outright.
+            #
+            # p75, not p90: 25 of 115 rows carry a whisker, so at p90 the
+            # percentile is still inside the spurs and returns 0.1321. p75
+            # lands on 0.1211, which is the body's own widest row.
+            rows = {}
+            for y, x in pix:
+                lo, hi = rows.get(y, (x, x))
+                rows[y] = (min(lo, x), max(hi, x))
+            halves = sorted((hi - lo + 1) / 2.0 / frame.height_px
+                            for lo, hi in rows.values())
+            muzzle["half_w_H_p75"] = round(
+                float(np.percentile(halves, 75)), 5)
+            muzzle["half_w_H_p90"] = round(
+                float(np.percentile(halves, 90)), 5)
+            # Geometric centre and half-height, which is what an ellipse wants.
+            # The mass centroid sits 0.0116 lower because the chin is broad.
+            muzzle["centre_h"] = round(
+                (muzzle["h_top"] + muzzle["h_bot"]) / 2, 5)
+            muzzle["half_h_H_span"] = round(
+                (muzzle["h_top"] - muzzle["h_bot"]) / 2, 5)
+            muzzle["half_w_H_bbox"] = muzzle["half_w_H"]
+            muzzle["profile_H"] = {
+                round(frame.h(y), 4): [round(frame.x(lo), 5),
+                                       round(frame.x(hi), 5)]
+                for y, (lo, hi) in sorted(rows.items())}
+            muzzle["asymmetry_H"] = round(
+                abs(abs(muzzle["x_in_H"]) - abs(muzzle["x_out_H"])), 5)
+            break
 
     model = {
         "frame": {"view": "front", "source": "front.png",
@@ -705,7 +759,13 @@ def main():
               f"w={mouth['half_w_H'] * 2:.4f}")
     if muzzle:
         print(f"MUZZLE   x={muzzle['x_H']:+.4f} h={muzzle['h']:.4f} "
-              f"w={muzzle['half_w_H'] * 2:.4f} h {muzzle['h_bot']:.4f}-{muzzle['h_top']:.4f}")
+              f"h {muzzle['h_bot']:.4f}-{muzzle['h_top']:.4f}  "
+              f"half_w p75={muzzle['half_w_H_p75']:.4f} "
+              f"(p90 {muzzle['half_w_H_p90']:.4f}, bbox "
+              f"{muzzle['half_w_H_bbox']:.4f} — both inside the whiskers)  "
+              f"centre h={muzzle['centre_h']:.4f} "
+              f"half_h={muzzle['half_h_H_span']:.4f}  "
+              f"asym={muzzle['asymmetry_H']:.4f}  rgb={muzzle['rgb']}")
     print(f"EYE_SEP  {d['eye_separation_H']:.4f}")
     print(f"FACE_CENTRE_H {d['face_centre_h']:.4f}  "
           f"(reference_model face_centre_front = 0.604)")

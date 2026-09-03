@@ -4187,3 +4187,120 @@ Face parts 12 -> 14, face verts 1,168 -> 1,396, `lion_face.glb` 131 -> 146 KB.
 3. Skin the face parts to `head`/`jaw`; they are parented to the cage object,
    which is right for review and wrong for a head turn.
 4. Mane chin lobe; leg volume.
+
+## 2026-09-03 (fourth pass) — the muzzle mass, and the mouth line it unhid
+
+Item 1 of the previous list. The lower face was blank gold; it now carries the
+cream mass, and building it surfaced a defect that had been hiding in plain
+sight.
+
+### Saturation is the discriminator, and value is a trap
+
+A horizontal scan across the muzzle shows a clean step with a gap nothing
+occupies — muzzle **s 0.30-0.62**, coat **s 0.71-0.91**. Two earlier filters
+both keyed on value and both failed:
+
+* `s 0.35-0.62 / v 0.55-0.78` is mid-tone GOLD, and returned the chest bib at
+  h 0.411 — a feature 0.14 H below the mouth.
+* `s < 0.45 / v > 0.90` found only the **chin**. The muzzle's two upper lobes
+  are shaded under the nose, so they fell outside the window — and worse, the
+  left lobe became a **separate connected component**, which meant "largest
+  component" only ever had the lit side of the face. That is the whole source
+  of the +0.0239 midline offset this file reported for the muzzle, and why the
+  patch looked to sit below the mouth rather than around the nose.
+
+At `s < 0.62 / v > 0.55` the mass is one region and comes out symmetric on its
+own: x −0.1793 to +0.1830, an asymmetry of **0.0037**. Nothing is mirrored to
+get that, which is the check that the threshold is right rather than merely
+convenient.
+
+Measured: **h 0.3955-0.6315**, centre h 0.5135, half-height 0.1180, colour
+**(239,197,137)**. It runs from the chin up past the nose on both sides — the
+lobes and the chin are the same cream, and what separates them visually is the
+philtrum crease and the mouth line, both of which already exist.
+
+### Whiskers pass the same threshold
+
+The widest row reports a half-width of **0.1812** against a body that never
+exceeds 0.121, because the whiskers are thin pale lines radiating outward and
+they are the same cream. A bounding box takes the spur outright.
+
+So the build width is a percentile of the per-row half-widths — and **p75, not
+p90**: 25 of 115 rows carry a whisker, so p90 is still inside the spurs at
+0.1321. p75 lands on **0.1221**, which is the body's own widest row.
+
+Centre and half-height come from the span, not the mass centroid: the chin is
+broad, which drags the centroid 0.0116 low.
+
+### Seeded on the chin, because the midline is not muzzle
+
+A midline seed at nose height lands in no cream component at all — the philtrum
+crease runs down the midline there and reads as nose. The seed is 0.030 H below
+the measured mouth line, which is chin and unambiguous.
+
+### THE MOUTH LINE WAS BEING BUILT INSIDE THE MOUTH
+
+This is the real find. `surface_at` takes the first ray hit, which is correct on
+a convex face and wrong at the mouth, because the cage's mouth is a genuine
+opening 0.052 deep. Probing the midline:
+
+| h | y | normal |
+| --- | --- | --- |
+| 0.470 | +0.6210 | forward |
+| 0.480 | +0.6086 | **+0.92 z — facing UP** |
+| 0.490 | +0.5836 | **+0.92 z — facing UP** |
+| **0.498** | — | **measured mouth line** |
+| 0.510 | +0.6320 | forward |
+| 0.520-0.580 | +0.6320 | dead forward (muzzle front) |
+
+The measured mouth height falls inside a recess that dips back **67 mm**, so
+the decal was being placed on an upward-facing wall inside the head. It was
+invisible from the front, and the muzzle going in behind it made that obvious
+rather than causing it — it had been wrong since the mouth line was first
+built, showing only as a faint mark.
+
+Fixed with a narrow z-window probe that takes the most protruding hit within
+±0.015 — the cavity's **rim**, which is where a mouth line belongs: the
+reference draws the line on the muzzle front with the opening behind it. The
+window has to stay narrow; the earlier wide-ring version of this idea found the
+NOSE and lifted the mouth 104 mm.
+
+### The dome bit for the third time
+
+`dome = min(rx, rz) * flat`, so on a mass this large even `flat=0.10` is a
+0.0118 dome — 11.8 mm proud. That put the muzzle IN FRONT of the mouth line's
+0.0144 apex and swallowed it, and bulged the lower face into a ball. The muzzle
+is a **colour region, not a form**: the cage already carries the muzzle's shape
+in its rings. `flat=0.02` gives 0.0024, enough to avoid z-fighting and no more.
+
+Three occurrences now — iris through pupil, lid over the whole eye, muzzle over
+the mouth. The pattern is always the same: a part is placed correctly in
+POSITION and still occludes what it sits behind, because nothing checked its
+height. Worth a shared assertion if a fourth decal is ever added.
+
+### Nothing else moved, and this time it needed no re-run
+
+`cage_lion.py` is untouched and reads only the pupil/almond, brow, nose and
+mouth values from `face_model.json` — none of which changed. A rebuild confirms
+it: **999 verts, 997 faces, 100% quads, 0 slivers, 0 boundary edges**, byte for
+byte the state the last pass verified. So the rig, walk, deformation battery,
+overlay and silhouette grade all stand as measured in the previous entry; they
+were not re-run and are not claimed to have been.
+
+Face parts 14 -> 15, face verts 1,396 -> 1,578, `lion_face.glb` 146 -> 159 KB.
+
+### Honest read of the result
+
+The lower face reads as a muzzle now instead of blank gold. It is **one
+ellipse** where the reference draws two lobes and a chin joined by a philtrum
+crease, so it does not yet read as *lobed*, and the mouth line is straight
+where the reference smiles. Both are look passes on a correct measurement, not
+corrections to it.
+
+### Next, in order
+
+1. The **shape keys** — the rest of Gate 15, and the largest remaining piece.
+2. Skin the face parts to `head`/`jaw`; they are parented to the cage object,
+   which is right for review and wrong for a head turn.
+3. Muzzle lobes and a curved mouth line; whiskers.
+4. Mane chin lobe; leg volume.

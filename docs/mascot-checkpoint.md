@@ -210,8 +210,11 @@ contact, the largest single error in the asset.
    180 deg centred +52 deg (0 outboard, 90 up), stroke 0.0055 H at the peak
    tapering to 0.0025 at the ends, nothing below. Still outstanding for
    Gate 15: the **shape-key set** (`Blink_*`, `BrowUp_*`, `Smile`, `JawOpen`,
-   visemes), the cream **muzzle patch**, and skinning the face parts to
-   `head`/`jaw`.
+   visemes) and skinning the face parts to `head`/`jaw`. The cream **muzzle
+   mass** landed 2026-09-03 — one measured region, h 0.3955-0.6315, half-width
+   0.1221, rgb (239,197,137). It is a single ellipse where the reference draws
+   two lobes and a chin joined by a philtrum crease, so it reads as a muzzle
+   but not yet as lobed; refining that is a look pass, not a measurement.
 2. **The mane has no chin lobe.** Its front rim is a flat wall at y 0.566 where the
    reference recedes to 0.44-0.48 around the face and then juts forward below it.
    Silhouette-neutral (the union still matches) but it is why the mane reads as a

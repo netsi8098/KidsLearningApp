@@ -170,6 +170,36 @@ def surface_at(cage, x, z, y_start=1.4):
     return loc, nor.normalized()
 
 
+def outer_surface_at(cage, x, z, dz, samples=13):
+    """The OUTER surface near (x, z), ignoring a cavity the ray falls into.
+
+    `surface_at` takes the first hit, which is correct on a convex face and
+    wrong at the mouth. The cage's mouth is a real opening 0.052 deep, so at
+    the measured mouth height the first hit is the cavity's INTERIOR: probing
+    the midline shows y dropping from 0.6320 at h 0.510 to 0.5648 at h 0.500,
+    with the normal flipping to face upward. The mouth line was being built
+    67 mm inside the head, lying flat on an upward-facing wall — invisible
+    from the front, which is exactly how it rendered once the muzzle went in
+    behind it.
+
+    A narrow z-window fixes it: the most protruding hit within +/-`dz` is the
+    cavity's RIM, which is where a mouth line belongs — the reference draws
+    the line on the muzzle front and the opening sits behind it. The window
+    must stay narrow. An earlier attempt at this used a wide ring and found
+    the NOSE, lifting the mouth 104 mm.
+    """
+    best = None
+    for i in range(samples):
+        zz = z - dz + 2.0 * dz * i / (samples - 1)
+        hit, loc, nor, _ = cage.ray_cast(Vector((x, 1.4, zz)),
+                                         Vector((0.0, -1.0, 0.0)))
+        if hit and (best is None or loc.y > best[0].y):
+            best = (loc, nor.normalized())
+    if best is None:
+        raise SystemExit(f"[face] outer surface probe missed at x={x:+.4f} z={z:.4f}")
+    return best
+
+
 def lift_for(feature):
     """How far to raise a decal off the socket floor it was cast onto.
 
@@ -430,6 +460,53 @@ def build_eyes(cage, fm, parts, report):
             f"({protrusion * 1300 / 0.847:.1f} mm at 1.30 m)  "
             f"lifted {lift:.4f} off the socket floor")
 
+def build_muzzle(cage, fm, parts, report):
+    """The cream muzzle mass, under the nose pad and mouth line.
+
+    It is ONE pale mass, not a patch: measured h 0.3955 to 0.6315, so it runs
+    from the chin up past the nose on both sides. The two upper lobes and the
+    chin are the same cream; what separates them visually is the philtrum
+    crease and the mouth line, and both of those are already built.
+
+    So this goes on FIRST and sits behind them. The nose pad and mouth line
+    then read on top of it, which is the reference's own layering.
+
+    Sized from the measured profile rather than the bounding box: the whiskers
+    pass the same saturation threshold and push the widest row to 0.181
+    against a body that never exceeds 0.121, so the build width is the p75 of
+    the per-row half-widths. Height and centre come from the span, not the mass
+    centroid — the chin is broad, which drags the centroid 0.0116 low.
+    """
+    mz = fm.get("muzzle_patch")
+    if not mz:
+        report.append("muzzle: NOT MEASURED — skipped")
+        return
+    half_w = mz.get("half_w_H_p75", mz["half_w_H"])
+    half_h = mz.get("half_h_H_span", mz["half_h_H"])
+    centre_h = mz.get("centre_h", mz["h"])
+
+    p0, n = surface_at(cage, 0.0, centre_h)
+    # Behind the nose pad and the mouth line, both of which are lifted off
+    # their own socket floors. Sitting on the raw surface here is enough to be
+    # under both, and a flat dome keeps it from bulging the muzzle's profile.
+    p0 = p0 + n * 0.0008
+    # ALMOST FLAT, and this is the third time the dome has bitten.
+    #
+    # `dome = min(rx, rz) * flat`, so on a mass this large even flat=0.10 is a
+    # 0.0118 dome — 11.8 mm proud, which put the muzzle IN FRONT of the mouth
+    # line's 0.0144 apex and swallowed it, and bulged the lower face into a
+    # ball. The muzzle is a COLOUR REGION, not a form: the cage already carries
+    # the muzzle's shape in its rings. flat=0.02 gives a 0.0024 dome, enough to
+    # avoid z-fighting with the skin and nothing more.
+    o, _ = disc("Muzzle", p0, n, half_w, half_h, mz["srgb01"],
+                finish="matte", segments=20, flat=0.02)
+    parts.append(o)
+    report.append(
+        f"muzzle: centre h={centre_h:.4f} half_w={half_w:.4f} "
+        f"(p75; bbox {mz['half_w_H_bbox']:.4f} is whiskers) "
+        f"half_h={half_h:.4f} spans h {mz['h_bot']:.4f}-{mz['h_top']:.4f} "
+        f"asym={mz['asymmetry_H']:.4f} rgb={mz['rgb']}")
+
 
 def build_brows(cage, fm, parts, report):
     """The brow marks, at the MEASURED position the socket could not reach.
@@ -500,7 +577,13 @@ def build_nose_and_mouth(cage, fm, parts, report):
         if not b:
             report.append(f"{key}: NOT MEASURED — skipped")
             continue
-        p0, n = surface_at(cage, b["x_H"], b["h"])
+        if key == "mouth_line":
+            # Window is half the cavity's own height span, which keeps it off
+            # the nose pad 0.084 H above.
+            p0, n = outer_surface_at(cage, b["x_H"], b["h"], 0.015)
+            p0 = Vector((p0.x, p0.y, b["h"]))   # keep the measured height
+        else:
+            p0, n = surface_at(cage, b["x_H"], b["h"])
         lift = lift_for(key.replace("_line", ""))
         p0 = p0 + n * lift
         o, _ = disc(name, p0, n, b["half_w_H"], b["half_h_H"] * flat_z,
@@ -589,6 +672,8 @@ def main():
     paint(cage, fm["face_aperture"]["srgb01"], finish="matte")
 
     parts, report = [], []
+    # Muzzle first: it is the layer everything else on the lower face sits on.
+    build_muzzle(cage, fm, parts, report)
     build_eyes(cage, fm, parts, report)
     build_brows(cage, fm, parts, report)
     build_nose_and_mouth(cage, fm, parts, report)
