@@ -4914,3 +4914,88 @@ remaining gap against the reference is art, not parameters:
 2. The five missing colour regions.
 3. `conform()` the brows.
 4. Clips for Gates 10-14; eye bones; mane follow-through bones.
+
+## 2026-09-03 (eleventh pass) — mane rebuild: the surface was 24% degenerate
+
+The mane read as a hard-edged slab. Four causes, found by measuring the surface
+rather than looking at the profile tables.
+
+### 1. A quarter of the mesh was degenerate geometry
+
+Measured on the shipped mane:
+
+    coincident vertices    9,824 of 38,016   (26%)
+    zero-area faces        9,292 of 38,016   (24%)
+    edges sharper than 60  8,670 of 76,032   — 8,522 of them on the midline
+    worst dihedral         180.0 deg         — surfaces folded flat back on themselves
+
+The hood's rings converge at the crown and the front, and the construction left
+a fan of DUPLICATED vertices there instead of a pole. Subdividing multiplied
+it: Catmull-Clark on a zero-area quad gives four zero-area quads. **A zero-area
+face has no defined normal**, so a quarter of the mesh was shading off garbage
+— which is the whole reason 38,016 verts of 100% quads with every face
+smooth-shaded still rendered as a plate.
+
+`weld()` now merges before subdividing. After: **0 coincident vertices, 0
+zero-area faces, 288 edges over 60 degrees** (from 8,670), and the mane is
+19,593 verts — *half* what it shipped with.
+
+### 2. The band correction stepped 32 times
+
+`fit_to_measured` applied its per-band x factor as `sm[band_of(z)]` —
+piecewise-CONSTANT, so x jumped at every band boundary. The factors run 0.630
+to 1.001, so the worst boundary was a several-percent discontinuity in width:
+the horizontal terracing down the flank in every side render. The docstring
+claimed "the correction is smoothed across neighbouring bands so the profile
+cannot step" — smoothing the TABLE does not help when the APPLICATION is a step
+function. Now interpolated between band centres.
+
+### 3. Nyquist, on a mane
+
+The clumps were isotropic Gaussians — azimuth sigma 26-32 degrees against a
+station sigma of 0.42 out of a range of 1.0. Eleven round blobs on a hood read
+as a lumpy rock, which is what an isolated render showed. A lock is NARROW
+across the flow and LONG along it, so `LOCKS` generates three overlapping rows
+of 22/18/14 with azimuth sigmas of 6-8 degrees.
+
+That alone did nothing: raising the clump count 11 -> 65 changed the render not
+at all, because `nh=22` gives 44 samples around the outline — one every 8.2
+degrees — and a 7.5-degree lock spans barely one sample. `nh=56` gives 112
+samples at 3.2 degrees, so a lock spans 4-5 and reads. Subdivision then dropped
+to L1, because L2 smooths away the very relief the level-2 pass exists to make.
+
+### 4. I improved a function nothing calls
+
+`polar_radius()` had genuine faults — nearest-neighbour lookup over a table
+whose adjacent 5-degree samples disagree by up to 22% — and fixing them changed
+nothing, because **nothing calls it**. `build_hood` shapes its rings from
+`front_half_w`. It is now marked UNUSED in its own docstring so the next reader
+does not repeat the detour.
+
+### Where it stands
+
+Better, and not there. The locks read clearly in three-quarter and side view
+(`docs/assets/lion-mane-rebuilt.png`), the slab is gone, the surface is clean,
+and the asset is 3.90 MB against 5.10 with both contracts passing.
+
+Still wrong, plainly:
+
+1. **The locks do not read from the FRONT** — the hero angle. They run along
+   the depth station, front-to-back over the mane, so the front view sees them
+   end-on. The reference's front view shows locks radiating OUTWARD from the
+   face to the rim. That is a different axis and needs the lock direction
+   rotating into the radial frame, not more amplitude.
+2. **The macro form is a lumpy mass, not a teardrop hood.** No clear crown or
+   quiff read, and still no chin lobe.
+3. **The mane sits behind the head rather than framing it** — it reads as a
+   cape, and the face is too exposed.
+4. Still missing: pink inner ear, cream chest bib, cream paws, tail tuft
+   colour, cheek blush.
+5. The head is large against the body and the ears large against the head,
+   which the three-quarter view shows more honestly than the front IoU does.
+
+### Next, in order
+
+1. Rotate the lock direction into the radial frame so they read from the front.
+2. The macro hood form: crown, quiff, chin lobe.
+3. The five missing colour regions.

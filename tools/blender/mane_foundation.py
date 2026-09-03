@@ -94,6 +94,40 @@ def mane_depth_at_u(u):
 # Placing clumps in this frame rather than as 3D directions is what finally made
 # them read: the fan's parameterisation already follows the mane's flow, so a
 # bump here becomes a lock rather than a dent in a tube.
+# LEVEL 2, rebuilt: LOCKS, not lumps.
+#
+# The table below is the macro lobe set and it is right — crown, quiff, cheeks,
+# chest. What was wrong is the KERNEL it is evaluated through. Every entry was
+# broad in BOTH axes (azimuth sigma 26-32 deg, station sigma 0.42 out of a
+# station range of 1.0), so each one was an isotropic Gaussian blob. Eleven
+# round blobs on a hood do not read as a mane; they read as a lumpy rock, which
+# is what the isolated render showed.
+#
+# A lock has direction. It is NARROW across the flow and LONG along it, and on
+# this parameterisation the flow runs with the depth station — a lock starts near
+# the face and sweeps back over the mane. So locks are generated with a small
+# azimuth sigma and a large station sigma, spaced around the azimuth, and the
+# named lobes stay as low-frequency mass underneath them.
+#
+# Amplitudes stay modest because `fit_to_measured` normalises the envelope
+# afterwards: relief decides silhouette, measurement decides extent.
+def lock_ring(count, amp, asig, ssig, station, phase=0.0, az_from=-90.0,
+              az_to=270.0):
+    """`count` locks evenly spaced in azimuth, each long in station."""
+    out = []
+    span = az_to - az_from
+    for i in range(count):
+        az = az_from + span * ((i + 0.5) / count) + phase
+        out.append((f"lock_{station:.2f}_{i}", az, station, amp, asig, ssig))
+    return out
+
+
+# Three overlapping rows so locks read as layered rather than combed once. The
+# phase offset stops row 2 sitting exactly on row 1 and doubling its amplitude.
+LOCKS = (lock_ring(22, 0.170, 6.0, 0.30, 0.30)
+         + lock_ring(18, 0.140, 7.0, 0.26, 0.58, phase=9.0)
+         + lock_ring(14, 0.110, 8.0, 0.22, 0.80, phase=-6.0))
+
 CLUMPS = [
     ("crown",      90.0, 0.30, 0.17, 30.0, 0.42),
     ("quiff",      90.0, 0.07, 0.21, 24.0, 0.26),
@@ -106,23 +140,83 @@ CLUMPS = [
     ("chest",     270.0, 0.34, 0.17, 32.0, 0.46),
     ("rear_R",     40.0, 0.72, 0.10, 32.0, 0.34),
     ("rear_L",    140.0, 0.72, 0.10, 32.0, 0.34),
-]
+] + LOCKS
 
 
-def polar_radius():
-    """Measured mane radius against azimuth, mirror-averaged.
+def polar_radius(smooth_deg=22.5):
+    """Measured mane radius against azimuth: mirror-averaged, smoothed, interpolated.
 
-    The drawing is not symmetric — 45 deg reads 0.261 H against 0.338 H at its
-    mirror — but the character must be.
+    *** UNUSED. Kept for the measurement, not called by the build. ***
+
+    Worth being blunt about: I improved this function believing it shaped every
+    cross-section, and it changed the render not at all — because nothing calls
+    it. `build_hood` shapes its rings from `front_half_w`, a different profile.
+    The faults below were real faults in this code and the notes are worth
+    keeping if it is ever wired in, but fixing them fixed nothing, and a reader
+    should not think otherwise.
+
+    Two faults, and they compounded.
+
+    Nearest-neighbour lookup. The table is sampled every 5 degrees, so `at()`
+    returned a STEP FUNCTION: every ring of the hood was a 72-sided polygon
+    whose radius jumped between facets instead of curving. Subdivision cannot
+    remove that — the hard corners are in the geometry, which is exactly why
+    38,016 verts of 100% quads with every face smooth-shaded still rendered
+    with visible planar creases.
+
+    And the raw signal is NOISY, so those steps were large. Measured, adjacent
+    5-degree samples disagree by up to 22%:
+
+        20 deg 0.2955 -> 25 deg 0.2385     -19%
+        65 deg 0.3239 -> 70 deg 0.3664     +13%
+       130 deg 0.3712 -> 135 deg 0.3120    -16%
+       150 deg 0.2843 -> 155 deg 0.3482    +22%
+
+    None of that is mane shape. It is the reference's own lock shading and the
+    places where the auburn mask is ambiguous against the ear and the shadow
+    under the jaw. `measured_front_half_w` already smooths the front width
+    profile with a 5% window for exactly this reason; the polar radius never
+    got the same treatment, and it is the profile that sets every cross-section.
+
+    So: circular moving average over +/-`smooth_deg`, then linear interpolation
+    between samples. The crown lobe and the cheek waist are far wider than the
+    window and survive; 5-degree spikes do not. Locks belong to LEVEL 2, where
+    they are placed deliberately and named, not inherited from segmentation
+    noise.
     """
-    raw = {float(k): v for k, v in LM["mane_polar_front"].items()}
+    raw = {float(k) % 360.0: float(v) for k, v in LM["mane_polar_front"].items()}
     keys = sorted(raw)
+    step = 360.0 / len(keys)
+
+    # Mirror-average first: the drawing is not symmetric — 45 deg reads 0.261 H
+    # against 0.338 H at its mirror — but the character must be.
+    def sample(a):
+        return raw[min(keys, key=lambda k: min(abs(k - a % 360.0),
+                                               360.0 - abs(k - a % 360.0)))]
+
+    mirrored = [0.5 * (sample(k) + sample(180.0 - k)) for k in keys]
+
+    # Circular moving average. Circular because azimuth wraps: a window at
+    # 355 deg has to reach past 0, and clamping there would flatten the chest
+    # lobe that straddles 270.
+    half = max(1, int(round(smooth_deg / step)))
+    n = len(mirrored)
+    smoothed = []
+    for i in range(n):
+        acc = 0.0
+        for j in range(i - half, i + half + 1):
+            acc += mirrored[j % n]
+        smoothed.append(acc / (2 * half + 1))
 
     def at(a):
         a %= 360.0
-        return raw[min(keys, key=lambda k: min(abs(k - a), 360 - abs(k - a)))]
+        f = a / step
+        i0 = int(math.floor(f)) % n
+        i1 = (i0 + 1) % n
+        k = f - math.floor(f)
+        return smoothed[i0] + (smoothed[i1] - smoothed[i0]) * k
 
-    return lambda a: 0.5 * (at(a) + at(180.0 - a))
+    return at
 
 
 def widest_depth_u():
@@ -172,7 +266,16 @@ def measured_front_half_w():
     return at
 
 
-def build_hood(nh=22, nring=26):
+def build_hood(nh=56, nring=30):
+    """
+    RESOLUTION NOTE (2026-09-03). nh was 22, which gives 44 samples around the
+    closed outline — one every 8.2 degrees. Locks with an azimuth sigma of 7.5
+    degrees therefore spanned barely one sample and were invisible: raising the
+    clump count from 11 to 65 changed the render not at all, because the mesh
+    could not carry them. Nyquist, on a mane.
+    nh=56 gives 112 samples, ~3.2 degrees apart, so a lock spans 4-5 samples
+    and reads. Base cost 3,420 verts against 2,376.
+    """
     """Two-view construction, with rings shaped BY the front silhouette.
 
     The previous version placed each ring as an ellipse and then looked up the
@@ -457,8 +560,35 @@ def fit_to_measured(obj):
             fac[b] = min(2.10, max(0.55, want_w[b] / cur[b]))
     sm = [sum(fac[max(0, b - 2):min(NB, b + 3)]) / len(fac[max(0, b - 2):min(NB, b + 3)])
           for b in range(NB)]
+
+    # INTERPOLATE THE FACTOR, do not index it.
+    #
+    # This line used to read `v.co.x *= sm[band_of(v.co.z)]`, which is
+    # piecewise-CONSTANT: every vertex in a band took the band's factor exactly,
+    # so x jumped at all 32 band boundaries. Smoothing `sm` across neighbours
+    # does not help — the docstring above claimed "the correction is smoothed
+    # across neighbouring bands so the profile cannot step", and it stepped 32
+    # times, because it is the APPLICATION that has to be continuous, not the
+    # table.
+    #
+    # Measured, the factors run 0.630 to 1.001, so the worst boundary was a
+    # several-percent discontinuity in width. That is the horizontal terracing
+    # visible down the mane's flank in every side render, and — with the
+    # nearest-neighbour polar radius fixed in `polar_radius` — the other half of
+    # why 38,016 smooth-shaded quads still read as a hard-edged slab.
+    #
+    # Linear interpolation between band CENTRES, clamped at the ends.
+    def factor_at(z):
+        f = (z - z0) / max(1e-9, z1 - z0) * NB - 0.5
+        if f <= 0.0:
+            return sm[0]
+        if f >= NB - 1:
+            return sm[NB - 1]
+        i = int(math.floor(f))
+        return sm[i] + (sm[i + 1] - sm[i]) * (f - i)
+
     for v in me.vertices:
-        v.co.x *= sm[band_of(v.co.z)]
+        v.co.x *= factor_at(v.co.z)
     worst = max(range(NB), key=lambda b: abs(sm[b] - 1.0))
     print(f"[mane] fitted: scale {tuple(round(c, 3) for c in k)} -> "
           f"w={want.x:.4f} d={want.y:.4f} h={want.z:.4f}")
@@ -467,11 +597,52 @@ def fit_to_measured(obj):
           f"h={z0 + (worst + 0.5) / NB * (z1 - z0):.3f}")
 
 
+def weld(obj, dist=1e-4):
+    """Merge coincident vertices BEFORE subdividing. This is the slab.
+
+    Measured on the shipped mane: **9,824 of 38,016 vertices coincident (26%)
+    and 9,292 of 38,016 faces at zero area (24%)**, with 8,522 of the 8,670
+    edges sharper than 60 degrees sitting on the midline, and the worst at a
+    full 180 — surfaces folded flat back on themselves.
+
+    The hood's rings converge at the crown and the front, and the construction
+    left a fan of duplicated vertices there instead of a pole. Subdividing that
+    multiplied it: Catmull-Clark on a zero-area quad produces four zero-area
+    quads. A zero-area face has NO DEFINED NORMAL, so a quarter of the mesh was
+    shading off garbage — which is why 38,016 verts of 100% quads with every
+    face smooth-shaded still rendered as a hard-edged plate, and why neither
+    smoothing the polar profile nor interpolating the band factors moved it.
+
+    Welding before the subdivision turns the fan into a genuine pole, and the
+    subdivision then has clean topology to work with.
+    """
+    before_v, before_f = len(obj.data.vertices), len(obj.data.polygons)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=dist)
+    # Drop anything still degenerate after the weld — a collapsed quad becomes
+    # a duplicate-vertex face, which the welder leaves behind as a wire.
+    bmesh.ops.dissolve_degenerate(bm, dist=dist, edges=bm.edges[:])
+    bm.normal_update()
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+    zero = sum(1 for p in obj.data.polygons if p.area < 1e-9)
+    print(f"[mane] welded: {before_v} -> {len(obj.data.vertices)} verts, "
+          f"{before_f} -> {len(obj.data.polygons)} faces, "
+          f"{zero} zero-area faces remain")
+
+
 def smooth_and_subdivide(obj):
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
+    # L1, not L2. With the base ring raised to 112 samples the cage is already
+    # 4,850 welded verts, so L2 gave 78,277 — and Catmull-Clark at that level
+    # smooths the very lock relief the level-2 pass exists to create. L1 keeps
+    # the locks legible at ~19k, which is also cheaper than the 38,016 this
+    # mane shipped with before any of these fixes.
     sub = obj.modifiers.new("Subdiv", "SUBSURF")
-    sub.levels = sub.render_levels = 2
+    sub.levels = sub.render_levels = 1
     bpy.ops.object.modifier_apply(modifier=sub.name)
     sm = obj.modifiers.new("Relax", "SMOOTH")
     # Light. A relax pass strong enough to hide the ring seams also erases the
@@ -557,6 +728,7 @@ def clay_render(objs):
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     mane = build_hood()
+    weld(mane)
     smooth_and_subdivide(mane)
     # Fit LAST. Catmull-Clark plus a relax pass pull a tube inward, and fitting
     # before them left the final width 17% under the measurement even though the
