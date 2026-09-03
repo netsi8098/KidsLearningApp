@@ -5471,3 +5471,81 @@ zero extra draw calls: the ears are matte body colour, so they merge into the
 Weighted IoU **0.8602**, front **0.9164**. Battery 0 pinched / 0 flipped, worst
 area 0.261. Reach 22.1 / 42.1 mm, support slide 0.166 mm. Asset 3.91 MB,
 4 meshes, both contracts passing. Residual ear band error stays at 0.148.
+
+## 2026-09-03 (eighteenth pass) — ears as separate geometry: DONE
+
+The sixth attempt, and the first that works, because it stopped fighting the
+primitive. Weighted IoU **0.8602 -> 0.8632**, front **0.9164 -> 0.9259** — best
+recorded — with the deformation battery still **0 pinched / 0 flipped**.
+
+### What changed
+
+* `cage_lion.py` no longer opens or grows the ear patches. The `head_mid` ring
+  is left INTACT — not opened and capped, simply not opened — so the
+  deformation cage loses the two appendages it kept pinching on. Cage
+  **999 -> 937 verts**, 100% quads, watertight, 0 slivers.
+* `face_lion.build_ears()` builds each ear as its own ellipsoid, fitted by
+  search against the four bands an ear is load-bearing in.
+* `assemble_lion` skins them rigid to **`ear_R` / `ear_L`** — the bones already
+  existed and were already in the skin, so the rig can perk them, which is the
+  first beat of the storyboard.
+* `paint_regions`' inner-ear entry is retired: the ears left the cage, so it
+  selected 0 vertices and read like a failure rather than a move.
+  `build_ears` applies the same measured colour by the same forward-facing test
+  on the geometry that now carries it.
+
+`lion_skeleton`'s `EAR_WEIGHTS` entries become no-ops. Verified rather than
+assumed: the skin map is applied by iterating the rings that EXIST on the mesh,
+so entries with no ring are skipped silently, and `rig_cage_lion` reported no
+unmapped-ring warning.
+
+### The band result
+
+    front band   reference   cage ear   separate ear
+    0.85-0.90      0.552      -0.006      -0.031
+    0.80-0.85      0.621      -0.058      **+0.002**
+    0.75-0.80      0.631      -0.069      **-0.006**
+    0.70-0.75      0.650      +0.015      -0.029
+    sum |dw|                   0.148       **0.068**
+
+Ellipsoid: x_c 0.130, a_x 0.175, y_c 0.468, a_y 0.055, z_c 0.785, a_z 0.072 —
+max |x| 0.305, spanning z 0.713-0.857, so it stays clear of band 0.90-0.95
+where the reference has mane only. The inner half sits buried in the skull,
+which is how a stuck-on ear works and costs a few hidden faces.
+
+The analytic fit predicted 0.020 and the rendered mask gives 0.068. The gap is
+the difference between an ideal ellipsoid and its rasterised silhouette under a
+perspective camera; the direction and most of the magnitude held.
+
+### One thing the first render caught
+
+`normal.y > 0.30` for the inner-ear colour selects roughly a THIRD of an
+ellipsoid — 131 of 350 verts — so the entire front of the ear came out
+inner-coloured and read as a brown blob merging into the mane. The reference has
+a small inner patch inside a GOLD ear. Threshold 0.78 selects 61 verts and the
+ear reads as an ear.
+
+### Free, as predicted
+
+Still **4 meshes and 4 draw calls**: the ears are matte body colour, so the
+per-material join folds them into `Face_Matte` with the cage. Asset 3.91 ->
+**3.89 MB**.
+
+### State
+
+Weighted IoU **0.8632** (front 0.9259, side 0.8498, rear 0.8297, 3/4 0.8050).
+Battery 0 pinched / 0 flipped, worst area 0.252. Reach 22.1 / 42.1 mm, support
+slide 0.166 mm. 4 meshes, 3.89 MB, both contracts passing. Repo baseline
+unmoved: typecheck 52 errors, `npm test` 29 failed / 727 passed, all
+pre-existing.
+
+### Next, in order
+
+1. **Three-quarter is now the weakest view** at 0.8050, and h 0.1-0.2 there has
+   both missing and extra — the legs are misplaced in DEPTH as well as thin,
+   which the side view's gap deltas agree with (ref_gap 0.246 against mod_gap
+   0.290 at h 0.05-0.10). Depth placement does not have the midline-collision
+   constraint that blocked widening them, so this one is open.
+2. The mane crown's remaining -0.037 / -0.033, and its missing chin lobe.
+3. Clips for Gates 10-14; eye bones; mane follow-through bones.
+4. `conform()` the brows, still 11.7 and 15.3 mm off.

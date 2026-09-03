@@ -649,6 +649,90 @@ def build_eyes(cage, fm, parts, report):
             f"({protrusion * 1000.0:.1f} mm)  "
             f"lifted {lift:.4f} off the socket floor")
 
+# The ear, fitted to the reference's band widths as an ELLIPSOID.
+#
+# x_c/a_x place it on the side of the skull; z_c/a_z set the vertical span. The
+# inner half sits buried inside the head, which is how a stuck-on ear works and
+# costs nothing but a few hidden faces.
+#
+# Fitted by search against the four bands an ear is load-bearing in, after
+# subtracting what the mane already covers:
+#
+#     band        ref     mane    ellipsoid   d
+#     0.70-0.75   0.650   0.642     0.642    -0.008   mane covers it
+#     0.75-0.80   0.631   0.461     0.625    -0.006
+#     0.80-0.85   0.621   0.417     0.626    +0.005
+#     0.85-0.90   0.552   0.424     0.553    +0.001
+#     sum |dw|                               0.020    (cage ear was 0.148)
+#
+# It reaches z 0.713-0.857 and max |x| 0.305, so it stays out of band
+# 0.90-0.95, where the reference has mane only.
+EAR = {"x_c": 0.130, "a_x": 0.175, "y_c": 0.468, "a_y": 0.055,
+       "z_c": 0.785, "a_z": 0.072}
+
+
+def build_ears(cage, fm, bm, parts, report):
+    """The ears, as their own meshes. NOT cage geometry, deliberately.
+
+    Five attempts to build these as a lofted ring appendage on the cage failed,
+    and the last one proved why: the reference's ear is widest LOW and tapers
+    upward, which needs the station x to come back inward, which makes the loft
+    RE-ENTRANT — the surface between a ring at x 0.308 and one at x 0.272 faces
+    backward toward the head. That is watertight, 100% quads and invisible to
+    every integrity check, and it self-intersects the moment the skull bends:
+    16 pinched faces and a worst area ratio of 0.035, against 0 and 0.261.
+    Correct tangents did not save it; isolation showed the reversal itself was
+    the cause.
+
+    An ear does not deform. It follows the skull. So it is built free of the
+    lofted-ring constraint and rigid-skinned to `ear_L` / `ear_R`, which is the
+    same call this project already made for the mane and for the 15 face parts.
+
+    The inner surface takes the measured inner-ear colour, selected by a
+    forward-facing normal — the same test `paint_regions` used while the ears
+    were still on the cage, and the same one the reference view implies, since
+    the inner ear is what a front view can see.
+    """
+    inner = (bm or {}).get("inner_ear")
+    coat = fm["face_aperture"]["srgb01"]
+    for sx, side in ((+1, "R"), (-1, "L")):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=16,
+                                             radius=1.0, location=(0, 0, 0))
+        o = bpy.context.object
+        o.name = f"Ear_{side}"
+        o.data.name = o.name
+        o.matrix_world = (Matrix.Translation((sx * EAR["x_c"], EAR["y_c"], EAR["z_c"]))
+                          @ Matrix.Diagonal((EAR["a_x"], EAR["a_y"], EAR["a_z"], 1.0)))
+        bpy.context.view_layer.objects.active = o
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        paint(o, coat, finish="matte")
+
+        if inner:
+            # Repaint the forward-facing half.
+            attr = o.data.color_attributes.get(COLOR_ATTR)
+            lin = tuple(srgb_to_linear(c) for c in inner["srgb01"])
+            n = 0
+            for v in o.data.vertices:
+                # 0.78, not 0.30. On an ellipsoid a normal.y threshold of 0.30
+                # selects roughly a THIRD of the surface — measured, 131 of 350
+                # verts — so the whole front of the ear came out inner-coloured
+                # and read as a brown blob merging into the mane. The reference
+                # has a small inner patch inside a gold ear, so only the
+                # most forward-facing cap qualifies.
+                if v.normal.y > 0.78:
+                    attr.data[v.index].color = (*lin, 1.0)
+                    n += 1
+            o.data.update()
+            report.append(f"ear {side}: {n} forward-facing verts take the measured "
+                          f"inner colour {inner['rgb']}")
+        parts.append(o)
+        report.append(
+            f"ear {side}: ellipsoid at (x={sx * EAR['x_c']:+.3f}, y={EAR['y_c']:.3f}, "
+            f"z={EAR['z_c']:.3f}) semi-axes ({EAR['a_x']:.3f}, {EAR['a_y']:.3f}, "
+            f"{EAR['a_z']:.3f}) -> max |x| {EAR['x_c'] + EAR['a_x']:.3f}, "
+            f"z {EAR['z_c'] - EAR['a_z']:.3f}-{EAR['z_c'] + EAR['a_z']:.3f}")
+
+
 def build_muzzle(cage, fm, parts, report):
     """The cream muzzle mass, under the nose pad and mouth line.
 

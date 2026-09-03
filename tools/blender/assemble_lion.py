@@ -288,7 +288,12 @@ def paint_regions(cage, arm, bm):
             in_group(v, ("paw_FL", "paw_FR", "paw_RL", "paw_RR"), 0.35)
             and v.co.z <= paw["h_top"]))
 
-    ear = bm.get("inner_ear")
+    # The inner ear is NOT painted here any more. The ears left the cage when
+    # they became their own meshes, so `ear_L`/`ear_R` own no cage vertices and
+    # this selected 0 of them — which read like a failure rather than a move.
+    # `face_lion.build_ears` applies the same measured colour by the same
+    # forward-facing-normal test, on the geometry that now carries it.
+    ear = None
     if ear:
         # The INNER surface only — the ear's outer back stays coat-coloured.
         # A forward-facing normal is what distinguishes them, and it is the
@@ -303,7 +308,8 @@ def paint_regions(cage, arm, bm):
             in_group(v, ("tail_05", "tail_06"), 0.35)))
 
     me.update()
-    print(f"[assemble] {total} verts repainted from body_model.json "
+    print(f"[assemble] {total} cage verts repainted from body_model.json "
+          f"(inner ear now lives on the ear meshes) "
           f"(cheek blush and cream chest bib are NOT in the reference — "
           f"see measure_body.py)")
 
@@ -409,6 +415,8 @@ def main():
     face_lion.build_eyes(cage, fm, parts, report)
     face_lion.build_brows(cage, fm, parts, report)
     face_lion.build_nose_and_mouth(cage, fm, parts, report)
+    body = json.load(open(BODY_JSON)) if os.path.exists(BODY_JSON) else {}
+    face_lion.build_ears(cage, fm, body, parts, report)
     for line in report:
         print(f"[assemble] {line}")
     print(f"[assemble] built {len(parts)} face parts")
@@ -426,6 +434,9 @@ def main():
     # The two decals that straddle the jaw line are named, not derived from a
     # threshold: deriving is what put the mouth line on the wrong bone.
     STRADDLES = {"Muzzle", "MouthLine"}
+    # The ears ride their own bones so the rig can perk them — GATE 15's
+    # storyboard opens with exactly that beat.
+    EAR_BONE = {"Ear_R": "ear_R", "Ear_L": "ear_L"}
     band = fm["mouth_line"]["half_h_H"]
     print(f"[assemble] head/jaw split at the measured mouth line h={split_h:.4f}, "
           f"blend band ±{band:.4f} (the mouth's measured half-height)")
@@ -433,7 +444,10 @@ def main():
         raise SystemExit("[assemble] no 'jaw' bone — the lower face cannot be skinned")
     for o in parts:
         centre_z = o.matrix_world.translation.z
-        if o.name in STRADDLES:
+        if o.name in EAR_BONE:
+            skin_rigid(o, arm, EAR_BONE[o.name])
+            print(f"[assemble]   {o.name:14s} z={centre_z:.4f} -> {EAR_BONE[o.name]}")
+        elif o.name in STRADDLES:
             skin_by_height(o, arm, split_h, band)
             print(f"[assemble]   {o.name:14s} z={centre_z:.4f} -> head/jaw blend")
         else:

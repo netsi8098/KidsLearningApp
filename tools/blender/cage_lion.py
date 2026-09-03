@@ -1067,10 +1067,23 @@ def build():
     tl = cage.open_patch(BODY_INDEX["rump"], 3)
     cage.cap_loop(cage.grow(tl, TAIL, prefix="tail")[-1])
 
-    er = cage.open_patch(BODY_INDEX["head_mid"], 1)
-    cage.cap_loop(cage.grow(er, ear(+1), prefix="earR")[-1])
-    el = cage.open_patch(BODY_INDEX["head_mid"], 5)
-    cage.cap_loop(cage.grow(el, ear(-1), prefix="earL")[-1])
+    # THE EARS ARE NO LONGER CAGE GEOMETRY. See `ear()` below for the full
+    # reasoning and the five attempts it took to get here. In short: the
+    # reference's ear is widest LOW and tapers upward, a lofted ring appendage
+    # cannot make that shape without a re-entrant surface, and a re-entrant
+    # surface self-intersects the moment the skull bends — measured at 16
+    # pinched faces and a worst area ratio of 0.035 against 0 and 0.261.
+    #
+    # An ear does not deform. It follows the skull, and `ear_L` / `ear_R` bones
+    # already exist. So the ears are built in `face_lion.build_ears()` as their
+    # own meshes and rigid-skinned to those bones, exactly as the mane and the
+    # 15 face parts are. The head_mid ring is left INTACT — not opened and
+    # capped, simply not opened — so the deformation cage loses the two
+    # appendages it was pinching on and gains nothing to go wrong.
+    #
+    # `lion_skeleton`'s EAR_WEIGHTS entries become no-ops: the skin map is
+    # applied by iterating the rings that EXIST on the mesh, so entries with no
+    # ring are skipped silently. Verified, not assumed.
 
     # Caps FIRST. The mouth socket sits within 0.036 of the nose ring, so with
     # the muzzle still open its inset ran along an open boundary and shredded the
