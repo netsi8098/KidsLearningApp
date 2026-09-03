@@ -264,7 +264,10 @@ Khronos-clean, both clips present, floor gap -17.2 mm, 29 draw calls, 121/121
 > Re-measured in the browser 2026-09-03: the shipping proxy `lion_v2.glb` reads
 > **-17.2 mm**, not -11.5. Its own geometry has minY = -0.0146, so it has always
 > sunk by this much; the -11.5 figure was stale. The assembled cage asset reads
-> **+4.7 mm**. Draw calls are **78** for the assembled asset against the 29
-> recorded here, because 16 face meshes are 16 draw calls — see the seventh-pass
-> entry in `codex-claude-handoff.md`.
+> **+4.7 mm**. Draw calls for the assembled asset are **51** — 78 before the
+> face meshes were joined per material (17 meshes -> 4). For comparison the
+> shipping proxy measures 47 and the faceless cage 45 in the same scene, so the
+> world floor is ~43 and the faced, maned character costs 8 draw calls against
+> the proxy's 4. See the seventh- and eighth-pass entries in
+> `codex-claude-handoff.md`.
 homepage QA checks green.
