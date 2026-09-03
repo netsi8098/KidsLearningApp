@@ -269,8 +269,9 @@ def report_decal_float(cage, contract):
     print("DECAL FLOAT (worst vertex distance to the cage surface, mm)")
     print("  NB the eye stack is SUPPOSED to stand proud — it is lifted 15.5 mm")
     print("  off the socket floor by design, so its ~20 mm is the socket, not a")
-    print("  defect. The brows and muzzle are flat ellipses on curved surfaces,")
-    print("  and there the number is the artefact.")
+    print("  defect. The MUZZLE is now a conformed sheet and reads 4.0 mm, which")
+    print("  is its deliberate clearance. The BROWS are still flat ellipses on a")
+    print("  curving forehead, and there the number is the artefact.")
     print(f"{'decal':14s} {'rest':>7s}   morphs at full value")
     for o in sorted((o for o in bpy.data.objects
                      if o.type == "MESH" and o is not cage

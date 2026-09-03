@@ -56,6 +56,7 @@ import math
 import os
 import sys
 
+import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
@@ -148,6 +149,38 @@ def paint(obj, srgb01, finish="matte"):
         attr.data[i].color = (*lin, 1.0)
     for poly in me.polygons:
         poly.use_smooth = True
+
+
+# Every object this script creates. Named here so the build can be idempotent.
+FACE_PART_NAMES = (
+    "Muzzle", "EyeLid_R", "Sclera_R", "Iris_R", "Pupil_R", "Catchlight_R",
+    "EyeLid_L", "Sclera_L", "Iris_L", "Pupil_L", "Catchlight_L",
+    "Brow_R", "Brow_L", "NosePad", "MouthLine",
+)
+
+
+def purge_face_parts():
+    """Delete any face parts already in the scene, so a build is idempotent.
+
+    Without this, running the script on its own output silently DUPLICATES
+    everything: Blender suffixes the new objects `.001`, `.002` and leaves the
+    originals in place. Two accidental re-runs left `lion_face.blend` with 46
+    meshes instead of 16, and — worse — a later measurement picked up the
+    stale original and reported the muzzle still floating 65.6 mm when the
+    freshly built one measured 0.8. A build that cannot be re-run is a build
+    whose output nobody can trust.
+    """
+    stale = [o for o in bpy.data.objects
+             if o.type == "MESH" and o.name.split(".")[0] in FACE_PART_NAMES]
+    for o in stale:
+        me = o.data
+        bpy.data.objects.remove(o, do_unlink=True)
+        if me.users == 0:
+            bpy.data.meshes.remove(me)
+    if stale:
+        print(f"[face] purged {len(stale)} pre-existing face parts "
+              f"(this build is idempotent)")
+    return len(stale)
 
 
 def cage_object():
@@ -299,6 +332,156 @@ def disc(name, centre, normal, rx, rz, srgb01, finish="gloss", segments=16,
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     paint(o, srgb01, finish)
     return o, dome
+
+
+def patch(name, centre, normal, rx, rz, srgb01, finish="matte",
+          rings=6, segments=24, roll_deg=0.0):
+    """A single-sheet elliptical grid, for a decal that has to CONFORM.
+
+    `disc()` builds a flattened sphere, which is right for the eye stack: the
+    dome is what lands a catchlight. It is wrong for anything that then gets
+    snapped to the skin, because a sphere has a back hemisphere and conforming
+    collapses it onto the front, leaving two coincident shells to z-fight.
+
+    Concentric rings rather than a subdivided square: the boundary is the
+    ellipse itself, so there is no ragged edge to hide, and ring density is
+    where a conform needs it — evenly across the span that curves.
+    """
+    bm = bmesh.new()
+    centre_v = bm.verts.new((0.0, 0.0, 0.0))
+    loops = []
+    for r in range(1, rings + 1):
+        t = r / rings
+        loop = []
+        for k in range(segments):
+            a = 2.0 * math.pi * k / segments
+            loop.append(bm.verts.new((math.cos(a) * t, math.sin(a) * t, 0.0)))
+        loops.append(loop)
+    for k in range(segments):
+        bm.faces.new((centre_v, loops[0][k], loops[0][(k + 1) % segments]))
+    for i in range(rings - 1):
+        a_loop, b_loop = loops[i], loops[i + 1]
+        for k in range(segments):
+            k2 = (k + 1) % segments
+            bm.faces.new((a_loop[k], b_loop[k], b_loop[k2], a_loop[k2]))
+    bm.normal_update()
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(o)
+
+    side, up, n = plane_basis(normal)
+    if roll_deg:
+        a = math.radians(roll_deg)
+        side, up = (side * math.cos(a) + up * math.sin(a),
+                    up * math.cos(a) - side * math.sin(a))
+    mat = Matrix(((side.x, up.x, n.x, centre.x),
+                  (side.y, up.y, n.y, centre.y),
+                  (side.z, up.z, n.z, centre.z),
+                  (0.0, 0.0, 0.0, 1.0)))
+    o.matrix_world = mat @ Matrix.Diagonal((rx, rz, 1.0, 1.0))
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    paint(o, srgb01, finish)
+    return o
+
+
+def conform(o, cage, lift, plane_normal, max_pull=0.09, facing_min=0.0,
+            smooth_passes=10):
+    """Snap every vertex to the cage skin and lift it clear along a SMOOTH field.
+
+    A flat decal on a curved face touches at one point. The muzzle spans
+    0.244 H — chin to above the nose — and its rim floated 65.6 mm off the
+    skin, which reads as a hard circular seam sitting in front of the face.
+
+    Three things had to be got right, and each was found by looking at a
+    render rather than at a number.
+
+    1. WHERE each vertex lands. `closest_point_on_mesh` flattens the float but
+       moves vertices sideways, because the nearest skin to a vertex hanging
+       past the chin is the chin's edge rather than the point behind it. That
+       foreshortened the decal to h 0.4368-0.6320 against a measured
+       0.3955-0.6315 — 41 mm short of the chin. A ray along the plane normal
+       preserves the footprint exactly, which is what projecting a decal means.
+
+    2. WHICH vertices can project at all. A front-projected decal cannot reach
+       a silhouette edge: at the bottom of the span the chin curves under, so
+       the ray is grazing and runs 155 mm before it hits, or hits the underside
+       facing away. That is 14 of 197 vertices, all on the outer rim, and they
+       fall back to the nearest surface point — a slight sideways shift on the
+       rim, against a 66 mm spike if they stay on the plane.
+
+    3. WHICH WAY to lift. This is the one that bit twice. `ray_cast` returns
+       the FACE normal and the cage is 1,000 verts, so adjacent vertices
+       landing on different facets lifted in different directions and the rim
+       tore into a sawtooth — visibly worse than the float it replaced. Using
+       one constant plane normal fixed the smooth middle and left the wrapped
+       chin torn, because there the offset direction has to follow the surface.
+
+       So the directions are SMOOTHED as a field: each vertex starts from the
+       plane normal (or the surface normal where it wrapped), then those
+       vectors are relaxed over the decal's own edge connectivity. The result
+       is continuous everywhere, follows the wrap, and has no facet in it.
+
+    `max_pull` and `facing_min` are the guards that keep the sheet out of the
+    mouth: it is a real cavity 52 mm deep, and the nearest surface to a vertex
+    over it is the INSIDE of it.
+    """
+    mw = o.matrix_world
+    inv = mw.inverted()
+    n = Vector(plane_normal).normalized()
+    me = o.data
+    moved = fallback = missed = 0
+    before = after = 0.0
+
+    targets = [None] * len(me.vertices)
+    dirs = [n.copy() for _ in me.vertices]
+
+    for v in me.vertices:
+        world = mw @ v.co
+        ok, loc, nrm, _idx = cage.ray_cast(world + n * 1.2, -n)
+        d = (world - loc).length if ok else 0.0
+        if ok:
+            before = max(before, d)
+        if ok and nrm.dot(n) >= facing_min and d <= max_pull:
+            targets[v.index] = loc.copy()
+            dirs[v.index] = n.copy()
+            moved += 1
+        else:
+            ok2, loc2, nrm2, _i2 = cage.closest_point_on_mesh(world)
+            if ok2:
+                targets[v.index] = loc2.copy()
+                dirs[v.index] = nrm2.normalized()
+                fallback += 1
+                before = max(before, (world - loc2).length)
+            else:
+                missed += 1
+
+    # Relax the offset directions over the sheet's own edges.
+    neighbours = [[] for _ in me.vertices]
+    for e in me.edges:
+        a, b = e.vertices
+        neighbours[a].append(b)
+        neighbours[b].append(a)
+    for _ in range(smooth_passes):
+        nxt = []
+        for i, d in enumerate(dirs):
+            acc = d.copy()
+            for j in neighbours[i]:
+                acc += dirs[j]
+            nxt.append(acc.normalized() if acc.length > 1e-9 else d)
+        dirs = nxt
+
+    for v in me.vertices:
+        loc = targets[v.index]
+        if loc is None:
+            continue
+        v.co = inv @ (loc + dirs[v.index] * lift)
+        after = max(after, lift)
+    me.update()
+    return {"moved": moved, "fallback": fallback, "missed": missed,
+            "worst_before": before, "worst_after": after}
 
 
 def symmetrise(part):
@@ -504,14 +687,34 @@ def build_muzzle(cage, fm, parts, report):
     # ball. The muzzle is a COLOUR REGION, not a form: the cage already carries
     # the muzzle's shape in its rings. flat=0.02 gives a 0.0024 dome, enough to
     # avoid z-fighting with the skin and nothing more.
-    o, _ = disc("Muzzle", p0, n, half_w, half_h, mz["srgb01"],
-                finish="matte", segments=20, flat=0.02)
+    # A CONFORMING SHEET, not a dome. The dome was tuned down to flat=0.02
+    # to stop it swallowing the mouth line, but that only ever addressed the
+    # bulge at the centre — the RIM was still 65.6 mm off the skin, because a
+    # flat ellipse 0.244 H tall cannot follow a face that curves away under it.
+    o = patch("Muzzle", p0, n, half_w, half_h, mz["srgb01"],
+              finish="matte", rings=7, segments=28)
+    # max_pull 0.25 and facing_min -0.30 let the rim rays REACH the chin's
+    # underside instead of falling back. The fallback was the sawtooth: it
+    # pulls adjacent rim vertices to nearly the same point on the silhouette,
+    # which makes slivers, and slivers alternate in and out of the skin. The
+    # mouth guard still holds — a cavity interior faces backward, dot ~ -1.
+    # 4 mm not 3: measured minimum clearance at 3 mm was 0.70 mm, because
+    # offsetting along one plane normal loses cos(angle) where the skin turns
+    # away, and at 0.7 mm the low-poly skin poked through as small flecks. Still
+    # far behind the mouth line's 20.7 mm and the nose pad, so the stack holds.
+    stats = conform(o, cage, 0.004, n, max_pull=0.25, facing_min=-0.30)
     parts.append(o)
     report.append(
         f"muzzle: centre h={centre_h:.4f} half_w={half_w:.4f} "
         f"(p75; bbox {mz['half_w_H_bbox']:.4f} is whiskers) "
         f"half_h={half_h:.4f} spans h {mz['h_bot']:.4f}-{mz['h_top']:.4f} "
         f"asym={mz['asymmetry_H']:.4f} rgb={mz['rgb']}")
+    report.append(
+        f"muzzle conform: {stats['moved']} verts snapped, "
+        f"{stats['fallback']} on the rim fell back to nearest-point, "
+        f"{stats['missed']} unplaced — "
+        f"float {stats['worst_before'] * 1000:.1f} -> "
+        f"{stats['worst_after'] * 1000:.1f} mm")
 
 
 def build_brows(cage, fm, parts, report):
@@ -661,6 +864,7 @@ def render(cage, parts):
 
 
 def main():
+    purge_face_parts()
     if not os.path.exists(FACE_JSON):
         raise SystemExit(f"[face] {FACE_JSON} missing — run tools/cad/measure_face.py")
     fm = json.load(open(FACE_JSON))

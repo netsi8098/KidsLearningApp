@@ -266,6 +266,10 @@ def main():
     print(f"[assemble] cage '{cage.name}': {len(cage.data.vertices)} verts, "
           f"{len(cage.vertex_groups)} vertex groups")
 
+    # Same idempotence guard as `face_lion.main()`: without it, running the
+    # assembler on its own output duplicates all 15 parts as `.001`.
+    face_lion.purge_face_parts()
+
     # ---- 0. the coat -----------------------------------------------------
     # `face_lion.main()` paints the cage; the build_* functions do not, so
     # calling them directly left the assembled character WHITE. It showed
