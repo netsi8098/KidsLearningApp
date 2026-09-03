@@ -5395,3 +5395,79 @@ residual -0.058 and -0.069 at h 0.75-0.85 stays until the patch moves.
 Weighted IoU **0.8602**, front **0.9164**. Battery 0 pinched / 0 flipped, worst
 area ratio 0.261. Reach 22.1 / 42.1 mm, support slide 0.166 mm. Asset 3.91 MB,
 4 meshes, both contracts passing.
+
+## 2026-09-03 (seventeenth pass) — ear span: patch moved, attempt 5, and a PROOF
+
+No code change landed again, but this pass produced the conclusive result the
+previous four were missing. **Stop trying to build this ear with `grow()`.**
+
+### The patch move works, and is cheap
+
+`head_mid` segment 1 -> 0 (mirror 5 -> 6) moves the attachment from
+x 0.059-0.196, z 0.641-0.797 to **x 0.113-0.212, z 0.580-0.756** — lower and
+further outboard, symmetric, watertight, 0 slivers. That is genuinely the room
+the root needed, and the previous four attempts never had it.
+
+### Attempt 5, with the tangent bug fixed
+
+Stations tapering 0.212 -> 0.276 -> 0.308 -> 0.272 -> 0.222, and this time every
+tangent pointing along the ACTUAL path direction including the reversal
+(+0.93/+0.38, +0.73/+0.68, **-0.83**/+0.55, **-0.95**/+0.30). Predicted band
+error 0.026 against the current ear's 0.148.
+
+Built clean — 999 verts, 100% quads, watertight, 0 slivers. Battery: **16
+pinched, 18 flipped, worst area ratio 0.035.**
+
+### The isolation, which is the actual finding
+
+Three configurations, same battery:
+
+| configuration | worst area | pinched | flipped |
+| --- | --- | --- | --- |
+| original patch + original ear | 0.261 | **0** | **0** |
+| **moved patch** + original ear | 0.233 | 1 | 0 |
+| moved patch + **reversing ear** | 0.035 | **16** | **18** |
+
+So the patch move costs one pinch. **The re-entrant taper is what breaks it,
+and correct tangents do not save it** — attempt 4 (wrong tangents) and attempt 5
+(right tangents) both landed at worst area 0.035. The tangents were a real bug
+and fixing them changed nothing, which is the same shape of result as
+`polar_radius` earlier in this session.
+
+### Why, and what to do instead
+
+A lofted ring surface that comes back inward is re-entrant by definition: the
+loft between a ring at x 0.308 and one at x 0.272 faces backward toward the
+head. Watertight, 100% quads, invisible to every integrity check — and it
+self-intersects the moment the skull bends. The cage's existing rounded caps
+(nose tip, four paw soles, tail tip) work because they taper to a POINT with
+shrinking radius, not to a wider ring lower down.
+
+The reference's ear is widest low and narrower at the top. That shape cannot be
+a lofted ring appendage on this cage. Proven, three ways now.
+
+**The answer is that the ear should not be cage geometry at all.** It is the
+same call the project already made twice: the mane is separate geometry, and the
+face parts are separate geometry, because neither needs to DEFORM. An ear does
+not deform either — it needs to follow the skull, and `ear_L` / `ear_R` bones
+already exist and are already in the skin. So:
+
+* build the ears in `face_lion.py` as their own meshes, shaped freely, with no
+  lofted-ring constraint at all;
+* `skin_rigid` them to `ear_L` / `ear_R`, exactly as the 15 face parts are
+  skinned to `head`;
+* cap the cage's ear patches instead of growing them, which removes the ear
+  stubs from the deformation cage entirely and should return the battery to
+  0 pinched;
+* the inner-ear colour region moves with them — it is already selected by bone
+  group in `paint_regions`, so that code needs no change.
+
+The cost is one more mesh, and after the per-material join it is very likely
+zero extra draw calls: the ears are matte body colour, so they merge into the
+`Face_Matte` group with the cage and the mane's material is separate anyway.
+
+### State — unchanged and good
+
+Weighted IoU **0.8602**, front **0.9164**. Battery 0 pinched / 0 flipped, worst
+area 0.261. Reach 22.1 / 42.1 mm, support slide 0.166 mm. Asset 3.91 MB,
+4 meshes, both contracts passing. Residual ear band error stays at 0.148.
