@@ -188,7 +188,7 @@ Built the way a box-modeller builds a quadruped:
   extension headroom;
 * the mouth is a **real cavity**, not a dent: a jaw cannot open a dent.
 
-961 verts · 959 faces · 100% quads · watertight · poles only at nose tip, four
+1,005 verts · 1,003 faces · 100% quads · watertight · poles only at nose tip, four
 paw soles, two ear tips, tail tip — **none in a bending joint**.
 
 ### Skinning is authored — `tools/blender/lion_skeleton.py`

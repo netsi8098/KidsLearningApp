@@ -208,7 +208,7 @@ excluded from the skin by `export_def_bones`, so no control widget reaches the
 production asset: **0 control bones in the skin**. Mid-limb joints carry hinge
 limits and locked Y/Z so IK cannot solve an elbow sideways.
 
-`lion_cage_rigged.glb` — 961 verts, 1,918 tris, 35 joints, **63.5 KB**, Khronos
+`lion_cage_rigged.glb` — 1,005 verts, 2,006 tris, 35 joints, **66.1 KB**, Khronos
 validator clean, loads at `/world3d?mesh=cage` with no errors. App regression:
 121/121 homepage QA.
 

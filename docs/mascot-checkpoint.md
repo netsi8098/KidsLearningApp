@@ -59,15 +59,22 @@ in the top front band, 4,493 at the rear — where the reference tops them just
 under the mane crown. Lowered and widened, which also makes them read from the
 side.
 
-## D. Rig-overlay check — **PASS**
+## D. Rig-overlay check — **REVIEW**
+
+> Re-measured 2026-09-03. The figures below were 64 contained / 0 escaped /
+> 8 by design / 6.0 mm / **PASS**. Rebuilding `a827a37` from source and running
+> `rig_overlay_check.py` gives what follows — and gives it on the UNMODIFIED
+> baseline too, so this is documentation drift, not a regression.
 
 72 joint points ray-cast in six directions against the new surface:
 
-* **64 contained**, **0 escaped**
-* 8 at the surface **by design** — `root` is a transform handle under the belly,
+* **62 contained**, **3 escaped**
+* 7 at the surface **by design** — `root` is a transform handle under the belly,
   and a terminal bone's tail *is* the surface (a paw's tail is the sole, the
   jaw's is the chin, the tail's is the tip)
-* tightest contained clearance 6.0 mm
+* tightest contained clearance **5.4 mm**, on `tail_02.tail` and `tail_03.head`
+* the 3 escaped are `ear_L.head`, `ear_R.head` and `tail_01.head` — ears and
+  tail, not the rear limb the previous note blamed
 
 ### One required rig adjustment, documented not worked around
 
@@ -92,8 +99,11 @@ were corrected in place and the ring **names** left unchanged, which means:
 * the joint contract holds (verified above);
 * the walk, IK and metrics transfer without retargeting.
 
-Current: 961 verts, 959 faces, 100% quads, watertight, 0 loose, 0 non-manifold,
+Current: 1,005 verts, 1,003 faces, 100% quads, watertight, 0 loose, 0 non-manifold,
 **0 slivers** (down from 4). The mane is separate geometry, as it should be.
+
+(961/959 until the elliptical-limb-ring paw rebuild in `dba4062`; the counts in
+this file were three commits stale until re-measured on 2026-09-03.)
 
 If the remaining defects below cannot be resolved in this topology, the fallback
 is the brief's original route — sculpt freely, then retopologise against it. That
@@ -104,20 +114,25 @@ will be reported, not assumed.
 STEP 9 and STEP 10 have now been run on the corrected cage. Every figure is
 measured, against the donor baseline the brief set as the bar.
 
+> Re-measured 2026-09-03 from a clean rebuild. Four rows here were stale, and
+> in the model's favour: the paw rebuild in `dba4062` cleared the pinching and
+> the flipped faces, and no row moved with it. The "regressed" verdicts below
+> were describing a cage that no longer existed. Verified on the unmodified
+> baseline as well, so none of it is attributable to the GATE 15 face work.
+
 | Metric | Donor baseline | Corrected cage | Verdict |
 | --- | --- | --- | --- |
 | Deformation battery FAIL | 0 | **0** | held |
-| Battery PASS / WARN | 5 / 7 | 5 / 7 | held |
-| Pinched faces | 0 | **4** | regressed |
-| Worst area ratio | 0.267 | **0.128** | regressed |
-| Flipped faces | 24 | 24 | held |
-| Reach headroom FL/FR | 20.0 mm | 20.0 mm | held |
-| Reach headroom RL/RR | 40.9 mm | 40.9 mm | held |
-| Planted paw, animation amplitude | 0.052 mm | **0.069 mm** | held |
-| Walk support slide, worst | 0.46 mm | **0.62 mm** | held |
-| Walk vertical paw movement | 0.15 mm | 0.17 mm | held |
+| Battery PASS / WARN | 5 / 7 | **12 / 0** | better |
+| Pinched faces | 0 | **0** | held |
+| Worst area ratio | 0.267 | **0.260** | held |
+| Flipped faces | 24 | **0** | better |
+| Reach headroom FL/FR | 20.0 mm | **22.1 mm** | better |
+| Reach headroom RL/RR | 40.9 mm | **42.1 mm** | better |
+| Planted paw, animation amplitude | 0.052 mm | **0.105 mm** | held |
+| Walk support slide, worst | 0.46 mm | **0.166 mm** | better |
 | IK residual, all four paws | 0.00 mm | 0.00 mm | held |
-| Feet planted, every frame | 3 | 3 | held |
+| Feet planted, every phase | 3 | 3 | held |
 | Quad ratio / boundary edges | 1.0 / 0 | 1.0 / 0 | held |
 
 Honest reading: the motion system transferred. Support slide rose 35% in relative
@@ -145,12 +160,12 @@ against a measured 0.40 H. Two hundredths of body height is invisible at hero
 scale; a crouch that collapses the rump is not. Motion quality is the higher bar
 and it wins. Weighted IoU moved 0.822 → 0.817 as a result, which is the cost.
 
-Runtime confirmed: 189.2 KB GLB, 961 verts / 1,918 tris / 35 joints, Khronos
+Runtime confirmed: 191.6 KB GLB, 1,005 verts / 2,006 tris / 35 joints, Khronos
 validation clean, zero control bones in the skin, both clips (`Idle`, `Walk`)
 present, floor gap −11.5 mm, 29 draw calls, and the 121-check homepage QA suite
 still fully green.
 
-## F. Verdict — **CLOSE, BUT THE FACE IS STILL MISSING**
+## F. Verdict — **CLOSE; THE FACE IS NOW MEASURED AND PARTLY BUILT**
 
 Weighted silhouette IoU has gone 0.590 → 0.822 → **0.878** (registered; 0.869
 unregistered), with front 0.936 and side 0.875, and the motion system is now
@@ -181,10 +196,19 @@ contact, the largest single error in the asset.
 
 ### What still blocks final retopology
 
-1. **No face.** The head is a smooth skull: no eye sockets, no brow plane, no
-   cheek break, no mouth. That is Gate 15, deliberately not started, and it is now
-   the single largest reason this does not read as *the* mascot. Everything below
-   it is minor by comparison.
+1. ~~**No face.**~~ **STARTED 2026-09-03.** The claim that the head had "no eye
+   sockets... no mouth" was wrong even when written — `cage_lion.py` had carried
+   eye, brow and mouth sockets since GATE 4. What it did not have was a face
+   anyone had *measured*: the eye target sat 76 mm behind the skin it was meant
+   to be a socket in, the brow 48 mm too narrow and 76 mm too low, and there was
+   no nose pad at all. All five socket targets are now driven by
+   `face_model.json`, and the forms the loops frame — eyes as a measured
+   sclera/iris/pupil/catchlight stack, brows, nose pad, mouth line — are built
+   by `face_lion.py`. See the 2026-09-03 entries in `codex-claude-handoff.md`.
+   Still outstanding for Gate 15: the **shape-key set** (`Blink_*`, `BrowUp_*`,
+   `Smile`, `JawOpen`, visemes), the cream **muzzle patch**, and an **eyelid rim**
+   — without a dark liner the sclera reads as an unbounded white blob rather
+   than an eye.
 2. **The mane has no chin lobe.** Its front rim is a flat wall at y 0.566 where the
    reference recedes to 0.44-0.48 around the face and then juts forward below it.
    Silhouette-neutral (the union still matches) but it is why the mane reads as a

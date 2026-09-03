@@ -114,7 +114,7 @@ Status 2026-08-21 — weighted IoU **0.878** registered (0.869 unregistered):
 
 | Sub-point | Status |
 |---|---|
-| 2A head/face | **head position DONE** — dropped 0.131 to the measured face centre h 0.604, which is also where the mane's aperture was already being built. Face itself NOT STARTED (GATE 15). |
+| 2A head/face | **head position DONE** — dropped 0.131 to the measured face centre h 0.604, which is also where the mane's aperture was already being built. Face **MEASURED AND PARTLY BUILT** 2026-09-03: sockets driven by `face_model.json`, eye/brow/nose/mouth forms in `face_lion.py`; shape keys, eyelid rim and muzzle patch outstanding. |
 | 2B mane | PART — macro form and per-band width profile fitted; no chin lobe, so it still reads as a hood rather than a mane |
 | 2C body | **DONE** — torso lowered 0.045 off the measured top/bottom edge pair; rib, haunch and rump all driven from the reference |
 | 2D legs | **DONE** — shafts compressed with the torso; front-view widths within 0.03 H |
@@ -171,6 +171,13 @@ from stride × cycle, not eyeballed — but it needs re-deriving now the gait
 changed from 32 frames/2 strides to 48 frames/4 beats.
 
 ### GATE 15–16 — Face and speech · PART
+
+> 2026-09-03: the PRODUCTION CAGE now has a measured face. The paragraph below
+> describes the PROXY (`detail_lion.py`), which is a different asset — the two
+> were being conflated. On the cage: all five socket targets are driven by
+> `face_model.json` (three were badly misplaced and one absent), and
+> `face_lion.py` builds the eye stack, brows, nose pad and mouth line from the
+> measurement. Shape keys remain PLAN. Detail in `docs/codex-claude-handoff.md`.
 Eyes are real nested geometry: sclera, iris, pupil, catchlight, built as stacked
 flat discs because concentric spheres cannot nest safely (offset + radius must
 stay inside the parent, and it did not — the iris punched through). Mouth has a

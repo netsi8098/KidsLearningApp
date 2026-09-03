@@ -3790,3 +3790,282 @@ New infrastructure worth knowing about:
    guessed.
 2. Mane chin lobe — silhouette-neutral but it is what makes a mane a mane.
 3. Leg volume, which should also clear the 4 pinches and the REVIEW verdict.
+
+## 2026-09-03 — GATE 15 opened: the face is now measured
+
+Resumed from the "Next, in order" list above, item 1. No geometry has changed
+yet; what changed is that the face is no longer unmeasurable.
+
+### The baseline reproduces, exactly
+
+Before touching anything, the whole chain was rebuilt from a clean tree at
+`a827a37` and every published figure re-measured:
+
+| | documented | rebuilt | |
+| --- | --- | --- | --- |
+| Reach headroom FL/FR | 22.1 mm | **22.1 mm** | match |
+| Reach headroom RL/RR | 42.1 mm | **42.1 mm** | match |
+| Planted paw, animation | 0.105 mm | **0.105 mm** | match |
+| Walk support slide, worst | 0.166 mm | **0.166 mm** | match |
+| IK residual, all four paws | 0.00 mm | **0.00 mm** | match |
+| Feet planted, every phase | 3 | **3** | match |
+| Quad ratio / boundary edges | 1.0 / 0 | **1.0 / 0** | match |
+| Sliver faces | 0 | **0** | match |
+
+The motion system is reproducible from source. Nothing in it was taken on faith.
+
+### Four documents were stale, including the one whose commit says they are not
+
+`a827a37` is titled "Bring every mascot document in step with the measured
+state". It was three commits behind its own claim: `dba4062` rebuilt the paws
+with elliptical limb rings and took the cage from 961 verts to **1,005**, and
+no count moved with it.
+
+Corrected against a fresh build in `mascot-checkpoint.md`,
+`rigged-lion-production.md`, `gate-cage-report.md` and
+`blender-current-state-audit.md`: **1,005 verts · 1,003 faces · 2,006 tris ·
+102 ring groups · 66.1 KB rigged · 191.6 KB animated.** Dated handoff sections
+in this file were deliberately left alone — they are a log, not a status board.
+
+### A silhouette cannot see a face
+
+This is why section F of the checkpoint could sit next to a weighted IoU of
+0.878 and still say "no face". Every measurement in this pipeline reads an
+outline, and eyes, brows, nose pad, nostrils and mouth never touch one. The
+0.878 was never measuring a face; it still is not.
+
+`tools/cad/measure_face.py` closes that gap. Same method as the mane/body
+split — cluster in HSV, label connected components, select by geometry — and
+the same H units, so a number can be compared with `HEAD_CAGE_Z = 0.604`
+directly. Output: `face_model.json` plus a boxed overlay, because the printed
+number cannot tell a muzzle patch from a chest bib and a box on the picture can.
+
+| feature | x_H | h | notes |
+| --- | --- | --- | --- |
+| pupil | ±0.0890 | 0.6564 | asymmetry 0.0000 |
+| eye almond | — | — | 0.0911 × 0.0932, aspect 0.978 — round, not almond |
+| sclera | ±0.1104 | 0.6737 | the white is a crescent, up and out |
+| brow | ±0.1031 | 0.7618 | 0.1054 above the pupil |
+| nose pad | −0.0031 | 0.5820 | 0.1511 wide, 0.0745 tall |
+| nostril | ±0.0410 | 0.5710 | inside the pad's own span |
+| mouth line | −0.0040 | 0.4984 | 0.1325 wide |
+| muzzle patch | +0.0239 | 0.4591 | cream, h 0.4162–0.5072 |
+| face aperture | −0.0049 | 0.6120 | h 0.3955–0.8240, half-width 0.2277 |
+
+Aperture centre 0.6120 against the independently derived
+`face_centre_front` 0.604 — 0.008 apart, from two unrelated methods.
+
+### Three bugs the measurement found, two of them in my own tool
+
+1. **The mask bbox is not the face's axis.** Pupils sit at cols 244.6 and
+   330.6, midpoint 287.6; the bbox gives 282.0. A bbox centre is the *mane's*
+   axis, and the mane is heavier on one side. Using it put every midline
+   feature 0.0116 H off centre. The pupil pair now derives the axis, and the
+   nose pad independently lands at −0.0031 of it — a third of a pixel.
+
+2. **Restricting a segmentation by the aperture clips the features.** The nose
+   pad reaches the aperture rim on one side, lost those pixels, and reported a
+   fabricated 0.0258 H asymmetry. Components are now selected by centroid
+   membership and measured on all their pixels. The aperture also needed its
+   holes filled first: every feature is a non-gold hole punched in the gold
+   region, so the nose pad's centroid lands in the middle of its own cavity.
+
+3. **The muzzle filter was looking for gold.** s 0.35–0.62 / v 0.55–0.78 is
+   mid-tone gold, and it returned the chest bib at h 0.411 — 0.14 H below the
+   mouth. Measured down the midline the cream reads s 0.33–0.37, v 0.97–0.98.
+
+### Depth is measured too, and two socket targets are off the surface
+
+A front elevation has no y. The cage supplies it as three hand-picked literals,
+and `socket()` hides a bad one: it searches a 52 mm sphere and falls back to
+`nearest_face()`, which always succeeds. An off-surface target therefore builds
+a socket *somewhere* instead of erroring. The build log is the only tell —
+2 or 6 centre faces when the target is on the surface, and the two brow
+targets report **1 each**.
+
+`tools/blender/face_placement.py` ray-casts inward at each measured (x, h) and
+takes the surface's own y, then reports the delta from the current literal. Ring
+vertex groups name what each ray hit, so the probe validates itself:
+
+| feature | measured x, h | surface y | ray landed on | Δ from current (x, y, z) |
+| --- | --- | --- | --- | --- |
+| eye | +0.0890, 0.6564 | +0.6278 | `body:muzzle_02` | −0.0060, **+0.0498**, +0.0044 |
+| brow | +0.1031, 0.7618 | +0.5651 | `body:brow`, **`earR:attach`, `earR:root`** | **+0.0311**, +0.0131, **+0.0498** |
+| nose pad | 0.0000, 0.5820 | +0.6323 | `body:muzzle_01`, `body:nose` | no socket exists |
+| nostril | +0.0410, 0.5710 | +0.6319 | `body:muzzle_01`, `body:nose` | no socket exists |
+| mouth | 0.0000, 0.4984 | +0.6365 | cap/cavity, no ring group | 0.0000, +0.0266, +0.0064 |
+
+Read in millimetres on the shipped 1.30 m character: the eye target sits **76 mm
+behind** the surface it is meant to be a socket in, the brow **48 mm too narrow
+and 76 mm too low**, the mouth **41 mm behind**. Only the eye's x and z, and the
+mouth's x, were already right.
+
+The nose pad and nostrils have `normal.y` +0.996 and +0.997 — dead-on the front
+of the muzzle, unambiguous, and there is no socket at either.
+
+### Open decision for Codex
+
+**The measured brow collides with the ear attachment patch.** At x ±0.1031,
+h 0.7618 the ray lands on faces shared by `body:brow` and `earR:attach` /
+`earR:root`. The 3×3 attach patch is wide and its inner column reaches x ≈ 0.10,
+which is where the reference puts the brow ridge.
+
+Recommendation: move the brow socket, not the ear. The ear attachment is
+load-bearing for deformation — it is what makes the ear's loops flow into the
+skull by construction — and the ear itself measures correct in the silhouette
+pass. The brow is a shape-key anchor with no motion contract, so it can take
+the inboard offset. This is an engineering detail, not a design call, so it is
+not blocking; flagging it because it constrains how wide `BrowUp_L/R` can read.
+
+### Next, in order
+
+1. Drive the face socket targets from `face_model.json` + `face_placement.json`
+   instead of literals, so a re-exported reference moves the face with it — and
+   so `socket()` cannot land a target by fallback again. Make the fallback
+   *warn loudly* rather than succeed quietly.
+2. Nose pad and nostril sockets, which do not exist at all.
+3. Then the geometry Gate 15 is actually about: eye sockets with nested
+   eyeballs, brow plane, cheek break, and the shape-key set in
+   `technical-direction.md` — the production cage has the deformation loops but
+   none of the features, and the nested-eye approach is already proven on the
+   proxy in `detail_lion.py`.
+4. Mane chin lobe; leg volume, which should also clear the 4 pinches.
+
+## 2026-09-03 (later) — GATE 15 geometry: the face is on the cage
+
+Continues the entry above. The measurement is now driving geometry, and four
+bugs came out of building against it — two of them latent in the cage since
+GATE 4.
+
+### Every metric held
+
+The face work is deformation-neutral and silhouette-neutral, measured not
+assumed. Full chain rebuilt from source:
+
+| | before | after |
+| --- | --- | --- |
+| Weighted silhouette IoU | 0.8780 | **0.8772** |
+| Front IoU | 0.9358 | **0.9358** |
+| Deformation battery | 12 PASS / 0 FAIL | **12 PASS / 0 FAIL** |
+| Pinched / flipped faces | 0 / 0 | **0 / 0** |
+| Worst area ratio | 0.257 | **0.260** |
+| Reach headroom | 22.1 / 42.1 mm | **22.1 / 42.1 mm** |
+| Walk support slide | 0.166 mm | **0.166 mm** |
+| IK residual | 0.00 mm | **0.00 mm** |
+| Rig overlay | 62 contained / 3 escaped | **62 / 3** |
+| Cage verts / quad ratio | 1,005 / 1.0 | **1,007 / 1.0** |
+| Slivers / boundary edges | 0 / 0 | **0 / 0** |
+
+The 0.0008 IoU cost is the raised nose pad: cage length 1.338 → 1.345, and the
+side reference is clipped at the canvas edge exactly there, so that band cannot
+be graded against a measured value anyway.
+
+### Four bugs, two of them latent since GATE 4
+
+1. **`socket()` and `open_cavity()` read face normals that nobody had
+   recalculated.** The only `recalc_face_normals` in `cage_lion.py` was in
+   `finish()`, so both were extruding along whatever winding the inset chain
+   happened to leave. It stayed invisible while the mouth target was off-surface
+   and the fallback handed back a single face; with a real two-face region on
+   the lower muzzle the summed normal came out inverted and the cavity extruded
+   **outward** — a gold spike protruding under the chin, splitting the mouth
+   line in two. Normals are now made consistent before the facial phase, which
+   is also the point at which the surface is closed.
+
+2. **`radius` was calibrated against an off-surface target.** It is a sphere
+   around the target, so it only selects a sensible patch when the target is on
+   the skin. The mouth's 0.052 grazed the muzzle and caught 6 faces from 41 mm
+   behind; placed correctly, the same 0.052 catches **21** — a mouth a third of
+   the face wide — and the nose pad's 0.062 caught 15 overlapping it. Insetting
+   overlapping regions produced **12 sliver faces** where the cage had had none.
+   Radii are now sized against the measured feature width; slivers back to 0.
+
+3. **The ear keep-out excluded the whole upper head.** `earR:attach` is the
+   eight boundary verts left when the ear's patch was opened, so it lives on the
+   `head_mid` ring — which circles the entire skull. Excluding any face touching
+   an `earR:*` vert excluded every sample from x 0.000 to 0.130 at brow height,
+   and the brow could not be placed anywhere at all. The keep-out is now the
+   ear's own rings (`root`/`mid`/`upper`/`tip`), and the brow socket slides
+   0.028 H inboard off the attachment patch.
+
+4. **A decal cast onto a socket lands on its FLOOR.** Once (1) was fixed the
+   sockets became genuine dents rather than accidental bumps, and the whole face
+   sank into them — the sclera showed as a slit in the inner corner and the
+   character read as squinting. The first fix probed a ring for the most
+   protruding nearby surface and overreached: at a radius wide enough to clear
+   the eye socket the ring also sampled the muzzle, so the "rim" for the mouth
+   came back as the **nose** and lifted it 0.0678 — 104 mm on the shipped
+   character. `face_lion.py` now imports `FACE_SOCKETS` and lifts each decal by
+   its own socket's depth plus one clearance constant.
+
+### What the measurement knew that a builder would not
+
+* **The pupil is not centred in the eye.** It sits 0.0116 H inboard and 0.0113 H
+  below the almond's centre, with the sclera's white crescent up and out from
+  both. That offset is the expression — parts are placed at their own measured
+  coordinates, not concentrically.
+* **The brow rises 20.9° toward the midline.** The first build tilted it 14° by
+  eye *and in the opposite direction*, which is the universal angry brow. The
+  principal axis of the reference component gives magnitude and sign with
+  nothing to guess.
+* **The iris is a thin ring around a big pupil**, r 0.0290 against the pupil's
+  0.0217 — not a large iris. Measuring "the largest non-black non-white
+  component in the almond" gave 0.0456 on one side against 0.0321 on the other,
+  because it caught the lid line and the lit sclera edge. Flooding outward from
+  the pupil over amber-or-dark fixed it; the two sides now agree to 0.002.
+* **The artwork is symmetric** — the pupil pair measures an asymmetry of exactly
+  0.0000 H — so per-side disagreement is lighting, not character, and sizes are
+  averaged rather than taken from one side.
+* **The palette is measured too**, medians off the artwork: sclera (250,242,225),
+  iris (150,80,9), pupil (9,6,0), nose (86,44,16), mouth (27,8,2), brow
+  (110,59,20), coat (242,180,75). Vertex colours are linear and the measurement
+  is sRGB; skipping the conversion is a ~25% error that reads as yellow on amber.
+
+### Two errors of my own worth recording
+
+* **`rotation_difference` gives an arbitrary ROLL.** Orienting each disc by the
+  shortest arc from +Z to the surface normal left `rx`/`rz` pointing somewhere
+  unpredictable in the plane — ellipses at random angles, and a brow tilt
+  measured in degrees about an axis nobody had defined. `plane_basis()` now
+  projects world +Z into the plane so "up" is up.
+* **Nesting is about dome height, not radius.** Fixed stack offsets put the
+  pupil 0.0025 in front of an iris standing 0.0062 proud, so the iris pushed
+  through and the pupil rendered as a crescent clinging to its rim — the same
+  failure `detail_lion.py` documented for concentric spheres, one level up. The
+  stack is now derived from the domes it has to clear, and total protrusion is
+  reported: 0.0083, or 12.7 mm at 1.30 m.
+
+### Not built, deliberately
+
+**Nostrils are measured but not modelled.** They are at x ±0.0410, h 0.5710 with
+`normal.y` +0.997, so the numbers are there for a detail pass. They are not cage
+geometry: this cage carries loops WHERE SOMETHING MOVES, which is the rule that
+decided how many rings an elbow gets and why the mouth is a cavity rather than a
+dent. A nostril has no bone and no shape key. Insetting one subdivides faces the
+nose pad has already subdivided, which is where 8 of the 12 slivers were.
+
+### New in the tree
+
+| file | what |
+| --- | --- |
+| `tools/cad/measure_face.py` | the face, measured off the front view — positions, sizes, slopes, palette |
+| `tools/blender/face_placement.py` | ray-cast depth per feature, and the delta from what the cage used |
+| `tools/blender/face_lion.py` | the face forms: eye stack, brows, nose pad, mouth line |
+| `art/.../face_model.json` · `face-features.png` | the measurement and its boxed overlay |
+| `public/assets/lion/cage/lion_face.glb` | 131 KB — cage + 12 face parts, 1,168 face verts |
+| `docs/assets/lion-face/` | front, three-quarter, side, eye close-up |
+
+### Next, in order
+
+1. **Eyelid rim.** The single biggest remaining read problem: with no dark
+   liner the sclera is an unbounded white blob. The reference has one, and it is
+   what contains the white and makes the eye an eye.
+2. **The cream muzzle patch** — measured at h 0.4162–0.5072, rgb (247,209,154),
+   not yet built.
+3. **The shape keys**, which is the rest of Gate 15 and what the sockets exist
+   for: `Blink_L/R/Both`, `Squint`, `EyesWide`, `BrowUp_L/R`, `BrowDown`,
+   `Smile`, `JawOpen`, `MouthWide/Narrow/Round`, visemes.
+4. Skin the face parts to `head`/`jaw` so they travel with the skull. They are
+   currently parented to the cage object, which is correct for review and wrong
+   for a head turn.
+5. Mane chin lobe; leg volume.

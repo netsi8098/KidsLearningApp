@@ -37,6 +37,7 @@ Outputs:
   docs/assets/lion-cage/{front,side,rear,three-quarter}-wire.png
 """
 
+import json
 import math
 import os
 import sys
@@ -44,6 +45,7 @@ import sys
 import bmesh
 import bpy
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lion_contract import (  # noqa: E402
@@ -137,6 +139,124 @@ def ring_points(centre, normal, rx, rz, count, phase=0.0):
 # HEAD_Z itself is NOT changed: the contract is shared with the technical donor,
 # which must not move. Same reasoning as the spine positions in lion_skeleton.
 HEAD_CAGE_Z = 0.604
+
+# ── the face, measured ──────────────────────────────────────────────────────
+#
+# GATE 15. Until 2026-09-03 the five facial socket targets were hand-picked
+# literals, and three of them were wrong in a way nothing reported:
+#
+#     eye    76 mm BEHIND the surface it is meant to be a socket in
+#     brow   48 mm too narrow and 76 mm too low
+#     mouth  41 mm behind
+#
+# (millimetres on the shipped 1.30 m character). They survived because
+# `socket()` searches a 52 mm sphere and then falls back to `nearest_face()`,
+# which always succeeds — so an off-surface target builds a socket SOMEWHERE
+# instead of erroring. The eye's 50 mm error fitted inside the 52 mm sphere
+# with 2 mm to spare. That fallback now warns, and `build()` refuses to
+# continue if any socket used it.
+#
+# x and z come from `face_model.json` (tools/cad/measure_face.py). y cannot:
+# a front elevation has no depth. So y is ray-cast off the tube AT BUILD TIME,
+# which means the target is on the surface by construction and cannot drift
+# when a ring moves.
+#
+# Everything else here — how many concentric loops, how deep, how wide a patch
+# — is a DEFORMATION decision, not a reference measurement, and is named as
+# such. An eyelid needs two loops because a blink slides loops over an eyeball
+# and one loop has nothing to slide.
+FACE_JSON = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "art", "blender", "references", "turnaround-views", "face_model.json")
+
+# (feature, insets, depth, radius, mirrored)
+#
+# depth > 0 pushes the patch IN along its own normal (a socket).
+# depth < 0 pushes it OUT (the nose pad is a raised pad, not a dent).
+# RADIUS IS NOT A FREE PARAMETER, and the old values were calibrated against
+# the wrong thing. `radius` is a sphere around the target, so it only selects a
+# sensible patch when the target is ON the surface. With the mouth target 41 mm
+# behind the skin, 0.052 grazed the muzzle and caught 6 faces; put on the
+# surface, the same 0.052 catches 21 — a mouth a third of the face wide — and
+# the nose pad's 0.062 catches 15 that overlap it. Insetting overlapping regions
+# produced 12 sliver faces where the cage had had none.
+#
+# Sized against the measurement instead: the mouth line measures 0.1325 wide
+# and the nose pad 0.1511, and a radius near half the feature's half-width
+# lands 4-8 faces, which is what two concentric insets can subdivide without
+# collapsing an edge.
+FACE_SOCKETS = [
+    # Two loops: a blink needs one to slide and one to hold the rim.
+    ("eye",      (0.016, 0.011), 0.013, 0.052, True),
+    # One loop. Enough for BrowUp_L/R to have something to move without adding
+    # density the rest of the forehead cannot use.
+    ("brow",     (0.014,),       0.000, 0.044, True),
+    # Raised, not recessed — the pad reads as a form in the reference, so depth
+    # is negative and pushes it out along its own normal.
+    ("nose_pad", (0.018, 0.012), -0.009, 0.038, False),
+    # Two loops, then `open_cavity`: a jaw cannot open a dent.
+    ("mouth",    (0.015, 0.010), 0.010, 0.038, False),
+]
+
+# NOSTRILS ARE MEASURED BUT NOT BUILT, deliberately.
+#
+# `face_model.json` puts them at x ±0.0410, h 0.5710, inside the nose pad's own
+# span, and `face_placement.py` confirms normal.y +0.997 — dead-on the muzzle
+# front. So the numbers are there when a detail pass wants them.
+#
+# They are not cage geometry. This cage carries loops WHERE SOMETHING MOVES:
+# that is the rule that decided how many rings an elbow gets and why the mouth
+# is a cavity rather than a dent. A nostril has no shape key and no bone; it
+# never deforms. Insetting one at this density subdivides faces the nose pad
+# has already subdivided, which is precisely where 8 of the 12 slivers were.
+# Nostrils belong in the texture and normal map, like the whiskers.
+
+# Ring groups a facial socket must not consume — the ear's OWN rings.
+#
+# `earR:attach` is deliberately NOT in this list, and the distinction is the
+# whole point. `attach` is the eight boundary vertices left behind when the
+# ear's 3x3 patch was opened, so it is part of the BODY TUBE: those verts sit
+# on the `head_mid` ring, which circles the entire head. Keeping out any face
+# that touches an `earR:*` vert therefore keeps out the upper head all the way
+# across the midline — measured at z 0.7618, every sample from x 0.000 to
+# 0.130 shares a vert with an attach ring. The first version of this list did
+# exactly that and the brow could not be placed anywhere at all.
+#
+# What must not be consumed is the ear proper: root, mid, upper, tip. Insetting
+# a face that belongs to those would break the loop flow that makes the ear
+# deform with the skull instead of tearing from it.
+FACE_KEEP_OUT = ("earR:root", "earR:mid", "earR:upper", "earR:tip",
+                 "earL:root", "earL:mid", "earL:upper", "earL:tip")
+
+
+# Filled by `build()` with the target each facial socket actually resolved to,
+# after the ray-cast supplied y and after any keep-out slide. Downstream
+# consumers (the close-up cameras, and later the shape-key pass) read this
+# instead of re-deriving or re-hardcoding a position that can move.
+FACE_TARGETS = {}
+
+
+def face_measurement():
+    """Measured (x, z) per facial feature, in cage units.
+
+    Midline features carry x = 0 by measurement, not by assumption: the nose
+    pad lands at -0.0031 of the axis the pupil pair defines and the mouth line
+    at -0.0040, both inside a third of a pixel. Rounding them to the midline is
+    a statement that the character is symmetric, which it is; the measurement
+    is what proves it rather than what assumes it.
+    """
+    fm = json.load(open(FACE_JSON))
+    out = {
+        "eye": (abs(fm["eye"]["pupil"]["x_H_abs"]), fm["eye"]["pupil"]["h"]),
+        "mouth": (0.0, fm["mouth_line"]["h"]),
+        "nose_pad": (0.0, fm["nose_pad"]["h"]),
+    }
+    if fm.get("brow"):
+        out["brow"] = (abs(fm["brow"]["x_H_abs"]), fm["brow"]["h"])
+    if fm.get("nostril"):
+        out["nostril"] = (abs(fm["nostril"]["x_H_abs"]), fm["nostril"]["h"])
+    return out
+
 
 # ── the body tube ───────────────────────────────────────────────────────────
 # (name, centre, tangent, rx, rz)
@@ -494,6 +614,56 @@ class Cage:
         # "elbow_lo" of the front-right limb. Recording it here means the rig can
         # look the answer up instead of inferring it.
         self.rings = []
+        # Sockets that could not find faces within their radius and had to fall
+        # back to `nearest_face`. Empty is the only acceptable value; `build()`
+        # checks it. See the FACE_SOCKETS comment for what this hid for a month.
+        self.socket_fallbacks = []
+
+    # -- surface queries ----------------------------------------------------
+    def surface_y(self, x, z, y_start=1.4):
+        """The tube's outer y at (x, z), by ray-cast.
+
+        A front elevation measures x and height and nothing else, so depth for
+        a facial feature has to come from the geometry. Casting backward from
+        in front of the nose and taking the FIRST hit gives the outer surface,
+        which is the one a socket belongs on. Returns None on a miss, which is
+        a finding rather than something to replace with a guess.
+        """
+        bvh = BVHTree.FromBMesh(self.bm)
+        loc, _, _, _ = bvh.ray_cast(Vector((x, y_start, z)), Vector((0.0, -1.0, 0.0)))
+        return None if loc is None else loc.y
+
+    def keep_out_verts(self, prefixes):
+        """Verts belonging to ring groups a socket must not consume."""
+        out = set()
+        for name, verts in self.rings:
+            if any(name.startswith(p) for p in prefixes):
+                out.update(verts)
+        return out
+
+    def slide_inboard(self, x, z, radius, side, avoid, step=0.004, limit=0.060):
+        """Walk a target inboard until it clears the keep-out region.
+
+        The measured brow sits at x ±0.1031, h 0.7618, and at that point the
+        surface is ENTIRELY the ear's 3x3 attachment patch — the nearest
+        non-ear face is 0.035 away, so this is a total collision, not a
+        marginal one. One of the two has to move.
+
+        The ear does not: its attachment is what makes its loops flow into the
+        skull by construction, and the ear measures correct in the silhouette
+        pass. The brow is a shape-key anchor with no motion contract, so the
+        brow yields — inboard, at the measured HEIGHT, which is the part
+        BrowUp_L/R actually needs. What it costs in width is returned so the
+        build states it rather than absorbing it.
+        """
+        moved = 0.0
+        while moved <= limit:
+            xx = x - math.copysign(moved, x)
+            y = self.surface_y(xx, z)
+            if y is not None and self.faces_near((xx, y, z), radius, side, avoid):
+                return xx, y, moved
+            moved += step
+        return None, None, None
 
     # -- body tube ----------------------------------------------------------
     def build_body(self):
@@ -655,12 +825,14 @@ class Cage:
                 best, bd = f, d
         return best
 
-    def faces_near(self, target, radius, side=None):
+    def faces_near(self, target, radius, side=None, avoid=None):
         t = Vector(target)
         out = []
         for f in self.bm.faces:
             c = f.calc_center_median()
             if side and c.x * side <= 0.015:
+                continue
+            if avoid and any(v in avoid for v in f.verts):
                 continue
             if (c - t).length <= radius:
                 out.append(f)
@@ -684,7 +856,8 @@ class Cage:
         shortest = min(e.calc_length() for e in edges)
         return min(wanted, shortest * 0.32)
 
-    def socket(self, target, insets, depth, side=None, radius=0.052):
+    def socket(self, target, insets, depth, side=None, radius=0.052,
+               avoid=None, label=""):
         """Concentric deformation loops around a facial feature.
 
         `inset_region` creates a rim of new faces and leaves the ORIGINAL faces
@@ -693,9 +866,17 @@ class Cage:
         slides loops over the eyeball, and one ring has nothing to slide.
 
         `depth` then pushes the centre in along its own normal, which is what
-        makes it a socket rather than a circle drawn on a cheek.
+        makes it a socket rather than a circle drawn on a cheek. Negative depth
+        pushes OUT, which is how the nose pad is a pad rather than a dent.
+
+        THE FALLBACK IS NOT A CONVENIENCE. `nearest_face()` always succeeds, so
+        for as long as it was silent an off-surface target produced a socket
+        somewhere and the only trace was a "-> 1 centre faces" line in a build
+        log nobody diffs. Three of the five facial targets were wrong that way.
+        It now records itself, and `build()` refuses to finish with a non-empty
+        `socket_fallbacks`.
         """
-        region = self.faces_near(target, radius, side)
+        region = self.faces_near(target, radius, side, avoid)
         if not region:
             pred = None
             if side:
@@ -705,6 +886,11 @@ class Cage:
                 print(f"[cage] WARNING no face near {target}")
                 return None
             region = [f]
+            miss = (f.calc_center_median() - Vector(target)).length
+            self.socket_fallbacks.append((label or "unnamed", tuple(target), miss))
+            print(f"[cage] *** FALLBACK *** socket '{label or 'unnamed'}' found no "
+                  f"face within {radius:.3f} of {tuple(round(v, 4) for v in target)}; "
+                  f"nearest is {miss:.4f} away. The target is not on the surface.")
 
         for wanted in insets:
             t = self.safe_inset(region, wanted)
@@ -848,15 +1034,75 @@ def build():
     cage.cap_rear()
     cage.cap_front()
 
-    # Facial deformation loops, authored on a CLOSED surface.
-    cage.socket((0.095, 0.578, HEAD_CAGE_Z + 0.048), (0.016, 0.011), 0.013, side=+1)
-    cage.socket((-0.095, 0.578, HEAD_CAGE_Z + 0.048), (0.016, 0.011), 0.013, side=-1)
-    mouth = cage.socket((0.0, 0.610, HEAD_CAGE_Z - 0.112), (0.015, 0.010), 0.010, side=None)
+    # NORMALS BEFORE NORMALS ARE USED.
+    #
+    # `socket()` pushes its centre along the summed face normal and
+    # `open_cavity()` extrudes along it, but until now the only
+    # `recalc_face_normals` in this file was in `finish()` — so both were
+    # reading whatever winding the extrude/inset chain happened to leave.
+    # It survived while the mouth target was off-surface and the fallback
+    # handed back a single face; with a real two-face region on the lower
+    # muzzle the summed normal came out inverted and `open_cavity` extruded
+    # OUTWARD, producing a gold spike protruding under the chin and splitting
+    # the mouth line in two. The surface is closed at this point (both caps are
+    # in), so this is exactly where the winding can be made consistent.
+    bmesh.ops.recalc_face_normals(cage.bm, faces=list(cage.bm.faces))
+
+    # Facial deformation loops, authored on a CLOSED surface, from the measured
+    # face. x and z are read; y is ray-cast off the surface that now exists.
+    measured = face_measurement()
+    keep_out = cage.keep_out_verts(FACE_KEEP_OUT)
+    mouth = None
+    print("[cage] face sockets, measured x/z with ray-cast depth:")
+    for name, insets, depth, radius, mirrored in FACE_SOCKETS:
+        if name not in measured:
+            print(f"[cage] WARNING no measurement for '{name}' — skipped")
+            continue
+        mx, mz = measured[name]
+        sides = ((+1, +mx), (-1, -mx)) if mirrored else ((None, mx),)
+        for side, x in sides:
+            y = cage.surface_y(x, mz)
+            if y is None:
+                raise SystemExit(
+                    f"[cage] '{name}' at x={x:+.4f} z={mz:.4f} does not hit the "
+                    f"tube. The measurement and the cage disagree about where "
+                    f"the head is; that is a real conflict, not a tolerance.")
+            avoid = keep_out if name == "brow" else None
+            note = "ray-cast"
+            if avoid:
+                x2, y2, moved = cage.slide_inboard(x, mz, radius, side, avoid)
+                if x2 is None:
+                    raise SystemExit(
+                        f"[cage] '{name}' could not clear {FACE_KEEP_OUT} within "
+                        f"0.060 of x={x:+.4f}. The ear patch and the measured "
+                        f"brow cannot both be where they are.")
+                if moved > 1e-9:
+                    note = (f"ray-cast, slid {moved:.3f} inboard off the ear "
+                            f"patch (measured x was {x:+.4f})")
+                x, y = x2, y2
+            target = (x, y, mz)
+            # Record one target per feature for the close-up cameras. For a
+            # mirrored pair the +x side is enough; both are built.
+            if side is None or side > 0:
+                FACE_TARGETS[name] = target
+            print(f"[cage]   {name:9s} x={x:+.4f} z={mz:.4f} "
+                  f"y={y:+.4f} ({note})")
+            region = cage.socket(target, insets, depth, side=side, radius=radius,
+                                 avoid=avoid, label=name)
+            if name == "mouth":
+                mouth = region
+    if mouth is None:
+        raise SystemExit("[cage] the mouth socket did not build — no cavity to open")
     cage.open_cavity(mouth, 0.052)
-    # Brow ridges get one ring each — enough for a BrowUp shape key to have
-    # something to move without adding density the rest of the forehead cannot use.
-    for sx in (-1, 1):
-        cage.socket((sx * 0.072, 0.552, HEAD_CAGE_Z + 0.108), (0.014,), 0.0, side=sx)
+
+    if cage.socket_fallbacks:
+        for label, target, miss in cage.socket_fallbacks:
+            print(f"[cage] FALLBACK {label} at "
+                  f"{tuple(round(v, 4) for v in target)} missed by {miss:.4f}")
+        raise SystemExit(
+            f"[cage] {len(cage.socket_fallbacks)} facial socket(s) fell back to "
+            f"nearest_face. A socket target must be ON the surface — fix the "
+            f"measurement or the radius, do not accept a silent placement.")
 
 
 
@@ -1003,9 +1249,12 @@ def render_wires(obj):
 
     # Topology close-ups, so the loops around each joint can actually be judged.
     cd.lens = 135.0
+    # The facial close-ups aim at the socket target the build actually resolved,
+    # not at a literal. The previous eye target (0.075, 0.585, 0.624) was 0.032
+    # below and 0.032 behind where the eye is, so the one render that exists to
+    # let the eye loops be judged was pointing at blank cheek. Reading
+    # FACE_TARGETS also means a slid brow is followed by its own camera.
     closeups = {
-        "eye": (0.075, 0.585, HEAD_CAGE_Z + 0.02, 210),
-        "mouth": (0.0, 0.640, HEAD_CAGE_Z - 0.10, 195),
         "shoulder": (0.120, 0.215, 0.300, 235),
         "elbow": (0.120, 0.205, 0.160, 240),
         "hip": (0.115, -0.290, 0.295, 300),
@@ -1013,6 +1262,12 @@ def render_wires(obj):
         "tail_root": (0.0, -0.462, 0.346, 340),
         "tail_tuft": (0.0, -0.598, 0.180, 320),
     }
+    # Yaw per facial feature: the angle that shows that feature's loops. A
+    # midline feature wants a near-frontal view; a paired one wants to be seen
+    # off-axis or its own rim hides it.
+    FACE_YAW = {"eye": 210, "brow": 205, "nose_pad": 200, "mouth": 195}
+    for name, (tx, ty, tz) in FACE_TARGETS.items():
+        closeups[name] = (tx, ty, tz, FACE_YAW.get(name, 200))
     for name, (tx, ty, tz, yaw) in closeups.items():
         t = Vector((tx, ty, tz))
         a = math.radians(yaw)

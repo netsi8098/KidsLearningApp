@@ -285,7 +285,7 @@ be upgraded inside the preserved rig/export/runtime architecture.
 | `lion_retopo.blend` | `retopo_lion.py` | Quadriflow pass on the proxy |
 | `lion_detailed.blend` | `detail_lion.py` | proxy + face/paw features + vertex-colour coat |
 | `lion_rigged.blend` | `rig_lion.py` | proxy rigged, 41 bones, 10 clips |
-| `lion_cage.blend` | `cage_lion.py` | **production cage**, 959 quads, 95 ring groups |
+| `lion_cage.blend` | `cage_lion.py` | **production cage**, 1,003 quads, 102 ring groups |
 | `lion_cage_qa.blend` | `deform_qa_lion.py` | cage + QA armature |
 | `lion_rigged_cage.blend` | `rig_cage_lion.py` | **production rig**, authored weights, 4 IK chains |
 | `home_environment.blend` | `build_home_environment.py` | world, 85k tris, 29 materials, 10 markers |
