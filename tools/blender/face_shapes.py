@@ -312,12 +312,27 @@ def assert_neutral_is_neutral():
                 if d > worst:
                     worst_name, worst = f"{o.name}[{i}]", d
         ev.to_mesh_clear()
-    if worst > 1e-6:
+    # TOLERANCE 1e-5, not 1e-6.
+    #
+    # 1e-6 sat on the float-noise floor and produced a FALSE FAILURE: with the
+    # cage subdivided to 15,954 verts the evaluated-versus-base comparison
+    # accumulates slightly more error, and the check aborted the whole build
+    # reporting "a morph is stuck on" over a deviation of 0.000001 model units
+    # — one micron on a 1.30 m character, on a mesh whose morphs were all
+    # verifiably at 0. At 3,990 verts the same build measured 7.3e-07 and
+    # passed, so the threshold was deciding on mesh density rather than on
+    # anything about the morphs.
+    #
+    # 1e-5 is 0.015 mm at runtime scale: still some three orders of magnitude
+    # below anything visible, and clear of the noise. A genuinely stuck morph
+    # displaces millimetres, not microns — the failure this guards against was
+    # all 16 keys defaulting to 1.0, which is centimetres.
+    if worst > 1e-5:
         raise SystemExit(
             f"[shapes] rest pose differs from base by {worst:.6f} at "
             f"{worst_name} — a morph is stuck on")
     print(f"[shapes] neutral check: rest pose == base "
-          f"(worst deviation {worst:.2e})")
+          f"(worst deviation {worst:.2e}, tolerance 1e-05)")
 
 
 def render_morphs(cage, contract):

@@ -4837,3 +4837,80 @@ passed**, all pre-existing and none touching world3d or the lion.
 4. At proxy retirement: rename the cage rig to one scheme and collapse the two
    contracts back to one. The cage's naming should win — it is the character
    that survives.
+
+## 2026-09-03 (tenth pass) — the cage was never meant to be RENDERED
+
+Feedback on the assembled renders: the detail still lacks clean work. It is
+right, and the cause is not the decals I had been measuring in millimetres.
+
+**The cage is 1,000 verts.** That is correct for a deformation cage and wrong
+for a render mesh — shipped raw it reads faceted everywhere, and no decal work
+fixes a body whose silhouette is visibly polygonal. The whole reason to author
+a quad cage is that it subdivides cleanly, and nothing was subdividing it.
+
+Catmull-Clark L2 now runs in the assembler: **999 -> 15,954 verts, 997 ->
+15,952 faces**, 35 vertex groups preserved by interpolation. Comparison in
+`docs/assets/lion-subdiv-comparison.png`.
+
+### Order, which is the whole trick
+
+Subdivision has to happen BEFORE two things, for unrelated reasons:
+
+* **Before the face parts.** They are placed by ray-casting the skin, and
+  Catmull-Clark pulls the surface INWARD toward the hull. Conform against the
+  coarse cage and every decal floats again the moment it smooths. Placed after,
+  the muzzle needs **zero** rim fallbacks where the coarse cage needed 14 —
+  the smoother surface projects cleanly.
+* **Before the morphs.** glTF has no subdivision so it must be baked, and
+  Blender's exporter cannot both apply modifiers and export shape keys.
+  Authoring the morphs on the already-dense mesh is what lets them coexist.
+
+The cost is the morph deltas: 16 targets x 15,954 verts x 12 bytes is ~3.1 MB
+on its own, which took the asset 3.14 -> 5.10 MB. `maxBytes` raised 4 -> 6 MB;
+the brief's ceiling is 10.
+
+### A false failure the density exposed
+
+`assert_neutral_is_neutral` aborted the L2 build reporting "a morph is stuck
+on" over a deviation of **0.000001 model units** — one micron on a 1.30 m
+character, on a mesh whose keys were all verifiably 0. The tolerance was 1e-6,
+sitting on the float-noise floor: at 3,990 verts the same build measured
+7.3e-07 and passed, so the threshold was deciding on mesh density rather than
+on anything about the morphs. Now 1e-5, which is 0.015 mm at runtime scale and
+still three orders of magnitude below visible. A genuinely stuck morph
+displaces millimetres — the failure this guards against was all 16 keys
+defaulting to 1.0, which is centimetres.
+
+### What is STILL not clean, stated plainly
+
+Subdivision fixed the cage's surface. It did not fix the character, and the
+remaining gap against the reference is art, not parameters:
+
+1. **The mane's SHAPE is the dominant defect.** It reads as a hard angular
+   slab — a shield with polygonal creases — not a mane. Checked before blaming
+   shading: 38,016 verts, **100% quads, every face smooth-shaded, zero sharp
+   edges**. So the creases are geometry. `mane_foundation.py` needs rebuilding,
+   not tuning. This is what the earlier notes were circling with "reads as a
+   hood rather than a mane", "a bonnet with a hard front lip" and "no chin
+   lobe"; the subdivided body now makes it unmissable, because the mane is the
+   only faceted thing left.
+2. **The mane is not subdivided.** It cannot simply be — at 38,016 verts L1
+   would be 152k, and it carries no morphs so the delta cost is nil, but
+   subdividing a shape that is wrong only makes it smoothly wrong.
+3. **Colour regions that do not exist at all**: the pink inner ear, the cream
+   chest bib (the reference's V), cream paws/socks, the tail tuft's colour, and
+   the cheek blush. Every one is measurable off the same front view with
+   `measure_face.py`'s method.
+4. **The brows are still flat ellipses**, 11.7 and 15.3 mm off a curving
+   forehead. `conform()` now exists and applies directly.
+5. **Proportions read differently in three-quarter view** than the reference —
+   the head large, the legs thin. The silhouette IoU is measured against front
+   and side; the 3/4 view is 25% of the weighting and the weakest.
+
+### Next, in order — and item 1 is most of the remaining work
+
+1. Rebuild the mane. Locks and flow, a chin lobe, and a soft front rim instead
+   of a hard lip.
+2. The five missing colour regions.
+3. `conform()` the brows.
+4. Clips for Gates 10-14; eye bones; mane follow-through bones.

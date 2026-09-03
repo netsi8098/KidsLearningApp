@@ -17,7 +17,14 @@
     "GENERATED FROM INTENT, NOT FROM THE ARTIFACT. `bones` is",
     "lion_skeleton.skeleton() - the authored table the rig is built from -",
     "not a scrape of the exported GLB. A contract read back off its own",
-    "output can never fail."
+    "output can never fail.",
+    "",
+    "maxBytes is 6 MB, not 4. The cage ships Catmull-Clark subdivided (L2,",
+    "999 -> 15,954 verts) because a 1,000-vert deformation cage rendered raw is",
+    "visibly faceted, and glTF has no subdivision so it must be baked. The cost",
+    "is not the geometry but the morph deltas: every one of the 16 targets stores",
+    "a delta per vertex, which is ~3.1 MB on its own. The brief's ceiling is",
+    "10 MB, so 6 leaves headroom while still catching a runaway."
   ],
   "assetPath": "/assets/lion/cage/lion.glb",
   "assetVersion": 1,
@@ -264,5 +271,5 @@
     }
   ],
   "maxMeshes": 4,
-  "maxBytes": 4194304
+  "maxBytes": 6291456
 }

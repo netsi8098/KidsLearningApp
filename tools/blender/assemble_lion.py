@@ -63,6 +63,11 @@ MANE_BLEND = os.path.join(REPO, "art", "blender", "lion_mane_foundation.blend")
 BLEND_OUT = os.path.join(REPO, "art", "blender", "lion_assembled.blend")
 GLB_OUT = os.path.join(REPO, "public", "assets", "lion", "cage", "lion.glb")
 
+# Catmull-Clark level for the shipped surface. 1 -> 3,990 verts, 2 -> 15,954.
+# The cost is not the geometry, it is that every morph target stores a delta
+# per vertex: at L2 that is 15,954 x 16 x 12 bytes ~ 3.1 MB of deltas alone.
+SUBDIV_LEVELS = int(os.environ.get("LION_SUBDIV", "2"))
+
 
 def find_armature():
     arms = [o for o in bpy.data.objects if o.type == "ARMATURE"]
@@ -231,6 +236,44 @@ def join_by_material(cage, parts, keep_separate=("LionMane",)):
     return out
 
 
+def subdivide(cage, levels):
+    """Catmull-Clark the cage, destructively, before anything reads its surface.
+
+    THE CAGE IS 1,000 VERTS. That is right for a deformation cage and wrong for
+    a render mesh: shipped raw it reads faceted everywhere, and no amount of
+    decal work fixes a body whose silhouette is visibly polygonal. The whole
+    point of authoring a quad cage is that it subdivides cleanly.
+
+    ORDER MATTERS, twice over.
+
+    Before the face parts, because they are placed by ray-casting the skin and
+    Catmull-Clark pulls the surface INWARD toward the hull — conform against
+    the coarse cage and every decal floats again once it smooths.
+
+    Before the morphs, because glTF has no subdivision, so this has to be baked
+    — and Blender's exporter cannot both apply modifiers and export shape keys.
+    Authoring the morphs on the already-dense mesh is what makes them coexist.
+    It also means the morph deltas are 16x the dense vertex count, which is the
+    real cost here and the reason the level is a parameter rather than a 2.
+
+    Vertex groups interpolate under subdivision, so the authored ring-to-bone
+    weights survive; the cage carries no shape keys at this point, which is
+    what allows the modifier to be applied at all.
+    """
+    before_v, before_f = len(cage.data.vertices), len(cage.data.polygons)
+    bpy.ops.object.select_all(action="DESELECT")
+    cage.select_set(True)
+    bpy.context.view_layer.objects.active = cage
+    mod = cage.modifiers.new(name="Subdivision", type="SUBSURF")
+    mod.levels = mod.render_levels = levels
+    mod.use_limit_surface = False
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    print(f"[assemble] cage subdivided L{levels}: {before_v} -> "
+          f"{len(cage.data.vertices)} verts, {before_f} -> "
+          f"{len(cage.data.polygons)} faces, "
+          f"{len(cage.vertex_groups)} vertex groups preserved")
+
+
 def main():
     fm = json.load(open(FACE_JSON))
     contract = json.load(open(CONTRACT))["morphTargets"]
@@ -269,6 +312,9 @@ def main():
     # Same idempotence guard as `face_lion.main()`: without it, running the
     # assembler on its own output duplicates all 15 parts as `.001`.
     face_lion.purge_face_parts()
+
+    # ---- 0a. smooth the render surface -------------------------------
+    subdivide(cage, SUBDIV_LEVELS)
 
     # ---- 0. the coat -----------------------------------------------------
     # `face_lion.main()` paints the cage; the build_* functions do not, so
