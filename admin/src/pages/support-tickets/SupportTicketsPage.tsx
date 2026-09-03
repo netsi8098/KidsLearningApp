@@ -19,6 +19,7 @@ import {
   StatusChip,
   TextArea,
 } from '../../components/ui';
+import type { BadgeVariant, StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -72,7 +73,7 @@ const PRIORITY_OPTIONS = [
   { value: 'urgent', label: 'Urgent' },
 ];
 
-const STATUS_MAP: Record<TicketStatus, 'draft' | 'published' | 'in_review' | 'approved'> = {
+const STATUS_MAP: Record<TicketStatus, StatusChipStatus> = {
   open: 'draft',
   in_progress: 'in_review',
   waiting: 'in_review',
@@ -80,7 +81,7 @@ const STATUS_MAP: Record<TicketStatus, 'draft' | 'published' | 'in_review' | 'ap
   closed: 'published',
 };
 
-const PRIORITY_VARIANTS: Record<TicketPriority, 'info' | 'warning' | 'danger' | 'default'> = {
+const PRIORITY_VARIANTS: Record<TicketPriority, BadgeVariant> = {
   low: 'info',
   medium: 'warning',
   high: 'danger',

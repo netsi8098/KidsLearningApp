@@ -14,6 +14,7 @@ import {
   LineChart,
   LoadingState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -50,7 +51,7 @@ interface LifecycleStatsResponse {
 
 /* ─── Constants ─── */
 
-const STATUS_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'> = {
+const STATUS_VARIANTS: Record<string, BadgeVariant> = {
   evergreen: 'success',
   fresh: 'info',
   stale: 'warning',

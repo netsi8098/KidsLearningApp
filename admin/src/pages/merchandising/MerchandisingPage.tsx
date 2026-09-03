@@ -17,6 +17,7 @@ import {
   LoadingState,
   EmptyState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -94,7 +95,7 @@ const PLATFORM_FORM_OPTIONS = [
   { value: 'all', label: 'Universal' },
 ];
 
-const STATUS_VARIANTS: Record<AssetStatus, 'default' | 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
+const STATUS_VARIANTS: Record<AssetStatus, BadgeVariant> = {
   draft: 'default',
   review: 'warning',
   approved: 'info',

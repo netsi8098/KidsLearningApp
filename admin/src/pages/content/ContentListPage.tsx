@@ -16,6 +16,7 @@ import {
   StatusChip,
   LoadingState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 interface ContentItem {
   id: string;
@@ -67,7 +68,7 @@ const AGE_GROUP_OPTIONS = [
   { value: '5-6', label: '5-6 years' },
 ];
 
-const TYPE_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'> = {
+const TYPE_VARIANTS: Record<string, BadgeVariant> = {
   story: 'primary',
   quiz: 'warning',
   alphabet: 'info',

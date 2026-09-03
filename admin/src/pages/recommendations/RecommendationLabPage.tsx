@@ -11,6 +11,7 @@ import {
   LoadingState,
   EmptyState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -63,7 +64,7 @@ const DEFAULT_SLIDERS: ConfigSlider[] = [
   { key: 'completion_boost', label: 'Completion Boost', description: 'Boost content likely to be completed', value: 35, min: 0, max: 100 },
 ];
 
-const TYPE_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'> = {
+const TYPE_VARIANTS: Record<string, BadgeVariant> = {
   story: 'primary',
   quiz: 'warning',
   alphabet: 'info',

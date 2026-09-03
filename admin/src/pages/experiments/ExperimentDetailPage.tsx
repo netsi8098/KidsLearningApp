@@ -12,6 +12,7 @@ import {
   LoadingState,
   EmptyState,
 } from '../../components/ui';
+import type { StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -38,7 +39,7 @@ interface ExperimentDetail {
 
 /* ─── Constants ─── */
 
-const STATUS_MAP: Record<ExperimentStatus, 'draft' | 'published' | 'in_review' | 'approved'> = {
+const STATUS_MAP: Record<ExperimentStatus, StatusChipStatus> = {
   draft: 'draft',
   running: 'published',
   paused: 'in_review',

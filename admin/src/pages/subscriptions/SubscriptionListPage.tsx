@@ -20,6 +20,7 @@ import {
   Modal,
   Input,
 } from '../../components/ui';
+import type { BadgeVariant, StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -96,7 +97,7 @@ const PLAN_OPTIONS = [
   { value: 'family', label: 'Family' },
 ];
 
-const STATUS_MAP: Record<SubscriptionStatus, 'published' | 'in_review' | 'draft' | 'approved' | 'archived'> = {
+const STATUS_MAP: Record<SubscriptionStatus, StatusChipStatus> = {
   active: 'published',
   trialing: 'in_review',
   cancelled: 'archived',
@@ -104,7 +105,7 @@ const STATUS_MAP: Record<SubscriptionStatus, 'published' | 'in_review' | 'draft'
   paused: 'approved',
 };
 
-const PLAN_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'info'> = {
+const PLAN_VARIANTS: Record<string, BadgeVariant> = {
   free: 'default',
   basic: 'info',
   premium: 'success',

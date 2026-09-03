@@ -11,6 +11,7 @@ import {
   Drawer,
   LoadingState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 interface MaintenanceJob {
   id: string;
@@ -34,7 +35,7 @@ interface RunResponse {
   affectedCount: number;
 }
 
-const STATUS_VARIANTS: Record<string, 'success' | 'danger' | 'warning' | 'default'> = {
+const STATUS_VARIANTS: Record<string, BadgeVariant> = {
   success: 'success',
   failed: 'danger',
   pending: 'warning',

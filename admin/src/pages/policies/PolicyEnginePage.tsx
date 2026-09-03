@@ -42,7 +42,7 @@ interface PolicyCheckResponse {
 
 /* ─── Constants ─── */
 
-const SEVERITY_VARIANTS: Record<string, 'success' | 'warning' | 'danger' | 'info'> = {
+const SEVERITY_VARIANTS: Record<string, BadgeVariant> = {
   low: 'info',
   medium: 'warning',
   high: 'danger',
@@ -57,7 +57,7 @@ const CATEGORY_VARIANTS: Record<string, BadgeVariant> = {
   performance: 'success',
 };
 
-const STATUS_VARIANTS: Record<string, 'success' | 'warning' | 'danger'> = {
+const STATUS_VARIANTS: Record<string, BadgeVariant> = {
   pass: 'success',
   warning: 'warning',
   block: 'danger',

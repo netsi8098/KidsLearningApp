@@ -10,6 +10,7 @@ import {
   EmptyState,
   LoadingState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -30,7 +31,7 @@ interface SearchResponse {
 
 /* ─── Constants ─── */
 
-const PLAN_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'info'> = {
+const PLAN_VARIANTS: Record<string, BadgeVariant> = {
   free: 'default',
   basic: 'info',
   premium: 'success',
