@@ -8,6 +8,11 @@ Labels are burned in because an unlabelled grid of a character from four angles
 is genuinely ambiguous — several passes on this asset lost time to arguing
 about which view a render was.
 
+The individual renders in `docs/assets/lion-review/` are GITIGNORED and this
+stitched sheet is not — the 18 PNGs are 6.4 MB of churn regenerable by one
+command, whereas the sheet is what goes in a commit or a PR as the visual
+record of a change.
+
 Run via `npm run lion:review -- --sheet`, or directly:
   python3 scripts/lion-contact-sheet.py
 """

@@ -5928,7 +5928,13 @@ review sheet. `scripts/lion-review.sh` + `tools/blender/review_render.py` +
     npm run lion:review -- --sheet   also stitch the contact sheet
 
 Output: 18 sheets in `docs/assets/lion-review/`, stitched to
-`docs/assets/lion-review-sheet.png` (172 KB total).
+`docs/assets/lion-review-sheet.png`.
+
+**The individual sheets are gitignored; the stitched one is tracked.** The 18
+PNGs are 6.4 MB, change on every run, and are all derivable from the committed
+`.blend` files by one command — that is churn, not history. The contact sheet is
+the artefact anyone actually looks at, so it belongs in a commit or a PR as the
+visual record of what a change did.
 
 ### Why this, and not a Blender MCP
 
