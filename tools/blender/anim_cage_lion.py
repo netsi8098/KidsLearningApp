@@ -235,6 +235,13 @@ def author_walk(arm):
         key_rot(arm, "neck_01", f, (bob * 1.0, 0.0, -rock * 1.2))
         key_rot(arm, "head", f, (-bob * 0.8, 0.0, -rock * 1.8))
 
+        tl = t - MANE_LAG
+        bob_l = math.sin(4.0 * math.pi * tl)
+        rock_l = math.sin(2.0 * math.pi * tl)
+        key_mane_lag(arm, f,
+                     (-bob * 0.8, 0.0, -rock * 1.8),
+                     (-bob_l * 0.8, 0.0, -rock_l * 1.8))
+
         # Shoulder blades swing with their own limb. The paw is IK-pinned, so
         # this adds shoulder motion without moving the foot.
         for lab, bone in (("FL", "scapula_FL"), ("FR", "scapula_FR")):
@@ -284,6 +291,15 @@ def author_idle(arm):
         key_rot(arm, "chest", f, (breath * 1.5, -shift * 0.6, 0.0))
         key_rot(arm, "neck_01", f, (-breath * 0.9, 0.0, shift * 1.1))
         key_rot(arm, "head", f, (-breath * 0.6, 0.0, shift * 1.6))
+
+        # The same expressions evaluated LAG earlier. Analytic, so this is the
+        # exact previous orientation rather than a sampled approximation.
+        tl = t - MANE_LAG
+        breath_l = math.sin(2.0 * math.pi * tl * 2.0)
+        shift_l = math.sin(2.0 * math.pi * tl)
+        key_mane_lag(arm, f,
+                     (-breath * 0.6, 0.0, shift * 1.6),
+                     (-breath_l * 0.6, 0.0, shift_l * 1.6))
 
         for i, amp in ((1, 2.0), (2, 3.5), (3, 5.0), (4, 6.5), (5, 7.5), (6, 8.0)):
             key_rot(arm, f"tail_{i:02d}", f, (0.0, 0.0, tail * amp))
@@ -377,6 +393,39 @@ def _plant_all(arm, f, offset=(0.0, 0.0, 0.0)):
 
 def _ease(t):
     return t * t * (3.0 - 2.0 * t)
+
+
+# MANE FOLLOW-THROUGH: the mane arrives LATE.
+#
+# The three mane bones exist so the mane's outer mass can lag the skull rather
+# than turning as one lump with it. Bones alone do nothing, so the looping
+# clips drive them, and the definition used is the literal one:
+#
+#     mane(t) = (head(t - LAG) - head(t)) * MANE_GAIN
+#
+# That is, the mane holds the head's PREVIOUS orientation. When the head is
+# still the difference is zero and the mane sits neutral; when the head moves
+# the mane trails by exactly how far the head travelled in LAG seconds. No
+# spring constant to tune and nothing to blow up — it cannot overshoot, because
+# it is a delayed copy rather than a simulation.
+#
+# The runtime adds a spring on top for head motion the clips cannot know about
+# (gaze, turnTo, navigation); see HomeWorld3D. These compose: this is baked
+# into the clip's own bone curves, the runtime's is added afterwards.
+MANE_LAG = 0.10          # of the loop, so 0.5s on Idle and 0.15s on Walk
+MANE_GAIN = 0.55         # a mane lags visibly, not comically
+
+
+def key_mane_lag(arm, f, head_now, head_lagged):
+    """Key the three mane bones from the head's own delayed motion."""
+    dx = (head_lagged[0] - head_now[0]) * MANE_GAIN
+    dz = (head_lagged[2] - head_now[2]) * MANE_GAIN
+    # The crown takes the pitch; the side lobes take the yaw, and they take it
+    # in OPPOSITE senses because a head turning left swings the left lobe in
+    # toward the neck and the right lobe out.
+    key_rot(arm, "mane_top", f, (dx * 1.25, 0.0, dz * 0.5))
+    key_rot(arm, "mane_L", f, (dx * 0.7, 0.0, dz * 1.15))
+    key_rot(arm, "mane_R", f, (dx * 0.7, 0.0, dz * 1.15))
 
 
 def author_walk_start(arm):

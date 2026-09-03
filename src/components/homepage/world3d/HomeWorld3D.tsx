@@ -326,6 +326,22 @@ function Lion({
      per frame against the environment is cheap and, unlike an analytic dome
      formula copied from the build script, cannot drift out of sync with the
      asset that actually shipped. */
+  /* MANE FOLLOW-THROUGH AT RUNTIME.
+     The clips bake a lag from their own head curves, but the head is also
+     driven live — `turnTo`, `lookAt`, navigation yaw — and a baked curve
+     cannot know about any of that. So a delayed copy of the body yaw is kept
+     here and the difference is composed onto the mane bones.
+     Same definition as the bake: the mane holds the body's PREVIOUS heading,
+     so it cannot overshoot and there is no spring constant to tune. */
+  const maneBones = useMemo(() => (
+    ['mane_top', 'mane_L', 'mane_R']
+      .map((n) => model.getObjectByName(n))
+      .filter((o): o is THREE.Object3D => Boolean(o))
+  ), [model]);
+  const maneYaw = useRef(0);
+  const maneQ = useMemo(() => new THREE.Quaternion(), []);
+  const maneAxis = useMemo(() => new THREE.Vector3(0, 0, 1), []);
+
   const reportedClip = useRef<LionClip>('Idle');
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const down = useMemo(() => new THREE.Vector3(0, -1, 0), []);
@@ -354,6 +370,26 @@ function Lion({
        yaw is added on top of it. */
     group.current.rotation.y = Math.PI + brain.yaw;
     mixer.update(0);
+
+    /* AFTER the mixer, and that is the whole difference from the gaze block.
+       The eye bones are keyed by no clip, so writing them before `update` is
+       safe. The mane bones ARE keyed — Idle and Walk both drive them — so a
+       write before `update` would simply be overwritten. Composing onto the
+       quaternion afterwards adds the runtime lag to the baked one instead of
+       fighting it, and `multiply` rather than `set` is what makes it additive. */
+    if (maneBones.length) {
+      const k = 1 - Math.exp(-dt * 5.5);
+      maneYaw.current += (brain.yaw - maneYaw.current) * k;
+      const lag = maneYaw.current - brain.yaw;
+      if (Math.abs(lag) > 1e-4) {
+        for (let i = 0; i < maneBones.length; i += 1) {
+          // The crown takes less than the side lobes: it is anchored at the
+          // skull's top and has less free mass hanging off it.
+          maneQ.setFromAxisAngle(maneAxis, lag * (i === 0 ? 0.5 : 1.0));
+          maneBones[i].quaternion.multiply(maneQ);
+        }
+      }
+    }
   });
 
   return (

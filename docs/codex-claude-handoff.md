@@ -6007,3 +6007,100 @@ construction.
 2. Wire `lookAt` to the card markers (`CardShelfZone`, `CardShelfZoneHero`),
    which is the storyboard's "eyes move to player cards" beat.
 3. The paw's rounded sole, with the walk QA in the loop.
+
+## 2026-09-03 (twenty-fifth pass) — mane follow-through, and plannedBones is EMPTY
+
+`mane_L`, `mane_top`, `mane_R` exist, the mane is blend-skinned across them,
+and both the clips and the runtime drive them.
+
+    40 bones, 13 clips, 16 morph targets, 4 meshes, 4.28 MB.
+    plannedBones: []   <- every bone the contract ever listed now exists
+
+### Placed on the mass that is actually there
+
+Measured off the built mane (19,735 verts) rather than guessed:
+
+    crown   z > 0.80    3,467 verts   centroid ( 0.002, 0.387, 0.865)
+    left    x < -0.16   3,607 verts   centroid (-0.237, 0.334, 0.601)
+    right   x > +0.16   3,652 verts   centroid (+0.236, 0.334, 0.599)
+
+Each bone runs from just outside the skull toward its lobe's centroid, and all
+three are parented to `head` — so the mane still follows the skull by default
+and the lag is an ADDITION to that, not a replacement.
+
+### Blend-skinned, on two independent weights
+
+`skin_mane()` replaces the rigid bind. Keeping the two weights separate is what
+makes it behave:
+
+* **How far out.** `f` runs 0 at the aperture (0.18 from the head centre) to 1
+  at the rim (0.42), and `head` takes `1-f`. The collar against the skull stays
+  welded; only the free mass swings. Without this the mane would detach at the
+  neck the moment a lobe rotated.
+* **Which lobe.** Share is `max(0, dot)^2` against each lobe's direction,
+  normalised. A nearest-lobe test would leave a visible seam where crown meets
+  side; squared-cosine blending has none by construction.
+
+Result: head holds 10,095 vert-equivalents, lobes 2,774 / 3,385 / 3,482.
+
+Isolation measured by rotating each bone 18 degrees and averaging displacement
+per zone:
+
+    bone       collar   crown    left   right
+    mane_top    0.2 mm  36.9 mm  2.3 mm  1.9 mm
+    mane_L      0.2 mm   5.1 mm 42.4 mm  0.0 mm
+    mane_R      0.2 mm   5.1 mm  0.0 mm 41.8 mm
+    head       49.2 mm 125.0 mm 53.7 mm 56.6 mm
+
+The collar barely moves, each lobe owns its own mass, left and right have ZERO
+cross-talk, and `head` still carries the whole mane.
+
+### Driven twice, because a bone alone does nothing
+
+**Baked, in Idle and Walk.** The definition is the literal one:
+
+    mane(t) = (head(t - LAG) - head(t)) * MANE_GAIN
+
+The mane holds the head's PREVIOUS orientation. Still head means zero
+difference and a neutral mane; moving head means the mane trails by exactly how
+far the head travelled in LAG. No spring constant, and it cannot overshoot,
+because it is a delayed copy and not a simulation. Both clips are analytic, so
+the lagged value is exact rather than sampled. Measured: Idle head 1.60 deg
+gives mane 0.48-0.63; Walk head 1.80 gives 0.64-0.70.
+
+**Runtime, in `HomeWorld3D`.** The head is also driven live — `turnTo`,
+`lookAt`, navigation yaw — and a baked curve cannot know about any of it. Same
+delayed-copy definition on the body yaw, composed onto the bones.
+
+The one subtlety worth recording: this must run **AFTER `mixer.update`**, which
+is the opposite of the gaze block. The eye bones are keyed by no clip so writing
+them first is safe; the mane bones ARE keyed by Idle and Walk, so a write before
+the update would simply be overwritten. It composes with
+`quaternion.multiply` rather than `set`, so the runtime lag ADDS to the baked
+one instead of replacing it.
+
+### Honest limit of the verification
+
+The isolation, the weights and the baked amplitudes are all measured. The
+runtime lag is not — it only exists while the head is turning, and a still
+review sheet cannot show it. The review sheet confirms the blend-skinning
+distorts nothing at rest, which is the failure it could have caused; the lag
+itself is verified by the numbers above and by there being no console error on
+a `turnTo`.
+
+### State
+
+Battery 0 pinched / 0 flipped, worst area 0.252. 13 clips within 0.002 mm IK
+residual, walk support slide 0.166 mm. 4 meshes, 4.28 MB, both contracts pass,
+`plannedBones` empty. Repo baseline unmoved: typecheck 52, tests 29 failed /
+727 passed.
+
+### Next, in order
+
+1. Wire `lookAt` to the card markers (`CardShelfZone`, `CardShelfZoneHero`) —
+   the storyboard's "eyes move to player cards" beat, and the gaze rig now
+   exists to serve it.
+2. The paw's rounded sole, with the walk QA in the loop.
+3. The mane still reads as a smooth hood from the FRONT: its locks run
+   front-to-back so the hero angle sees them end-on. That is the one remaining
+   item from the mane rebuild.

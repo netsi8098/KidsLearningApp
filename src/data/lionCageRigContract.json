@@ -33,7 +33,10 @@
     "eye_L and eye_R moved from plannedBones to bones on 2026-09-03 \u2014 they exist,",
     "the eyeballs are skinned to them, and gaze is measured at 22.1 mm of iris",
     "travel for a 22 degree rotation. Only the three mane follow-through bones",
-    "remain planned."
+    "remain planned.",
+    "",
+    "mane_L / mane_top / mane_R moved from plannedBones to bones on 2026-09-03.",
+    "plannedBones is now EMPTY \u2014 every bone the contract ever listed exists."
   ],
   "assetPath": "/assets/lion/cage/lion.glb",
   "assetVersion": 1,
@@ -190,6 +193,18 @@
     {
       "name": "eye_R",
       "parent": "head"
+    },
+    {
+      "name": "mane_L",
+      "parent": "head"
+    },
+    {
+      "name": "mane_top",
+      "parent": "head"
+    },
+    {
+      "name": "mane_R",
+      "parent": "head"
     }
   ],
   "clips": [
@@ -226,20 +241,7 @@
     "brow_down_R",
     "cheeks_up"
   ],
-  "plannedBones": [
-    {
-      "name": "mane_L",
-      "why": "mane follow-through; the mane is currently rigid to head"
-    },
-    {
-      "name": "mane_top",
-      "why": "mane follow-through; the mane is currently rigid to head"
-    },
-    {
-      "name": "mane_R",
-      "why": "mane follow-through; the mane is currently rigid to head"
-    }
-  ],
+  "plannedBones": [],
   "excludedBones": [
     {
       "name": "root",

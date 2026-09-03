@@ -49,6 +49,7 @@ import os
 import sys
 
 import bpy
+from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -138,6 +139,76 @@ def append_mane():
         if o is not mane:
             bpy.data.objects.remove(o, do_unlink=True)
     return mane
+
+
+# Where the mane's three masses sit, and how far out its rim reaches. Measured
+# off the built mane, not chosen: see `lion_skeleton`'s mane block.
+MANE_HEAD = Vector((0.0, 0.440, 0.604))
+MANE_INNER = 0.18   # the aperture / skull surface — rides `head` entirely
+MANE_OUTER = 0.42   # the outer rim — rides its lobe bone entirely
+MANE_LOBES = (
+    ("mane_top", Vector((0.0, -0.25, 1.0))),
+    ("mane_L", Vector((-1.0, -0.35, 0.0))),
+    ("mane_R", Vector((1.0, -0.35, 0.0))),
+)
+
+
+def skin_mane(o, arm, head_bone):
+    """Blend the mane from the skull outward, so it can LAG rather than lump.
+
+    Rigid to `head` — which is what this was — means the mane turns as one
+    solid piece with the skull. A mane is heavy and loose; the whole point of
+    the three follow-through bones is that its outer mass arrives late.
+
+    TWO INDEPENDENT WEIGHTS, and keeping them separate is what makes this
+    behave:
+
+      * HOW FAR OUT. `f` runs 0 at the aperture (0.18 from the head centre) to
+        1 at the rim (0.42). Weight on `head` is 1-f, so the collar against the
+        skull stays welded to it and only the free mass swings. Without this
+        the mane would detach at the neck the moment a lobe rotated.
+
+      * WHICH LOBE. Each of the three has a direction, and a vertex's share is
+        `max(0, dot)^2` against each, normalised. A hard nearest-lobe test
+        would put a visible seam straight down the mane where crown meets side;
+        squared-cosine blending has no seam by construction.
+    """
+    for vg in list(o.vertex_groups):
+        o.vertex_groups.remove(vg)
+    g_head = o.vertex_groups.new(name=head_bone)
+    g_lobe = {name: o.vertex_groups.new(name=name) for name, _ in MANE_LOBES}
+    dirs = [(name, d.normalized()) for name, d in MANE_LOBES]
+
+    span = MANE_OUTER - MANE_INNER
+    stats = {name: 0.0 for name, _ in MANE_LOBES}
+    for v in o.data.vertices:
+        rel = (o.matrix_world @ v.co) - MANE_HEAD
+        r = rel.length
+        f = max(0.0, min(1.0, (r - MANE_INNER) / span))
+        g_head.add([v.index], 1.0 - f, "REPLACE")
+        if f <= 0.0:
+            for name, _ in MANE_LOBES:
+                g_lobe[name].add([v.index], 0.0, "REPLACE")
+            continue
+        u = rel.normalized() if r > 1e-9 else Vector((0.0, 0.0, 1.0))
+        shares = [(name, max(0.0, u.dot(d)) ** 2) for name, d in dirs]
+        total = sum(w for _, w in shares)
+        for name, w in shares:
+            share = (w / total) if total > 1e-9 else (1.0 / len(shares))
+            g_lobe[name].add([v.index], f * share, "REPLACE")
+            stats[name] += f * share
+
+    o.parent = arm
+    o.matrix_parent_inverse = arm.matrix_world.inverted()
+    mod = next((m for m in o.modifiers if m.type == "ARMATURE"), None)
+    if mod is None:
+        mod = o.modifiers.new(name="Armature", type="ARMATURE")
+    mod.object = arm
+    mod.use_vertex_groups = True
+    total_w = sum(stats.values())
+    print(f"[assemble]   mane weights: head holds "
+          f"{len(o.data.vertices) - total_w:.0f} vert-equivalents, lobes "
+          + ", ".join(f"{n.split('_')[1]} {w:.0f}" for n, w in stats.items()))
 
 
 def skin_by_height(o, arm, split_h, band):
@@ -489,7 +560,10 @@ def main():
         print("[assemble] WARNING no mane appended — the character will ship "
               "without one. Run tools/blender/mane_foundation.py first.")
     else:
-        skin_rigid(mane, arm, head_bone)
+        if all(f"mane_{k}" in arm.data.bones for k in ("top", "L", "R")):
+            skin_mane(mane, arm, head_bone)
+        else:
+            skin_rigid(mane, arm, head_bone)
         # Appended from its own blend the mane arrives with no material, and
         # the first assembly shipped a WHITE mane framing a gold face. Its
         # measured median is (117,55,9) — the auburn `measure_reference`
@@ -503,7 +577,7 @@ def main():
             print("[assemble]   WARNING mane colour not measured — mane is unpainted")
         parts.append(mane)
         print(f"[assemble]   {mane.name:14s} {len(mane.data.vertices)} verts "
-              f"-> {head_bone} (rigid; no mane follow-through bones exist)")
+              f"-> {head_bone} + mane_top/L/R (blended for follow-through)")
 
     # ---- 3. the morphs, on the rigged cage and the skinned decals -------
     face_shapes.build_morphs(cage, fm, contract)

@@ -174,6 +174,29 @@ def skeleton():
         B.append((f"eye_{sd}", "head",
                   (sx * 0.095, 0.580, 0.6564), (sx * 0.095, 0.612, 0.6564)))
 
+    # MANE FOLLOW-THROUGH — the last three bones the contract listed.
+    #
+    # The mane was rigid to `head`, which means it turned as one lump with the
+    # skull. A mane is heavy and loose: it should LAG. These three carry the
+    # three masses the geometry actually has, measured off the built mane
+    # (19,727 verts) rather than guessed:
+    #
+    #     crown   z > 0.80    3,467 verts   centroid ( 0.002, 0.387, 0.865)
+    #     left    x < -0.16   3,607 verts   centroid (-0.237, 0.334, 0.601)
+    #     right   x > +0.16   3,652 verts   centroid (+0.236, 0.334, 0.599)
+    #
+    # Each bone runs from just outside the skull toward its lobe's centroid, so
+    # rotating it swings that mass and nothing else. Parented to `head`, so the
+    # mane still follows the skull by default and the lag is an ADDITION to
+    # that rather than a replacement for it.
+    #
+    # Named exactly as `lionRigContract.json` asks — mane_L, mane_top, mane_R —
+    # because the runtime and both contracts already reference those names.
+    B.append(("mane_top", "head", (0.0, 0.440, 0.700), (0.0, 0.390, 0.900)))
+    for sd, sx in (("L", -1.0), ("R", 1.0)):
+        B.append((f"mane_{sd}", "head",
+                  (sx * 0.090, 0.420, 0.630), (sx * 0.250, 0.340, 0.600)))
+
     # DOCUMENTED RIG ADJUSTMENT — tail chain relocated, not distorted.
     #
     # The reference-driven cage moved the tail from a near-horizontal sweep at
