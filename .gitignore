@@ -44,3 +44,9 @@ uploads-test/
 
 # video-forge intermediates (scripts, TTS audio cache, captured frames)
 tools/video-forge/.work/
+
+# Test and QA artifacts — regenerated, sometimes very large. A hung browser
+# recording once wrote a 152 GB .webm into screenshots/; keep these out of git.
+screenshots/
+playwright-report/
+e2e/test-results/
