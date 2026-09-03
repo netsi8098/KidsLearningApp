@@ -19,7 +19,6 @@ import {
   LoadingState,
   Modal,
   Input,
-  Card,
 } from '../../components/ui';
 
 /* ─── Types ─── */

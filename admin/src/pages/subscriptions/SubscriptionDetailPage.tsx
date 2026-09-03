@@ -117,7 +117,7 @@ export function SubscriptionDetailPage() {
     { enabled: !!householdId && activeTab === 'entitlements' },
   );
 
-  const { mutate: cancelSubscription, loading: cancelling } = useMutation<void, void>(
+  const { mutate: cancelSubscription } = useMutation<void, void>(
     () => api.post(`/subscriptions/${id}/cancel`),
     {
       onSuccess: () => {
@@ -129,7 +129,7 @@ export function SubscriptionDetailPage() {
     },
   );
 
-  const { mutate: pauseSubscription, loading: pausing } = useMutation<void, void>(
+  const { mutate: pauseSubscription } = useMutation<void, void>(
     () => api.post(`/subscriptions/${id}/pause`),
     {
       onSuccess: () => {
@@ -141,7 +141,7 @@ export function SubscriptionDetailPage() {
     },
   );
 
-  const { mutate: resumeSubscription, loading: resuming } = useMutation<void, void>(
+  const { mutate: resumeSubscription } = useMutation<void, void>(
     () => api.post(`/subscriptions/${id}/resume`),
     {
       onSuccess: () => {
@@ -183,7 +183,7 @@ export function SubscriptionDetailPage() {
     if (confirmAction === 'resume') resumeSubscription();
   };
 
-  const confirmMessages: Record<string, { title: string; message: string; label: string }> = {
+  const confirmMessages: Record<NonNullable<ConfirmAction>, { title: string; message: string; label: string }> = {
     cancel: {
       title: 'Cancel Subscription',
       message: 'Are you sure you want to cancel this subscription? The household will lose access at the end of the current billing period.',

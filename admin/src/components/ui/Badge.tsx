@@ -1,6 +1,8 @@
 import { type ReactNode } from 'react';
 
-type Variant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+
+type Variant = BadgeVariant;
 
 interface BadgeProps {
   variant?: Variant;

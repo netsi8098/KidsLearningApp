@@ -280,7 +280,7 @@ export function PerformanceLabPage() {
                         onChange={(e) =>
                           setEditingBaselines((prev) => ({
                             ...prev,
-                            [metricType]: { ...prev[metricType], p50: Number(e.target.value) },
+                            [metricType]: { ...(prev[metricType] ?? baseline), p50: Number(e.target.value) },
                           }))
                         }
                       />
@@ -291,7 +291,7 @@ export function PerformanceLabPage() {
                         onChange={(e) =>
                           setEditingBaselines((prev) => ({
                             ...prev,
-                            [metricType]: { ...prev[metricType], p75: Number(e.target.value) },
+                            [metricType]: { ...(prev[metricType] ?? baseline), p75: Number(e.target.value) },
                           }))
                         }
                       />
@@ -302,7 +302,7 @@ export function PerformanceLabPage() {
                         onChange={(e) =>
                           setEditingBaselines((prev) => ({
                             ...prev,
-                            [metricType]: { ...prev[metricType], p95: Number(e.target.value) },
+                            [metricType]: { ...(prev[metricType] ?? baseline), p95: Number(e.target.value) },
                           }))
                         }
                       />
@@ -313,7 +313,7 @@ export function PerformanceLabPage() {
                         onChange={(e) =>
                           setEditingBaselines((prev) => ({
                             ...prev,
-                            [metricType]: { ...prev[metricType], threshold: Number(e.target.value) },
+                            [metricType]: { ...(prev[metricType] ?? baseline), threshold: Number(e.target.value) },
                           }))
                         }
                       />
@@ -322,7 +322,7 @@ export function PerformanceLabPage() {
                   <Button
                     size="sm"
                     loading={savingBaseline}
-                    onClick={() => saveBaseline(editingBaselines[metricType])}
+                    onClick={() => saveBaseline(editingBaselines[metricType] ?? baseline)}
                   >
                     Save
                   </Button>

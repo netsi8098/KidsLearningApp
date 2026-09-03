@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useQuery } from '../../hooks/useQuery';
 import { usePagination } from '../../hooks/usePagination';
 import { useMutation } from '../../hooks/useMutation';
@@ -57,11 +57,11 @@ const STATUS_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warni
   critical: 'danger',
 };
 
-const FRESHNESS_COLORS: Record<string, string> = {
+const FRESHNESS_COLORS = {
   high: 'text-success',
   medium: 'text-warning',
   low: 'text-danger',
-};
+} as const;
 
 function getFreshnessColorClass(score: number): string {
   if (score >= 70) return FRESHNESS_COLORS.high;
@@ -91,7 +91,7 @@ export function ContentLifecyclePage() {
     [JSON.stringify(queryParams)],
   );
 
-  const { data: statsData, loading: statsLoading } = useQuery<LifecycleStatsResponse>(
+  const { data: statsData } = useQuery<LifecycleStatsResponse>(
     () => api.get('/content/lifecycle/stats'),
     [],
   );
