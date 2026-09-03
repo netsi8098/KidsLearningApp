@@ -50,3 +50,5 @@ tools/video-forge/.work/
 screenshots/
 playwright-report/
 e2e/test-results/
+coverage/
+test-results/
