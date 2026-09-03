@@ -24,7 +24,11 @@
     "visibly faceted, and glTF has no subdivision so it must be baked. The cost",
     "is not the geometry but the morph deltas: every one of the 16 targets stores",
     "a delta per vertex, which is ~3.1 MB on its own. The brief's ceiling is",
-    "10 MB, so 6 leaves headroom while still catching a runaway."
+    "10 MB, so 6 leaves headroom while still catching a runaway.",
+    "",
+    "All 13 clips are now REQUIRED. They were plannedClips until 2026-09-03, when",
+    "the eleven missing ones were authored. Promoting them means the contract now",
+    "fails if any regresses, which is the point of having listed them."
   ],
   "assetPath": "/assets/lion/cage/lion.glb",
   "assetVersion": 1,
@@ -177,9 +181,7 @@
   ],
   "clips": [
     "Idle",
-    "Walk"
-  ],
-  "plannedClips": [
+    "Walk",
     "WalkStart",
     "WalkStop",
     "TurnLeft",
@@ -192,6 +194,7 @@
     "JumpRecovery",
     "Celebrate"
   ],
+  "plannedClips": [],
   "morphTargets": [
     "blink_L",
     "blink_R",

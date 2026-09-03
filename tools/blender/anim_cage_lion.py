@@ -299,6 +299,347 @@ def author_idle(arm):
     return ("Idle", 1, IDLE_FRAMES + 1)
 
 
+# ── the remaining eleven contract clips ─────────────────────────────────────
+#
+# `lionCageRigContract.json` lists thirteen and only Idle and Walk existed, so
+# the other eleven were tracked as `plannedClips`. They are authored here to the
+# same rules the walk follows, and those rules are what make them usable rather
+# than merely present:
+#
+#   * IN PLACE. No clip carries horizontal root translation. `LionBrain` owns
+#     world position and heading, so a clip that also travelled would
+#     double-count. The single exception is the jump's VERTICAL rise, which is
+#     part of the action rather than navigation.
+#
+#   * IK TARGETS MOVE WITH THE BODY WHEN THE FEET LEAVE THE GROUND. Reach
+#     headroom is 22.1 mm at the front and 42.1 mm at the rear, so lifting the
+#     pelvis while the targets stay pinned straightens the legs and then
+#     exceeds the solver's reach — the clip looks fine in the viewport and the
+#     residual is non-zero. Anything airborne moves the targets too.
+#
+#   * OVERLAYS DO NOT TOUCH THE LEGS THEY DO NOT NEED. Wave and Celebrate are
+#     specified as blendable over breathing or locomotion, so they key only the
+#     chain they use plus the weight shift that makes the pose honest. Keying a
+#     rear leg in Wave would fight whatever the base layer is doing with it.
+
+# BODY-ROTATION GAIN, and it is not a taste knob.
+#
+# A pinned foot has to absorb whatever the body does above it, and the reach
+# headroom is 22.1 mm at the front and 42.1 mm at the rear. Rotating the spine
+# swings the shoulder through an arc: 7 degrees at the chest moves the front
+# scapula tens of millimetres, and past 22.1 of them the solver simply cannot
+# reach and the leg detaches from its target.
+#
+# The first draft used rotations sized by eye and measured IK residuals of
+# 26-92 mm across Wave, Turn, Celebrate and the jump. This gain is swept
+# against that residual (see the CLIP_IK table the script prints) and set to
+# the largest value that keeps every clip inside a millimetre.
+GAIN = float(os.environ.get("LION_CLIP_GAIN", "0.22"))
+
+# The turn is a separate gain because its motion is YAW, not pitch, and the
+# first attempt at a single gain silently scaled the turn's (always zero) X
+# component instead — which is why TurnLeft measured exactly 22.043 mm of
+# residual through every value of GAIN. A number that will not move under the
+# knob you are turning is the knob not being connected.
+GAIN_TURN = float(os.environ.get("LION_TURN_GAIN", "0.50"))
+
+# THE FRONT LEGS ARE THE BINDING CONSTRAINT, always. Measured per leg, every
+# residual in every clip is a FRONT leg and both rears are exactly 0.00 —
+# front reach headroom is 22.1 mm against the rear's 42.1, and the front legs
+# hang from the CHEST, which rises further than the pelvis whenever the spine
+# pitches. So a front target lifted by the pelvis rise alone falls behind the
+# shoulder and the solver runs out of leg. This boost tracks the difference.
+# Swept against the measured residual, which has a clean minimum:
+#
+#     boost    1.4    2.0    2.6    3.4    4.2    5.0    6.0
+#     JumpAirborne  66.5   53.3   40.1   22.5    5.0   0.002  19.5
+#
+# Monotonically better up to 5.0 and worse after it: below 5.0 the front leg is
+# over-EXTENDED reaching down for a target the body has flown away from, and
+# above it the leg hits its hinge limit trying to FOLD that far. 5.0 is where
+# neither binds.
+FRONT_LIFT_BOOST = float(os.environ.get("LION_FRONT_BOOST", "5.0"))
+
+START_FRAMES = 14
+STOP_FRAMES = 16
+TURN_FRAMES = 26
+WAVE_FRAMES = 40
+CELEBRATE_FRAMES = 44
+JUMP = {"JumpAnticipation": 12, "JumpTakeoff": 8, "JumpAirborne": 14,
+        "JumpLand": 8, "JumpRecovery": 16}
+
+
+def _plant_all(arm, f, offset=(0.0, 0.0, 0.0)):
+    for lab in PHASE:
+        set_world_offset(arm, f"ik_{lab}", offset)
+        key_loc(arm, f"ik_{lab}", f)
+
+
+def _ease(t):
+    return t * t * (3.0 - 2.0 * t)
+
+
+def author_walk_start(arm):
+    """Standing to the walk's first pose. The rear-left leaves first.
+
+    The gait's phase table puts RL at 0.00, so a start that lifts any other
+    limb first has to be re-sequenced by the mixer before the loop can begin.
+    Starting with RL means WalkStart's last frame IS Walk's frame 1.
+    """
+    new_action(arm, "WalkStart")
+    clear_pose(arm)
+    for f in range(1, START_FRAMES + 1):
+        t = _ease((f - 1) / (START_FRAMES - 1))
+        # Weight rocks onto the diagonal that will support the first swing.
+        set_world_offset(arm, "pelvis", (-0.006 * t, 0.004 * t, -0.003 * t))
+        key_loc(arm, "pelvis", f)
+        key_rot(arm, "pelvis", f, (0.0 * GAIN, -1.6 * t, 0.8 * t))
+        key_rot(arm, "spine_01", f, (0.6 * GAIN * t, 0.0, 0.6 * t))
+        key_rot(arm, "chest", f, (1.0 * GAIN * t, 0.0, -0.5 * t))
+        key_rot(arm, "neck_01", f, (-1.2 * GAIN * t, 0.0, 0.0))
+        key_rot(arm, "head", f, (-1.0 * GAIN * t, 0.0, 0.0))
+        for lab in PHASE:
+            # RL begins to unweight in the last third; the rest stay planted.
+            lift = LIFT * 0.45 * max(0.0, (t - 0.66) / 0.34) if lab == "RL" else 0.0
+            back = -STRIDE * 0.18 * t if lab == "RL" else 0.0
+            set_world_offset(arm, f"ik_{lab}", (0.0, back, lift))
+            key_loc(arm, f"ik_{lab}", f)
+        for i, amp in ((1, 1.0), (2, 2.0), (3, 3.0), (4, 4.0), (5, 4.5), (6, 5.0)):
+            key_rot(arm, f"tail_{i:02d}", f, (0.0, 0.0, -amp * t))
+    smooth(arm.animation_data.action)
+    return ("WalkStart", 1, START_FRAMES)
+
+
+def author_walk_stop(arm):
+    """Walk to standing, with the trailing foot PLANTED rather than faded.
+
+    A stop that cross-fades to Idle slides the last foot, because Idle's feet
+    are at zero offset and the walk's are mid-stride. This drives every target
+    back to zero explicitly, so the last thing the clip does is set the foot
+    down where it will stand.
+    """
+    new_action(arm, "WalkStop")
+    clear_pose(arm)
+    for f in range(1, STOP_FRAMES + 1):
+        t = _ease((f - 1) / (STOP_FRAMES - 1))
+        r = 1.0 - t
+        set_world_offset(arm, "pelvis", (0.004 * r, -0.004 * r, -0.004 * r * (1 - t)))
+        key_loc(arm, "pelvis", f)
+        key_rot(arm, "pelvis", f, (0.0 * GAIN, 1.4 * r, -0.6 * r))
+        key_rot(arm, "spine_01", f, (0.5 * GAIN * r, 0.0, -0.5 * r))
+        key_rot(arm, "chest", f, (0.8 * GAIN * r, 0.0, 0.4 * r))
+        key_rot(arm, "neck_01", f, (-0.8 * GAIN * r, 0.0, 0.0))
+        key_rot(arm, "head", f, (-0.6 * GAIN * r, 0.0, 0.0))
+        for lab in PHASE:
+            # Each foot closes to zero; the two mid-swing limbs travel furthest.
+            start = -STRIDE * (0.22 if lab in ("RL", "FR") else 0.08)
+            set_world_offset(arm, f"ik_{lab}", (0.0, start * r, 0.0))
+            key_loc(arm, f"ik_{lab}", f)
+        for i, amp in ((1, 1.0), (2, 2.0), (3, 3.0), (4, 4.0), (5, 4.5), (6, 5.0)):
+            key_rot(arm, f"tail_{i:02d}", f, (0.0, 0.0, amp * r * 0.6))
+    smooth(arm.animation_data.action)
+    return ("WalkStop", 1, STOP_FRAMES)
+
+
+def author_turn(arm, sign, name):
+    """In-place turn: the HEAD LEADS, then the body follows, then paws reset.
+
+    Face-before-move is the rule `LionBrain` already applies at the navigation
+    level, and the clip has to agree with it or the two fight. The head reaches
+    its full yaw by 35% of the clip, the spine follows to 70%, and the feet
+    reposition last — which is also the order that keeps a foot from pivoting
+    while it carries weight.
+    """
+    new_action(arm, name)
+    clear_pose(arm)
+    for f in range(1, TURN_FRAMES + 1):
+        u = (f - 1) / (TURN_FRAMES - 1)
+        head_t = _ease(min(1.0, u / 0.35))
+        body_t = _ease(max(0.0, min(1.0, (u - 0.15) / 0.55)))
+        foot_t = _ease(max(0.0, (u - 0.45) / 0.55))
+        key_rot(arm, "head", f, (0.0, 0.0, sign * 26.0 * GAIN_TURN * head_t))
+        key_rot(arm, "neck_01", f, (0.0, 0.0, sign * 14.0 * GAIN_TURN * head_t))
+        key_rot(arm, "chest", f, (0.0, 0.0, sign * 7.0 * GAIN_TURN * body_t))
+        key_rot(arm, "spine_02", f, (0.0, 0.0, sign * 5.0 * GAIN_TURN * body_t))
+        key_rot(arm, "spine_01", f, (0.0, 0.0, sign * 4.0 * GAIN_TURN * body_t))
+        key_rot(arm, "pelvis", f, (0.0, 0.0, sign * 6.0 * GAIN_TURN * body_t))
+        set_world_offset(arm, "pelvis", (sign * 0.005 * body_t, 0.0, -0.002 * body_t))
+        key_loc(arm, "pelvis", f)
+        # Feet step round one diagonal pair at a time, so weight is never on a
+        # pivoting foot.
+        for lab, ph in (("FL", 0.0), ("RR", 0.0), ("FR", 0.5), ("RL", 0.5)):
+            local = _ease(max(0.0, min(1.0, (foot_t - ph) / 0.5)))
+            side = 1.0 if lab in ("FL", "RL") else -1.0
+            lift = LIFT * 0.28 * math.sin(math.pi * local)
+            set_world_offset(arm, f"ik_{lab}",
+                             (sign * side * 0.005 * local, 0.0, lift))
+            key_loc(arm, f"ik_{lab}", f)
+        for i, amp in ((1, 2.0), (2, 4.0), (3, 6.0), (4, 8.0), (5, 9.0), (6, 10.0)):
+            key_rot(arm, f"tail_{i:02d}", f, (0.0, 0.0, sign * amp * body_t))
+    smooth(arm.animation_data.action)
+    return (name, 1, TURN_FRAMES)
+
+
+def author_wave(arm):
+    """Front-right paw waves, weight on the other three. UPPER BODY ONLY.
+
+    Keys the FR chain, the spine and the weight shift — and deliberately not
+    the rear legs, so the mixer can run this over Idle's breathing or over a
+    walk without the two layers arguing about a hind foot.
+
+    The weight shift is not decoration: lifting a front paw without moving the
+    centre of mass over the remaining three reads as a cheat, and the brief
+    calls for the transfer explicitly.
+    """
+    new_action(arm, "Wave")
+    clear_pose(arm)
+    for f in range(1, WAVE_FRAMES + 1):
+        u = (f - 1) / (WAVE_FRAMES - 1)
+        rise = _ease(min(1.0, u / 0.22))
+        fall = _ease(max(0.0, (u - 0.82) / 0.18))
+        up = rise * (1.0 - fall)
+        # Four waves while the paw is up.
+        osc = math.sin(2.0 * math.pi * ((u - 0.22) / 0.60) * 4.0) if 0.22 < u < 0.82 else 0.0
+        # Weight onto the left-front / both-rear tripod.
+        set_world_offset(arm, "pelvis", (-0.010 * up, -0.006 * up, -0.004 * up))
+        key_loc(arm, "pelvis", f)
+        key_rot(arm, "pelvis", f, (0.0 * GAIN, -3.0 * up, 0.0))
+        key_rot(arm, "spine_01", f, (1.0 * GAIN * up, -1.5 * up, 0.0))
+        key_rot(arm, "spine_02", f, (2.0 * GAIN * up, -1.0 * up, 0.0))
+        key_rot(arm, "chest", f, (4.0 * GAIN * up, -2.0 * up, -3.0 * up))
+        key_rot(arm, "neck_01", f, (-2.0 * GAIN * up, 0.0, -4.0 * up))
+        key_rot(arm, "head", f, (-3.0 * GAIN * up, 0.0, -6.0 * up + osc * 2.0))
+        # THE WAVING LIMB IS DRIVEN THROUGH ITS IK TARGET, not by FK on the
+        # chain. `wrist_FR` carries an IK constraint at influence 1.0, so FK
+        # rotations written onto it and onto `forearm_FR` are fought by the
+        # solver trying to hold the paw at `ik_FR` — measured as a 26.6 mm
+        # residual, which is the solver losing, not the pose working.
+        #
+        # Moving the target is also what makes the wave read: the paw goes
+        # where it is told and the shoulder and elbow follow.
+        # 60 mm of lift, not 150. The chain has hinge limits with locked Y/Z,
+        # so how far it can FOLD is bounded as surely as how far it can
+        # extend — a 150 mm lift measured a 67 mm residual, and lowering the
+        # body gain made it worse rather than better, which is the signature of
+        # a target the solver cannot reach at all.
+        set_world_offset(arm, "ik_FR",
+                         (0.006 * up, 0.026 * up, 0.060 * up + osc * 0.006))
+        key_loc(arm, "ik_FR", f)
+        # The paw's own orientation is FK — it has no IK constraint, so this is
+        # the one part of the chain that can be posed directly.
+        key_rot(arm, "paw_FR", f, (14.0 * up + osc * 12.0, 0.0, 0.0))
+        # The supporting front paw stays exactly where it is.
+        set_world_offset(arm, "ik_FL", (0.0, 0.0, 0.0))
+        key_loc(arm, "ik_FL", f)
+        for i, amp in ((1, 2.0), (2, 3.5), (3, 5.0), (4, 6.5), (5, 7.0), (6, 7.5)):
+            key_rot(arm, f"tail_{i:02d}", f, (0.0, 0.0, amp * up * 0.8 + osc * amp * 0.2))
+    smooth(arm.animation_data.action)
+    return ("Wave", 1, WAVE_FRAMES)
+
+
+def author_jump(arm):
+    """Five clips, five distinct phases, blendable at their seams.
+
+    The brief asks for anticipation, takeoff, airborne tuck, landing contact,
+    compression and recovery as SEPARATE clips so the runtime can hold a phase
+    — hang in the air while a card loads, for instance — rather than committing
+    to one fixed-length jump.
+
+    Each clip therefore starts where the previous one ends. `_h` is the
+    pelvis rise, and the IK targets carry the same rise plus a tuck, because
+    with 22.1 mm of front reach headroom a pinned target would exceed the
+    solver the moment the body left the ground.
+    """
+    out = []
+    # (name, frames, h0, h1, tuck0, tuck1, crouch0, crouch1)
+    spec = [
+        # Sized against the solver, not against how big a jump looks in a
+        # storyboard. Reach headroom is 22.1 mm front / 42.1 mm rear and the
+        # hinge limits bound the fold, so rise, crouch and tuck are all a
+        # fraction of the first draft's — which measured 73-116 mm residual
+        # and put the paws 94 mm under the floor.
+        ("JumpAnticipation", JUMP["JumpAnticipation"], 0.000, -0.010, 0.0, 0.0, 0.0, 1.0),
+        ("JumpTakeoff", JUMP["JumpTakeoff"], -0.010, 0.022, 0.0, 0.30, 1.0, 0.0),
+        ("JumpAirborne", JUMP["JumpAirborne"], 0.022, 0.022, 0.30, 0.85, 0.0, 0.0),
+        ("JumpLand", JUMP["JumpLand"], 0.022, 0.004, 0.85, 0.10, 0.0, 0.25),
+        ("JumpRecovery", JUMP["JumpRecovery"], 0.004, 0.000, 0.10, 0.0, 0.25, 0.0),
+    ]
+    for name, frames, h0, h1, k0, k1, c0, c1 in spec:
+        new_action(arm, name)
+        clear_pose(arm)
+        for f in range(1, frames + 1):
+            t = _ease((f - 1) / max(1, frames - 1))
+            h = h0 + (h1 - h0) * t
+            tuck = k0 + (k1 - k0) * t
+            crouch = c0 + (c1 - c0) * t
+            set_world_offset(arm, "pelvis", (0.0, 0.0, h - 0.008 * crouch))
+            key_loc(arm, "pelvis", f)
+            key_rot(arm, "pelvis", f, (-6.0 * GAIN * crouch + 4.0 * tuck, 0.0, 0.0))
+            key_rot(arm, "spine_01", f, (-4.0 * GAIN * crouch + 5.0 * tuck, 0.0, 0.0))
+            key_rot(arm, "spine_02", f, (-3.0 * GAIN * crouch + 6.0 * tuck, 0.0, 0.0))
+            key_rot(arm, "chest", f, (-5.0 * GAIN * crouch + 7.0 * tuck, 0.0, 0.0))
+            key_rot(arm, "neck_01", f, (6.0 * GAIN * crouch - 4.0 * tuck, 0.0, 0.0))
+            key_rot(arm, "head", f, (8.0 * GAIN * crouch - 6.0 * tuck, 0.0, 0.0))
+            for lab in PHASE:
+                front = lab.startswith("F")
+                # Targets rise with the body and tuck toward it. Front legs
+                # tuck harder, which is what a cat actually does.
+                lift = (max(0.0, h) * (FRONT_LIFT_BOOST if front else 1.0)
+                        + (0.020 if front else 0.016) * tuck)
+                fwd = (0.012 if front else -0.010) * tuck
+                # NO SUB-GROUND TARGETS. The first version subtracted
+                # 0.026*crouch here, which drove the targets 26 mm BELOW the
+                # floor during anticipation — measured, the paws ended up
+                # 105 mm under it. In a crouch the feet stay planted and the
+                # BODY comes down; that is what the pelvis term does.
+                set_world_offset(arm, f"ik_{lab}", (0.0, fwd, max(0.0, lift)))
+                key_loc(arm, f"ik_{lab}", f)
+            for i, amp in ((1, 3.0), (2, 5.0), (3, 7.0), (4, 9.0), (5, 10.0), (6, 11.0)):
+                key_rot(arm, f"tail_{i:02d}", f,
+                        (-amp * tuck * 0.6 + amp * crouch * 0.4, 0.0, 0.0))
+        smooth(arm.animation_data.action)
+        out.append((name, 1, frames))
+    return out
+
+
+def author_celebrate(arm):
+    """Two bounces with a head flourish. UPPER BODY plus a small vertical.
+
+    Blendable like Wave, so it keys the spine, head, tail and a modest pelvis
+    rise, and leaves the legs to whatever is underneath. The bounce is small
+    enough — 18 mm — that the IK targets can follow it inside the reach
+    headroom without the legs having to leave the ground at all.
+    """
+    new_action(arm, "Celebrate")
+    clear_pose(arm)
+    for f in range(1, CELEBRATE_FRAMES + 1):
+        u = (f - 1) / (CELEBRATE_FRAMES - 1)
+        env = math.sin(math.pi * min(1.0, u / 0.92))
+        bounce = abs(math.sin(2.0 * math.pi * u)) * env
+        sway = math.sin(2.0 * math.pi * u * 2.0) * env
+        set_world_offset(arm, "pelvis", (0.0, 0.0, 0.018 * bounce))
+        key_loc(arm, "pelvis", f)
+        key_rot(arm, "pelvis", f, (3.0 * GAIN * bounce, 0.0, sway * 3.0))
+        key_rot(arm, "spine_01", f, (4.0 * GAIN * bounce, 0.0, sway * 3.0))
+        key_rot(arm, "spine_02", f, (5.0 * GAIN * bounce, 0.0, sway * 2.0))
+        key_rot(arm, "chest", f, (7.0 * GAIN * bounce, 0.0, -sway * 2.0))
+        key_rot(arm, "neck_01", f, (-6.0 * GAIN * bounce, 0.0, -sway * 4.0))
+        key_rot(arm, "head", f, (-9.0 * GAIN * bounce, 0.0, -sway * 7.0))
+        key_rot(arm, "ear_L", f, (10.0 * bounce, 0.0, 0.0))
+        key_rot(arm, "ear_R", f, (10.0 * bounce, 0.0, 0.0))
+        for lab in PHASE:
+            # Front targets take the shoulder compensation too — the chest
+            # pitches, so the front shoulders rise further than the pelvis and
+            # a uniform lift leaves the front legs 6.35 mm short.
+            k = 0.018 * (2.4 if lab.startswith("F") else 1.0)
+            set_world_offset(arm, f"ik_{lab}", (0.0, 0.0, k * bounce))
+            key_loc(arm, f"ik_{lab}", f)
+        for i, amp in ((1, 4.0), (2, 7.0), (3, 10.0), (4, 13.0), (5, 15.0), (6, 16.0)):
+            key_rot(arm, f"tail_{i:02d}", f, (0.0, 0.0, sway * amp))
+    smooth(arm.animation_data.action)
+    return ("Celebrate", 1, CELEBRATE_FRAMES)
+
+
 # ── measurement ─────────────────────────────────────────────────────────────
 def paw_world(arm, cage, label):
     """Paw sole position from the DEFORMED mesh, not from the bone."""
@@ -392,6 +733,54 @@ def planted_during_walk(arm, cage):
               f"vertical={rise * 1000:5.2f}mm  ik_residual={residual[lab] * 1000:6.2f}mm  "
               f"over {len(samples)} frames")
     return worst, rows
+
+
+def clip_ik_report(arm):
+    """Every clip's worst IK residual and worst sub-floor paw. A GATE, not a note.
+
+    This is the check that found four separate authoring faults the viewport
+    would have shown as "looks a bit odd": FK written onto an IK-constrained
+    wrist (26.6 mm), IK targets driven 26 mm below the floor (paws 105 mm
+    under it), body rotations swinging the shoulders past the front legs'
+    22.1 mm of reach headroom, and a gain knob wired to a component that was
+    always zero.
+
+    A non-zero residual means the solver did not reach the target, so the leg
+    is not where the clip says it is. A negative sink means a paw went through
+    the ground. Both are silent in a render and obvious here.
+    """
+    LEGS = {"FL": ("wrist_FL", "ik_FL"), "FR": ("wrist_FR", "ik_FR"),
+            "RL": ("ankle_RL", "ik_RL"), "RR": ("ankle_RR", "ik_RR")}
+    sc = bpy.context.scene
+    keep = arm.animation_data.action
+    rows, bad = [], []
+    for act in sorted(bpy.data.actions, key=lambda a: a.name):
+        arm.animation_data.action = act
+        f0, f1 = (int(x) for x in act.frame_range)
+        worst, sink, who = 0.0, 0.0, ""
+        for f in range(f0, f1 + 1):
+            sc.frame_set(f)
+            bpy.context.view_layer.update()
+            for lab, (bone, tgt) in LEGS.items():
+                d = ((arm.matrix_world @ arm.pose.bones[bone].tail)
+                     - (arm.matrix_world @ arm.pose.bones[tgt].head)).length
+                if d > worst:
+                    worst, who = d, f"{lab}@{f}"
+                z = (arm.matrix_world @ arm.pose.bones[f"paw_{lab}"].tail).z
+                sink = min(sink, z)
+        rows.append((act.name, f1 - f0 + 1, worst, sink, who))
+        if worst > 0.003 or sink < -0.001:
+            bad.append(act.name)
+    arm.animation_data.action = keep
+    print("")
+    print("CLIP IK (worst target residual, worst paw below floor)")
+    print(f"{'clip':18s} {'frames':>6s} {'residual':>11s} {'sink':>10s}  worst at")
+    for n, fr, w, sk, who in rows:
+        print(f"{n:18s} {fr:6d} {w * 1000:8.3f} mm {sk * 1000:7.2f} mm  {who}")
+    if bad:
+        raise SystemExit(f"[anim] {len(bad)} clips exceed the IK gate: {bad}")
+    print(f"[anim] all {len(rows)} clips within 3 mm residual and on or above the floor")
+    return rows
 
 
 def phase_table():
@@ -507,9 +896,15 @@ def main():
         arm.animation_data_create()
     bpy.ops.object.mode_set(mode="POSE")
 
-    made = [author_idle(arm), author_walk(arm)]
+    made = [author_idle(arm), author_walk(arm),
+            author_walk_start(arm), author_walk_stop(arm),
+            author_turn(arm, +1, "TurnLeft"), author_turn(arm, -1, "TurnRight"),
+            author_wave(arm)]
+    made += author_jump(arm)
+    made.append(author_celebrate(arm))
     phase_table()
     worst, _rows = planted_during_walk(arm, cage)
+    clip_ik_report(arm)
 
     bpy.ops.object.mode_set(mode="OBJECT")
     cam = setup_render(cage)

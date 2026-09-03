@@ -5676,3 +5676,104 @@ tweak.
 
 Weighted IoU **0.8628**. Battery 0/0. 4 meshes, 3.90 MB, both contracts pass.
 Repo baseline unmoved: typecheck 52, tests 29 failed / 727 passed.
+
+## 2026-09-03 (twenty-first pass) — the eleven missing clips
+
+`lion.glb` now carries all **13 contract clips** and the cage contract requires
+them rather than tracking eleven as planned:
+
+    35 bones, 13 clips, 16 morph targets, 4 meshes, 4.24 MB.
+
+WalkStart, WalkStop, TurnLeft, TurnRight, Wave, the five Jump phases and
+Celebrate, authored in `anim_cage_lion.py` to the rules the walk already
+follows: in place (no horizontal root translation — `LionBrain` owns position),
+IK targets move with the body whenever the feet leave the ground, and overlays
+key only the chain they use.
+
+### The measurement found four faults the viewport would have hidden
+
+`clip_ik_report()` is now a GATE in the build: worst IK target residual and
+worst sub-floor paw, per clip, failing above 3 mm or below the floor. First run
+against the first draft:
+
+    clip                residual        sink
+    JumpAnticipation     92.2 mm     -105.2 mm
+    JumpTakeoff          92.2 mm     -105.2 mm
+    JumpAirborne         72.8 mm         0
+    Celebrate            70.6 mm         0
+    Wave                 26.6 mm         0
+    TurnLeft             22.0 mm         0
+
+1. **FK written onto an IK-constrained bone.** Wave keyed `forearm_FR` and
+   `wrist_FR` in FK, and `wrist_FR` carries an IK constraint at influence 1.0 —
+   so the solver spent the clip fighting the pose. Driving `ik_FR` instead took
+   it to **0.000 mm**, and it is also what makes the wave read: the paw goes
+   where it is told and the shoulder follows.
+
+2. **IK targets driven below the floor.** The jump's crouch subtracted
+   0.026 from the target z, which put the paws **105 mm under the ground**. In a
+   crouch the feet stay planted and the body comes down.
+
+3. **Body rotations outrunning the front legs.** Every residual, in every clip,
+   was a FRONT leg — both rears measured exactly 0.00. Front reach headroom is
+   22.1 mm against the rear's 42.1, and the front legs hang from the CHEST,
+   which rises further than the pelvis whenever the spine pitches. TurnLeft's
+   residual was exactly 22.043 mm: the entire budget.
+
+4. **A gain knob wired to nothing.** A regex meant to scale the torso rotations
+   matched the first numeric in each `key_rot`, and the turn's rotations are
+   `(0.0, 0.0, yaw)` — so it scaled a constant zero. That is why TurnLeft
+   measured 22.043 mm through every value of the gain. **A number that will not
+   move under the knob you are turning is the knob not being connected**, and it
+   took a sweep to notice.
+
+### Sized against the solver, not by eye
+
+Three constants, each swept against the residual rather than chosen:
+
+* `GAIN = 0.22` — torso pitch. Celebrate: 70.6 -> 37.0 -> 15.7 -> 4.8 mm across
+  1.0 / 0.6 / 0.34 / 0.2.
+* `GAIN_TURN = 0.50` — turn yaw. 22.0 mm at 1.0, **0.000** at 0.55 and below.
+* `FRONT_LIFT_BOOST = 5.0` — how much further a front target rises than the
+  pelvis. Has a clean minimum:
+
+      boost         1.4    2.0    2.6    3.4    4.2    5.0    6.0
+      JumpAirborne 66.5   53.3   40.1   22.5    5.0   0.002  19.5
+
+  Below 5.0 the front leg is over-EXTENDED reaching for a target the body flew
+  away from; above it the leg hits its hinge limit trying to FOLD that far.
+
+### Final state, all 13 clips
+
+Worst IK residual **0.002 mm**, worst sub-floor paw **0.00 mm**, walk support
+slide unchanged at **0.166 mm**. Asset 3.89 -> 4.24 MB for eleven clips, still
+4 meshes. Deformation battery untouched (this pass changes no geometry).
+
+### On the open-source video models — they do not apply here
+
+Asked whether the local AI tooling could help. `docs/local-ai-models.md` covers
+`Kokoro-82M` for narration and `all-MiniLM-L6-v2` for search — both genuinely
+useful and both already wired up. Neither is a video model, and there is a
+`Wan2.1` checkout outside this repo.
+
+A video generator cannot produce any of this. What the runtime needs is a
+SKINNED clip: per-bone transforms a mixer can blend, retarget and interrupt.
+A generated video is pixels — it cannot be blended over breathing, cannot be
+cut short when a child taps, and cannot have `blink_L` applied to it. That is
+the same conclusion `rigged-lion-production.md` reached in its own audit: "a new
+image, video, or CSS pass will not solve it".
+
+Where those models WOULD earn their place: Kokoro already drives the voice
+lines, and a video model is genuinely useful for the **YouTube pipeline** in
+`mar-app/youtube-automation-system`, which renders finished video rather than
+an interactive character.
+
+### Next, in order
+
+1. **Eye bones** — `eye_L`/`eye_R` are the last two `plannedBones` alongside the
+   three mane ones, and gaze is what makes the mascot feel like it is looking at
+   the child. `RiggedLionCharacter` already wants them.
+2. Mane follow-through bones, so the mane stops being rigid to `head`.
+3. Wire the new clips into `LionBrain`'s semantic API — they exist in the asset
+   but nothing calls WalkStart/WalkStop/Turn* yet.
+4. The paw's rounded sole, with the walk QA in the loop.
