@@ -1,0 +1,430 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>video-forge scene</title>
+<style>
+  :root { --primary:#FFB347; --accent:#FF6B6B; --sky:#FFF4E0; --ink:#2A2438; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1280px; height:720px; overflow:hidden; }
+  body {
+    background:var(--sky);
+    font-family:"Baloo 2","Nunito",-apple-system,"Segoe UI",system-ui,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  #stage { position:relative; width:1280px; height:720px; }
+
+  .sky { position:absolute; inset:0; background:
+      radial-gradient(120% 80% at 50% -10%, #fff 0%, var(--sky) 55%, color-mix(in srgb, var(--primary) 18%, var(--sky)) 100%); }
+  .hills { position:absolute; bottom:0; left:0; width:100%; height:220px; }
+  .clouds { position:absolute; inset:0; }
+  .cloud { fill:#fff; opacity:.85; }
+
+  #host { position:absolute; left:52px; bottom:22px; width:414px; height:512px; transform-origin:50% 100%; }
+
+  #panel {
+    position:absolute; left:462px; top:88px; width:772px; min-height:404px;
+    background:#fff; border-radius:36px; padding:38px 44px;
+    box-shadow:0 18px 0 rgba(0,0,0,.06), 0 26px 60px rgba(0,0,0,.14);
+    border:6px solid color-mix(in srgb, var(--primary) 45%, #fff);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; transform-origin:50% 50%;
+  }
+  .headline { font-size:58px; font-weight:800; line-height:1.06; letter-spacing:-.5px; }
+  .headline.small { font-size:43px; }
+  .sub { margin-top:16px; font-size:29px; font-weight:600; opacity:.72; }
+  .bigemoji { font-size:200px; line-height:1; filter:drop-shadow(0 12px 18px rgba(0,0,0,.16)); }
+  .prompt { font-size:45px; font-weight:800; margin-bottom:26px; }
+  .options { display:flex; gap:26px; justify-content:center; }
+  .opt {
+    width:130px; height:130px; border-radius:28px; display:flex; align-items:center; justify-content:center;
+    font-size:72px; background:#F6F4FF; border:5px solid #E6E1F5;
+  }
+  .opt.correct { background:#E8FBEA; border-color:#6BCB77; }
+  .caption-line { margin-top:22px; font-size:27px; font-weight:600; opacity:.8; max-width:640px; }
+  .word { font-size:94px; font-weight:800; color:var(--accent); letter-spacing:1px; }
+
+  #subtitle {
+    position:absolute; left:50%; bottom:26px; transform:translateX(-50%);
+    max-width:1100px; padding:12px 30px; border-radius:20px;
+    background:rgba(42,36,56,.86); color:#fff;
+    font-size:30px; font-weight:700; text-align:center; line-height:1.25;
+  }
+
+  #badge {
+    position:absolute; left:34px; top:28px; display:flex; align-items:center; gap:12px;
+    background:#fff; border-radius:999px; padding:10px 22px 10px 14px;
+    box-shadow:0 8px 22px rgba(0,0,0,.12); font-weight:800; font-size:22px;
+  }
+  #badge .dot { width:34px; height:34px; border-radius:50%; background:var(--primary);
+    display:flex; align-items:center; justify-content:center; font-size:20px; }
+  #progress { position:absolute; left:0; top:0; height:8px; background:var(--accent); }
+  .sparkle { position:absolute; font-size:44px; pointer-events:none; }
+</style>
+
+<div id="stage">
+  <div class="sky"></div>
+  <svg class="clouds" viewBox="0 0 1280 720" preserveAspectRatio="none">
+    <g id="cloudGroup"></g>
+  </svg>
+  <svg class="hills" viewBox="0 0 1280 220" preserveAspectRatio="none">
+    <path id="hillBack" d="M0,120 C200,60 380,150 600,110 C820,70 1040,140 1280,90 L1280,220 L0,220 Z"/>
+    <path id="hillFront" d="M0,165 C240,120 420,190 700,155 C940,125 1100,180 1280,150 L1280,220 L0,220 Z"/>
+  </svg>
+
+  <div id="badge"><span class="dot" id="badgeEmoji">🦁</span><span id="badgeName">Leo Lion</span></div>
+  <div id="progress"></div>
+
+  <svg id="host" viewBox="0 0 340 420"><g id="hostRoot"></g></svg>
+  <div id="panel"></div>
+  <div id="subtitle"></div>
+  <div id="sparkles"></div>
+</div>
+
+<script>
+/* ────────────────────────────────────────────────────────────────────────
+   Scene renderer.
+
+   `render(t)` paints the frame at t milliseconds. It is a PURE function of
+   (STORYBOARD, t): no CSS animations, no requestAnimationFrame, no elapsed
+   wall-clock. That is what makes the Playwright frame capture deterministic
+   and re-runnable — frame 900 always looks identical.
+   ──────────────────────────────────────────────────────────────────────── */
+
+let STORYBOARD = null;
+
+const $ = (id) => document.getElementById(id);
+
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const easeOut = (x) => 1 - Math.pow(1 - clamp01(x), 3);
+/** Deterministic pseudo-random from an integer seed — stable across runs. */
+function rnd(seed) { const x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); }
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+/* ── mascot ───────────────────────────────────────────
+   One parametric character posed by the same pose vocabulary the app uses
+   (src/mascot/poses.ts), plus per-species features so the five hosts are
+   visually distinct.
+   ─────────────────────────────────────────────────── */
+const POSES = {
+  waving:     { bodyRot:-3, armL:-18,  armR:-116, headTilt:-6, bounce:1.0, sway:0.7 },
+  pointing:   { bodyRot: 2, armL: 10,  armR: -64, headTilt: 3, bounce:0.3, sway:0.2 },
+  cheering:   { bodyRot: 0, armL:-128, armR:-128, headTilt: 0, bounce:1.5, sway:0.3 },
+  explaining: { bodyRot:-1, armL:-34,  armR: -34, headTilt:-2, bounce:0.4, sway:0.5 },
+  listening:  { bodyRot: 1, armL: 14,  armR:  14, headTilt: 9, bounce:0.2, sway:0.3 },
+  clapping:   { bodyRot: 0, armL:-58,  armR: -58, headTilt: 0, bounce:1.1, sway:0.2 },
+  reading:    { bodyRot: 2, armL:-24,  armR: -24, headTilt:12, bounce:0.2, sway:0.1 },
+  dancing:    { bodyRot: 6, armL:-96,  armR: -20, headTilt:-8, bounce:1.8, sway:1.4 },
+  tiptoeing:  { bodyRot:-2, armL:-12,  armR: -12, headTilt:-4, bounce:0.6, sway:0.8 },
+  reward:     { bodyRot: 0, armL:-108, armR:-108, headTilt:-3, bounce:1.3, sway:0.4 },
+};
+
+/** Mouth path per shape — matches MouthShape in src/mascot/lipSync.ts. */
+const MOUTHS = {
+  closed:      'M-20,0 Q0,6 20,0',
+  'open-small':'M-16,-2 Q0,16 16,-2 Q0,6 -16,-2 Z',
+  'open-wide': 'M-24,-4 Q0,34 24,-4 Q0,10 -24,-4 Z',
+  smile:       'M-24,-2 Q0,22 24,-2 Q0,8 -24,-2 Z',
+  oh:          'M0,6 m-13,0 a13,15 0 1,0 26,0 a13,15 0 1,0 -26,0',
+  ee:          'M-22,2 L22,2 L22,9 L-22,9 Z',
+};
+
+const EXPRESSIONS = {
+  excited:      { eye:1.18, brow:-6, blush:0.9 },
+  happy:        { eye:1.0,  brow:-3, blush:0.6 },
+  curious:      { eye:1.1,  brow:-1, blush:0.3 },
+  encouraging:  { eye:1.05, brow:-4, blush:0.7 },
+  celebrating:  { eye:1.25, brow:-9, blush:1.0 },
+  warm:         { eye:0.95, brow:-2, blush:0.7 },
+  thinking:     { eye:0.9,  brow: 2, blush:0.2 },
+};
+
+/*
+  Species features, in three layers so parts land in the right z-order:
+    behind — under the head (manes, ears, antlers)
+    mid    — over the face base but UNDER the eyes/brows (owl eye discs)
+    front  — over everything (beaks, whiskers, muzzle lines)
+  Putting the owl's eye discs in `front` would paint over its pupils, so the
+  mid slot exists specifically to keep facial features readable.
+*/
+const HOST_FEATURES = {
+  leo: {
+    behind: (th) => {
+      let petals = '';
+      for (let i = 0; i < 14; i += 1) {
+        const a = (i / 14) * Math.PI * 2;
+        const cx = (Math.cos(a) * 78).toFixed(1);
+        const cy = (Math.sin(a) * 78).toFixed(1);
+        petals += `<ellipse cx="${cx}" cy="${cy}" rx="30" ry="24" fill="${th.accent}"
+          transform="rotate(${(a * 180 / Math.PI).toFixed(1)} ${cx} ${cy})"/>`;
+      }
+      return `<g opacity=".95">${petals}</g>
+        <circle cx="-58" cy="-52" r="22" fill="${th.primary}"/>
+        <circle cx="58"  cy="-52" r="22" fill="${th.primary}"/>`;
+    },
+    front: () => '',
+  },
+  daisy: {
+    behind: (th) => `
+      <g stroke="${th.accent}" stroke-width="9" stroke-linecap="round" fill="none">
+        <path d="M-30,-66 C-40,-104 -52,-112 -60,-130"/><path d="M-44,-104 C-56,-108 -64,-102 -72,-106"/>
+        <path d="M30,-66 C40,-104 52,-112 60,-130"/><path d="M44,-104 C56,-108 64,-102 72,-106"/>
+      </g>
+      <ellipse cx="-74" cy="-30" rx="20" ry="34" fill="${th.accent}" transform="rotate(-22 -74 -30)"/>
+      <ellipse cx="74"  cy="-30" rx="20" ry="34" fill="${th.accent}" transform="rotate(22 74 -30)"/>`,
+    front: () => '',
+  },
+  ollie: {
+    behind: (th) => `
+      <circle cx="0" cy="0" r="84" fill="${th.accent}" opacity=".5"/>
+      <path d="M-76,-46 L-52,-88 L-26,-52 Z" fill="${th.accent}"/>
+      <path d="M76,-46 L52,-88 L26,-52 Z" fill="${th.accent}"/>`,
+    // Discs sit under the eyes; the beak replaces the nose and leaves the
+    // mouth visible below it.
+    mid: () => `
+      <circle cx="-24" cy="-8" r="32" fill="#fff" opacity=".92"/>
+      <circle cx="24"  cy="-8" r="32" fill="#fff" opacity=".92"/>`,
+    front: () => `<path d="M0,4 L-11,23 L11,23 Z" fill="#F5A623"/>`,
+  },
+  ruby: {
+    behind: (th) => `
+      <g transform="rotate(-10 -30 -60)">
+        <ellipse cx="-30" cy="-118" rx="19" ry="60" fill="${th.primary}"/>
+        <ellipse cx="-30" cy="-118" rx="9"  ry="44" fill="${th.accent}"/>
+      </g>
+      <g transform="rotate(10 30 -60)">
+        <ellipse cx="30" cy="-118" rx="19" ry="60" fill="${th.primary}"/>
+        <ellipse cx="30" cy="-118" rx="9"  ry="44" fill="${th.accent}"/>
+      </g>`,
+    front: () => `<path d="M-13,31 L13,31" stroke="#8A2E4A" stroke-width="3" stroke-linecap="round"/>`,
+  },
+  finn: {
+    behind: (th) => `
+      <path d="M-80,-30 L-58,-96 L-22,-56 Z" fill="${th.primary}"/>
+      <path d="M-70,-38 L-57,-78 L-36,-54 Z" fill="${th.accent}"/>
+      <path d="M80,-30 L58,-96 L22,-56 Z" fill="${th.primary}"/>
+      <path d="M70,-38 L57,-78 L36,-54 Z" fill="${th.accent}"/>`,
+    front: () => `
+      <g stroke="#2A2438" stroke-width="2.5" stroke-linecap="round" opacity=".45">
+        <path d="M-32,26 L-62,20"/><path d="M-32,32 L-60,35"/>
+        <path d="M32,26 L62,20"/><path d="M32,32 L60,35"/>
+      </g>`,
+  },
+};
+
+function mouthShapeAt(shot, t) {
+  for (const f of shot.lipSync) if (t >= f.startMs && t < f.endMs) return f.shape;
+  return 'closed';
+}
+
+function drawHost(shot, t, theme, hostId) {
+  const pose = POSES[shot.pose] ?? POSES.explaining;
+  const expr = EXPRESSIONS[shot.expression] ?? EXPRESSIONS.happy;
+  const feat = HOST_FEATURES[hostId] ?? HOST_FEATURES.leo;
+  const tt = t / 1000;
+
+  // Idle life: a slow bob and sway, scaled by how energetic the pose is.
+  const bob = Math.sin(tt * 3.1) * 6 * pose.bounce;
+  const sway = Math.sin(tt * 1.7) * 4 * pose.sway;
+  const breathe = 1 + Math.sin(tt * 2.2) * 0.012;
+
+  // Blink: a quick close roughly every 3.4s, deterministic from t.
+  const blinkPhase = (t % 3400) / 3400;
+  const blink = blinkPhase > 0.965 ? 0.12 : 1;
+
+  // Waving arm oscillates while greeting; cheering/clapping claps.
+  const waveExtra = (shot.pose === 'waving') ? Math.sin(tt * 7.5) * 22 : 0;
+  const clapExtra = (shot.pose === 'cheering' || shot.pose === 'clapping') ? Math.abs(Math.sin(tt * 6)) * 18 : 0;
+
+  const mouth = MOUTHS[mouthShapeAt(shot, t)] ?? MOUTHS.closed;
+  const eyeH = 15 * expr.eye * blink;
+  // Brows are gentle, symmetric arcs sitting above the eyes. A peaked or
+  // inward-slanting brow reads as angry, which is wrong for a kids' host.
+  const browY = -36 + expr.brow;
+
+  $('hostRoot').innerHTML = `
+    <g transform="translate(170,${(404 + bob).toFixed(2)}) rotate(${pose.bodyRot})">
+      <ellipse cx="0" cy="8" rx="100" ry="15" fill="rgba(0,0,0,.10)"/>
+      <g transform="translate(${sway.toFixed(2)},0) scale(${breathe.toFixed(4)})">
+        <rect x="-46" y="-58" width="34" height="62" rx="17" fill="${theme.primary}"/>
+        <rect x="12"  y="-58" width="34" height="62" rx="17" fill="${theme.primary}"/>
+        <ellipse cx="-29" cy="2" rx="25" ry="12" fill="${theme.accent}"/>
+        <ellipse cx="29"  cy="2" rx="25" ry="12" fill="${theme.accent}"/>
+
+        <ellipse cx="0" cy="-124" rx="84" ry="90" fill="${theme.primary}"/>
+        <ellipse cx="0" cy="-108" rx="55" ry="63" fill="#fff" opacity=".92"/>
+
+        <g transform="rotate(${(pose.armL - clapExtra).toFixed(1)} -76 -170)">
+          <rect x="-112" y="-180" width="31" height="88" rx="15" fill="${theme.primary}"/>
+          <circle cx="-96" cy="-94" r="20" fill="${theme.accent}"/>
+        </g>
+        <g transform="rotate(${(pose.armR - waveExtra - clapExtra).toFixed(1)} 76 -170)">
+          <rect x="81" y="-180" width="31" height="88" rx="15" fill="${theme.primary}"/>
+          <circle cx="96" cy="-94" r="20" fill="${theme.accent}"/>
+        </g>
+
+        <g transform="translate(0,-252) rotate(${pose.headTilt})">
+          ${feat.behind(theme)}
+          <circle cx="0" cy="0" r="76" fill="${theme.primary}"/>
+          <circle cx="0" cy="14" r="52" fill="#fff" opacity=".95"/>
+          ${feat.mid ? feat.mid(theme) : ''}
+          <path d="M-46,${browY + 2} q19,-9 37,1" stroke="#3B3348" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+          <path d="M9,${browY + 3} q19,-10 37,-1"  stroke="#3B3348" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+          <ellipse cx="-24" cy="-6" rx="12" ry="${eyeH.toFixed(2)}" fill="#2A2438"/>
+          <ellipse cx="24"  cy="-6" rx="12" ry="${eyeH.toFixed(2)}" fill="#2A2438"/>
+          <circle cx="-20" cy="${(-11 - eyeH * 0.2).toFixed(2)}" r="4.2" fill="#fff"/>
+          <circle cx="28"  cy="${(-11 - eyeH * 0.2).toFixed(2)}" r="4.2" fill="#fff"/>
+          <ellipse cx="-49" cy="20" rx="15" ry="9" fill="${theme.accent}" opacity="${(0.45 * expr.blush).toFixed(2)}"/>
+          <ellipse cx="49"  cy="20" rx="15" ry="9" fill="${theme.accent}" opacity="${(0.45 * expr.blush).toFixed(2)}"/>
+          <ellipse cx="0" cy="24" rx="27" ry="20" fill="#fff"/>
+          ${hostId === 'ollie' ? '' : '<circle cx="0" cy="14" r="7" fill="#2A2438"/>'}
+          <g transform="translate(0,34)">
+            <path d="${mouth}" fill="#8A2E4A" stroke="#8A2E4A" stroke-width="3" stroke-linejoin="round"/>
+          </g>
+          ${feat.front(theme)}
+        </g>
+      </g>
+    </g>`;
+}
+
+/* ── backdrop ─────────────────────────────────────── */
+function drawBackdrop(t, theme) {
+  const drift = (t / 1000) * 9;
+  let out = '';
+  for (let i = 0; i < 5; i += 1) {
+    const baseX = rnd(i + 1) * 1400;
+    const x = ((baseX + drift * (0.5 + rnd(i + 9) * 0.8)) % 1500) - 120;
+    const y = 50 + rnd(i + 21) * 170;
+    const s = 0.55 + rnd(i + 33) * 0.75;
+    out += `<g class="cloud" transform="translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${s.toFixed(2)})">
+      <ellipse cx="0" cy="0" rx="54" ry="30"/><ellipse cx="42" cy="8" rx="42" ry="24"/><ellipse cx="-40" cy="10" rx="38" ry="22"/>
+    </g>`;
+  }
+  $('cloudGroup').innerHTML = out;
+  $('hillBack').setAttribute('fill', `color-mix(in srgb, ${theme.accent} 28%, #fff)`);
+  $('hillFront').setAttribute('fill', `color-mix(in srgb, ${theme.primary} 46%, #fff)`);
+}
+
+/* ── celebratory sparkles ─────────────────────────── */
+function drawSparkles(shot, t) {
+  const wants = shot.visual.kind === 'recap'
+    || (shot.visual.kind === 'repeat' && shot.visual.celebrate)
+    || shot.visual.kind === 'reveal';
+  if (!wants) { $('sparkles').innerHTML = ''; return; }
+
+  const local = t - shot.startMs;
+  let out = '';
+  for (let i = 0; i < 12; i += 1) {
+    const cycle = 1800;
+    const phase = ((local + rnd(i + 2) * cycle) % cycle) / cycle;
+    const x = 462 + rnd(i + 5) * 740;
+    const y = 620 - phase * 520;
+    const op = Math.sin(phase * Math.PI);
+    out += `<span class="sparkle" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;opacity:${op.toFixed(2)};
+      transform:rotate(${(phase * 220).toFixed(0)}deg) scale(${(0.55 + op * 0.6).toFixed(2)})">${i % 3 ? '✨' : '⭐'}</span>`;
+  }
+  $('sparkles').innerHTML = out;
+}
+
+/* ── content panel ────────────────────────────────── */
+function drawPanel(shot, t) {
+  const v = shot.visual;
+  const local = t - shot.startMs;
+  // Panel pops in over 420ms at the start of each shot.
+  const inP = easeOut(local / 420);
+  const panel = $('panel');
+  panel.style.opacity = inP.toFixed(3);
+  panel.style.transform = `scale(${(0.9 + inP * 0.1).toFixed(4)})`;
+
+  let html = '';
+  switch (v.kind) {
+    case 'title':
+      html = `<div class="headline">${esc(v.headline)}</div>${v.sub ? `<div class="sub">${esc(v.sub)}</div>` : ''}`;
+      break;
+    case 'reveal': {
+      // Emoji swells in with a little overshoot, then settles.
+      const pop = local < 700 ? 1 + Math.sin(easeOut(local / 700) * Math.PI) * 0.22 : 1;
+      const spin = (1 - clamp01(local / 900)) * -12;
+      html = `<div class="bigemoji" style="transform:scale(${pop.toFixed(3)}) rotate(${spin.toFixed(1)}deg)">${esc(v.emoji)}</div>
+              <div class="headline small" style="margin-top:14px">${esc(v.headline)}</div>`;
+      break;
+    }
+    case 'teach': {
+      const float = Math.sin(t / 620) * 10;
+      const pop = local < 520 ? easeOut(local / 520) : 1;
+      html = `<div class="bigemoji" style="transform:translateY(${float.toFixed(1)}px) scale(${(0.7 + pop * 0.3).toFixed(3)})">${esc(v.emoji)}</div>
+              <div class="caption-line">${esc(v.caption)}</div>`;
+      break;
+    }
+    case 'choose': {
+      const opts = v.options.map((o, i) => {
+        const isRight = v.revealAnswer && o === v.correctAnswer;
+        // Options cascade in, 110ms apart.
+        const oin = easeOut((local - 260 - i * 110) / 380);
+        const wob = isRight ? 1 + Math.abs(Math.sin(t / 220)) * 0.1 : 1;
+        return `<div class="opt ${isRight ? 'correct' : ''}"
+          style="opacity:${oin.toFixed(2)};transform:scale(${(0.7 + oin * 0.3 * wob).toFixed(3)})">${esc(o)}</div>`;
+      }).join('');
+      html = `<div class="prompt">${esc(v.prompt)}</div><div class="options">${opts}</div>`;
+      break;
+    }
+    case 'repeat': {
+      const pulse = 1 + Math.abs(Math.sin(t / 300)) * 0.12;
+      html = `<div class="sub" style="margin:0 0 10px">Say it with me!</div>
+              <div class="word" style="transform:scale(${pulse.toFixed(3)})">${esc(v.word)}</div>`;
+      break;
+    }
+    case 'recap':
+      html = `<div class="headline small">You did it! 🎉</div><div class="caption-line" style="font-size:30px">${esc(v.summary)}</div>`;
+      break;
+    case 'goodbye':
+      html = `<div class="bigemoji" style="font-size:146px">👋</div>
+              <div class="headline small">${esc(v.headline)}</div>
+              ${v.sub ? `<div class="sub" style="font-size:26px">${esc(v.sub)}</div>` : ''}`;
+      break;
+    default:
+      html = '';
+  }
+  panel.innerHTML = html;
+}
+
+/* ── subtitle ─────────────────────────────────────── */
+function drawSubtitle(shot, t) {
+  const cue = shot.cues.find((c) => t >= c.startMs && t < c.endMs);
+  const el = $('subtitle');
+  if (cue) { el.textContent = cue.text; el.style.opacity = '1'; }
+  else { el.style.opacity = '0'; }
+}
+
+/* ── main ─────────────────────────────────────────── */
+function shotAt(t) {
+  const shots = STORYBOARD.shots;
+  for (const s of shots) if (t >= s.startMs && t < s.endMs) return s;
+  return t < shots[0].startMs ? shots[0] : shots[shots.length - 1];
+}
+
+function render(t) {
+  const sb = STORYBOARD;
+  const theme = sb.theme;
+  const shot = shotAt(t);
+
+  document.documentElement.style.setProperty('--primary', theme.primary);
+  document.documentElement.style.setProperty('--accent', theme.accent);
+  document.documentElement.style.setProperty('--sky', theme.sky);
+
+  $('badgeEmoji').textContent = sb.hostAnimal;
+  $('badgeName').textContent = sb.hostName;
+  $('progress').style.width = `${((t / sb.totalMs) * 100).toFixed(2)}%`;
+
+  drawBackdrop(t, theme);
+  drawHost(shot, t, theme, sb.host);
+  drawPanel(shot, t);
+  drawSubtitle(shot, t);
+  drawSparkles(shot, t);
+  return true;
+}
+
+/* Playwright drives these two. */
+window.loadStoryboard = (sb) => { STORYBOARD = sb; return { frames: sb.frameCount, totalMs: sb.totalMs }; };
+window.renderFrame = (t) => render(t);
+window.sceneReady = true;
+</script>

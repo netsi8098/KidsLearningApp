@@ -67,14 +67,41 @@ export default function VideoPlayer({ video, onClose, onPlayRelated, onFavorite,
             style={{ borderRadius: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
           >
             <div className="aspect-video bg-black">
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1&playsinline=1&fs=0&controls=1`}
-                title={video.title}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                frameBorder="0"
-                style={{ borderRadius: '16px' }}
-              />
+              {video.source === 'local' && video.src ? (
+                /* Locally forged episode: plays offline from /public/videos,
+                   with captions on by default. */
+                <video
+                  key={video.id}
+                  src={video.src}
+                  poster={video.thumbnail}
+                  title={video.title}
+                  className="w-full h-full"
+                  style={{ borderRadius: '16px' }}
+                  controls
+                  autoPlay
+                  playsInline
+                  controlsList="nodownload"
+                >
+                  {video.captions && (
+                    <track
+                      kind="captions"
+                      src={video.captions}
+                      srcLang="en"
+                      label="English"
+                      default
+                    />
+                  )}
+                </video>
+              ) : (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1&playsinline=1&fs=0&controls=1`}
+                  title={video.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  frameBorder="0"
+                  style={{ borderRadius: '16px' }}
+                />
+              )}
             </div>
           </div>
         </div>

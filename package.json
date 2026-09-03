@@ -21,7 +21,10 @@
     "test:backend": "cd backend && npx vitest run",
     "test:admin": "cd admin && npx vitest run",
     "test:ci": "npm run test -- --reporter=junit --outputFile=coverage/frontend-results.xml && npm run test:backend && npm run test:admin",
-    "test:certify": "npm run test:all && npm run test:e2e"
+    "test:certify": "npm run test:all && npm run test:e2e",
+    "test:forge": "vitest run tests/unit/video-forge",
+    "forge": "node tools/video-forge/forge.mjs",
+    "forge:batch": "node tools/video-forge/forge.mjs --batch tools/video-forge/batch.example.json"
   },
   "dependencies": {
     "dexie": "^4.3.0",

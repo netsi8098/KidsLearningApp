@@ -1,0 +1,8 @@
+[
+  { "topic": "colors",    "age": "2-3", "host": "leo" },
+  { "topic": "counting",  "age": "2-3", "host": "ollie" },
+  { "topic": "shapes",    "age": "4-5", "host": "ruby" },
+  { "topic": "alphabet",  "age": "4-5", "host": "daisy" },
+  { "topic": "animals",   "age": "2-3", "host": "finn" },
+  { "topic": "emotions",  "age": "4-5", "host": "daisy" }
+]
