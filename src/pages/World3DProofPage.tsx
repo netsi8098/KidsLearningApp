@@ -82,22 +82,45 @@ export default function World3DProofPage() {
               testing the sequencing. These call the API the app calls, so the
               cage's WalkStart -> Walk -> WalkStop chain and the five-phase jump
               are exercisable rather than merely present in the GLB. */}
-          {([
-            ['walkTo', () => brain.current?.walkTo(-1.1, 0.5)],
-            ['turnTo', () => brain.current?.turnTo(1.3, 0.2)],
-            ['jump()', () => brain.current?.jump()],
-            ['lookAt card', () => brain.current?.lookAt(0, 4.6, 0.4)],
-            ['lookAhead', () => brain.current?.lookAhead()],
-          ] as const).map(([label, fn]) => (
-            <button
-              key={label}
-              onClick={() => { setClip(null); fn(); }}
-              className="rounded-full px-3 py-2 text-xs font-bold"
-              style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
-            >
-              {label}
-            </button>
-          ))}
+          {/* Written out rather than mapped over an array of closures: building
+              that array during render reads `brain.current` at render time,
+              which `react-hooks` correctly flags. The repetition is the price
+              of the rule, and it matches the buttons above. */}
+          <button
+            onClick={() => { setClip(null); brain.current?.walkTo(-1.1, 0.5); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+          >
+            walkTo
+          </button>
+          <button
+            onClick={() => { setClip(null); brain.current?.turnTo(1.3, 0.2); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+          >
+            turnTo
+          </button>
+          <button
+            onClick={() => { setClip(null); brain.current?.jump(); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+          >
+            jump()
+          </button>
+          <button
+            onClick={() => { setClip(null); brain.current?.lookAt(0, 4.6, 0.4); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+          >
+            lookAt card
+          </button>
+          <button
+            onClick={() => { setClip(null); brain.current?.lookAhead(); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+          >
+            lookAhead
+          </button>
           <button
             onClick={() => { setClip(null); brain.current?.walkTo(-1.1, 0.5); }}
             className="rounded-full px-3 py-2 text-xs font-bold"
