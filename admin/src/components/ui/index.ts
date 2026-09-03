@@ -17,6 +17,7 @@ export { Toast } from './Toast';
 export { DropdownMenu } from './DropdownMenu';
 export { Avatar } from './Avatar';
 export { StatusChip } from './StatusChip';
+export type { StatusChipStatus } from './StatusChip';
 export { StatsCard } from './StatsCard';
 export { DataTable } from './DataTable';
 export { FilterBar } from './FilterBar';

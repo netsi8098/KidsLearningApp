@@ -1,4 +1,7 @@
-type Status = 'draft' | 'in_review' | 'approved' | 'published' | 'archived' | 'rejected';
+export type StatusChipStatus =
+  | 'draft' | 'in_review' | 'approved' | 'published' | 'archived' | 'rejected';
+
+type Status = StatusChipStatus;
 
 interface StatusChipProps {
   status: Status;

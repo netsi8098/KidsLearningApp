@@ -13,6 +13,7 @@ import {
   StatusChip,
   LoadingState,
 } from '../../components/ui';
+import type { StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -44,7 +45,7 @@ const STATUS_OPTIONS = [
   { value: 'completed', label: 'Completed' },
 ];
 
-const STATUS_MAP: Record<ExperimentStatus, 'draft' | 'published' | 'in_review' | 'approved'> = {
+const STATUS_MAP: Record<ExperimentStatus, StatusChipStatus> = {
   draft: 'draft',
   running: 'published',
   paused: 'in_review',

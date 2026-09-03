@@ -21,6 +21,7 @@ import {
   LoadingState,
   EmptyState,
 } from '../../components/ui';
+import type { BadgeVariant, StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -102,14 +103,14 @@ const CATEGORY_OPTIONS = [
   { value: 'unknown', label: 'Unknown' },
 ];
 
-const STATUS_MAP: Record<ErrorStatus, 'draft' | 'in_review' | 'published' | 'approved' | 'archived'> = {
+const STATUS_MAP: Record<ErrorStatus, StatusChipStatus> = {
   new: 'draft',
   investigating: 'in_review',
   resolved: 'published',
   ignored: 'archived',
 };
 
-const CATEGORY_VARIANTS: Record<ErrorCategory, 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'> = {
+const CATEGORY_VARIANTS: Record<ErrorCategory, BadgeVariant> = {
   crash: 'danger',
   network: 'warning',
   render: 'info',

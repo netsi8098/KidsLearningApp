@@ -16,6 +16,7 @@ import {
   Tabs,
   TextArea,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -52,7 +53,7 @@ const TYPE_OPTIONS = [
   { value: 'alert', label: 'Alert' },
 ];
 
-const TYPE_VARIANTS: Record<MessageType, 'primary' | 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
+const TYPE_VARIANTS: Record<MessageType, BadgeVariant> = {
   recap: 'primary',
   new_content: 'success',
   tip: 'info',

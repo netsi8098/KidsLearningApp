@@ -12,6 +12,7 @@ import {
   SearchInput,
   Tabs,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 interface IndexStatus {
   id: string;
@@ -42,7 +43,7 @@ const HEALTH_COLORS: Record<string, string> = {
   red: 'bg-danger',
 };
 
-const HEALTH_VARIANTS: Record<string, 'success' | 'warning' | 'danger'> = {
+const HEALTH_VARIANTS: Record<string, BadgeVariant> = {
   green: 'success',
   yellow: 'warning',
   red: 'danger',

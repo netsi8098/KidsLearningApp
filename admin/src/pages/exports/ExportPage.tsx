@@ -17,6 +17,7 @@ import {
   Tabs,
   TextArea,
 } from '../../components/ui';
+import type { StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -67,7 +68,7 @@ const FORMAT_OPTIONS = [
   { value: 'json', label: 'JSON' },
 ];
 
-const STATUS_MAP: Record<ExportStatus, 'draft' | 'published' | 'in_review' | 'approved'> = {
+const STATUS_MAP: Record<ExportStatus, StatusChipStatus> = {
   pending: 'draft',
   processing: 'in_review',
   completed: 'approved',

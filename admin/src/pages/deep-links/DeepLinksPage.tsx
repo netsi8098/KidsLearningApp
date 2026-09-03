@@ -15,6 +15,7 @@ import {
   Pagination,
   Select,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -49,7 +50,7 @@ const TARGET_TYPE_OPTIONS = [
   { value: 'external', label: 'External' },
 ];
 
-const TARGET_VARIANTS: Record<TargetType, 'primary' | 'success' | 'warning' | 'info' | 'default'> = {
+const TARGET_VARIANTS: Record<TargetType, BadgeVariant> = {
   content: 'primary',
   collection: 'success',
   profile: 'info',

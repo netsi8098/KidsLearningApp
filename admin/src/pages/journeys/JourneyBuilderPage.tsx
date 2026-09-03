@@ -18,6 +18,7 @@ import {
   Toggle,
   Select,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -58,7 +59,7 @@ interface EnrollmentStats {
 
 /* ─── Constants ─── */
 
-const TRIGGER_VARIANTS: Record<string, 'primary' | 'success' | 'warning' | 'danger' | 'info'> = {
+const TRIGGER_VARIANTS: Record<string, BadgeVariant> = {
   signup: 'primary',
   milestone: 'success',
   inactivity: 'warning',

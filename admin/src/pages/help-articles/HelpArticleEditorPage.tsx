@@ -17,6 +17,7 @@ import {
   TextArea,
   Toggle,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -53,7 +54,7 @@ const CATEGORY_OPTIONS = [
   { value: 'safety', label: 'Safety' },
 ];
 
-const CATEGORY_VARIANTS: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
+const CATEGORY_VARIANTS: Record<string, BadgeVariant> = {
   'getting-started': 'primary',
   account: 'info',
   billing: 'warning',

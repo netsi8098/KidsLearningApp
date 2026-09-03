@@ -16,6 +16,7 @@ import {
   ConfirmDialog,
   StatusChip,
 } from '../../components/ui';
+import type { BadgeVariant, StatusChipStatus } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -71,7 +72,7 @@ const TABS = [
   { key: 'history', label: 'History' },
 ];
 
-const STATUS_MAP: Record<SubscriptionStatus, 'published' | 'in_review' | 'draft' | 'approved' | 'archived'> = {
+const STATUS_MAP: Record<SubscriptionStatus, StatusChipStatus> = {
   active: 'published',
   trialing: 'in_review',
   cancelled: 'archived',
@@ -79,14 +80,14 @@ const STATUS_MAP: Record<SubscriptionStatus, 'published' | 'in_review' | 'draft'
   paused: 'approved',
 };
 
-const PLAN_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'info'> = {
+const PLAN_VARIANTS: Record<string, BadgeVariant> = {
   free: 'default',
   basic: 'info',
   premium: 'success',
   family: 'primary',
 };
 
-const INVOICE_STATUS_MAP: Record<string, 'published' | 'in_review' | 'draft' | 'approved'> = {
+const INVOICE_STATUS_MAP: Record<string, StatusChipStatus> = {
   paid: 'published',
   pending: 'in_review',
   failed: 'draft',

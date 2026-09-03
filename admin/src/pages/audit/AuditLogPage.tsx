@@ -13,6 +13,7 @@ import {
   Badge,
   LoadingState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 interface AuditEntry {
   id: string;
@@ -44,7 +45,7 @@ const ENTITY_OPTIONS = [
   { value: 'Household', label: 'Household' },
 ];
 
-const ACTION_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'> = {
+const ACTION_VARIANTS: Record<string, BadgeVariant> = {
   create: 'success',
   update: 'info',
   delete: 'danger',

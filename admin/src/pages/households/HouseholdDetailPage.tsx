@@ -14,6 +14,7 @@ import {
   LoadingState,
   EmptyState,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -68,7 +69,7 @@ const TABS = [
   { key: 'activity', label: 'Activity' },
 ];
 
-const PLAN_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'info'> = {
+const PLAN_VARIANTS: Record<string, BadgeVariant> = {
   free: 'default',
   basic: 'info',
   premium: 'success',
