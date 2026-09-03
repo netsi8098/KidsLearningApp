@@ -290,9 +290,15 @@ be upgraded inside the preserved rig/export/runtime architecture.
 | `lion_rigged_cage.blend` | `rig_cage_lion.py` | **production rig**, authored weights, 4 IK chains |
 | `home_environment.blend` | `build_home_environment.py` | world, 85k tris, 29 materials, 10 markers |
 
-Superseded and kept only as history: `lion.blend`, `lion 2.blend`,
+Superseded and kept only as history: `lion.blend`,
 `lion_clay_sculpt_v1.blend`, `lion_proportion_study*.blend`,
 `lion_reference_stage.blend`.
+
+`lion 2.blend` was removed on 2026-09-03. It was a macOS duplicate of an
+intermediate `lion.blend` save — 771,926 bytes against that file's 807,868,
+so an older snapshot of the same proxy rather than a distinct asset — and no
+script or document read it. It is still in history at `e36610f` if it is ever
+wanted back.
 
 ### Shared contracts — read these before touching any stage
 
