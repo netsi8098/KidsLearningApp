@@ -327,6 +327,7 @@ export function ExportPage() {
             <DataTable
               columns={dictColumns}
               data={filteredDictionary}
+              getRowId={(field) => field.name}
               loading={dictLoading}
               emptyMessage="No fields match your search."
             />

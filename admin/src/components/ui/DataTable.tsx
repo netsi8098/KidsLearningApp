@@ -12,6 +12,15 @@ interface DataTableProps<T> {
   loading?: boolean;
   emptyMessage?: string;
   onRowClick?: (item: T) => void;
+  /**
+   * Derives a stable key for each row. Defaults to `item.id` when the row has
+   * one, falling back to the row index.
+   *
+   * Row types without an `id` (an API result keyed by name, say) should pass
+   * this explicitly — and must pass it to use selection, since selection is
+   * tracked by these keys.
+   */
+  getRowId?: (item: T, index: number) => string;
   selectedIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
 }
@@ -28,24 +37,28 @@ function SkeletonRow({ cols }: { cols: number }) {
   );
 }
 
-export function DataTable<T extends { id: string }>({
+export function DataTable<T>({
   columns,
   data,
   loading,
   emptyMessage = 'No data found.',
   onRowClick,
+  getRowId,
   selectedIds,
   onSelectionChange,
 }: DataTableProps<T>) {
+  const rowId = (item: T, index: number): string =>
+    getRowId?.(item, index) ?? (item as { id?: string }).id ?? String(index);
+
   const hasSelection = selectedIds !== undefined && onSelectionChange !== undefined;
-  const allSelected = data.length > 0 && data.every((item) => selectedIds?.has(item.id));
+  const allSelected = data.length > 0 && data.every((item, i) => selectedIds?.has(rowId(item, i)));
 
   const toggleAll = () => {
     if (!onSelectionChange) return;
     if (allSelected) {
       onSelectionChange(new Set());
     } else {
-      onSelectionChange(new Set(data.map((item) => item.id)));
+      onSelectionChange(new Set(data.map((item, i) => rowId(item, i))));
     }
   };
 
@@ -87,20 +100,20 @@ export function DataTable<T extends { id: string }>({
                 </td>
               </tr>
             ) : (
-              data.map((item) => (
+              data.map((item, index) => (
                 <tr
-                  key={item.id}
+                  key={rowId(item, index)}
                   onClick={() => onRowClick?.(item)}
                   className={`transition-colors
                     ${onRowClick ? 'cursor-pointer hover:bg-bg' : ''}
-                    ${selectedIds?.has(item.id) ? 'bg-primary/5' : 'bg-surface'}`}
+                    ${selectedIds?.has(rowId(item, index)) ? 'bg-primary/5' : 'bg-surface'}`}
                 >
                   {hasSelection && (
                     <td className="w-10 px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
-                        checked={selectedIds?.has(item.id) ?? false}
-                        onChange={() => toggleRow(item.id)}
+                        checked={selectedIds?.has(rowId(item, index)) ?? false}
+                        onChange={() => toggleRow(rowId(item, index))}
                         className="rounded"
                       />
                     </td>

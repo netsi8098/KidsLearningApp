@@ -12,7 +12,6 @@ import {
   Input,
   TextArea,
   Checkbox,
-  Badge,
   LoadingState,
   ConfirmDialog,
 } from '../../components/ui';
@@ -137,7 +136,7 @@ export function FeatureFlagsPage() {
     },
   );
 
-  const { mutate: killSwitch, loading: killing } = useMutation<void, { key: string }>(
+  const { mutate: killSwitch } = useMutation<void, { key: string }>(
     (vars) => api.post(`/feature-flags/${vars.key}/kill`),
     {
       onSuccess: () => {

@@ -15,6 +15,7 @@ import {
   Tabs,
   Toggle,
 } from '../../components/ui';
+import type { BadgeVariant } from '../../components/ui';
 
 /* ─── Types ─── */
 
@@ -48,7 +49,7 @@ const SEVERITY_VARIANTS: Record<string, 'success' | 'warning' | 'danger' | 'info
   critical: 'danger',
 };
 
-const CATEGORY_VARIANTS: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'default'> = {
+const CATEGORY_VARIANTS: Record<string, BadgeVariant> = {
   safety: 'danger',
   quality: 'primary',
   compliance: 'warning',
@@ -253,6 +254,7 @@ export function PolicyEnginePage() {
               <DataTable
                 columns={resultColumns}
                 data={checkResults.results}
+                getRowId={(result) => result.policyName}
                 loading={false}
                 emptyMessage="No check results."
               />

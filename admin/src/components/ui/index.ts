@@ -5,6 +5,7 @@ export { TextArea } from './TextArea';
 export { Checkbox } from './Checkbox';
 export { Toggle } from './Toggle';
 export { Badge } from './Badge';
+export type { BadgeVariant } from './Badge';
 export { Card } from './Card';
 export { Tabs } from './Tabs';
 export { Pagination } from './Pagination';
