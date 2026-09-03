@@ -28,7 +28,12 @@
     "",
     "All 13 clips are now REQUIRED. They were plannedClips until 2026-09-03, when",
     "the eleven missing ones were authored. Promoting them means the contract now",
-    "fails if any regresses, which is the point of having listed them."
+    "fails if any regresses, which is the point of having listed them.",
+    "",
+    "eye_L and eye_R moved from plannedBones to bones on 2026-09-03 \u2014 they exist,",
+    "the eyeballs are skinned to them, and gaze is measured at 22.1 mm of iris",
+    "travel for a 22 degree rotation. Only the three mane follow-through bones",
+    "remain planned."
   ],
   "assetPath": "/assets/lion/cage/lion.glb",
   "assetVersion": 1,
@@ -177,6 +182,14 @@
     {
       "name": "tail_06",
       "parent": "tail_05"
+    },
+    {
+      "name": "eye_L",
+      "parent": "head"
+    },
+    {
+      "name": "eye_R",
+      "parent": "head"
     }
   ],
   "clips": [
@@ -214,14 +227,6 @@
     "cheeks_up"
   ],
   "plannedBones": [
-    {
-      "name": "eye_L",
-      "why": "gaze; RiggedLionCharacter wants eye bones for controlled convergence"
-    },
-    {
-      "name": "eye_R",
-      "why": "gaze; RiggedLionCharacter wants eye bones for controlled convergence"
-    },
     {
       "name": "mane_L",
       "why": "mane follow-through; the mane is currently rigid to head"

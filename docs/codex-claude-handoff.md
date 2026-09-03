@@ -5777,3 +5777,68 @@ an interactive character.
 3. Wire the new clips into `LionBrain`'s semantic API — they exist in the asset
    but nothing calls WalkStart/WalkStop/Turn* yet.
 4. The paw's rounded sole, with the walk QA in the loop.
+
+## 2026-09-03 (twenty-second pass) — eye bones, and gaze that reads
+
+`eye_L` / `eye_R` exist, the eyeballs are skinned to them, and they are
+promoted out of `plannedBones`:
+
+    37 bones, 13 clips, 16 morph targets, 4 meshes, 4.25 MB.
+
+Only the three mane follow-through bones remain planned. Renders in
+`docs/assets/lion-gaze.png`.
+
+### What rides the eye, and what does not
+
+    Iris, Pupil, Catchlight   ->  eye_L / eye_R
+    Sclera, EyeLid            ->  head
+
+**The sclera stays on the skull.** Skinning it to the eye rotated the WHITE
+along with the gaze, so the whole assembly swung as a unit and at 24 degrees
+the white sat on the wrong side of the socket with the iris hanging off its
+edge. On a flat-disc eye the sclera IS the aperture; the iris slides across it.
+The lid is the same argument — a lid slides OVER an eyeball, and `blink_L` is a
+morph on it, so skinning it to the eye would carry the blink around the face
+with the pupil.
+
+### The bone LENGTH is the gaze range, and the first value was wrong
+
+The iris may only travel until its edge reaches the white's. Measured off the
+built discs — not inferred from the reference, which is where I went wrong
+first — sclera r 0.0435, iris r 0.0283, so the iris centre has **0.0152** of
+room. Travel is `L * sin(theta)`, so:
+
+    bone length   0.070   0.045   0.036   0.032   0.028
+    usable gaze  ±12.5°  ±19.7°  ±25.0°  ±28.4°  ±32.9°
+
+The first version was 0.070 — one sclera radius back, which sounded anatomical
+and delivered **±12.5 degrees**. A 24-degree gaze slid the iris clean off the
+white, and it took a render to see it because the arithmetic I did first used
+the almond's full WIDTH where the disc builder takes a RADIUS. Now 0.032, for
+±28.4 degrees.
+
+**The runtime should clamp to ±28 degrees** rather than trusting the rig to
+look sane past it. `RiggedLionCharacter` drives these for convergence, and
+convergence on a near target asks for more angle than a far one.
+
+### Measured, not asserted
+
+A 22-degree rotation moves the gloss group (irises, catchlights) **22.1 mm**
+and the ink group (pupils) **12.3 mm**, while `LionCage` — which carries the
+sclera, lids, ears and muzzle after the per-material join — moves 0.4 mm,
+which is just the sclera's share of a 16,000-vertex centroid. So the eyes turn
+and the sockets do not.
+
+Everything else is untouched: 13 clips still within 0.002 mm IK residual, walk
+support slide 0.166 mm, deformation battery 0 pinched / 0 flipped, worst area
+0.252, 4 meshes. Repo baseline unmoved at typecheck 52 and 29 failed / 727
+passed.
+
+### Next, in order
+
+1. **Wire the rig into `LionBrain`.** This is now the binding gap, not the
+   asset: the GLB has 13 clips, 16 morphs and working gaze, and nothing calls
+   `WalkStart`, `WalkStop`, `TurnLeft`, `TurnRight` or the five jump phases,
+   and no code drives `eye_L`/`eye_R`. The asset is ahead of the runtime.
+2. Mane follow-through bones — the last three `plannedBones`.
+3. The paw's rounded sole, with the walk QA in the loop.

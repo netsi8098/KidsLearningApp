@@ -138,6 +138,42 @@ def skeleton():
         B.append((f"ear_{sd}", "head",
                   (sx * 0.150, 0.484, HEAD_CAGE_Z + 0.150), (sx * 0.242, 0.468, HEAD_CAGE_Z + 0.196)))
 
+        # EYE BONES — gaze. The last functional gap the contract listed.
+        #
+        # `RiggedLionCharacter` wants these so it can converge the eyes on a
+        # target rather than rotating both by the same angle, which is what
+        # makes a character look AT something instead of merely away from
+        # straight ahead.
+        #
+        # The head sits at the ROTATION CENTRE, not on the eye surface. The eye
+        # stack is a set of flat discs at the measured plane y = 0.612; a bone
+        # whose origin lay on that plane would spin the discs in place, where
+        # one behind it swings them ACROSS the face, which is what a real eye
+        # does. 0.070 back puts the centre roughly a sclera-radius in, the
+        # sclera measuring 0.0890 x 0.0942.
+        #
+        # x = 0.095 sits between the measured pupil centre (0.0890) and the
+        # socket plane the stack is built on (0.1040) — the discs straddle
+        # both, so the bone splits them.
+        #
+        # LENGTH 0.032, AND THE LENGTH IS THE GAZE RANGE. The iris slides
+        # across a fixed sclera, so it may only travel until its edge reaches
+        # the white's. Measured off the built discs: sclera r 0.0435, iris
+        # r 0.0283, so the iris centre has 0.0152 of room. Travel is
+        # L*sin(theta), which makes the bone length a direct trade against how
+        # far the eye can look:
+        #
+        #     length   0.070   0.045   0.036   0.032   0.028
+        #     usable   ±12.5°  ±19.8°  ±25.0°  ±28.4°  ±32.9°
+        #
+        # The first version was 0.070 — a sclera-radius back, which sounded
+        # anatomical and gave only ±12.5 degrees. Rendering a 24-degree gaze
+        # slid the iris clean off the white. 0.032 buys ±28.4, which covers any
+        # gaze the runtime will ask for, and the runtime should still clamp
+        # there rather than trusting the rig to look sane past it.
+        B.append((f"eye_{sd}", "head",
+                  (sx * 0.095, 0.580, 0.6564), (sx * 0.095, 0.612, 0.6564)))
+
     # DOCUMENTED RIG ADJUSTMENT — tail chain relocated, not distorted.
     #
     # The reference-driven cage moved the tail from a near-horizontal sweep at

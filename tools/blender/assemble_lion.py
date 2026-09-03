@@ -437,6 +437,27 @@ def main():
     # The ears ride their own bones so the rig can perk them — GATE 15's
     # storyboard opens with exactly that beat.
     EAR_BONE = {"Ear_R": "ear_R", "Ear_L": "ear_L"}
+    # The EYEBALL rides its eye bone so gaze can move it. The LID does not —
+    # a lid slides OVER an eyeball, so it belongs to the skull, and `blink_L`
+    # is a morph on it. Skinning the lid to the eye would carry it along with
+    # the gaze and the blink would follow the pupil around the face.
+    # THE SCLERA STAYS ON THE HEAD. Only the iris, pupil and catchlight ride
+    # the eye bone.
+    #
+    # Skinning the sclera to the eye rotated the WHITE along with the gaze, so
+    # the whole assembly swung as a unit and at 24 degrees the white ended up
+    # on the wrong side of the socket with the iris hanging off its edge. On a
+    # flat-disc eye the sclera IS the aperture — it belongs to the skull, and
+    # the iris slides across it, which is also how a real eye reads.
+    #
+    # Travel budget: the sclera is 0.0890 half-wide and the iris radius is
+    # 0.0290, so the iris centre may move 0.060 before its edge reaches the
+    # white's. The bone is 0.070 long, so that is 0.070*sin(theta) < 0.060 —
+    # about 59 degrees. The 24 degrees rendered uses 0.028 of the 0.060.
+    EYE_BONE = {}
+    for sd in ("R", "L"):
+        for part in ("Iris", "Pupil", "Catchlight"):
+            EYE_BONE[f"{part}_{sd}"] = f"eye_{sd}"
     band = fm["mouth_line"]["half_h_H"]
     print(f"[assemble] head/jaw split at the measured mouth line h={split_h:.4f}, "
           f"blend band ±{band:.4f} (the mouth's measured half-height)")
@@ -447,6 +468,9 @@ def main():
         if o.name in EAR_BONE:
             skin_rigid(o, arm, EAR_BONE[o.name])
             print(f"[assemble]   {o.name:14s} z={centre_z:.4f} -> {EAR_BONE[o.name]}")
+        elif o.name in EYE_BONE and EYE_BONE[o.name] in arm.data.bones:
+            skin_rigid(o, arm, EYE_BONE[o.name])
+            print(f"[assemble]   {o.name:14s} z={centre_z:.4f} -> {EYE_BONE[o.name]}")
         elif o.name in STRADDLES:
             skin_by_height(o, arm, split_h, band)
             print(f"[assemble]   {o.name:14s} z={centre_z:.4f} -> head/jaw blend")
