@@ -27,13 +27,12 @@ export default defineConfig({
          lion pose art are exactly that size class and would have been dropped
          from the offline precache without any error. */
       workbox: {
-        // Note: mp4 is deliberately absent from globPatterns. The generated
-        // episodes in public/videos are ~5 MB each, and precaching them would
-        // pull tens of MB on first load; they should be cached at runtime
-        // instead, once a child actually plays one.
+        // mp4 is deliberately absent below: the generated episodes in
+        // public/videos are ~5 MB each, and precaching them would pull tens of
+        // MB on first load. They belong in runtime caching, fetched once a
+        // child actually plays one.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
       },
       manifest: {
         name: 'Kids Learning Fun',
