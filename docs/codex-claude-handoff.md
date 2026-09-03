@@ -5916,3 +5916,88 @@ rebuilt.
    `CardShelfZone`/`CardShelfZoneHero` in the GLB's markers, which is exactly
    the storyboard's "eyes move to player cards" beat.
 3. The paw's rounded sole, with the walk QA in the loop.
+
+## 2026-09-03 (twenty-fourth pass) — `npm run lion:review`
+
+One command: rebuild the chain, print every QA table, and render a front-lit
+review sheet. `scripts/lion-review.sh` + `tools/blender/review_render.py` +
+`scripts/lion-contact-sheet.py`.
+
+    npm run lion:review              measure + render from the current blends
+    npm run lion:review -- --rebuild rebuild the whole chain first
+    npm run lion:review -- --sheet   also stitch the contact sheet
+
+Output: 18 sheets in `docs/assets/lion-review/`, stitched to
+`docs/assets/lion-review-sheet.png` (172 KB total).
+
+### Why this, and not a Blender MCP
+
+Assessed `IvanMurzak/Unity-MCP` and `ahujasid/blender-mcp` for this. Neither
+fits, and the reasons are worth recording so it is not re-litigated:
+
+* **Unity-MCP** (Apache-2.0, 4.1k stars, 70+ tools) is *entirely*
+  Unity-specific — its tools are Unity's AssetDatabase, GameObjects, prefabs,
+  Roslyn and Profiler, and it needs the Editor running. This project is React +
+  Three.js + Blender. The only transferable thing is the MCP-server-plus-editor
+  pattern, which is an idea, not a fork.
+* **blender-mcp** (MIT, ~26.7k stars) is closer but weaker than the stars
+  suggest: **no rigging, animation, shape-key or glTF tools**, GUI-only with no
+  documented headless support, and its `execute_blender_code` is running Python
+  in Blender, which `--python` already does. Rigging, morphs and glTF are ~90%
+  of what this asset needs.
+* Interactive editing would also fight this project's design. `cage_lion.py`
+  and `mane_foundation.py` ARE the source of truth and every number is measured
+  off the approved turnaround; hand-poking a mesh produces changes nobody can
+  reproduce.
+
+The honest diagnosis was never missing tools. It was **judging geometry from
+numbers and being wrong** — the ear diagnosis built and reverted twice on a
+metric error, the mane's slab blamed on the outer hood twice when it was the
+inner shell, and one whole pass spent judging a surface that was in shadow. The
+fix is that looking at it properly must be one command with the lighting
+already right.
+
+### What the sheet guarantees
+
+* **Key light from the camera side, rebuilt per shot.** A fixed rig backlights
+  half the angles, and a backlit surface hides exactly the shallow relief this
+  asset keeps getting wrong.
+* **Isolated sheets** — the mane alone and the face parts alone. The mane sheet
+  is the one that finally found the aperture shell.
+* **Fixed angles and framing**, so two runs compare.
+* **Seven expression and pose tiles** — smile, blink_L, mouth_round, cheeks_up,
+  jaw_open, gaze_left, head_turn. A rig that reads at rest can still break the
+  moment something moves, and every one of those has broken at least once.
+
+### The orchestrator encodes the pipeline ORDER
+
+Not obvious and not forgiving:
+
+    cage_lion -> rig_cage_lion -> anim_cage_lion -> assemble_lion
+         \                                              ^
+          `--> mane_foundation (imports lion_cage) -----'
+
+`mane_foundation` reads the CAGE and `assemble` reads both the animated rig and
+the mane, so a cage change invalidates everything downstream. Three separate
+failures this session came from getting that wrong: a skipped rig/anim stage
+left the assembled GLB carrying an old cage while the measurements described a
+model that no longer existed; `face_lion` run on its own output duplicated all
+15 face parts and a later probe measured the stale original.
+
+Stages do not abort the run on failure — a broken stage must not hide the
+measurements of the stages that worked, which is most of the value.
+
+### One bug in the tool itself, caught by using it
+
+The head target was guessed as `centre.y * 0.4, centre.z + size * 0.30` and
+landed INSIDE the mane, so both head shots and all seven expression tiles
+rendered the back of the hood. Now derived from `LionFace_Gloss`'s bounds,
+which carries the irises, catchlights and nose pad and therefore IS the face by
+construction.
+
+### Next, in order
+
+1. Mane follow-through bones — the last three `plannedBones`.
+2. Wire `lookAt` to the card markers (`CardShelfZone`, `CardShelfZoneHero`),
+   which is the storyboard's "eyes move to player cards" beat.
+3. The paw's rounded sole, with the walk QA in the loop.
