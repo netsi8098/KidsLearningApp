@@ -21,11 +21,18 @@ export default function World3DProofPage() {
   const [wander, setWander] = useState(true);
   const brain = useRef<LionBrain | null>(null);
   /* ?mesh=cage swaps in the raw production cage. Reviewing a retopology pass in
-     Blender proves nothing about how it skins and shades at runtime. */
+     Blender proves nothing about how it skins and shades at runtime.
+
+     ?mesh=assembled is the GATE 15 output — the same cage but carrying the
+     face, the mane and all 16 morph targets in one file. Kept as a separate
+     value rather than repointing `cage`, so the faceless cage stays available
+     to compare against. */
   const meshParam = new URLSearchParams(window.location.search).get('mesh');
   const lionUrl = meshParam === 'cage'
     ? '/assets/lion/cage/lion_cage_anim.glb'
-    : undefined;
+    : meshParam === 'assembled'
+      ? '/assets/lion/cage/lion.glb'
+      : undefined;
   const [showHud, setShowHud] = useState(true);
 
   const onStats = useCallback((s: WorldStats) => setStats({ ...s }), []);

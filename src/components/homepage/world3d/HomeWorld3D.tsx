@@ -56,6 +56,11 @@ export interface WorldStats {
   lionHeight: number | null;
   lionGrounded: boolean | null;
   lionClips?: string[];
+  /* Signed distance from the ground marker to the asset's lowest bind-pose
+     vertex, in model units after scaling. Negative means the character sinks.
+     It was already being written here and read by the HUD; only the type was
+     missing, so `tsc` had three errors on a stat that worked at runtime. */
+  lionFloorGap?: number;
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -178,16 +183,30 @@ function Lion({
      described a mid-stride pose and sank into the island. What is wanted here is
      the asset's rest footprint, which is a property of the geometry and cannot
      depend on what frame it happens to be on. */
+  /* ...and for the same reason it cannot come from `computeBoundingBox()`.
+     three.js expands a geometry's bounding box to cover every MORPH TARGET
+     extreme, so the box describes the union of all poses the morphs can reach
+     rather than the neutral one. That is the same class of error as measuring
+     a posed hierarchy, and it appeared the moment the character gained a face:
+     the mouth morphs displace geometry ~0.0206 below the paws, which dropped
+     the measured floor to -0.0171 and, after the 1.3299 scale, seated the
+     character 22.8mm INTO the island. The faceless cage measured +5.4mm.
+
+     So the box is built from the position attribute alone. Local geometry
+     space, as before — every mesh in these assets carries an identity
+     transform, and the export asserts it. */
   const bindBox = useMemo(() => {
     const box = new THREE.Box3();
-    const one = new THREE.Box3();
+    const v = new THREE.Vector3();
     model.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh || !m.geometry) return;
-      if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
-      if (!m.geometry.boundingBox) return;
-      one.copy(m.geometry.boundingBox);
-      box.union(one);
+      const pos = m.geometry.attributes.position as THREE.BufferAttribute | undefined;
+      if (!pos) return;
+      for (let i = 0; i < pos.count; i += 1) {
+        v.fromBufferAttribute(pos, i);
+        box.expandByPoint(v);
+      }
     });
     return box;
   }, [model]);

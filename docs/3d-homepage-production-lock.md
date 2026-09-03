@@ -259,5 +259,12 @@ lion match "silhouette, proportions, face, colors, and personality" is satisfied
 on the first two and untouched on the last three.
 
 Promotion criteria unchanged. Runtime spot-check at each pass: 191.6 KB GLB,
-Khronos-clean, both clips present, floor gap -11.5 mm, 29 draw calls, 121/121
+Khronos-clean, both clips present, floor gap -17.2 mm, 29 draw calls, 121/121
+
+> Re-measured in the browser 2026-09-03: the shipping proxy `lion_v2.glb` reads
+> **-17.2 mm**, not -11.5. Its own geometry has minY = -0.0146, so it has always
+> sunk by this much; the -11.5 figure was stale. The assembled cage asset reads
+> **+4.7 mm**. Draw calls are **78** for the assembled asset against the 29
+> recorded here, because 16 face meshes are 16 draw calls — see the seventh-pass
+> entry in `codex-claude-handoff.md`.
 homepage QA checks green.

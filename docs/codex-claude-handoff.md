@@ -4598,3 +4598,79 @@ lets the cage be validated on its own terms today.
 3. Clips for Gates 10-14 on the cage; eye bones; mane follow-through bones.
 4. Mane chin lobe — it still reads as a hood rather than a mane, which the
    assembled render makes plainer than the face-only ones did.
+
+## 2026-09-03 (seventh pass) — ran it in the browser, and the morph box bit
+
+`?mesh=assembled` on `/world3d` loads `lion/cage/lion.glb`. Added as a new
+param value rather than repointing `?mesh=cage`, so the faceless cage stays
+available to compare against — which is what caught the bug below.
+
+### The character sank 22.8 mm into the island
+
+Runtime HUD, assembled against faceless:
+
+| | `?mesh=cage` | `?mesh=assembled` |
+| --- | --- | --- |
+| floor gap | +5.4 mm | **−22.8 mm** |
+| draw calls | 45 | 78 |
+| triangles | 107,428 | 266,944 |
+
+Cause: **three.js `computeBoundingBox()` expands a geometry's box to cover every
+MORPH TARGET extreme.** The box therefore described the union of all poses the
+morphs can reach, not the neutral one — so the mouth morphs, which displace
+geometry ~0.0206 below the paws, dropped the measured floor to −0.0171. After
+the 1.3299 scale that is −22.8 mm, and the runtime seats feet at `-scaledMinY`.
+
+The arithmetic closes exactly: base minY 0.0035, maxY 0.9810, scale
+1.30/0.9775 = 1.3299, 0.0035 × 1.3299 = **+4.7 mm**, which is what it now
+reports.
+
+This is the same class of error the existing comment in `HomeWorld3D` already
+warns about for posed hierarchies — "the asset's rest footprint … cannot depend
+on what frame it happens to be on". Morph extremes are that, for shape keys.
+`bindBox` now builds from the position attribute alone.
+
+**No regression on the other two assets**, checked rather than assumed:
+
+| asset | before | after |
+| --- | --- | --- |
+| `cage/lion.glb` | −22.8 mm | **+4.7 mm** |
+| `cage/lion_cage_anim.glb` | +5.4 mm | +5.4 mm (no morphs) |
+| `rigged/lion_v2.glb` (shipping) | −17.2 mm | −17.2 mm |
+
+### A pre-existing defect this turned up
+
+**`lion_v2.glb` — the character the homepage actually renders — sinks 17.2 mm**,
+and it is nothing to do with morphs: its own geometry has minY = −0.0146, so it
+sank before this work and sinks by the same amount after. `3d-homepage-production-lock.md`
+and `mascot-checkpoint.md` both record **−11.5 mm**. The measured figure is
+−17.2 mm. Not fixed here because it is the proxy's geometry, not the runtime's
+measuring, and the proxy is due to retire.
+
+`WorldStats.lionFloorGap` was also missing from the type while being written and
+read — three `tsc` errors on a stat that worked at runtime. Added.
+
+### State of the tree, honestly
+
+`npm run typecheck` reports **52 errors** (was 55; the three fixed are the
+`lionFloorGap` ones). The rest are pre-existing across 16 files —
+`RewardSticker`, `AccessibilityContext`, `PrintablesPage`, `WelcomePage` and
+others none of this work touches.
+
+`npm test`: **29 failed / 727 passed**. All 29 are pre-existing assertion drift
+in `StarCounter`, `MissionCard`, `useAudio`, `useAudioPlayer` and
+`useRecommendations` — e.g. a test expecting `rounded-full` where the component
+now renders `rounded-[12px]`. None import world3d or the lion.
+
+Both numbers are stated so the next pass knows the baseline is not green and
+does not attribute it to the mascot work.
+
+### Next, in order
+
+1. The bone-naming decision from the sixth pass — still the blocker on
+   `validate-lion-glb`.
+2. **78 draw calls against the 29 the production lock records.** 16 face meshes
+   is 16 draw calls that could be one: the decals share materials already, so
+   joining them per material at export is the obvious win.
+3. Project the decals onto the surface (the muzzle's 65.6 mm float).
+4. The proxy's −17.2 mm floor gap, or retire the proxy.

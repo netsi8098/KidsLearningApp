@@ -162,7 +162,7 @@ and it wins. Weighted IoU moved 0.822 → 0.817 as a result, which is the cost.
 
 Runtime confirmed: 191.6 KB GLB, 1,005 verts / 2,006 tris / 35 joints, Khronos
 validation clean, zero control bones in the skin, both clips (`Idle`, `Walk`)
-present, floor gap −11.5 mm, 29 draw calls, and the 121-check homepage QA suite
+present, floor gap −17.2 mm (re-measured 2026-09-03), 29 draw calls, and the 121-check homepage QA suite
 still fully green.
 
 ## F. Verdict — **CLOSE; THE FACE IS NOW MEASURED AND PARTLY BUILT**
