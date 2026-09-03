@@ -34,6 +34,7 @@ Outputs:
 import json
 import math
 import os
+import statistics
 import sys
 
 import bmesh
@@ -271,11 +272,32 @@ def measured_front_half_w():
     raw = MODEL["views"]["front"]["mane_width"]
     hs = sorted(float(k) for k in raw)
     vals = [raw[f"{h:.3f}"]["half_w"] for h in hs]
+
+    # MEDIAN, not mean. This is why the mane's crown was too narrow.
+    #
+    # A mean over 0.05 H is a low-pass filter, and the crown is a STEEP EDGE:
+    # the profile falls from 0.273 to 0.053 full-width between h 0.93 and 0.98.
+    # Averaging across that flattens it, and since `fit_to_measured` normalises
+    # the mane ONTO this profile, the build reproduced the flattened version
+    # exactly — the model measured 0.152 at band 0.95-1.00 against a reference
+    # mask of 0.251, and it was not a build error at all. It was matching a
+    # profile that had smoothed the crown away.
+    #
+    # A median of the SAME window rejects the same spikes and keeps the edge:
+    #
+    #     filter          h0.90  h0.93  h0.95  h0.96  h0.98   ripple
+    #     mean   5%       0.388  0.273  0.201  0.152  0.053   18.35e-4
+    #     median 5%       0.406  0.298  0.215  0.206  0.038   18.44e-4
+    #     median 2.5%     0.406  0.298  0.225  0.225  0.037   20.44e-4
+    #
+    # Median at 5% is free: +36% width at h 0.96 for 0.5% more ripple. The
+    # narrower window gets closer to the reference and costs 11% more ripple,
+    # which is the noise the smoothing exists to remove, so it is not taken.
     win = max(3, int(0.05 * len(hs)))
     sm = []
     for i in range(len(vals)):
         a, b = max(0, i - win // 2), min(len(vals), i + win // 2 + 1)
-        sm.append(sum(vals[a:b]) / (b - a))
+        sm.append(statistics.median(vals[a:b]))
     table = list(zip(hs, sm))
 
     def at(h):
@@ -338,26 +360,10 @@ def build_hood(nh=56, nring=30):
     # to five runs. Sampling it directly put all of that into the surface as
     # ripples. LEVEL 1 is the macro form, so it takes a profile smoothed over
     # 0.05 H; the deliberate relief is LEVEL 2's job and is added on top.
-    raw = MODEL["views"]["front"]["mane_width"]
-    hs = sorted(float(k) for k in raw)
-    vals = [raw[f"{h:.3f}"]["half_w"] for h in hs]
-    win = max(3, int(0.05 * len(hs)))
-    smooth_vals = []
-    for i in range(len(vals)):
-        a, b = max(0, i - win // 2), min(len(vals), i + win // 2 + 1)
-        smooth_vals.append(sum(vals[a:b]) / (b - a))
-    table = list(zip(hs, smooth_vals))
-
-    def front_half_w(h):
-        if h <= table[0][0]:
-            return table[0][1]
-        if h >= table[-1][0]:
-            return table[-1][1]
-        for (h0, v0), (h1, v1) in zip(table, table[1:]):
-            if h0 <= h <= h1:
-                k = (h - h0) / max(1e-9, h1 - h0)
-                return v0 + (v1 - v0) * k
-        return table[-1][1]
+    # ONE profile, shared with the fit stage. This was a duplicated copy of the
+    # same smoothing, which is how the two ended up able to disagree — and the
+    # median fix would have landed in only one of them.
+    front_half_w = measured_front_half_w()
 
     def taper(u):
         if u <= u_wide:
@@ -590,8 +596,21 @@ def fit_to_measured(obj):
         cur[b] = max(cur[b], abs(v.co.x))
     want_w, fac = [0.0] * NB, [1.0] * NB
     for b in range(NB):
-        zc = z0 + (b + 0.5) / NB * (z1 - z0)
-        want_w[b] = ref_at(zc)
+        # MAX ACROSS THE BAND, not the value at its centre.
+        #
+        # `cur[b]` is a per-band MAXIMUM of |x|, so the target has to be a
+        # per-band maximum too. Sampling `ref_at` at the band CENTRE compares a
+        # max against a midpoint, and on any steep gradient the max is the
+        # larger of the two — so the ratio comes out below 1 and the band gets
+        # SHRUNK for no reason but the metric.
+        #
+        # The crown is the steepest part of the profile, falling from 0.298 to
+        # 0.037 half-width over h 0.93-0.99, and it is exactly where the
+        # correction bottomed out at 0.681. Fixing the median filter alone did
+        # not help, because this then undid it.
+        lo_z = z0 + b / NB * (z1 - z0)
+        hi_z = z0 + (b + 1) / NB * (z1 - z0)
+        want_w[b] = max(ref_at(lo_z + (hi_z - lo_z) * t / 8.0) for t in range(9))
         if cur[b] > 1e-5 and want_w[b] > 1e-5:
             # Clamped. An unbounded ratio lets one stray vertex in a nearly-empty
             # band throw a spike into the surface.

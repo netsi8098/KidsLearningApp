@@ -5234,3 +5234,79 @@ Reach 22.1 / 42.1 mm, support slide 0.166 mm, both unchanged. Asset 3.92 MB,
    so the "head too large" read is more likely the mane's crown deficit plus
    the leg overlap than an actual head-size error. Worth stating, because it is
    the opposite of what the renders suggested.
+
+## 2026-09-03 (fifteenth pass) — the mane crown, and the same metric mistake twice
+
+Front IoU **0.8959 -> 0.9164**, weighted **0.8519 -> 0.8602**, mane width error
+-1.4% -> **-0.5%**. Best figures this asset has recorded. Deformation untouched:
+reach 22.1 / 42.1 mm, support slide 0.166 mm.
+
+    front band   reference   before    after
+    0.95-1.00      0.248     -0.096   **-0.037**
+    0.90-0.95      0.427     -0.079   **-0.033**
+
+### The crown was never a build error
+
+The model was reproducing the profile it is fitted to, exactly. The profile was
+wrong, in two independent ways, and both are the same class of mistake.
+
+**1. A mean over a steep edge.** `measured_front_half_w` smoothed the mane's
+width profile with a MEAN over 0.05 H. The crown falls from 0.273 to 0.053
+full-width between h 0.93 and 0.98 — averaging across that flattens it, and
+`fit_to_measured` then normalises the mane onto the flattened version. A MEDIAN
+of the same window rejects the same spikes and keeps the edge:
+
+    filter          h0.90  h0.93  h0.95  h0.96  h0.98   ripple
+    mean   5%       0.388  0.273  0.201  0.152  0.053   18.35e-4
+    median 5%       0.406  0.298  0.215  0.206  0.038   18.44e-4
+
++36% width at h 0.96 for 0.5% more ripple. Free.
+
+**2. A band MAX compared against a band CENTRE.** Fixing the filter alone
+changed nothing, because the per-band correction then undid it: `cur[b]` is a
+per-band MAXIMUM of |x| and `want_w[b]` was `ref_at(band centre)`. On a steep
+gradient the max exceeds the midpoint, so the ratio falls below 1 and the band
+is shrunk for no reason but the metric. The correction bottomed out at 0.681 at
+exactly the crown. Sampling the profile's max across the band took the range to
+0.954-1.165 — it now widens where the reference is wider, which it could never
+previously do.
+
+**This is the third time this pass made the same error**, and it is worth
+naming as a pattern rather than three incidents: comparing a per-band extremum
+against a point sample. It produced a fabricated ear diagnosis (below), then
+hid the crown fix, and it is invisible unless the two quantities are named out
+loud.
+
+Also unified: `build_hood` had its own duplicate copy of the smoothing, so the
+fit stage and the build stage could disagree — and the median fix would have
+landed in only one of them. Both now call `measured_front_half_w()`.
+
+### Two attempted ear corrections, both reverted
+
+Recorded in `cage_lion.py` beside the stations. Attempt 1 dropped the ears
+0.048 on the fabricated diagnosis above; attempt 2 made them taller. Measured
+max-against-max, summing absolute error across the four bands an ear touches:
+
+    front band   reference   ORIGINAL   dropped   taller
+    0.85-0.90      0.552      -0.006    -0.140    +0.088
+    0.80-0.85      0.621      -0.058    -0.006    +0.038
+    0.75-0.80      0.631      -0.069    +0.000    +0.019
+    0.70-0.75      0.650      +0.015    -0.025    -0.063
+    sum |dw|                   0.148     0.171     0.208
+    weighted IoU               0.8519    0.8495    0.8499
+
+The original is best on both. The reference's ears contribute width across
+about 0.20 H and these stations span 0.056 H, so an ear this short cannot
+satisfy four bands — every placement trades one for another. Attempt 2 also put
+the root below its attachment patch and the cage came back with 2 slivers, the
+fault the file already records at 6. A genuinely taller ear needs the PATCH
+moved down the side of the head, which is a separate change.
+
+### Next, in order
+
+1. The ear span: move the attachment patch down, then a taller ear can cover
+   h 0.70-0.90 without folding. Worth ~0.13 of band error.
+2. Three-quarter is the weakest view at 0.8049; h 0.1-0.2 has both missing and
+   extra, so the legs are misplaced in depth as well as thin.
+3. Clips for Gates 10-14; eye bones; mane follow-through bones.
+4. `conform()` the brows, still 11.7 and 15.3 mm off.
