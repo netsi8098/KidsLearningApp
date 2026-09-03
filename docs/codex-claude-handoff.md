@@ -4674,3 +4674,74 @@ does not attribute it to the mascot work.
    joining them per material at export is the obvious win.
 3. Project the decals onto the surface (the muzzle's 65.6 mm float).
 4. The proxy's −17.2 mm floor gap, or retire the proxy.
+
+## 2026-09-03 (eighth pass) — 78 draw calls down to 51
+
+17 meshes are 17 draw calls, and with the shadow pass that is 34. Joined per
+material the lion is **4 meshes**, and the browser reports **51** where it
+reported 78.
+
+Measured in the same scene, so the comparison means something:
+
+| asset | meshes | draw calls |
+| --- | --- | --- |
+| `?mesh=cage` (faceless cage) | 1 | 45 |
+| default `lion_v2.glb` (shipping proxy) | 2 | 47 |
+| `?mesh=assembled` before | 17 | 78 |
+| `?mesh=assembled` after | 4 | **51** |
+
+The world floor is ~43, so a faced and maned character now costs 8 draw calls
+against the proxy's 4 — two passes each, main and shadow.
+
+### Why joining is free here
+
+There are only **three materials**. Colour lives in a per-vertex FLOAT_COLOR
+attribute and the materials differ solely in roughness and specular, so
+same-material meshes merge with no visual change: vertex colours travel with
+the geometry, and vertex groups and shape keys merge BY NAME, which is exactly
+the wanted semantics — the joined mesh's `blink_L` is the union of its members'.
+
+    LionCage        1,581 verts  16 morphs  35 groups   <- cage, muzzle, sclera x2, brows x2
+    LionFace_Gloss    426 verts   4 morphs   1 group    <- irises, catchlights, nose pad
+    LionFace_Ink      570 verts  11 morphs   2 groups   <- lids, pupils, mouth line
+    LionMane       38,016 verts   0 morphs   1 group
+
+Still 16 unique morph targets, contract satisfied, 1 skin / 35 joints, both
+clips, floor gap unchanged at +4.7 mm, triangles unchanged at 265,684, and the
+render is indistinguishable.
+
+### Two things deliberately NOT joined
+
+**The mane stays out, for file size not looks.** glTF stores morph deltas
+densely, so folding 38,016 verts into a group carrying 16 morph targets would
+write 38,016 x 16 x 12 bytes ~ **7 MB** of almost entirely zeros. It has no
+shape keys of its own, and one mesh is one draw call, so leaving it separate
+costs a single call and saves all of that. Size went 3.08 -> 3.14 MB, which is
+the Matte group now carrying 16 morphs over 1,581 verts instead of 10 over 999.
+
+**Gloss and ink stay separate.** Merging them would need one material, and the
+ink finish exists because of a measured failure: at gloss values the near-black
+pupil (9,6,0), lid (39,17,3) and mouth (27,8,2) rendered mid-GREY, since a dark
+dome with any specular reflects the sky straight back. Merging would undo that
+fix to save one draw call. 4 meshes is the floor without changing the look.
+
+### One bug, and it was the one already documented
+
+The join was first placed after `pose_position` returned to `"POSE"`, so the
+post-join `assert_neutral_is_neutral()` ran on armature-deformed geometry and
+exited SILENTLY — no export, no error line. Exactly the trap written up in the
+sixth-pass entry, walked into two passes later. The join now happens while
+still in REST, which is the whole reason to re-check neutrality there at all
+(joining rewrites shape keys). Both checks pass: 2.64e-07 before, 2.17e-07
+after.
+
+Also: `join` keeps the ACTIVE object's name, so the groups shipped as `Iris_R`
+and `EyeLid_R` — GLB node names describing one member of five. Renamed
+`LionFace_Gloss` and `LionFace_Ink`.
+
+### Next, in order
+
+1. The bone-naming decision — still the only thing blocking `validate-lion-glb`.
+2. Project the decals onto the surface (the muzzle's 65.6 mm float).
+3. Clips for Gates 10-14; eye bones; mane follow-through bones.
+4. The proxy's -17.2 mm floor gap, or retire the proxy.

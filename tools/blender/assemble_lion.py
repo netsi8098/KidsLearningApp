@@ -173,6 +173,64 @@ def skin_by_height(o, arm, split_h, band):
     mod.use_vertex_groups = True
 
 
+def join_by_material(cage, parts, keep_separate=("LionMane",)):
+    """Collapse meshes that share a material into one, for draw calls.
+
+    The browser HUD reported 78 draw calls against the 29 the production lock
+    records, because 17 meshes are 17 draw calls. But there are only THREE
+    materials — colour lives in a per-vertex FLOAT_COLOR attribute and the
+    materials differ only in roughness and specular — so same-material meshes
+    can be merged with no visual change at all. Vertex colours travel with the
+    geometry; vertex groups and shape keys merge by name, which is exactly the
+    semantics wanted (a joined mesh's `blink_L` is the union of its members').
+
+    THE MANE STAYS OUT, and the reason is file size rather than looks. glTF
+    stores morph deltas densely, so joining the mane's 38,016 verts into a
+    group carrying 16 morph targets would write 38,016 x 16 x 12 bytes ~ 7 MB
+    of almost entirely zeros. It has no shape keys of its own and one mesh is
+    one draw call, so leaving it separate costs a single call and saves the
+    lot.
+    """
+    groups = {}
+    for o in [cage] + parts:
+        if o.name in keep_separate:
+            continue
+        mat = o.data.materials[0].name if o.data.materials else "(none)"
+        groups.setdefault(mat, []).append(o)
+
+    out = []
+    for mat, objs in sorted(groups.items()):
+        if len(objs) == 1:
+            out.append(objs[0])
+            print(f"[assemble] {mat}: 1 mesh, nothing to join")
+            continue
+        # Biggest mesh is the active one, so the result inherits the cage's
+        # name and transform rather than a decal's.
+        objs.sort(key=lambda o: len(o.data.vertices), reverse=True)
+        before = sum(len(o.data.vertices) for o in objs)
+        names = [o.name for o in objs]
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in objs:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = objs[0]
+        bpy.ops.object.join()
+        res = bpy.context.view_layer.objects.active
+        # Name it for what it now is. `join` keeps the active object's name, so
+        # the gloss group shipped as "Iris_R" and the ink group as "EyeLid_R" —
+        # node names a reviewer and the runtime both read, describing one
+        # member of five. The cage keeps its own name; it is still the cage.
+        if res.name != "LionCage":
+            res.name = f"LionFace_{mat.split('_')[-1]}"
+            res.data.name = res.name
+        keys = ([k.name for k in res.data.shape_keys.key_blocks if k.name != "Basis"]
+                if res.data.shape_keys else [])
+        print(f"[assemble] {mat}: joined {len(objs)} -> '{res.name}' "
+              f"({before} verts, {len(keys)} morphs, {len(res.vertex_groups)} groups)")
+        print(f"[assemble]     from {names}")
+        out.append(res)
+    return out
+
+
 def main():
     fm = json.load(open(FACE_JSON))
     contract = json.load(open(CONTRACT))["morphTargets"]
@@ -288,6 +346,22 @@ def main():
     face_shapes.assert_neutral_is_neutral()
     face_shapes.report_decal_float(cage, contract)
 
+    # ---- 3b. collapse to one mesh per material -------------------------
+    # After the morphs, so the keys exist to be merged, and after skinning, so
+    # the vertex groups do too — and STILL IN REST POSITION, because the
+    # neutral re-check below is the whole point of doing it here. Run after the
+    # POSE restore it failed on the armature deformation, silently, exactly the
+    # trap documented at the top of this function.
+    mane_obj = next((o for o in parts if o.name == "LionMane"), None)
+    meshes = join_by_material(cage, parts)
+    if mane_obj is not None:
+        meshes.append(mane_obj)
+    cage = max(meshes,
+               key=lambda o: -1 if o is mane_obj else len(o.data.vertices))
+    parts = [o for o in meshes if o is not cage]
+    # Joining rewrites shape keys; re-assert that neutral is still neutral.
+    face_shapes.assert_neutral_is_neutral()
+
     # Back to pose position: the clips are the point of shipping one file.
     arm.data.pose_position = "POSE"
     bpy.context.view_layer.update()
@@ -295,7 +369,7 @@ def main():
 
     # ---- 4. verify before exporting ------------------------------------
     problems = []
-    for o in [cage] + parts:
+    for o in meshes:
         if not any(m.type == "ARMATURE" for m in o.modifiers):
             problems.append(f"{o.name} has no armature modifier")
         if o.parent is not arm and o is not cage:
@@ -320,7 +394,7 @@ def main():
     # ---- 5. one export --------------------------------------------------
     os.makedirs(os.path.dirname(GLB_OUT), exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
-    for o in [arm, cage] + parts:
+    for o in [arm] + meshes:
         o.select_set(True)
     bpy.context.view_layer.objects.active = arm
     bpy.ops.export_scene.gltf(
@@ -337,9 +411,9 @@ def main():
     print(f"KB={kb:.1f}")
     print(f"BONES={len(arm.data.bones)}")
     print(f"ACTIONS={actions}")
-    print(f"FACE_PARTS={len(parts)}")
-    print(f"CAGE_VERTS={len(cage.data.vertices)}")
-    print(f"FACE_VERTS={sum(len(p.data.vertices) for p in parts)}")
+    print(f"MESHES={len(meshes)}  (one draw call each)")
+    print(f"MESH_NAMES={[o.name for o in meshes]}")
+    print(f"TOTAL_VERTS={sum(len(o.data.vertices) for o in meshes)}")
     print("===LION_ASSEMBLED_END===")
 
 
