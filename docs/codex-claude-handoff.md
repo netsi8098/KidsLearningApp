@@ -5310,3 +5310,88 @@ moved down the side of the head, which is a separate change.
    extra, so the legs are misplaced in depth as well as thin.
 3. Clips for Gates 10-14; eye bones; mane follow-through bones.
 4. `conform()` the brows, still 11.7 and 15.3 mm off.
+
+## 2026-09-03 (sixteenth pass) — ear span: FOURTH ATTEMPT, ALSO REVERTED
+
+No code change landed. This entry exists so the next attempt does not start
+where three have already failed.
+
+### What was tried
+
+The band arithmetic was done first, which is why it looked safe. Subtracting
+what the mane already covers gives the ear's load-bearing requirement:
+
+    band        ref     mane    ear must reach |x|
+    0.70-0.75   0.650   0.642   nothing, mane covers it
+    0.75-0.80   0.631   0.461   0.3075
+    0.80-0.85   0.621   0.417   0.3026
+    0.85-0.90   0.552   0.424   0.2690
+    0.90-0.95   0.427   0.394   nothing, mane covers it
+
+A five-station rounded tab — out and up to a widest point at z 0.790, then back
+inward — predicted -0.008, -0.003, +0.007, -0.002 across the four bands, a
+total absolute error of 0.020 against the current ear's 0.148.
+
+### What actually happened
+
+The cage built clean: 999 verts, 100% quads, watertight, **0 slivers**. Then
+the deformation battery:
+
+    | | current | five-station tab |
+    | worst area ratio | 0.261 | **0.035** |
+    | pinched faces    | **0** | **17**    |
+    | flipped faces    | **0** | **18**    |
+
+Front IoU did improve, 0.9164 -> 0.9239, and band 0.75-0.80 landed at +0.002 as
+predicted. But side fell 0.8495 -> 0.8210 and weighted 0.8602 -> 0.8517, so it
+was worse overall even before the battery is considered — and the battery alone
+disqualifies it.
+
+### Why the prediction failed
+
+**The station path reverses in x and the tangents do not.** The tab needs its
+widest point mid-height and must come back inward above it, so x runs
+0.196 -> 0.306 -> 0.268 -> 0.218 while every tangent still points along +x. A
+ring is built perpendicular to its tangent, so consecutive rings on the
+returning half face into the ones below them and the surface doubles back. It
+is watertight and 100% quads — the integrity checks cannot see it — and it
+self-intersects the moment a joint bends. Hence 17 pinches and an area ratio of
+0.035 where the geometry folds.
+
+The band prediction assumed the stations describe the surface. They describe
+the ring CENTRES; the surface is the loft between them, and a loft over a
+reversing path with a fixed tangent direction is not the tab that was drawn.
+
+### What the fix actually requires
+
+The taper cannot come from station x while the tangent is pinned to +x, and it
+cannot come from radius, because a ring perpendicular to +x has near-constant x
+and fills its whole vertical reach at full width — that is what made attempt 2
+over-fill the band above by +0.088.
+
+So the ear needs a MONOTONIC outward path over a taller span, which means the
+root must start lower, which means **moving the attachment patch down the side
+of the head**. It is currently segment 1 of `head_mid` at 22.5 degrees —
+x 0.196, z 0.686, patch spanning z 0.608-0.752. Segment 0 at 0 degrees sits at
+x 0.212, z 0.608, which would let the root drop about 0.078.
+
+That is a topology change at the head, and it is not free: `earR:attach` and
+`earL:attach` are ring groups the authored skin map in `lion_skeleton.py` reads
+BY NAME, and segment 0 is adjacent to whatever else the head_mid ring carries.
+It wants doing deliberately, with the battery run before and after, not as a
+station tweak.
+
+### Four attempts, one lesson
+
+Attempts 1 and 2 failed on a metric mistake (per-band extremum against a point
+sample). Attempt 4 failed on a geometry mistake (a reversing path with a fixed
+tangent). All four failed the same underlying way: **treating a four-band
+feature as a set of numbers to be moved, when the constraint is the
+construction.** The ear cannot be fixed from the station table alone. The
+residual -0.058 and -0.069 at h 0.75-0.85 stays until the patch moves.
+
+### State — unchanged and good
+
+Weighted IoU **0.8602**, front **0.9164**. Battery 0 pinched / 0 flipped, worst
+area ratio 0.261. Reach 22.1 / 42.1 mm, support slide 0.166 mm. Asset 3.91 MB,
+4 meshes, both contracts passing.
