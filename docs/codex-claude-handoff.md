@@ -5074,3 +5074,70 @@ Still not the reference, and none of it is mane topology now:
    measurable with `measure_face.py`'s method.
 2. Proportions: head-to-body and ear-to-head, measured against the turnaround.
 3. Mane chin lobe; the aperture tab.
+
+## 2026-09-03 (thirteenth pass) — coat colour regions: three built, two absent
+
+`tools/cad/measure_body.py` -> `body_model.json`, painted onto the cage by
+`paint_regions()` in the assembler. Renders in
+`docs/assets/lion-colour-regions.png`.
+
+### Painted as VERTEX COLOURS, not decals
+
+A face decal is a separate mesh because an eye is a distinct object. A coat
+region is the same skin in a different colour, so these are painted onto the
+cage's own vertices. Now that the cage is subdivided to 15,954 verts the
+boundary is clean enough, it costs no extra draw call, and it cannot float off
+the surface — which is the failure the muzzle needed three passes to fix.
+
+Selection is by BONE GROUP where the rig already knows the part, intersected
+with the measured height where the reference sets an extent: a paw is `paw_FL`,
+but how far up the sock goes is a measurement.
+
+| region | source | extent | colour | verts |
+| --- | --- | --- | --- | --- |
+| paws | front, 4 cream components | h 0.0000-0.0849 | (246,206,150) | 1,412 |
+| inner ear | front, warm inside the ear | h 0.6356-0.7205, x ±0.3185 | (183,112,70) | 433 |
+| tail tuft | side, auburn BEHIND the mane's own span | h 0.0777-0.2376 | (112,54,12) | 737 |
+
+The tuft is identified without naming a row: it is the auburn component whose
+fore-aft span starts past the mane's own (u 1.264 against the mane's 0.702) and
+sits below h 0.45. The inner ear takes only forward-facing normals, so the
+ear's outer back stays coat-coloured — the same test the reference view
+implies, since the inner ear is what a front view can see.
+
+### Two of the five are NOT IN THE APPROVED REFERENCE
+
+Both were asked for and both would have had to be invented.
+
+**No cheek blush.** Measured on the cheeks: hue 36.7-39.5 deg at saturation
+0.58-0.71, against a forehead of hue 36.7 at 0.75. So the cheeks are slightly
+LESS saturated and slightly MORE yellow. A blush moves hue DOWN toward red and
+ADDS saturation; this moves the other way on both axes. What is there is a
+broad highlight.
+
+**Almost no cream chest bib.** The mane covers the chest to h 0.20 in this
+turnaround, and below it the midline reads (207,156,89) at saturation 0.57
+against the muzzle's cream of (247,209,154) at 0.38. Only a small patch at
+h 0.17-0.21 crosses a cream threshold at all. Recorded as `chest` at its
+measured colour — a desaturated gold — and deliberately not painted, because a
+0.04 H band is a stripe, not a bib.
+
+Both appear clearly in the storyboard and hero images. **Those are not the
+approved turnaround**, and `lion_contract.py` makes the turnaround the
+authority. If the bib and blush are wanted, the reference needs re-approving,
+not the measurement overriding — flagging it rather than quietly painting to
+the prettier picture.
+
+### State
+
+Asset 3.91 MB, 4 meshes, both contracts passing. Nothing about the geometry
+changed, so every deformation and silhouette figure holds.
+
+### Next, in order
+
+1. **Proportions** — head large against the body, ears large against the head.
+   This is the largest remaining gap and the only one that needs
+   `lion_contract.py` to move, so it wants a decision first.
+2. Mane chin lobe; the flat tab at the top of the aperture.
+3. Clips for Gates 10-14; eye bones; mane follow-through bones.
+4. `conform()` the brows, which still float 11.7 and 15.3 mm.

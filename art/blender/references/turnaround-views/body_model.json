@@ -1,0 +1,149 @@
+{
+  "units": "h = height / subject height; u = lateral or fore-aft offset from the mask's own left edge, in the same units",
+  "paw": {
+    "count": 4,
+    "h_top": 0.08489,
+    "h_bot": 0.0,
+    "rgb": [
+      246,
+      206,
+      150
+    ],
+    "srgb01": [
+      0.96471,
+      0.80784,
+      0.58824
+    ],
+    "per_paw": [
+      {
+        "area_px": 2069,
+        "h_bot": 0.0,
+        "h_top": 0.08489,
+        "h": 0.03173,
+        "u_lo": 0.45963,
+        "u_hi": 0.60041,
+        "rgb": [
+          251,
+          216,
+          163
+        ],
+        "srgb01": [
+          0.98431,
+          0.84706,
+          0.63922
+        ]
+      },
+      {
+        "area_px": 2035,
+        "h_bot": 0.0,
+        "h_top": 0.08282,
+        "h": 0.03184,
+        "u_lo": 0.11801,
+        "u_hi": 0.26087,
+        "rgb": [
+          244,
+          204,
+          149
+        ],
+        "srgb01": [
+          0.95686,
+          0.8,
+          0.58431
+        ]
+      },
+      {
+        "area_px": 671,
+        "h_bot": 0.0,
+        "h_top": 0.06004,
+        "h": 0.0266,
+        "u_lo": 0.26294,
+        "u_hi": 0.31677,
+        "rgb": [
+          249,
+          209,
+          152
+        ],
+        "srgb01": [
+          0.97647,
+          0.81961,
+          0.59608
+        ]
+      },
+      {
+        "area_px": 606,
+        "h_bot": 0.0,
+        "h_top": 0.06004,
+        "h": 0.0267,
+        "u_lo": 0.40373,
+        "u_hi": 0.45549,
+        "rgb": [
+          239,
+          195,
+          135
+        ],
+        "srgb01": [
+          0.93725,
+          0.76471,
+          0.52941
+        ]
+      }
+    ]
+  },
+  "tail_tuft": {
+    "area_px": 3772,
+    "h_bot": 0.07775,
+    "h_top": 0.23758,
+    "h": 0.15279,
+    "u_lo": 1.2635,
+    "u_hi": 1.42765,
+    "rgb": [
+      112,
+      54,
+      12
+    ],
+    "srgb01": [
+      0.43922,
+      0.21176,
+      0.04706
+    ],
+    "note": "identified as auburn BEHIND the mane's own fore-aft span (mane u 0.147-0.702) and below h 0.45"
+  },
+  "inner_ear": {
+    "area_px": 174,
+    "h_bot": 0.63561,
+    "h_top": 0.7205,
+    "h": 0.68472,
+    "u_lo": 0.65839,
+    "u_hi": 0.70807,
+    "rgb": [
+      183,
+      112,
+      70
+    ],
+    "srgb01": [
+      0.71765,
+      0.43922,
+      0.27451
+    ],
+    "x_H_abs": 0.31849
+  },
+  "chest": {
+    "h_lo": 0.155,
+    "h_hi": 0.195,
+    "rgb": [
+      200,
+      150,
+      83
+    ],
+    "srgb01": [
+      0.78431,
+      0.58824,
+      0.32549
+    ],
+    "note": "the mane covers the chest to h 0.20 in this turnaround; this is a DESATURATED GOLD, not the muzzle's cream"
+  },
+  "absent": {
+    "cheek_blush": "cheeks measure hue 36.7-39.5 deg / sat 0.58-0.71 against a forehead of 36.7 / 0.75 \u2014 less saturated and MORE yellow. A blush moves hue toward red and adds saturation. Not built.",
+    "cream_chest_bib": "only a small patch at h 0.17-0.21 crosses the cream threshold; the chest midline is (207,156,89) at sat 0.57 against the muzzle's (247,209,154) at 0.38. Recorded as `chest` at its measured colour instead."
+  }
+}

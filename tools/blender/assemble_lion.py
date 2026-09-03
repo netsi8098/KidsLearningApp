@@ -58,6 +58,7 @@ import face_shapes  # noqa: E402
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VIEWS = os.path.join(REPO, "art", "blender", "references", "turnaround-views")
 FACE_JSON = os.path.join(VIEWS, "face_model.json")
+BODY_JSON = os.path.join(VIEWS, "body_model.json")
 CONTRACT = os.path.join(REPO, "src", "data", "lionRigContract.json")
 MANE_BLEND = os.path.join(REPO, "art", "blender", "lion_mane_foundation.blend")
 BLEND_OUT = os.path.join(REPO, "art", "blender", "lion_assembled.blend")
@@ -236,6 +237,77 @@ def join_by_material(cage, parts, keep_separate=("LionMane",)):
     return out
 
 
+def paint_regions(cage, arm, bm):
+    """Repaint measured coat regions onto the cage's own vertices.
+
+    NOT DECALS. A face decal is a separate mesh because an eye is a distinct
+    object; a coat region is the same skin in a different colour. Since the
+    cage is subdivided to 15,954 verts, painting its vertices gives a clean
+    enough boundary, costs no extra draw call, and cannot float off the surface
+    — which is the failure mode the muzzle needed three passes to fix.
+
+    Regions are selected by BONE GROUP where the rig already knows the part,
+    intersected with the measured height where the reference sets an extent.
+    A paw is `paw_FL`; how far up the sock goes is a measurement.
+
+    Only three of the five regions asked for are built, because only three are
+    in the approved turnaround. See `tools/cad/measure_body.py` for the
+    numbers; the short version is that the cheeks measure MORE yellow than the
+    forehead where a blush would be redder, and the chest below the mane is a
+    desaturated gold at saturation 0.57 rather than the muzzle's cream at 0.38.
+    """
+    me = cage.data
+    attr = me.color_attributes.get(face_lion.COLOR_ATTR)
+    if attr is None:
+        print("[assemble] no colour attribute on the cage — regions skipped")
+        return
+    gi = {g.name: g.index for g in cage.vertex_groups}
+
+    def in_group(v, names, min_w=0.5):
+        for g in v.groups:
+            if g.weight >= min_w and any(gi.get(n) == g.group for n in names):
+                return True
+        return False
+
+    def apply(name, srgb, pick):
+        lin = tuple(face_lion.srgb_to_linear(c) for c in srgb)
+        n = 0
+        for v in me.vertices:
+            if pick(v):
+                attr.data[v.index].color = (*lin, 1.0)
+                n += 1
+        print(f"[assemble]   region {name:11s} {n:5d} verts  srgb={[round(c*255) for c in srgb]}")
+        return n
+
+    total = 0
+    paw = bm.get("paw")
+    if paw:
+        # Bone group AND the measured ceiling: the paw bone owns the whole
+        # foot, and the reference says the cream stops at h 0.0849.
+        total += apply("paw", paw["srgb01"], lambda v: (
+            in_group(v, ("paw_FL", "paw_FR", "paw_RL", "paw_RR"), 0.35)
+            and v.co.z <= paw["h_top"]))
+
+    ear = bm.get("inner_ear")
+    if ear:
+        # The INNER surface only — the ear's outer back stays coat-coloured.
+        # A forward-facing normal is what distinguishes them, and it is the
+        # same test the reference view implies: the inner ear is what the
+        # front view can see.
+        total += apply("inner_ear", ear["srgb01"], lambda v: (
+            in_group(v, ("ear_L", "ear_R"), 0.35) and v.normal.y > 0.15))
+
+    tuft = bm.get("tail_tuft")
+    if tuft:
+        total += apply("tail_tuft", tuft["srgb01"], lambda v: (
+            in_group(v, ("tail_05", "tail_06"), 0.35)))
+
+    me.update()
+    print(f"[assemble] {total} verts repainted from body_model.json "
+          f"(cheek blush and cream chest bib are NOT in the reference — "
+          f"see measure_body.py)")
+
+
 def subdivide(cage, levels):
     """Catmull-Clark the cage, destructively, before anything reads its surface.
 
@@ -326,6 +398,10 @@ def main():
         cage.data.materials.clear()
     face_lion.paint(cage, fm["face_aperture"]["srgb01"], finish="matte")
     print(f"[assemble] coat painted {fm['face_aperture']['rgb']} (measured)")
+    if os.path.exists(BODY_JSON):
+        paint_regions(cage, arm, json.load(open(BODY_JSON)))
+    else:
+        print("[assemble] no body_model.json — run tools/cad/measure_body.py")
 
     # ---- 1. the face forms, built onto the rigged cage -----------------
     parts, report = [], []
