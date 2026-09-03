@@ -37,20 +37,26 @@ function Flock({ color, delay, top, dur, scale }: { color: string; delay: number
           { x: 38, y: 12, s: 0.72 },
           { x: 54, y: 6, s: 0.6 },
         ].map((b, i) => (
-          <motion.path
+          // The flap is a vertical squash of the wing V, not a path morph.
+          // Framer Motion cannot interpolate `d` between path strings — it has
+          // no path-morphing interpolator — so animating `d` wrote
+          // `d="undefined"` on every frame (60 console errors per load) and the
+          // birds never actually flapped. scaleY on a wrapping <g> is genuinely
+          // animatable, is GPU-composited, and reads the same at this size.
+          <motion.g
             key={i}
-            d={`M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`}
-            stroke={color}
-            strokeWidth={1.7 * b.s}
-            strokeLinecap="round"
-            fill="none"
-            animate={isReducedMotion ? undefined : { d: [
-              `M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`,
-              `M${b.x} ${b.y} q ${5 * b.s} ${2 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${2 * b.s} ${10 * b.s} 0`,
-              `M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`,
-            ] }}
+            style={{ transformOrigin: `${b.x + 10 * b.s}px ${b.y}px` }}
+            animate={isReducedMotion ? undefined : { scaleY: [1, 0.35, 1] }}
             transition={{ duration: 0.85 + i * 0.08, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          >
+            <path
+              d={`M${b.x} ${b.y} q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0 q ${5 * b.s} ${-4 * b.s} ${10 * b.s} 0`}
+              stroke={color}
+              strokeWidth={1.7 * b.s}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </motion.g>
         ))}
       </svg>
     </motion.div>

@@ -286,33 +286,37 @@ function SleepyMascot() {
 function SoundWaveDecoration({ isActive }: { isActive: boolean }) {
   return (
     <svg width="60" height="16" viewBox="0 0 60 16" className="mx-auto mb-2" fill="none">
-      <motion.path
-        d="M0 8 Q5 2, 10 8 T20 8 T30 8 T40 8 T50 8 T60 8"
-        stroke={isActive ? '#6C5CE7' : '#3A3D5C'}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        fill="none"
-        animate={isActive ? { d: [
-          'M0 8 Q5 2, 10 8 T20 8 T30 8 T40 8 T50 8 T60 8',
-          'M0 8 Q5 12, 10 8 T20 8 T30 8 T40 8 T50 8 T60 8',
-          'M0 8 Q5 2, 10 8 T20 8 T30 8 T40 8 T50 8 T60 8',
-        ] } : {}}
+      {/* The two keyframes of this wave were an exact vertical mirror of each
+          other about the baseline, so scaleY(-1) reproduces it precisely.
+          Framer cannot interpolate `d` between path strings — doing so wrote
+          `d="undefined"` on every frame and the wave never moved. With
+          transform-box: fill-box the default origin already sits on the
+          baseline, which is the axis being mirrored. */}
+      <motion.g
+        animate={isActive ? { scaleY: [1, -1, 1] } : {}}
         transition={isActive ? { repeat: Infinity, duration: 1.5, ease: 'easeInOut' } : {}}
-      />
-      <motion.path
-        d="M0 10 Q7.5 4, 15 10 T30 10 T45 10 T60 10"
-        stroke={isActive ? '#A78BFA' : '#2A2D52'}
-        strokeWidth="1"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.5"
-        animate={isActive ? { d: [
-          'M0 10 Q7.5 4, 15 10 T30 10 T45 10 T60 10',
-          'M0 10 Q7.5 14, 15 10 T30 10 T45 10 T60 10',
-          'M0 10 Q7.5 4, 15 10 T30 10 T45 10 T60 10',
-        ] } : {}}
+      >
+        <path
+          d="M0 8 Q5 2, 10 8 T20 8 T30 8 T40 8 T50 8 T60 8"
+          stroke={isActive ? '#6C5CE7' : '#3A3D5C'}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </motion.g>
+      <motion.g
+        animate={isActive ? { scaleY: [1, -1, 1] } : {}}
         transition={isActive ? { repeat: Infinity, duration: 2, ease: 'easeInOut' } : {}}
-      />
+      >
+        <path
+          d="M0 10 Q7.5 4, 15 10 T30 10 T45 10 T60 10"
+          stroke={isActive ? '#A78BFA' : '#2A2D52'}
+          strokeWidth="1"
+          strokeLinecap="round"
+          fill="none"
+          opacity="0.5"
+        />
+      </motion.g>
     </svg>
   );
 }

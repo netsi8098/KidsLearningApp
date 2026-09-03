@@ -133,21 +133,25 @@ function UnderwaterScene() {
       <rect width="1440" height="120" fill="url(#waterGrad)" />
       {/* Seaweed */}
       {[120, 380, 640, 900, 1180, 1350].map((x, i) => (
-        <motion.path
+        // Sway by rotating about the base rather than morphing `d`: Framer has
+        // no path interpolator, so animating `d` wrote `d="undefined"` every
+        // frame and the seaweed stayed still. originY:1 pins the pivot to the
+        // seabed end of the stem so only the tip travels.
+        <motion.g
           key={i}
-          d={`M${x},120 C${x + 8},${100 - i * 2} ${x - 8},${80 - i * 3} ${x + 4},${60 + i * 2}`}
-          fill="none"
-          stroke="#6BCB77"
-          strokeWidth={3}
-          strokeLinecap="round"
-          opacity={0.15}
-          animate={{ d: [
-            `M${x},120 C${x + 8},${100 - i * 2} ${x - 8},${80 - i * 3} ${x + 4},${60 + i * 2}`,
-            `M${x},120 C${x - 6},${100 - i * 2} ${x + 10},${80 - i * 3} ${x - 2},${60 + i * 2}`,
-            `M${x},120 C${x + 8},${100 - i * 2} ${x - 8},${80 - i * 3} ${x + 4},${60 + i * 2}`,
-          ] }}
+          style={{ originX: 0.45, originY: 1 }}
+          animate={{ rotate: [0, -6, 0] }}
           transition={{ duration: 4 + i * 0.5, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        >
+          <path
+            d={`M${x},120 C${x + 8},${100 - i * 2} ${x - 8},${80 - i * 3} ${x + 4},${60 + i * 2}`}
+            fill="none"
+            stroke="#6BCB77"
+            strokeWidth={3}
+            strokeLinecap="round"
+            opacity={0.15}
+          />
+        </motion.g>
       ))}
       {/* Bubbles */}
       {bubbles.map((b, i) => (
