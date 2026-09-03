@@ -11,6 +11,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'sounds/*.mp3'],
       workbox: {
+        // Note: mp4 is deliberately absent from globPatterns. The generated
+        // episodes in public/videos are ~5 MB each, and precaching them would
+        // pull tens of MB on first load; they should be cached at runtime
+        // instead, once a child actually plays one.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
@@ -41,9 +46,6 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
       },
     }),
   ],
