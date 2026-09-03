@@ -129,8 +129,12 @@ def main():
             dx, dy, dz = x - cur[0], y - cur[1], z - cur[2]
             rec["current"] = [round(v, 5) for v in cur]
             rec["delta"] = [round(dx, 5), round(dy, 5), round(dz, 5)]
-            rec["delta_mm_at_1m30"] = [round(v * 1300 / 0.847, 1)
-                                       for v in (dx, dy, dz)]
+            # x1000: model units are metres, matching every other metric in
+            # this pipeline. An earlier version used 1300/0.847 to express
+            # "mm on the shipped 1.30 m character" and inflated everything by
+            # 1.535x, making these deltas incomparable with the rig's own
+            # millimetres.
+            rec["delta_mm"] = [round(v * 1000.0, 1) for v in (dx, dy, dz)]
             line += (f"({cur[0]:+.3f}, {cur[1]:+.3f}, {cur[2]:+.3f})    "
                      f"{dx:+.4f} {dy:+.4f} {dz:+.4f}")
         else:
@@ -139,16 +143,15 @@ def main():
         out["features"][name] = rec
 
     print("")
-    # Restate the two placement facts that matter, in the units a reviewer
-    # thinks in: millimetres on the shipped 1.30 m character.
+    # Restate the placement facts in model millimetres.
     for name in ("eye", "brow", "mouth"):
         rec = out["features"].get(name)
-        if not rec or "delta_mm_at_1m30" not in rec:
+        if not rec or "delta_mm" not in rec:
             continue
-        dx, dy, dz = rec["delta_mm_at_1m30"]
+        dx, dy, dz = rec["delta_mm"]
         worst = max(abs(dx), abs(dy), abs(dz))
         verdict = "OK" if worst < 8 else ("MOVE" if worst < 40 else "MOVE — LARGE")
-        print(f"{name:8s} worst axis {worst:6.1f} mm at 1.30 m  ->  {verdict}")
+        print(f"{name:8s} worst axis {worst:6.1f} mm  ->  {verdict}")
     print("===FACE_PLACEMENT_END===")
 
     with open(OUT_JSON, "w") as fh:

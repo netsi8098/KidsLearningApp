@@ -3895,9 +3895,9 @@ vertex groups name what each ray hit, so the probe validates itself:
 | nostril | +0.0410, 0.5710 | +0.6319 | `body:muzzle_01`, `body:nose` | no socket exists |
 | mouth | 0.0000, 0.4984 | +0.6365 | cap/cavity, no ring group | 0.0000, +0.0266, +0.0064 |
 
-Read in millimetres on the shipped 1.30 m character: the eye target sits **76 mm
-behind** the surface it is meant to be a socket in, the brow **48 mm too narrow
-and 76 mm too low**, the mouth **41 mm behind**. Only the eye's x and z, and the
+Read in model millimetres: the eye target sits **49.8 mm behind** the surface
+it is meant to be a socket in, the brow **31.1 mm too narrow and 49.8 mm too
+low**, the mouth **26.6 mm behind**. Only the eye's x and z, and the
 mouth's x, were already right.
 
 The nose pad and nostrils have `normal.y` +0.996 and +0.997 — dead-on the front
@@ -3974,8 +3974,8 @@ be graded against a measured value anyway.
 
 2. **`radius` was calibrated against an off-surface target.** It is a sphere
    around the target, so it only selects a sensible patch when the target is on
-   the skin. The mouth's 0.052 grazed the muzzle and caught 6 faces from 41 mm
-   behind; placed correctly, the same 0.052 catches **21** — a mouth a third of
+   the skin. The mouth's 0.052 grazed the muzzle and caught 6 faces from
+   26.6 mm behind; placed correctly, the same 0.052 catches **21** — a mouth a third of
    the face wide — and the nose pad's 0.062 caught 15 overlapping it. Insetting
    overlapping regions produced **12 sliver faces** where the cage had had none.
    Radii are now sized against the measured feature width; slivers back to 0.
@@ -3994,8 +3994,7 @@ be graded against a measured value anyway.
    character read as squinting. The first fix probed a ring for the most
    protruding nearby surface and overreached: at a radius wide enough to clear
    the eye socket the ring also sampled the muzzle, so the "rim" for the mouth
-   came back as the **nose** and lifted it 0.0678 — 104 mm on the shipped
-   character. `face_lion.py` now imports `FACE_SOCKETS` and lifts each decal by
+   came back as the **nose** and lifted it 0.0678 — **67.8 mm**. `face_lion.py` now imports `FACE_SOCKETS` and lifts each decal by
    its own socket's depth plus one clearance constant.
 
 ### What the measurement knew that a builder would not
@@ -4033,7 +4032,7 @@ be graded against a measured value anyway.
   through and the pupil rendered as a crescent clinging to its rim — the same
   failure `detail_lion.py` documented for concentric spheres, one level up. The
   stack is now derived from the domes it has to clear, and total protrusion is
-  reported: 0.0083, or 12.7 mm at 1.30 m.
+  reported: 0.0083, or **8.3 mm**.
 
 ### Not built, deliberately
 
@@ -4263,7 +4262,7 @@ Fixed with a narrow z-window probe that takes the most protruding hit within
 ±0.015 — the cavity's **rim**, which is where a mouth line belongs: the
 reference draws the line on the muzzle front with the opening behind it. The
 window has to stay narrow; the earlier wide-ring version of this idea found the
-NOSE and lifted the mouth 104 mm.
+NOSE and lifted the mouth 67.8 mm.
 
 ### The dome bit for the third time
 
@@ -4302,5 +4301,165 @@ corrections to it.
 1. The **shape keys** — the rest of Gate 15, and the largest remaining piece.
 2. Skin the face parts to `head`/`jaw`; they are parented to the cage object,
    which is right for review and wrong for a head turn.
+3. Muzzle lobes and a curved mouth line; whiskers.
+4. Mane chin lobe; leg volume.
+
+## 2026-09-03 (fifth pass) — the 16 contract morph targets
+
+All 16 names in `src/data/lionRigContract.json` are built, present in the GLB,
+and verified by render rather than by displacement alone.
+`tools/blender/face_shapes.py`.
+
+### What is measured here and what is not
+
+This is the first stage of the pipeline whose numbers are mostly NOT measured,
+and saying so plainly matters more than the numbers do.
+
+The reference is ONE NEUTRAL POSE. It can say where a brow is; it cannot say
+how far a brow travels when it raises, because there is no raised brow in it.
+Expression amplitude is a performance choice.
+
+So every amplitude is anchored to a measured DIMENSION and states its fraction
+— `brow_up` travels 20% of the measured 0.1054 H brow-to-eye gap, `smile`
+raises the mouth's ends by 18% of its measured half-width, `cheeks_up` rises
+10% of the muzzle's measured half-height. That makes each one scale-correct and
+arguable as a single number, which is the most that can honestly be claimed.
+
+### Blink is a decal transform, not a skin deformation
+
+The eye stack stands **8.3 mm proud of the skin** — a rigid decal stack in
+front of the surface, by the `face_lion.py` design. A skin-based eyelid would
+have to travel that entire distance before it began to cover anything, on a
+socket that resolves to **2 centre faces** — flagged two passes ago as the
+thing to check here. Checked, and it is why the blink is not built that way.
+
+So the blink flattens the EYE STACK. The lid arc is the largest and darkest
+disc in it, so a closed eye collapses to the lid's own dark line, which is what
+a closed eye looks like in this art style. The runtime needs no change:
+`setMorph` traverses the scene and sets a morph on any mesh carrying that name,
+so a morph can live on the object it belongs to.
+
+The socket loops are not wasted by that — they are what lets the skin around
+the eye move without pinching, which `eyes_narrow` and `cheeks_up` use.
+
+| where | morphs |
+| --- | --- |
+| each eye's 5 parts | `blink_L`/`blink_R` (per side), `eyes_wide`, `eyes_narrow` |
+| each brow | `brow_up_*`, `brow_down_*` |
+| MouthLine + cage lip rim | `smile`, `mouth_wide/narrow/round`, `viseme_MBP/FV/OU` |
+| Muzzle + cage | `cheeks_up` |
+
+### `shape_key_add` RETURNS A KEY AT value = 1.0
+
+Not 0.0. Verified directly — adding Basis then two keys to a cube leaves
+`[('Basis', 1.0), ('k1', 1.0), ('k2', 1.0)]`.
+
+So every morph was live the instant it was authored, and by the end of the
+build all 16 were stacked on each other. The "NEUTRAL" preview rendered a lion
+with its eyes shut and its mouth crushed, and each per-morph preview showed
+whatever had not been zeroed yet. The geometry was correct throughout — the
+preview sheet was measuring the wrong scene. It would have EXPORTED that way
+too; only the explicit zeroing inside the preview loop left the saved file at
+rest, which was luck rather than design.
+
+Two things now prevent a recurrence: `key.value = 0.0` at creation, and
+`assert_neutral_is_neutral()`, which refuses to continue unless the evaluated
+mesh equals the base mesh with every morph at 0. That check is cheap and would
+have caught this in seconds instead of after a full render sheet.
+
+### Two bugs of my own in the eye morphs
+
+`eyes_wide` and `eyes_narrow` looped the sides and called `add_world_morph` on
+the CAGE inside the loop. Blender appends a suffix to a duplicate key name, so
+the second call would have produced `eyes_wide.001` that no runtime looks up —
+and a stray `if side == "L"` meant only the left eye's skin ever moved. One
+function applying both falloffs, added once.
+
+### A brow slides up the forehead; it does not lift off it
+
+Translating straight up worked on paper and failed in the render: the skull
+curves back above the brow, so the disc's outer end left the surface. The
+forehead's own slope is measurable — ray-cast at the start and end heights and
+take the difference — so the translation now follows the skin (−0.0233 in y at
+a full raise). Measured per side it came out −0.0198 against −0.0267, a 35%
+disagreement on a cage built from symmetric tables, so it is averaged: same
+conclusion as everywhere else, a left/right difference on a symmetric subject
+is sampling noise.
+
+### The decal-float report, and why the amplitudes did NOT change
+
+A render made `brow_up` look as though it were lifting the brow off the head,
+and the obvious response — shrink the amplitude — would have masked the cause.
+Measured instead:
+
+| decal | float at REST | worst added by a morph |
+| --- | --- | --- |
+| Muzzle | **65.6 mm** | −7.5 (`cheeks_up` reduces it) |
+| Brow_R | 15.3 mm | +7.1 (`brow_down_R`) |
+| Brow_L | 11.7 mm | +6.4 (`brow_up_L`) |
+| eye parts | 18–24 mm | +4.7 |
+| MouthLine | 20.7 mm | +3.7 |
+
+The brows and the muzzle float because they are **flat ellipses on curved
+surfaces** — a build issue in `face_lion.py`, present at rest, to which the
+morphs add at most 7.5 mm. So the amplitudes stay and the flat-decal build is
+what needs fixing. The eye stack's ~20 mm is the socket it sits in and is by
+design, not a defect; the report says so, because a bare number there invites
+exactly the wrong conclusion.
+
+`report_decal_float` prints this every run, so the next person does not
+rediscover it with a one-off probe, and a morph that genuinely peels a decal
+off the face shows up as a large delta rather than a puzzling render.
+
+### A unit error of mine, corrected across the docs
+
+I had been converting model units to millimetres with `1300/0.847`, to express
+"mm on the shipped 1.30 m character". Every other script here uses `× 1000` —
+`rig_cage_lion` prints reach headroom as `v * 1000`, `anim_cage_lion` prints
+support slide the same way — so my figures were inflated **1.535×** and
+incomparable with the 22.1 mm reach headroom and 0.166 mm support slide they
+sat beside. Corrected in all three scripts and in the figures already
+published:
+
+| claimed | actual |
+| --- | --- |
+| eye target 76 mm behind the skin | **49.8 mm** |
+| brow 48 mm too narrow / 76 mm too low | **31.1 / 49.8 mm** |
+| mouth 41 mm behind | **26.6 mm** |
+| eye stack 12.7 mm proud | **8.3 mm** |
+| bad rim probe lifted the mouth 104 mm | **67.8 mm** |
+
+The runtime does scale the asset by that factor; that belongs in a note, not in
+the units.
+
+### GLB meshes were called `Sphere.012`
+
+The glTF exporter writes mesh names from the DATA-block, not the object, so the
+face parts shipped as `Sphere` through `Sphere.014`. Functional — the runtime
+looks morphs up by morph name — but nothing in the file said which mesh was the
+pupil. `disc()` now names the data-block too, and the GLB reads `Brow_L,
+Brow_R, Catchlight_L, … Sclera_R, LionCage`.
+
+### Verification
+
+* **16/16 contract morphs** in the GLB — none missing, none extra.
+* **No morph displaces zero**; the build refuses to finish if one does.
+* **Neutral == base**, worst deviation 0.00e+00.
+* **17 renders** (neutral + 16) in `docs/assets/lion-shapes/` plus a contact
+  sheet. Every morph does what its name says — the only check that matters on a
+  face, and one a displacement in millimetres cannot make.
+* `validate-lion-glb.mjs` reports **no missing morph targets** against this
+  GLB. It still fails on 45 bones and 13 clips, which is correct and expected:
+  this is the face-stage export with no armature, not the assembled character.
+* `cage_lion.py` untouched, so the rig, walk, deformation battery, overlay and
+  silhouette grade stand as measured two passes ago. Not re-run, not claimed.
+
+### Next, in order
+
+1. **Assemble one GLB**: cage + armature + Idle/Walk + face parts + morphs,
+   with the face parts skinned to `head`/`jaw`. Until that exists the morphs
+   ship separately from the rig and the contract cannot pass as a whole.
+2. **Project the decals onto the surface** instead of leaving them flat — the
+   muzzle's 65.6 mm float and the brows' 15 mm are the same defect.
 3. Muzzle lobes and a curved mouth line; whiskers.
 4. Mane chin lobe; leg volume.

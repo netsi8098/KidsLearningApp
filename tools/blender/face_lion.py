@@ -278,6 +278,12 @@ def disc(name, centre, normal, rx, rz, srgb01, finish="gloss", segments=16,
                                          radius=1.0, location=(0, 0, 0))
     o = bpy.context.object
     o.name = name
+    # Name the MESH DATA too. The glTF exporter writes mesh names from the
+    # data-block, not the object, so without this the GLB shipped meshes called
+    # `Sphere`, `Sphere.001` ... `Sphere.014` — functional, because the runtime
+    # looks morphs up by morph name, but nothing in the file says which mesh is
+    # the pupil.
+    o.data.name = name
     side, up, n = plane_basis(normal)
     if roll_deg:
         a = math.radians(roll_deg)
@@ -457,7 +463,7 @@ def build_eyes(cage, fm, parts, report):
             f"pupil offset inboard {abs(al['x_H']) - abs(pu['x_H']):+.4f} "
             f"below {al['h'] - pu['h']:+.4f}  "
             f"stack protrusion {protrusion:.4f} "
-            f"({protrusion * 1300 / 0.847:.1f} mm at 1.30 m)  "
+            f"({protrusion * 1000.0:.1f} mm)  "
             f"lifted {lift:.4f} off the socket floor")
 
 def build_muzzle(cage, fm, parts, report):

@@ -199,8 +199,9 @@ contact, the largest single error in the asset.
 1. ~~**No face.**~~ **STARTED 2026-09-03.** The claim that the head had "no eye
    sockets... no mouth" was wrong even when written — `cage_lion.py` had carried
    eye, brow and mouth sockets since GATE 4. What it did not have was a face
-   anyone had *measured*: the eye target sat 76 mm behind the skin it was meant
-   to be a socket in, the brow 48 mm too narrow and 76 mm too low, and there was
+   anyone had *measured*: the eye target sat 49.8 mm behind the skin it was
+   meant to be a socket in, the brow 31.1 mm too narrow and 49.8 mm too low,
+   and there was
    no nose pad at all. All five socket targets are now driven by
    `face_model.json`, and the forms the loops frame — eyes as a measured
    sclera/iris/pupil/catchlight stack, brows, nose pad, mouth line — are built
@@ -209,8 +210,12 @@ contact, the largest single error in the asset.
    unbounded white blob into an eye. It is an ARC, not a rim: measured span
    180 deg centred +52 deg (0 outboard, 90 up), stroke 0.0055 H at the peak
    tapering to 0.0025 at the ends, nothing below. Still outstanding for
-   Gate 15: the **shape-key set** (`Blink_*`, `BrowUp_*`, `Smile`, `JawOpen`,
-   visemes) and skinning the face parts to `head`/`jaw`. The cream **muzzle
+   Gate 15: assembling one GLB (cage + armature + clips + face + morphs) and
+   skinning the face parts to `head`/`jaw`. The **16 contract morph targets**
+   landed 2026-09-03 — `blink_L/R`, `eyes_wide/narrow`, `smile`,
+   `mouth_wide/narrow/round`, `viseme_MBP/FV/OU`, `brow_up_L/R`,
+   `brow_down_L/R`, `cheeks_up` — all present in the GLB and each verified by
+   render, not by displacement alone. The cream **muzzle
    mass** landed 2026-09-03 — one measured region, h 0.3955-0.6315, half-width
    0.1221, rgb (239,197,137). It is a single ellipse where the reference draws
    two lobes and a chin joined by a philtrum crease, so it reads as a muzzle
