@@ -623,11 +623,24 @@ TAIL = [
     # the first pass put it, which is why the band at 0.05-0.10 was still 0.371 H
     # short after the tail was supposedly fixed.
     # Shaft. Thin, and tucked against the rump rather than trailing behind it.
-    ("root_02", (0.0, -0.398, 0.328), (0, -0.40, -1.00), 0.038),
-    ("root_01", (0.0, -0.406, 0.294), (0, -0.25, -1.00), 0.032),
-    ("tail_03", (0.0, -0.412, 0.262), (0, -0.55, -1.00), 0.028),
-    ("tail_04", (0.0, -0.438, 0.236), (0, -1.00, -0.70), 0.028),
-    ("tail_05", (0.0, -0.480, 0.206), (0, -1.00, -0.35), 0.030),
+    # THE UPPER TAIL LEFT THE BODY TOO EARLY.
+    #
+    # The side view's rear edge at h 0.25-0.35 measured 0.062-0.082 H too far
+    # back, and per-vertex attribution showed every rearmost vertex there is a
+    # `tail:*` group — not the rump, which is what "the torso is too long" had
+    # been read as. Converted out of mask units, the reference's rear edge at
+    # h 0.25-0.30 sits at y = -0.370, which is the RUMP; the model's tail was
+    # already at -0.450, well behind it.
+    #
+    # So the reference's tail hangs close to the body at rump height and only
+    # flicks out lower down, where the side reference is clipped at the canvas
+    # edge and its true extent is unknowable anyway. The upper stations come
+    # forward; the tuft is left where it measured.
+    ("root_02", (0.0, -0.392, 0.328), (0, -0.40, -1.00), 0.038),
+    ("root_01", (0.0, -0.394, 0.294), (0, -0.25, -1.00), 0.032),
+    ("tail_03", (0.0, -0.396, 0.262), (0, -0.55, -1.00), 0.028),
+    ("tail_04", (0.0, -0.404, 0.236), (0, -1.00, -0.70), 0.028),
+    ("tail_05", (0.0, -0.436, 0.206), (0, -1.00, -0.35), 0.030),
     # Tuft. Swings back to horizontal and bulges, so the oval stands upright.
     #
     # Centres dropped ~0.012 after the first attempt measured one band high at the
@@ -637,8 +650,8 @@ TAIL = [
     # nominal radius, and the cage is graded UNSUBDIVIDED. The radii below are set
     # from the effective extent, not the nominal one — reading r straight off the
     # reference leaves the tuft visibly small.
-    ("tuft_01", (0.0, -0.520, 0.186), (0, -1.00, -0.20), 0.046),
-    ("tuft_02", (0.0, -0.556, 0.166), (0, -1.00, -0.10), 0.074),
+    ("tuft_01", (0.0, -0.492, 0.186), (0, -1.00, -0.20), 0.046),
+    ("tuft_02", (0.0, -0.536, 0.166), (0, -1.00, -0.10), 0.074),
     ("tuft_03", (0.0, -0.592, 0.154), (0, -1.00,  0.10), 0.086),
     ("tuft_04", (0.0, -0.624, 0.152), (0, -1.00,  0.30), 0.070),
     ("tuft_05", (0.0, -0.642, 0.160), (0, -1.00,  0.50), 0.034),

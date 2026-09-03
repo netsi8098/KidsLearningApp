@@ -5614,3 +5614,65 @@ midline-collision constraint.
 Weighted IoU **0.8632** (front 0.9259, side 0.8498, rear 0.8297, 3/4 0.8049).
 Battery 0 pinched / 0 flipped, worst area 0.252. 4 meshes, 3.89 MB, both
 contracts passing.
+
+## 2026-09-03 (twentieth pass) — "torso length" was the TAIL
+
+The defect named at the end of the last pass does not exist. The side view's
+rear edge at h 0.25-0.35 measured 0.062-0.082 H too far back, which read as a
+long torso. Per-vertex attribution says otherwise: **every rearmost vertex in
+those bands is a `tail:*` group** — `tail_03`, `tail_04`, `root_01`, `tuft_*`.
+Not the rump, not the lumbar, not any torso station.
+
+Converted out of mask units, the reference's rear edge at h 0.25-0.30 sits at
+y = -0.370, which is where the RUMP is. The model's tail was already at -0.450,
+well behind it. So the reference's tail hangs close to the body at rump height
+and only flicks out lower down — where the side reference is clipped at the
+canvas edge and its true extent is unknowable anyway (`silhouette_qa` reports
+that clipping at rear-edge z 0.092-0.223, which is the tuft's own band).
+
+### The correction, and its honest cost
+
+Upper tail stations pulled forward 0.006-0.044: `root_02` -0.398 -> -0.392,
+`root_01` -0.406 -> -0.394, `tail_03` -0.412 -> -0.396, `tail_04`
+-0.438 -> -0.404, `tail_05` -0.480 -> -0.436, and the first two tuft stations
+in sympathy. The tuft itself is left where it measured.
+
+    side band     reference   before    after
+    0.25-0.30       0.919      +0.067   **+0.033**
+
+Halved. And the totals:
+
+    | | before | after |
+    | front IoU | 0.9259 | 0.9259 |
+    | side IoU  | 0.8498 | **0.8502** |
+    | rear IoU  | 0.8297 | 0.8298 |
+    | 3/4 IoU   | 0.8050 | **0.8026** |
+    | weighted  | 0.8632 | **0.8628** |
+
+**Net -0.0004 weighted.** The targeted band improved substantially and the
+three-quarter view lost 0.0024, because the tail's projection at 47 degrees
+changed. Kept: the attribution is per-vertex, the comparison is per-edge and
+max-against-max, and the reference genuinely puts its rear edge at the rump
+there. But it is a wash on the headline number and should be read as such
+rather than as a win.
+
+Deformation entirely unaffected — battery 0 pinched / 0 flipped, worst area
+0.252, reach 22.1 / 42.1 mm, support slide 0.166 mm, rig overlay unchanged.
+
+### What is left in the side view, and why it is not chaseable
+
+    side band     ref_w   mod_w      dw    ref_gap  mod_gap
+    0.05-0.10     1.071   1.010   -0.062    0.246    0.283
+    0.00-0.05     0.788   0.754   -0.035    0.246    0.283
+
+That is the paw band, and the previous pass established the cause: the sole is
+ROUNDED where the reference's is flat, so it is short at the lowest rows. The
+station rings are the right size (front 0.256 against 0.253, rear 0.264 against
+0.262) — it is the cap profile. Reshaping it risks the ground-contact metrics,
+so it wants doing with the walk QA in the loop rather than as a silhouette
+tweak.
+
+### State
+
+Weighted IoU **0.8628**. Battery 0/0. 4 meshes, 3.90 MB, both contracts pass.
+Repo baseline unmoved: typecheck 52, tests 29 failed / 727 passed.
