@@ -61,6 +61,11 @@ export interface WorldStats {
      It was already being written here and read by the HUD; only the type was
      missing, so `tsc` had three errors on a stat that worked at runtime. */
   lionFloorGap?: number;
+  /* The clip the BRAIN chose, as opposed to the debug override. Without this
+     the HUD could only ever report "auto (brain)", so a sequence like
+     WalkStart -> Walk -> WalkStop was unobservable and the wiring could not be
+     verified from outside. */
+  lionBrainClip?: LionClip;
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -135,6 +140,7 @@ function Lion({
   brainRef,
   lionUrl,
   onMeasured,
+  onBrainClip,
 }: {
   spawn: THREE.Vector3 | null;
   bounds: { cx: number; cz: number; r: number } | null;
@@ -145,6 +151,7 @@ function Lion({
   brainRef?: React.MutableRefObject<LionBrain | null>;
   lionUrl: string;
   onMeasured: (height: number, grounded: boolean, clips: string[], floorGap: number) => void;
+  onBrainClip: (clip: LionClip) => void;
 }) {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(lionUrl);
@@ -319,6 +326,7 @@ function Lion({
      per frame against the environment is cheap and, unlike an analytic dome
      formula copied from the build script, cannot drift out of sync with the
      asset that actually shipped. */
+  const reportedClip = useRef<LionClip>('Idle');
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const down = useMemo(() => new THREE.Vector3(0, -1, 0), []);
   const from = useMemo(() => new THREE.Vector3(), []);
@@ -328,6 +336,10 @@ function Lion({
     brain.step(dt);
     const clip = (clipOverride as LionClip | null) ?? brain.clip;
     if (clip !== activeClip && actions[clip]) setActiveClip(clip);
+    if (brain.clip !== reportedClip.current) {
+      reportedClip.current = brain.clip;
+      onBrainClip(brain.clip);
+    }
 
     let y = group.current.position.y;
     if (ground) {
@@ -574,6 +586,11 @@ export default function HomeWorld3D({
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
+  const handleBrainClip = useMemo(() => (clip: LionClip) => {
+    stats.current = { ...stats.current, lionBrainClip: clip };
+    onStats?.(stats.current as WorldStats);
+  }, [onStats]);
+
   const handleLionMeasured = useMemo(() => (height: number, grounded: boolean, clips: string[], floorGap: number) => {
     stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded, lionClips: clips, lionFloorGap: floorGap };
     onStats?.(stats.current as WorldStats);
@@ -623,6 +640,7 @@ export default function HomeWorld3D({
               brainRef={brainRef}
               lionUrl={lionUrl}
               onMeasured={handleLionMeasured}
+              onBrainClip={handleBrainClip}
             />
           )}
           <Preload all />

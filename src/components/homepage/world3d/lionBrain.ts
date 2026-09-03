@@ -16,7 +16,22 @@
 
 export type LionClip =
   | 'Idle' | 'Walk' | 'Wave' | 'Sit' | 'Jump'
-  | 'Celebrate' | 'Nod' | 'LookAround' | 'Talk' | 'Sleep';
+  | 'Celebrate' | 'Nod' | 'LookAround' | 'Talk' | 'Sleep'
+  /* The production cage's clips. TWO ASSETS SHIP DIFFERENT SETS: the proxy has
+     Sit / Nod / LookAround / Talk / Sleep and one fused Jump; the cage has
+     WalkStart / WalkStop / TurnLeft / TurnRight and the jump split into five
+     blendable phases. Neither is a subset of the other, so the union is
+     declared here and every request goes through `clipOrFallback`, which asks
+     the LOADED asset what it actually has. Requesting a clip the asset lacks
+     leaves `activeClip` unchanged and the lion frozen mid-behaviour. */
+  | 'WalkStart' | 'WalkStop' | 'TurnLeft' | 'TurnRight'
+  | 'JumpAnticipation' | 'JumpTakeoff' | 'JumpAirborne'
+  | 'JumpLand' | 'JumpRecovery';
+
+/** The rig's measured gaze limit — see `LionBrain.gaze`. */
+export const GAZE_LIMIT = (28 * Math.PI) / 180;
+/** Eye height in metres on the 1.30 m character, for the pitch calculation. */
+const EYE_HEIGHT = 0.85;
 
 /**
  * Fallback metres per second, used only until the measured value arrives.
@@ -80,6 +95,8 @@ export class LionBrain {
   private elapsed = 0;
   private restFor = 0;
   private durations: Partial<Record<LionClip, number>> = {};
+  private available = new Set<LionClip>();
+  private gazeTarget: { x: number; y: number; z: number } | null = null;
 
   /** Metres per second, from the measured clip stride. See setLocomotion. */
   private walkSpeed = WALK_SPEED_FALLBACK;
@@ -108,10 +125,62 @@ export class LionBrain {
   /** Real clip lengths, read from the GLB once it has loaded. */
   setDurations(d: Partial<Record<LionClip, number>>) {
     this.durations = d;
+    this.available = new Set(Object.keys(d) as LionClip[]);
+  }
+
+  /** Does the loaded asset actually contain this clip? */
+  has(clip: LionClip) {
+    // Before the GLB reports in, assume yes — otherwise every behaviour chosen
+    // during loading would silently degrade to Idle.
+    return this.available.size === 0 || this.available.has(clip);
+  }
+
+  /**
+   * First candidate the loaded asset has, else the last one as a floor.
+   *
+   * This is what lets one brain drive both characters. A sequence written for
+   * the cage (WalkStart -> Walk -> WalkStop) collapses cleanly to the proxy's
+   * plain Walk, and the five jump phases collapse to its single Jump.
+   */
+  private clipOrFallback(...candidates: LionClip[]): LionClip {
+    for (const c of candidates) if (this.has(c)) return c;
+    return candidates[candidates.length - 1];
   }
 
   private dur(clip: LionClip, fallback: number) {
     return this.durations[clip] ?? fallback;
+  }
+
+  private clipTask(clip: LionClip, fallback: number): Task {
+    return { kind: 'clip', clip, seconds: this.dur(clip, fallback) };
+  }
+
+  /** Point the eyes at a world position. Cleared by `lookAhead`. */
+  lookAt(x: number, z: number, y = 1.0) {
+    this.gazeTarget = { x, y, z };
+  }
+
+  lookAhead() { this.gazeTarget = null; }
+
+  /**
+   * Eye yaw and pitch in radians, relative to the head's facing, clamped to
+   * the range the rig can actually deliver.
+   *
+   * GAZE_LIMIT is not a taste choice. The iris slides across a FIXED sclera,
+   * and the built discs give it 0.0152 of travel against a 0.032 bone, so past
+   * ±28 degrees the iris leaves the white. The rig cannot look further and the
+   * runtime must not ask it to.
+   */
+  get gaze(): { yaw: number; pitch: number } {
+    if (!this.gazeTarget) return { yaw: 0, pitch: 0 };
+    const dx = this.gazeTarget.x - this.x;
+    const dz = this.gazeTarget.z - this.z;
+    const flat = Math.hypot(dx, dz);
+    const clamp = (a: number) => Math.max(-GAZE_LIMIT, Math.min(GAZE_LIMIT, a));
+    return {
+      yaw: clamp(shortestAngle(this.yaw, Math.atan2(dx, dz))),
+      pitch: clamp(Math.atan2(this.gazeTarget.y - EYE_HEIGHT, flat || 1e-3)),
+    };
   }
 
   /** Replace whatever the lion was doing. Used for direct, deliberate commands. */
@@ -127,11 +196,61 @@ export class LionBrain {
     this.queue.push(...tasks);
   }
 
-  walkTo(x: number, z: number) { this.command([{ kind: 'goto', x, z }]); }
+  /**
+   * Walk to a point, with a start and a stop when the asset has them.
+   *
+   * The cage's WalkStart ends on Walk's first pose and WalkStop drives every
+   * foot back to zero, so the three chain without a slide. On the proxy, which
+   * has neither, this collapses to the plain goto it always was.
+   */
+  walkTo(x: number, z: number) {
+    const tasks: Task[] = [];
+    if (this.has('WalkStart')) tasks.push(this.clipTask('WalkStart', 0.6));
+    tasks.push({ kind: 'goto', x, z });
+    if (this.has('WalkStop')) tasks.push(this.clipTask('WalkStop', 0.7));
+    this.command(tasks);
+  }
+
+  /**
+   * Turn in place to face a point, using the authored turn clips.
+   *
+   * The turn clips lead with the head and reposition the feet last, which is
+   * the same face-before-move rule this class already applies at the
+   * navigation level — so the clip and the brain finally agree, instead of the
+   * brain yawing the whole rig while a walk cycle plays.
+   */
+  turnTo(x: number, z: number) {
+    const diff = shortestAngle(this.yaw, Math.atan2(x - this.x, z - this.z));
+    const clip: LionClip = diff >= 0 ? 'TurnLeft' : 'TurnRight';
+    const tasks: Task[] = [];
+    if (this.has(clip)) tasks.push(this.clipTask(clip, 1.1));
+    tasks.push({ kind: 'face', x, z });
+    this.command(tasks);
+  }
   wave() { this.command([{ kind: 'clip', clip: 'Wave', seconds: this.dur('Wave', 2.6) }]); }
   celebrate() { this.command([{ kind: 'clip', clip: 'Celebrate', seconds: this.dur('Celebrate', 2.3) }]); }
   nod() { this.command([{ kind: 'clip', clip: 'Nod', seconds: this.dur('Nod', 1.4) }]); }
-  jump() { this.command([{ kind: 'clip', clip: 'Jump', seconds: this.dur('Jump', 1.7) }]); }
+  /**
+   * Jump as five blendable phases when the asset has them.
+   *
+   * The brief asks for anticipation, takeoff, airborne, land and recovery as
+   * SEPARATE clips precisely so a phase can be HELD — hanging in the air while
+   * a card loads, say — rather than committing to one fixed-length jump.
+   * Sequencing them here is what makes that possible.
+   */
+  jump() {
+    if (this.has('JumpAnticipation')) {
+      this.command([
+        this.clipTask('JumpAnticipation', 0.5),
+        this.clipTask('JumpTakeoff', 0.34),
+        this.clipTask('JumpAirborne', 0.58),
+        this.clipTask('JumpLand', 0.34),
+        this.clipTask('JumpRecovery', 0.67),
+      ]);
+      return;
+    }
+    this.command([this.clipTask('Jump', 1.7)]);
+  }
   sit(seconds = 4) { this.command([{ kind: 'clip', clip: 'Sit', seconds }]); }
   sleep(seconds = 12) { this.command([{ kind: 'clip', clip: 'Sleep', seconds }]); }
   talk(seconds: number) { this.command([{ kind: 'clip', clip: 'Talk', seconds }]); }
@@ -160,6 +279,20 @@ export class LionBrain {
     return { kind: 'face', x: this.homeX, z: this.homeZ + 6 };
   }
 
+  /**
+   * An idle-ish beat the LOADED asset actually has.
+   *
+   * The wander table asked for `LookAround` unconditionally, and the cage has
+   * no such clip — so autonomous behaviour picked a clip that does not exist,
+   * `actions[clip]` came back undefined, and the lion stood frozen until the
+   * task timed out. Caught in the browser: the HUD read
+   * `brain clip : LookAround` while nothing moved.
+   */
+  private ambient(scale: number): Task {
+    const clip = this.clipOrFallback('LookAround', 'Idle');
+    return { kind: 'clip', clip, seconds: this.dur(clip, 3.6) * scale };
+  }
+
   private pickWander(): Task[] {
     const roll = Math.random();
     if (roll < 0.22) {
@@ -172,21 +305,33 @@ export class LionBrain {
       return [
         { kind: 'goto', x: t.x, z: t.z },
         this.faceViewer(),
-        { kind: 'clip', clip: 'LookAround', seconds: this.dur('LookAround', 3.6) * 0.6 },
+        this.ambient(0.6),
         { kind: 'goto', x: this.homeX, z: this.homeZ },
         this.faceViewer(),
       ];
     }
-    if (roll < 0.62) return [this.faceViewer(), { kind: 'clip', clip: 'LookAround', seconds: this.dur('LookAround', 3.6) }];
+    if (roll < 0.62) return [this.faceViewer(), this.ambient(1.0)];
     // Sit and Sleep are NOT in the autonomous rotation. Both fold the hips past
     // 55 degrees, and under Blender's automatic weights that collapses the
     // barrel into a lump with the tail sticking out of it — in the running app
     // it read as a grey wedge on the island. They stay authored and reachable
     // from the debug panel; they return to production once the skeleton and
     // weight painting are rebuilt (GATE 6-7).
-    if (roll < 0.86) return [this.faceViewer(), { kind: 'clip', clip: 'Nod', seconds: this.dur('Nod', 1.4) }];
-    if (roll < 0.94) return [this.faceViewer(), { kind: 'clip', clip: 'Jump', seconds: this.dur('Jump', 1.7) }];
-    return [this.faceViewer(), { kind: 'clip', clip: 'Celebrate', seconds: this.dur('Celebrate', 2.3) }];
+    if (roll < 0.86) {
+      const nod = this.clipOrFallback('Nod', 'Wave');
+      return [this.faceViewer(), this.clipTask(nod, 1.4)];
+    }
+    if (roll < 0.94) {
+      // Routed through `jump()`'s own sequencing so the autonomous jump gets
+      // the five phases too, rather than a single clip the cage lacks.
+      const tail = this.has('JumpAnticipation')
+        ? [this.clipTask('JumpAnticipation', 0.5), this.clipTask('JumpTakeoff', 0.34),
+           this.clipTask('JumpAirborne', 0.58), this.clipTask('JumpLand', 0.34),
+           this.clipTask('JumpRecovery', 0.67)]
+        : [this.clipTask('Jump', 1.7)];
+      return [this.faceViewer(), ...tail];
+    }
+    return [this.faceViewer(), this.clipTask('Celebrate', 2.3)];
   }
 
   step(dt: number) {
@@ -224,7 +369,7 @@ export class LionBrain {
       const diff = shortestAngle(this.yaw, want);
       const stepAmt = Math.sign(diff) * Math.min(Math.abs(diff), TURN_SPEED * d);
       this.yaw += stepAmt;
-      this.clip = Math.abs(diff) > FACE_EPS ? 'Walk' : 'Idle';
+      this.clip = Math.abs(diff) > FACE_EPS ? this.clipOrFallback('Walk') : 'Idle';
       if (Math.abs(diff) <= 0.03) { this.yaw = want; this.active = null; }
       return;
     }
@@ -238,7 +383,7 @@ export class LionBrain {
     const want = Math.atan2(dx, dz);
     const diff = shortestAngle(this.yaw, want);
     this.yaw += Math.sign(diff) * Math.min(Math.abs(diff), TURN_SPEED * d);
-    this.clip = 'Walk';
+    this.clip = this.clipOrFallback('Walk');
 
     // Hold position until roughly aimed, so the lion never crab-walks sideways.
     if (Math.abs(diff) > FACE_EPS) return;

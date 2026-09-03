@@ -76,6 +76,28 @@ export default function World3DProofPage() {
           >
             {wander ? 'Wander ON' : 'Wander OFF'}
           </button>
+          {/* SEMANTIC controls, which is what LionBrain actually exposes.
+              The clip buttons above set `clipOverride` and so bypass the brain
+              entirely — useful for auditioning a single action, useless for
+              testing the sequencing. These call the API the app calls, so the
+              cage's WalkStart -> Walk -> WalkStop chain and the five-phase jump
+              are exercisable rather than merely present in the GLB. */}
+          {([
+            ['walkTo', () => brain.current?.walkTo(-1.1, 0.5)],
+            ['turnTo', () => brain.current?.turnTo(1.3, 0.2)],
+            ['jump()', () => brain.current?.jump()],
+            ['lookAt card', () => brain.current?.lookAt(0, 4.6, 0.4)],
+            ['lookAhead', () => brain.current?.lookAhead()],
+          ] as const).map(([label, fn]) => (
+            <button
+              key={label}
+              onClick={() => { setClip(null); fn(); }}
+              className="rounded-full px-3 py-2 text-xs font-bold"
+              style={{ background: 'rgba(120,200,255,0.92)', color: '#12263A' }}
+            >
+              {label}
+            </button>
+          ))}
           <button
             onClick={() => { setClip(null); brain.current?.walkTo(-1.1, 0.5); }}
             className="rounded-full px-3 py-2 text-xs font-bold"
@@ -137,7 +159,8 @@ export default function World3DProofPage() {
                 {stats.lionGrounded === false && ' (seated)'}
               </div>
               <div>clips      : {stats.lionClips?.join(', ') ?? '—'}</div>
-              <div>playing    : {clip ?? 'auto (brain)'}</div>
+              <div>override   : {clip ?? 'none'}</div>
+              <div>brain clip : {stats.lionBrainClip ?? '—'}</div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>
               {markerRows.length === 0 && <div>none found</div>}
               {markerRows.map(([name, v]) => (

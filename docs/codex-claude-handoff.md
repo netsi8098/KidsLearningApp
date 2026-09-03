@@ -5842,3 +5842,77 @@ passed.
    and no code drives `eye_L`/`eye_R`. The asset is ahead of the runtime.
 2. Mane follow-through bones — the last three `plannedBones`.
 3. The paw's rounded sole, with the walk QA in the loop.
+
+## 2026-09-03 (twenty-third pass) — the rig wired into LionBrain
+
+The asset had been ahead of the runtime: 13 clips, 16 morphs and working gaze in
+the GLB, and nothing calling any of it. Now wired, and the wiring found a bug
+that would have shipped.
+
+### Two assets, different clip sets — so the brain asks
+
+`LionClip` gains the cage's nine new names. But the proxy has `Sit`, `Nod`,
+`LookAround`, `Talk`, `Sleep` and one fused `Jump`, and the cage has
+`WalkStart`, `WalkStop`, `TurnLeft`, `TurnRight` and the jump in five phases.
+**Neither set is a subset of the other**, so `setDurations` now records what
+the loaded GLB reported and every request goes through `clipOrFallback`.
+
+That matters because requesting a missing clip is SILENT: `actions[clip]` comes
+back undefined, `activeClip` never changes, and the lion stands frozen until
+the task times out. Caught in the browser — the HUD read
+`brain clip : LookAround` while nothing moved, because the autonomous wander
+table asked for a clip the cage does not have. The wander beats now route
+through `ambient()` and `clipOrFallback`, so `LookAround` degrades to `Idle`
+and `Nod` to `Wave`.
+
+### What is now callable
+
+* `walkTo` emits **WalkStart -> goto -> WalkStop** when the asset has them, and
+  collapses to the plain goto on the proxy.
+* `turnTo` is new: it picks **TurnLeft or TurnRight** from the signed yaw
+  difference, then hands over to the existing `face` task. The turn clips lead
+  with the head and reposition the feet last, which is the same
+  face-before-move rule the brain already applied — so clip and brain finally
+  agree instead of the brain yawing the whole rig under a walk cycle.
+* `jump()` sequences the **five phases**, so a phase can be held rather than
+  committing to one fixed-length jump. The autonomous jump gets them too.
+* `lookAt(x, z, y)` / `lookAhead()` and a `gaze` getter, clamped to
+  **GAZE_LIMIT = 28 degrees** — the rig's measured limit, not a taste choice:
+  the iris has 0.0152 of travel against a 0.032 bone, and past 28 degrees it
+  leaves the white.
+
+`HomeWorld3D` resolves `eye_L`/`eye_R` once and lerps them toward the gaze each
+frame, BEFORE `mixer.update` — no clip keys those bones, so this does not fight
+the mixer. An asset without eye bones (the proxy) yields an empty array and the
+block does not run.
+
+`ONE_SHOT` also had to grow: a looping `WalkStart` would restart the gait
+forever and a looping `JumpTakeoff` would leave the lion pogoing.
+
+### Verified in the browser, not by inspection
+
+All 13 clips load against the assembled cage, floor gap +8.4 mm, 51 draw calls.
+The HUD now reports the BRAIN's clip separately from the debug override —
+without that the sequencing was unobservable, since it could only ever say
+"auto (brain)". Clicking `jump()` walks the HUD through
+`JumpAirborne -> JumpRecovery`; wander now shows `Wave` and `Idle` where it
+previously showed the nonexistent `LookAround`.
+
+`World3DProofPage` gains five SEMANTIC buttons — `walkTo`, `turnTo`, `jump()`,
+`lookAt card`, `lookAhead`. The existing clip buttons set `clipOverride` and so
+bypass the brain entirely, which is useful for auditioning one action and
+useless for testing sequencing.
+
+### State
+
+Repo baseline unmoved: typecheck **52** errors, `npm test` **29 failed / 727
+passed**, `HomeWorld3D` lint 5 before and after, `lionBrain` 0. No asset
+rebuilt.
+
+### Next, in order
+
+1. Mane follow-through bones — the last three `plannedBones`.
+2. Wire `lookAt` to something real: the player cards are at
+   `CardShelfZone`/`CardShelfZoneHero` in the GLB's markers, which is exactly
+   the storyboard's "eyes move to player cards" beat.
+3. The paw's rounded sole, with the walk QA in the loop.
