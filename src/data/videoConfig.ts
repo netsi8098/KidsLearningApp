@@ -9,13 +9,25 @@
  * results via the videoService. See `src/services/videoService.ts`.
  */
 
+import { generatedVideos } from './generatedVideos';
+
 export interface VideoItem {
-  id: string;           // YouTube video ID
+  /** YouTube video ID, or a video-forge episode id when source is 'local'. */
+  id: string;
   title: string;
   channel: string;
-  thumbnail: string;    // YouTube thumbnail URL (derived from id)
+  thumbnail: string;    // YouTube thumbnail URL, or /videos/<id>.jpg for local
   duration?: string;    // e.g. "3:42"
   category: VideoCategory;
+  /**
+   * Where the video plays from. Omitted means 'youtube' (all curated entries),
+   * so existing data needs no migration.
+   */
+  source?: 'youtube' | 'local';
+  /** mp4 path for locally generated episodes, e.g. /videos/ep-colors-23.mp4 */
+  src?: string;
+  /** WebVTT captions path for locally generated episodes. */
+  captions?: string;
 }
 
 export type VideoCategory =
@@ -58,7 +70,7 @@ function thumb(id: string): string {
  * - Jack Hartmann, The Kiboomers, LittleBabyBum
  * - National Geographic Kids, SciShow Kids
  */
-export const curatedVideos: VideoItem[] = [
+export const youtubeVideos: VideoItem[] = [
   // === LEARNING ===
   { id: 'ZanHgPprl-0', title: 'Head Shoulders Knees & Toes', channel: 'Super Simple Songs', thumbnail: thumb('ZanHgPprl-0'), duration: '3:44', category: 'learning' },
   { id: 'eCbHpeOgPuw', title: 'Learn to Count 1-10', channel: 'Super Simple Songs', thumbnail: thumb('eCbHpeOgPuw'), duration: '3:15', category: 'learning' },
@@ -100,6 +112,28 @@ export const curatedVideos: VideoItem[] = [
   { id: 'GBkT19uH2RQ', title: 'Rock-a-bye Baby', channel: 'Super Simple Songs', thumbnail: thumb('GBkT19uH2RQ'), duration: '3:10', category: 'bedtime' },
   { id: 'ufKmPvdEpfg', title: 'Calm Lullabies for Babies', channel: 'LittleBabyBum', thumbnail: thumb('ufKmPvdEpfg'), duration: '30:00', category: 'bedtime' },
   { id: 'TpGSQOLh1ss', title: 'Hush Little Baby', channel: 'CoComelon', thumbnail: thumb('TpGSQOLh1ss'), duration: '3:15', category: 'bedtime' },
+];
+
+/**
+ * Everything the app can play: locally generated episodes first (they are ours,
+ * fully offline, and captioned), then the curated YouTube catalog.
+ *
+ * This is the list every page, search and recommendation path reads, so a newly
+ * forged episode shows up across the app without further wiring.
+ */
+export const curatedVideos: VideoItem[] = [
+  ...generatedVideos.map((g): VideoItem => ({
+    id: g.id,
+    title: g.title,
+    channel: g.channel,
+    thumbnail: g.thumbnail,
+    duration: g.duration,
+    category: g.category,
+    source: 'local',
+    src: g.src,
+    captions: g.captions,
+  })),
+  ...youtubeVideos,
 ];
 
 /** Get videos for a specific category */

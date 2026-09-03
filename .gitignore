@@ -37,3 +37,6 @@ uploads-test/
 *.njsproj
 *.sln
 *.sw?
+
+# video-forge intermediates (scripts, TTS audio cache, captured frames)
+tools/video-forge/.work/
