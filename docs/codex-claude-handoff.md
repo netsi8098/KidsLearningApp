@@ -4999,3 +4999,78 @@ Still wrong, plainly:
 1. Rotate the lock direction into the radial frame so they read from the front.
 2. The macro hood form: crown, quiff, chin lobe.
 3. The five missing colour regions.
+
+## 2026-09-03 (twelfth pass) — front-facing locks, and the slab was the INNER shell
+
+Two findings, and the second one overturns what the last two passes blamed.
+
+### The lock rows were on the back of the hood
+
+The widest ring sits at u = 0.2017 in a span of u0 = 0.0787 .. u1 = 0.4936,
+which is station **t = 0.296**. So the surface facing the camera at the hero
+angle is only `t in [0, 0.296]` — the front 30% of the parameterisation.
+
+Integrating each original row's Gaussian over that band:
+
+    row t=0.30 sigma=0.30    33.7% of its mass in the front-facing band
+    row t=0.58 sigma=0.26    12.5%
+    row t=0.80 sigma=0.22     1.1%
+
+Nearly all the lock relief was on surface the front view never sees, which is
+precisely the reported symptom: legible in three-quarter and side, a smooth
+mass from the front. `FRONT_LOCKS` now puts three rows at t = 0.06 / 0.15 /
+0.25 with tighter station sigmas — 71.7%, 82.2% and 63.2% of their mass inside
+the visible band — and `BACK_LOCKS` keeps the flank. A narrow-azimuth ridge
+across t 0.05 -> 0.25 sweeps radially outward in the front view by
+construction, because `taper` takes the radius 0.55 -> 1.0 over exactly that
+band. That is the reference's own structure: locks starting beside the face and
+sweeping out to the rim.
+
+### The hard slab was the inner shell all along
+
+The rectangular block through the middle of every front render was NOT the
+outer hood. It was the aperture shell, and it was never a circle despite a
+comment saying it was:
+
+    ia = math.atan2(z - cz, sign * 1.0)
+
+The second argument is an x-EXTENT and it was passed a fixed unit. With
+`|z - cz|` never above ~0.4 the angle stayed inside +/-22 degrees (158-202 on
+the -x side), where `|cos(ia)|` is 0.93-1.0 — so x sat at a constant +/-`fr`
+while z spanned only 0.74 `fr`. A rectangular TUBE.
+
+The sample already carries its own azimuth `a`, running -90 up the +x side to
++90 and on to +270 coming back down, so `cos(a)`/`sin(a)` trace a true circle
+in the correct winding order with no sign term needed. The front view now shows
+a round face aperture with locks radiating out of it —
+`docs/assets/lion-mane-front-locks.png`.
+
+**Worth recording that I blamed this on the outer hood twice**, once as
+"polar_radius is a step function" and once as "the band correction terraces".
+Both were real bugs in real code and neither was this one. The isolated,
+FRONT-LIT render is what found it: my earlier isolated render lit the mane from
+40 degrees azimuth, so the front was in shadow and I had been judging an unlit
+surface.
+
+### State
+
+Mane 19,727 verts, 0 zero-area faces, 0 coincident vertices. Asset 3.91 MB,
+both contracts passing, 4 meshes.
+
+Still not the reference, and none of it is mane topology now:
+
+1. **Head large against the body, ears large against the head.** The
+   three-quarter view is more honest about this than the front IoU, which
+   weights front 0.35 and three-quarter 0.25.
+2. **The ears are plain yellow** — no pink inner ear.
+3. **No cream chest bib, no cream paws, no tail-tuft colour, no cheek blush.**
+4. A small flat tab remains at the top of the aperture, from the aperture taper
+   `ap = 1 - t/0.42` going linear at t=0.
+5. The mane still has no chin lobe.
+
+### Next, in order
+
+1. The five missing colour regions — the cheapest remaining win by far, and all
+   measurable with `measure_face.py`'s method.
+2. Proportions: head-to-body and ear-to-head, measured against the turnaround.
+3. Mane chin lobe; the aperture tab.

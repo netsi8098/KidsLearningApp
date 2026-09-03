@@ -122,11 +122,36 @@ def lock_ring(count, amp, asig, ssig, station, phase=0.0, az_from=-90.0,
     return out
 
 
-# Three overlapping rows so locks read as layered rather than combed once. The
-# phase offset stops row 2 sitting exactly on row 1 and doubling its amplitude.
-LOCKS = (lock_ring(22, 0.170, 6.0, 0.30, 0.30)
-         + lock_ring(18, 0.140, 7.0, 0.26, 0.58, phase=9.0)
-         + lock_ring(14, 0.110, 8.0, 0.22, 0.80, phase=-6.0))
+# WHERE THE ROWS SIT IS THE WHOLE POINT, and the first three were in the wrong
+# place. The widest ring is at u = 0.2017 out of a span u0 = 0.0787 .. u1 =
+# 0.4936, which is station t = 0.296 — so the surface that FACES THE CAMERA at
+# the hero angle is only t in [0, 0.296], the front 30% of the
+# parameterisation. Everything behind t = 0.30 is on the back of the hood.
+#
+# The three original rows sat at t = 0.30, 0.58 and 0.80, and integrating each
+# row's Gaussian over the front band gives 33.7%, 12.5% and 1.1% of its mass.
+# Nearly all the lock relief was on surface the front view never sees, which is
+# exactly the reported symptom: locks legible in three-quarter and side, and a
+# smooth mass from the front.
+#
+# So three FRONT rows are added inside the visible band, with tighter station
+# sigmas so their mass stays there, and higher counts because that is the
+# surface a child actually looks at. The reference's locks start beside the face
+# and sweep outward to the rim, which is what a narrow-azimuth ridge over
+# t 0.05 -> 0.24 draws, because `taper` takes the radius from 0.55 to 1.0
+# across that band — the ridge sweeps radially outward in the front view by
+# construction.
+FRONT_LOCKS = (lock_ring(24, 0.185, 5.5, 0.10, 0.06)
+               + lock_ring(22, 0.165, 6.0, 0.11, 0.15, phase=7.0)
+               + lock_ring(20, 0.140, 6.5, 0.12, 0.25, phase=-5.0))
+
+# Three more on the back and flank, layered. The phase offset stops a row
+# sitting exactly on its neighbour and doubling its amplitude.
+BACK_LOCKS = (lock_ring(22, 0.130, 6.0, 0.26, 0.42)
+              + lock_ring(18, 0.110, 7.0, 0.24, 0.62, phase=9.0)
+              + lock_ring(14, 0.090, 8.0, 0.22, 0.82, phase=-6.0))
+
+LOCKS = FRONT_LOCKS + BACK_LOCKS
 
 CLUMPS = [
     ("crown",      90.0, 0.30, 0.17, 30.0, 0.42),
@@ -391,9 +416,22 @@ def build_hood(nh=56, nring=30):
             ap = ap * ap * (3.0 - 2.0 * ap)
             fr = face_r * ap
             # Inner shell follows the face as a circle, in the same order.
-            ia = math.atan2(z - cz, sign * 1.0)
-            i_row.append(bm.verts.new((sign * fr * abs(math.cos(ia)) * 0.98, y,
-                                       fc["h"] + fr * math.sin(ia) * 1.04)))
+            #
+            # IT WAS NOT A CIRCLE. `ia = atan2(z - cz, sign * 1.0)` passed a
+            # FIXED unit as the x-extent, so with |z - cz| never above ~0.4 the
+            # angle stayed inside +/-22 degrees (or 158-202 on the -x side).
+            # Over that range |cos(ia)| is 0.93-1.0, so x sat at a constant
+            # +/-fr while z spanned only 0.74 fr — a rectangular TUBE, which is
+            # the hard slab that shows through the middle of every front render
+            # and which I twice blamed on the outer hood.
+            #
+            # The sample already carries its own azimuth `a`, running -90 up the
+            # +x side to +90 and on to +270 coming back down, so cos/sin of it
+            # trace a true circle in the correct winding order. No sign term is
+            # needed: cos(a) is already positive on the +x side and negative on
+            # the -x side.
+            i_row.append(bm.verts.new((fr * math.cos(a), y,
+                                       fc["h"] + fr * math.sin(a))))
         outer.append(o_row)
         inner.append(i_row)
 
