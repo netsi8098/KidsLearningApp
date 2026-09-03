@@ -5549,3 +5549,68 @@ pre-existing.
 2. The mane crown's remaining -0.037 / -0.033, and its missing chin lobe.
 3. Clips for Gates 10-14; eye bones; mane follow-through bones.
 4. `conform()` the brows, still 11.7 and 15.3 mm off.
+
+## 2026-09-03 (nineteenth pass) — leg depth: NOT the defect, and the camera is not either
+
+No geometry change. Two hypotheses tested and both rejected, which is the
+useful outcome — the previous entry's "next" item was wrong about the cause.
+
+### The paws are correctly sized and placed
+
+The side view's gap deltas looked like splayed legs: ref_gap 0.246 against
+mod_gap 0.288 at h 0.05-0.10, with the paw centroid 0.116 too far forward.
+Measured against the station table instead:
+
+    front sole ring   y 0.144-0.400, length 0.256   reference 0.253
+    rear  sole ring   y -0.106-0.370, length 0.264  reference 0.262
+
+Both inside 0.003 H. The paws are where the reference puts them and the size
+the reference asks for, so "leg depth placement" is not the defect.
+
+What the mask comparison at h 0.00-0.05 actually shows is that the model's
+sole is SHORT at the very lowest rows and full length just above them — a
+rounded sole against the reference's flat one. That is a real difference, worth
+about 0.16 of gap at the bottom band alone, but it is the paw's cap profile
+rather than its placement. Left alone deliberately: the flat sole is what makes
+a planted paw read as planted, and reshaping the cap risks the ground-contact
+metrics (`planted paw, animation amplitude 0.105 mm`) that took several passes
+to earn. It wants doing with the walk QA in the loop.
+
+### The 3/4 camera angle was an assumption; now it is measured
+
+3/4 has been the weakest view throughout (0.8049) with a systematic width
+deficit across BODY bands — -0.204 and -0.181 at h 0.25-0.35 — which is the
+signature of a camera error rather than a geometry one. `silhouette_render`'s
+comment called it "the reference sheet's own 3/4 angle" and nobody had tested
+it. Swept:
+
+    azimuth   35     40     45     47     50     55     60
+    3/4 IoU  0.7556 0.7816 0.8012 0.8049 0.8078 0.8047 0.7944
+
+It peaks at 50 degrees and 47 is 0.0029 off that — 0.0007 weighted. **So the
+camera is very nearly right and the 3/4 deficit is genuine geometry.**
+
+The default is deliberately NOT moved to 50. Picking a QA camera because it
+flatters the model is metric-gaming; 47 is the documented intent, and
+`LION_TQ_DEG` now exists for the next person who suspects the camera.
+
+### So what IS the 3/4 deficit
+
+Front says the legs are 0.079 too narrow laterally at h 0.25-0.30; side says the
+body is 0.067 too LONG fore-aft at the same height; 3/4 says 0.181 too narrow.
+The lateral component is the one already proven unfixable — closing it needs
+0.092 -> 0.120 radius, which puts each shaft's inner surface past the midline,
+and +8% alone already reintroduces a pinch. The rest is the drawing's
+overlapping legs, which `front_limb`'s docstring has recorded since the
+reference-driven pass.
+
+Best remaining candidate is therefore the body's fore-aft length at h 0.25-0.35,
+where the model is +0.056 and +0.067 too long and its centroid sits 0.036-0.049
+too far back. That is a torso station question, not a leg one, and it has no
+midline-collision constraint.
+
+### State
+
+Weighted IoU **0.8632** (front 0.9259, side 0.8498, rear 0.8297, 3/4 0.8049).
+Battery 0 pinched / 0 flipped, worst area 0.252. 4 meshes, 3.89 MB, both
+contracts passing.

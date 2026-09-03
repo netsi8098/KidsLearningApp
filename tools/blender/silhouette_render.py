@@ -34,11 +34,37 @@ OUT = os.path.join(REPO, "art", "blender", "references", f"silhouette-{OUT_NAME}
 # Front is read from +Y; the side is read from -X so image-right runs along -Y and
 # the nose lands on the LEFT, matching the reference. Three-quarter mirrors the
 # reference sheet's own 3/4 angle.
+def _tq(deg):
+    """3/4 camera at `deg` from straight-on, at radius 3.0."""
+    a = math.radians(deg)
+    return ((-3.0 * math.sin(a), 3.0 * math.cos(a), CZ),
+            (math.radians(90), 0.0, math.radians(180 + deg)))
+
+
 CAMS = {
     "front": ((0.0, 3.0, CZ), (math.radians(90), 0.0, math.radians(180))),
     "rear": ((0.0, -3.0, CZ), (math.radians(90), 0.0, 0.0)),
     "side": ((-3.0, 0.0, CZ), (math.radians(90), 0.0, math.radians(-90))),
-    "three-quarter": ((-2.2, 2.05, CZ), (math.radians(90), 0.0, math.radians(-133))),
+    # Azimuth is overridable so it can be SWEPT, via LION_TQ_DEG. The default
+    # STAYS at the documented 47 degrees.
+    #
+    # The 3/4 view has been the weakest of the four throughout, with a
+    # systematic width deficit across body bands (-0.204 and -0.181 at
+    # h 0.25-0.35) — which is what a camera-angle error looks like rather than
+    # a geometry error, since "the reference sheet's own 3/4 angle" was an
+    # assumption nobody had tested. Swept:
+    #
+    #     azimuth   35     40     45     47     50     55     60
+    #     3/4 IoU  0.7556 0.7816 0.8012 0.8049 0.8078 0.8047 0.7944
+    #
+    # It peaks at 50 and 47 is 0.0029 off it — 0.0007 weighted. So the camera
+    # is very nearly right and the deficit IS geometry. Hypothesis tested and
+    # rejected, which is worth more than the 0.0007.
+    #
+    # The default is NOT moved to 50. Choosing a QA camera because it flatters
+    # the model is metric-gaming; 47 is the documented intent and the sweep is
+    # here for the next person who suspects the camera.
+    "three-quarter": _tq(float(os.environ.get("LION_TQ_DEG", "47.0"))),
 }
 
 
