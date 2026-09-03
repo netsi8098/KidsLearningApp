@@ -161,6 +161,11 @@ export default function World3DProofPage() {
               <div>clips      : {stats.lionClips?.join(', ') ?? '—'}</div>
               <div>override   : {clip ?? 'none'}</div>
               <div>brain clip : {stats.lionBrainClip ?? '—'}</div>
+              <div>
+                gaze       : {stats.lionGaze
+                  ? `${stats.lionGaze.at}  (${stats.lionGaze.yaw.toFixed(1)}°, ${stats.lionGaze.pitch.toFixed(1)}°)`
+                  : '—'}
+              </div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>
               {markerRows.length === 0 && <div>none found</div>}
               {markerRows.map(([name, v]) => (

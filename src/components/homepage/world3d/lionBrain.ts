@@ -97,6 +97,9 @@ export class LionBrain {
   private durations: Partial<Record<LionClip, number>> = {};
   private available = new Set<LionClip>();
   private gazeTarget: { x: number; y: number; z: number } | null = null;
+  private interest: { x: number; y: number; z: number }[] = [];
+  private gazeSwitch = 2.0;
+  private gazeHold = 0;
 
   /** Metres per second, from the measured clip stride. See setLocomotion. */
   private walkSpeed = WALK_SPEED_FALLBACK;
@@ -158,9 +161,57 @@ export class LionBrain {
   /** Point the eyes at a world position. Cleared by `lookAhead`. */
   lookAt(x: number, z: number, y = 1.0) {
     this.gazeTarget = { x, y, z };
+    // A deliberate glance holds until something else asks. The scheduler must
+    // not steal it back a moment later.
+    this.gazeHold = 2.2;
   }
 
-  lookAhead() { this.gazeTarget = null; }
+  lookAhead() {
+    this.gazeTarget = null;
+    this.gazeHold = 0;
+  }
+
+  /**
+   * Places worth glancing at, in world space, from the environment's own
+   * markers.
+   *
+   * The lion should look at the THINGS IN THE SCENE, and the scene already
+   * says where they are: `MARK_CardShelfZone` is where the player cards sit,
+   * `MARK_TitleZone` the title. Passing them in rather than hard-coding
+   * positions means re-authoring the island in Blender moves the lion's
+   * attention with it — the same argument the walkable bounds already make.
+   */
+  setInterest(points: { x: number; y: number; z: number }[]) {
+    this.interest = points;
+  }
+
+  /**
+   * Rotate the gaze between the viewer and the scene's points of interest.
+   *
+   * A mascot that stares dead ahead forever reads as a prop. A mascot whose
+   * eyes flick to the cards and back reads as one that knows they are there —
+   * which is the storyboard's third beat, "eyes move to player cards".
+   *
+   * Called from `step`, so it costs nothing when there are no points and
+   * yields immediately to any explicit `lookAt`.
+   */
+  private stepGaze(dt: number) {
+    if (this.gazeHold > 0) {
+      this.gazeHold -= dt;
+      return;
+    }
+    this.gazeSwitch -= dt;
+    if (this.gazeSwitch > 0) return;
+    // Uneven on purpose: mostly at the child, sometimes at the cards. A even
+    // split reads as a metronome.
+    this.gazeSwitch = 1.8 + Math.random() * 2.6;
+    if (!this.interest.length || Math.random() < 0.55) {
+      this.gazeTarget = null;   // back to the viewer / straight ahead
+      return;
+    }
+    const p = this.interest[Math.floor(Math.random() * this.interest.length)];
+    this.gazeTarget = { x: p.x, y: p.y, z: p.z };
+  }
 
   /**
    * Eye yaw and pitch in radians, relative to the head's facing, clamped to
@@ -171,6 +222,11 @@ export class LionBrain {
    * ±28 degrees the iris leaves the white. The rig cannot look further and the
    * runtime must not ask it to.
    */
+  /** Where the eyes are aimed, for the debug HUD. Null means straight ahead. */
+  get gazeAt(): { x: number; y: number; z: number } | null {
+    return this.gazeTarget;
+  }
+
   get gaze(): { yaw: number; pitch: number } {
     if (!this.gazeTarget) return { yaw: 0, pitch: 0 };
     const dx = this.gazeTarget.x - this.x;
@@ -263,6 +319,16 @@ export class LionBrain {
       { kind: 'face', x, z: z + 6 },
       { kind: 'clip', clip: 'Wave', seconds: this.dur('Wave', 2.6) },
     ]);
+    /* The storyboard's opening runs notice -> lean -> EYES TO THE CARDS ->
+       head tilt -> speak -> wave. That glance is what makes the greeting about
+       the child's choice rather than about the lion, so it is part of `greet`
+       and not left to the ambient scheduler. It holds through the approach and
+       the scheduler takes over afterwards. */
+    if (this.interest.length) {
+      const p = this.interest[0];
+      this.lookAt(p.x, p.z, p.y);
+      this.gazeHold = 3.4;
+    }
   }
 
   private clampToIsland(x: number, z: number) {
@@ -336,6 +402,7 @@ export class LionBrain {
 
   step(dt: number) {
     const d = Math.min(dt, 0.1);   // a backgrounded tab must not teleport the lion
+    this.stepGaze(d);
 
     if (!this.active) {
       if (this.restFor > 0) {

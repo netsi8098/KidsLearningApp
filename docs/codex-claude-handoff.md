@@ -6104,3 +6104,67 @@ residual, walk support slide 0.166 mm. 4 meshes, 4.28 MB, both contracts pass,
 3. The mane still reads as a smooth hood from the FRONT: its locks run
    front-to-back so the hero angle sees them end-on. That is the one remaining
    item from the mane rebuild.
+
+## 2026-09-03 (twenty-sixth pass) — gaze wired to the scene's own markers
+
+The lion now looks at the player cards, and it learns where they are from the
+environment rather than from constants in the runtime.
+
+### The positions come out of the GLB
+
+`MARK_CardShelfZone`, `MARK_CardShelfZoneHero`, `MARK_TitleZone` and
+`MARK_TitleZoneHero` are authored in Blender and already read back by
+`Environment`. `HomeWorld3D` passes them to `brain.setInterest()`, so
+re-authoring the island moves the lion's attention with it — the same argument
+`walkBounds` already makes for where it is allowed to walk. Card shelf is
+first in the list because `greet` glances at `interest[0]`.
+
+### Two ways the gaze moves
+
+* **Ambient.** `stepGaze` rotates between the viewer and the points of
+  interest on a 1.8-4.4 s timer, deliberately uneven — mostly at the child,
+  sometimes at the cards. An even split reads as a metronome. It yields
+  immediately to any explicit `lookAt`, which sets a hold so the scheduler
+  cannot steal a commanded glance back a moment later.
+* **On greeting.** `greet()` now glances at the card shelf and holds it for
+  3.4 s through the approach. That is the storyboard's third beat — "eyes move
+  to player cards" — and it is what makes the greeting about the child's choice
+  rather than about the lion.
+
+### Observed in the browser, cycling real markers
+
+The HUD now reports the gaze for the same reason it reports the brain's clip: a
+scheduled glance is otherwise unobservable from outside.
+
+    gaze : 0.00,2.05  (-28.0°, -22.1°)     MARK_TitleZone
+    gaze : ahead      (  0.0°,   0.0°)     the viewer
+    gaze : 0.00,4.60  ( -0.1°, -13.0°)     MARK_CardShelfZone
+
+Negative pitch is correct — both zones sit at y ~-0.31, below the 0.85 m eye
+height, so the lion looks down at them.
+
+### One thing this exposes, and does NOT fix
+
+**-28.0° is exactly `GAZE_LIMIT`.** The clamp is doing its job, but a clamped
+gaze means the eyes are pinned at their limit and not actually pointing at the
+thing. For a target that far off-axis the HEAD should help — the same
+face-before-move logic the brain already applies to walking, applied to
+looking.
+
+Not built here, and deliberately: the head is keyed by Idle and Walk, so a
+head-turn assist has to compose onto the mixer's result the way the mane's
+runtime lag does rather than being written before it. That is the same trap
+twice already, and it wants doing on purpose rather than as a rider on this
+change.
+
+### State
+
+Repo baseline unmoved: typecheck 52, `npm test` 29 failed / 727 passed, lint 0
+on the files touched. No asset rebuilt — this pass is runtime only.
+
+### Next, in order
+
+1. Head-turn assist when the gaze clamps, composed after `mixer.update`.
+2. The paw's rounded sole, with the walk QA in the loop.
+3. The mane still reads as a smooth hood from the FRONT — its locks run
+   front-to-back, so the hero angle sees them end-on.

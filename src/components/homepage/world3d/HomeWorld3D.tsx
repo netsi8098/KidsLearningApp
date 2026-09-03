@@ -66,6 +66,10 @@ export interface WorldStats {
      WalkStart -> Walk -> WalkStop was unobservable and the wiring could not be
      verified from outside. */
   lionBrainClip?: LionClip;
+  /* Where the eyes are aimed, in degrees of eye yaw/pitch plus the world point.
+     Surfaced for the same reason as `lionBrainClip`: a gaze that is scheduled
+     rather than commanded is otherwise unobservable from outside. */
+  lionGaze?: { yaw: number; pitch: number; at: string };
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -141,6 +145,8 @@ function Lion({
   lionUrl,
   onMeasured,
   onBrainClip,
+  onGaze,
+  interestMarkers,
 }: {
   spawn: THREE.Vector3 | null;
   bounds: { cx: number; cz: number; r: number } | null;
@@ -152,6 +158,8 @@ function Lion({
   lionUrl: string;
   onMeasured: (height: number, grounded: boolean, clips: string[], floorGap: number) => void;
   onBrainClip: (clip: LionClip) => void;
+  onGaze: (g: { yaw: number; pitch: number; at: string }) => void;
+  interestMarkers: WorldMarkers;
 }) {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(lionUrl);
@@ -172,6 +180,24 @@ function Lion({
   useEffect(() => { if (brainRef) brainRef.current = brain; }, [brain, brainRef]);
   useEffect(() => { brain.wander = wander; }, [brain, wander]);
   useEffect(() => { brain.stageRadius = stageRadius; }, [brain, stageRadius]);
+
+  /* WHERE THE LION LOOKS COMES FROM THE ENVIRONMENT, not from constants here.
+     MARK_CardShelfZone is where the player cards sit and MARK_TitleZone the
+     title, both authored in Blender and read back out of the GLB — so
+     re-authoring the island moves the lion's attention with it, which is the
+     same argument the walkable bounds already make.
+
+     Card shelf first: `greet` glances at `interest[0]`, and the storyboard's
+     opening beat is the eyes going to the cards. */
+  useEffect(() => {
+    const wanted = ['MARK_CardShelfZoneHero', 'MARK_CardShelfZone',
+                    'MARK_TitleZoneHero', 'MARK_TitleZone'];
+    const pts = wanted
+      .map((n) => interestMarkers[n])
+      .filter((p): p is THREE.Vector3 => Boolean(p))
+      .map((p) => ({ x: p.x, y: p.y, z: p.z }));
+    brain.setInterest(pts);
+  }, [brain, interestMarkers]);
 
   // Real clip lengths, so a "play Wave then carry on" task ends when the wave
   // actually ends rather than after a number someone typed.
@@ -343,6 +369,7 @@ function Lion({
   const maneAxis = useMemo(() => new THREE.Vector3(0, 0, 1), []);
 
   const reportedClip = useRef<LionClip>('Idle');
+  const reportedGaze = useRef<string>('');
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const down = useMemo(() => new THREE.Vector3(0, -1, 0), []);
   const from = useMemo(() => new THREE.Vector3(), []);
@@ -355,6 +382,17 @@ function Lion({
     if (brain.clip !== reportedClip.current) {
       reportedClip.current = brain.clip;
       onBrainClip(brain.clip);
+    }
+    const at = brain.gazeAt;
+    const atKey = at ? `${at.x.toFixed(2)},${at.z.toFixed(2)}` : 'ahead';
+    if (atKey !== reportedGaze.current) {
+      reportedGaze.current = atKey;
+      const g = brain.gaze;
+      onGaze({
+        yaw: (g.yaw * 180) / Math.PI,
+        pitch: (g.pitch * 180) / Math.PI,
+        at: atKey,
+      });
     }
 
     let y = group.current.position.y;
@@ -627,6 +665,11 @@ export default function HomeWorld3D({
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
+  const handleGaze = useMemo(() => (g: { yaw: number; pitch: number; at: string }) => {
+    stats.current = { ...stats.current, lionGaze: g };
+    onStats?.(stats.current as WorldStats);
+  }, [onStats]);
+
   const handleLionMeasured = useMemo(() => (height: number, grounded: boolean, clips: string[], floorGap: number) => {
     stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded, lionClips: clips, lionFloorGap: floorGap };
     onStats?.(stats.current as WorldStats);
@@ -677,6 +720,8 @@ export default function HomeWorld3D({
               lionUrl={lionUrl}
               onMeasured={handleLionMeasured}
               onBrainClip={handleBrainClip}
+              onGaze={handleGaze}
+              interestMarkers={markers}
             />
           )}
           <Preload all />
