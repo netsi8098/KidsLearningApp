@@ -31,6 +31,11 @@ OUT_NAME = argv[0] if argv else "model"
 WANT = [n for n in (argv[1].split(",") if len(argv) > 1 else []) if n]
 OUT = os.path.join(REPO, "art", "blender", "references", f"silhouette-{OUT_NAME}")
 
+# Camera distance for a PERSPECTIVE render, in camera-ring units. 0 (the
+# default) keeps the orthographic camera the whole QA history was measured with,
+# bit-identical. See the block in `main` for why this exists.
+PERSP = float(os.environ.get("LION_SIL_PERSP", "0"))
+
 # Front is read from +Y; the side is read from -X so image-right runs along -Y and
 # the nose lands on the LEFT, matching the reference. Three-quarter mirrors the
 # reference sheet's own 3/4 angle.
@@ -182,18 +187,46 @@ def main():
     sc.world = w
 
     cd = bpy.data.cameras.new("SilCam")
-    cd.type = "ORTHO"
-    cd.ortho_scale = SPAN
     cam = bpy.data.objects.new("SilCam", cd)
     sc.collection.objects.link(cam)
     sc.camera = cam
 
+    if PERSP > 0.0:
+        # PERSPECTIVE, for measuring how much of the front/rear and 3/4
+        # disagreement is projection rather than geometry.
+        #
+        # An orthographic front silhouette and an orthographic rear silhouette
+        # of the same object are MIRROR IMAGES — necessarily, since both are the
+        # same set of rays. Measured on this model they agree at IoU 0.99927.
+        # The reference pair agrees at only 0.8097, with 19% fewer subject
+        # pixels in its rear view than its front, so the reference turnaround is
+        # a fairly close PERSPECTIVE render and the two projections cannot be
+        # made to agree by changing geometry.
+        #
+        # Distance is in the same units as the camera ring, and the lens is
+        # solved so the framing still maps SPAN to the canvas height at the
+        # subject's centre — otherwise the sweep would be measuring zoom.
+        cd.type = "PERSP"
+        cd.sensor_fit = "VERTICAL"
+        cd.sensor_height = 24.0
+        cd.lens = 24.0 * PERSP / SPAN
+    else:
+        cd.type = "ORTHO"
+        cd.ortho_scale = SPAN
+
     for view, (loc, rot) in CAMS.items():
-        cam.location = loc
+        if PERSP > 0.0:
+            v = Vector(loc)
+            flat = Vector((v.x, v.y, 0.0))
+            k = PERSP / (flat.length or 1.0)
+            cam.location = (v.x * k, v.y * k, v.z)
+        else:
+            cam.location = loc
         cam.rotation_euler = rot
         sc.render.filepath = os.path.join(OUT, f"model-{view}.png")
         bpy.ops.render.render(write_still=True)
-    print(f"[sil] wrote {OUT}")
+    print(f"[sil] wrote {OUT}"
+          f"{f' (perspective, d={PERSP})' if PERSP > 0 else ' (orthographic)'}")
 
 
 main()

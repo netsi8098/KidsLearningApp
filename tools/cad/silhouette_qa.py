@@ -64,6 +64,52 @@ def band_profile(ref, mod, bands=10):
     return out
 
 
+def rear_ceiling(report):
+    """State the rear view's UNREACHABLE ceiling, every run.
+
+    An orthographic front silhouette and an orthographic rear silhouette of the
+    same object are mirror images — necessarily, since they are the same set of
+    rays traced the other way. Measured on this model they agree at IoU 0.9993,
+    which is the projection working correctly.
+
+    The reference pair agrees at only 0.8097, with 84% of the front view's
+    subject area in its rear view. No single object under any single camera does
+    that, so the reference turnaround's four views are not consistent
+    projections of one form — it is a rendered STUDY, and its rear view is the
+    one that does not reconcile.
+
+    The consequence is arithmetic and it is worth printing rather than
+    remembering: because the model's rear mask is forced to be the mirror of
+    its front mask, the rear IoU cannot exceed the reference's own front-to-rear
+    self-consistency by much. The model sits at 0.815 against a ceiling of
+    0.810. THE REAR VIEW IS FINISHED. Three separate passes have recorded its
+    "16.9% extra material" as an outstanding defect; it is not one, and chasing
+    it can only be done by making the front view worse.
+    """
+    try:
+        rf = load(os.path.join(VIEWS, "front-norm.png"))
+        rr = load(os.path.join(VIEWS, "rear-norm.png"))
+        mf = load(os.path.join(SIL, "model-front.png"))
+        mr = load(os.path.join(SIL, "model-rear.png"))
+    except Exception:
+        return
+    def iou(a, b):
+        u = (a | b).sum()
+        return float((a & b).sum()) / u if u else 0.0
+    ref_self = iou(rf, rr[:, ::-1])
+    mod_self = iou(mf, mr[:, ::-1])
+    print("")
+    print("front/rear self-consistency (a projection check, not a model check):")
+    print(f"  model front vs mirrored rear   {mod_self:.4f}   "
+          f"(orthographic: must be ~1.0)")
+    print(f"  ref   front vs mirrored rear   {ref_self:.4f}   "
+          f"area ratio {rr.sum() / max(1, rf.sum()):.4f}")
+    got = report.get("rear", {}).get("iou")
+    if got is not None:
+        print(f"  REAR_CEILING={ref_self:.4f}  REAR_IOU={got:.4f}  "
+              f"headroom={got - ref_self:+.4f}")
+
+
 def main():
     report, overlays = {}, {}
     views = [v for v in ("front", "side", "rear", "three-quarter")
@@ -163,6 +209,8 @@ def main():
         f"{v}={report[v]['registration_px']:+d}" for v in report))
     print("unregistered IoU:           " + "  ".join(
         f"{v}={report[v]['iou_unregistered']:.4f}" for v in report))
+    rear_ceiling(report)
+
     weighted = sum(report[v]["iou"] * WEIGHT[v] for v in report) / tw
     print(f"MEAN_IOU={np.mean([r['iou'] for r in report.values()]):.4f}")
     print(f"WEIGHTED_IOU={weighted:.4f}   (front .35 side .30 3/4 .25 rear .10)")

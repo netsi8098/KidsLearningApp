@@ -95,8 +95,12 @@ step "silhouette — render the model through the locked reference cameras"
   || note_fail silhouette_render
 
 step "silhouette IoU  (vs the approved turnaround)"
+# REAR_CEILING is in the grep on purpose. The rear view sits at the ceiling its
+# own reference imposes, and three passes recorded its "16.9% extra material" as
+# an outstanding defect before that was measured. Printing the ceiling next to
+# the IoU every run is what stops a fourth.
 python3 tools/cad/silhouette_qa.py mascot subject 2>&1 \
-  | grep -E "^front|^side|^rear|^three|MEAN_IOU|WEIGHTED_IOU|CLIPPED|registration" \
+  | grep -E "^front|^side|^rear|^three|MEAN_IOU|WEIGHTED_IOU|CLIPPED|registration|REAR_CEILING|self-consistency|mirrored rear" \
   || note_fail silhouette_qa
 
 step "band spans — WHICH WAY each band disagrees, front and side"

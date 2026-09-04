@@ -6589,3 +6589,150 @@ Repo baseline unmoved: typecheck 52, `npm test` 29 failed / 756 passed.
    the work done here.
 4. Optional behaviour question: should the lion TURN toward something out of the
    gaze's reach? `turnTo` exists and nothing calls it for attention.
+
+## 2026-09-04 (thirtieth pass) — the band tables re-derived at rest
+
+No geometry change. The previous pass found that `silhouette_render.py` had been
+rendering a POSED lion, so every band table and every conclusion drawn from one
+needed re-deriving. Doing that retired two standing items, confirmed a third,
+and produced a different and shorter list of what is actually left.
+
+### 1. The 3/4 camera is right, and now it is proven rather than suspected
+
+The nineteenth pass swept the 3/4 azimuth, found the peak at 50 degrees against
+a documented 47, and left the default alone on the grounds that picking a QA
+camera because it flatters the model is metric-gaming. That was the right call
+for the wrong reason — the sweep was of posed renders. At rest:
+
+    azimuth   30     35     40     45     47     50     55     60     65     70
+    3/4 IoU  .7303  .7633  .7906  .8070 .8078  .8066  .7981  .7836  .7661  .7485
+
+A clean unimodal curve peaking exactly at **47**, the documented value. The
+posed sweep's 50 was an artefact of the pose. `LION_TQ_DEG` stays for the next
+person who suspects the camera, but the suspicion is now answered.
+
+### 2. THE REAR VIEW IS FINISHED. It has been for some time
+
+Three separate passes recorded the rear view's "16.9% extra material" as an
+outstanding defect. It is not one, and the proof is a projection identity rather
+than a judgement.
+
+An orthographic front silhouette and an orthographic rear silhouette of the same
+object are **mirror images** — necessarily, since they are the same set of rays
+traced the other way. Measured:
+
+    model front vs mirrored rear   IoU 0.9993      front 134,143 px / rear 134,139 px
+    ref   front vs mirrored rear   IoU 0.8097      front 142,621 px / rear 119,952 px
+
+The reference's rear view holds **84%** of its front view's subject area. No
+single object under any single camera does that. Two independent estimates of a
+perspective camera that could explain it disagree by six times over — the band
+widths need a camera about one body-height away, the front/rear self-mirror
+needs one about six away — so a single perspective camera does not explain it
+either. **The reference turnaround is a rendered STUDY whose four views are not
+consistent projections of one form**, and the rear view is the one that does not
+reconcile.
+
+The consequence is arithmetic. The model's rear mask is forced to be the mirror
+of its front mask, so the rear IoU cannot exceed the reference's own front-to-
+rear self-consistency by much:
+
+    REAR_CEILING=0.8097   REAR_IOU=0.8147   headroom=+0.0050
+
+The model is already **above** the ceiling. Any further gain in the rear view
+can only be bought by making the front view worse. That is 0.019 of the weighted
+total (0.10 x 0.19) permanently unreachable, and the weighting should be read
+with that in mind rather than as a target.
+
+`silhouette_qa.py` now prints those three lines every run and `lion-review.sh`
+greps for them, because this needed measuring three times before it stuck.
+
+### 3. What the projection test cost, and the tool it left
+
+`silhouette_render.py` gained `LION_SIL_PERSP` — a camera distance that switches
+the QA to a perspective camera, with the lens solved so the framing still maps
+SPAN to the canvas so a sweep measures projection rather than zoom. Default 0
+keeps the orthographic camera bit-identical.
+
+Every IoU falls monotonically under perspective (weighted 0.8675 ortho, 0.8456
+at d=6, 0.6341 at d=1.2) because the reference masks were normalised against an
+orthographic fit. So it is a diagnostic, not a proposal — its value is the
+self-mirror column, which is what dated the reference's effective camera and
+showed no single one fits.
+
+### 4. The front view is in good shape, and it is the trustworthy one
+
+At rest, 17 of the 20 front bands are inside 0.015 H. The three that are not:
+
+| band | ref_w | mod_w | dw | note |
+|---|---|---|---|---|
+| 0.95-1.00 | 0.248 | 0.210 | **-0.038** | top of the mane |
+| 0.90-0.95 | 0.427 | 0.394 | -0.033 | top of the mane |
+| 0.25-0.30 | 0.477 | 0.444 | -0.033 | mid leg |
+| 0.00-0.05 | 0.483 | 0.452 | -0.031 | paws, outer edges |
+
+and one gap: **ref_gap 0.023 against mod_gap 0.081** at 0.00-0.05. The overlay
+says the same thing more plainly — a thin even rim of missing material around
+the mane and down the outside of both legs, and the paws short on their OUTER
+edges only, with the inner edges landing exactly. The paws are set too far apart
+laterally, which is the one clean actionable item the front view has left.
+
+### 5. The side view: the actual list, read off the overlay
+
+The numbers said "band 0.20-0.25 is 0.037 narrow with the centroid 0.057 out",
+which is four things summed. The overlay says what they are, and this is the
+useful output of the whole pass:
+
+* **The tail.** Red above and blue below, in both the side and 3/4 overlays —
+  the largest single disagreement anywhere outside the rear view. The
+  reference's tail curves up and the model's hangs straighter. In the 3/4 view
+  the tail TUFT is entirely missing from where the reference puts it and sits
+  below and left instead. Cheap to fix, it is a station table.
+* **The mane is short at the BACK of the head** — a red band down the mane's
+  rear edge through bands 0.85-0.95, and the same deficit shows in front, side
+  and rear at 0.95-1.00. This is the mane's own remaining item, alongside its
+  front-facing lock read.
+* **The front leg is thin fore-aft** — a substantial red patch on its rear
+  edge. The reference's foreleg is deeper front-to-back than the model's.
+* **The muzzle and chin are slightly short**, a thin red edge.
+
+### 6. The 3/4 view's deficits are placement, not size
+
+The band table's 3/4 width deficits look alarming (-0.256 at band 0.50-0.55,
+-0.202 at 0.30-0.35) but the areas say the model is not too small:
+
+    3/4 area / front area     reference 1.2909    model 1.2915
+    3/4 area / side area      reference 1.0497    model 1.0433
+
+Both ratios match to three decimals, so the 3/4 silhouette carries the right
+amount of material for the front and side dimensions it has. The deficits are
+where it sits: `dcx` runs -0.077 at bands 0.45-0.55 and +0.127 to +0.145 at
+0.00-0.15 while the global registration is within 5 px, which is a
+rotation-like signature — the lower bands displaced one way and the middle bands
+the other. Given the front/rear proof above, some of that is the reference's own
+inconsistency and some is the model's stance. The tail accounts for a visible
+share of it.
+
+### State
+
+Unchanged, since nothing was rebuilt:
+
+    969 cage verts, 40 deform bones, 13 clips, 16 morphs, 4 meshes, 4436.8 KB
+    weighted IoU 0.8675  (front 0.9287  side 0.8635  rear 0.8147 at its 0.8097
+    ceiling  3/4 0.8078)
+    battery 0 pinched / 0 flipped, planted paw 0.069 mm, support slide 0.111 mm
+    both contracts pass; typecheck 52, npm test 29 failed / 756 passed
+
+### Next, in order
+
+1. **The tail.** Largest remaining disagreement outside the rear view, visible
+   in two views, and it is a station table.
+2. **The mane's rear edge** is short through bands 0.85-1.00, and the mane still
+   reads as a smooth hood from the FRONT because its locks run front-to-back.
+   One pass on the mane can take both.
+3. **The paws are set too far apart laterally** — front-view gap 0.081 against
+   the reference's 0.023, with the paws' inner edges landing exactly and the
+   outer edges 0.015 short per side.
+4. The front leg's fore-aft depth, one band above the sole work.
+5. Optional behaviour question: should the lion TURN toward something out of the
+   gaze's reach? `turnTo` exists and nothing calls it for attention.
