@@ -148,6 +148,73 @@ def measure_map(path):
     return {"sd": float(a.std()), "bump": b, "bump_r": at, "res": a.shape[0]}
 
 
+MANE_VIEWS = [os.path.join(REPO, "docs", "assets", "lion-review", n)
+              for n in ("07-mane-front.png", "09-mane-side.png",
+                        "08-mane-threequarter.png")]
+# The mane's grain must be DIRECTIONAL. Measured as the elongation of the
+# rendered grain — the square root of the ratio of the major to minor
+# eigenvalue of its power spectrum's second-moment matrix, which is
+# direction-agnostic, so it does not care which way the locks run in a
+# particular view. The reference artwork measures 2.24. The sweep that set the
+# shipped field:
+#
+#     field                                front  side   3/4   mean
+#     axis stretch Z=0.22 (the old one)     1.43  1.04  1.46   1.31
+#     axis stretch Z=0.02                   1.83  1.16  1.72   1.57
+#     x-z fan 5.0/1.0, detail 26, oct 6     1.58  1.60  1.84   1.67
+#     x-z fan 5.0/0.4, detail 26, oct 6     1.72  1.80  1.79   1.77
+#     3D fan from the face plane            1.40  1.24  1.68   1.44
+#     x-z fan 5.0/0.4, detail 11, oct 3     2.61  1.23  2.31   2.05
+#     ... at bump 8 (SHIPPED)               2.59  1.64  2.17   2.13
+#
+# 1.60 sits clear of the old field's 1.31 and well below the shipped 2.13.
+MANE_ELONG_MIN = float(os.environ.get("LION_MANE_ELONG_MIN", "1.60"))
+
+
+def brown_window(im, size):
+    """The densest window of mane-brown, chosen by the image."""
+    a = np.asarray(im.convert("RGB")).astype(int)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    m = (r > 90) & (r < 200) & (g > 40) & (g < 130) & (b < 90) & ((r - b) > 45)
+    best = None
+    h, w = m.shape
+    for y in range(0, max(1, h - size), 6):
+        for x in range(0, max(1, w - size), 6):
+            f = m[y:y + size, x:x + size].mean()
+            if best is None or f > best[0]:
+                best = (f, x, y)
+    return best
+
+
+def elongation(path, size=96):
+    """How directional the grain is, and how big its features are."""
+    im = Image.open(path)
+    a = np.asarray(im.convert("RGB")).astype(int)
+    corners = [tuple(a[0, 0]), tuple(a[0, -1]), tuple(a[-1, 0]), tuple(a[-1, -1])]
+    bg = np.array(max(set(corners), key=corners.count))
+    ys, _ = np.nonzero(np.abs(a - bg).sum(axis=2) > 40)
+    hpx = (ys.max() - ys.min()) if ys.size else a.shape[0]
+    f, x, y = brown_window(im, size)
+    p = np.asarray(im.convert("L").crop((x, y, x + size, y + size))).astype(float)
+    res = p - box_blur(p, max(2, size // 10))
+    w = np.hanning(size)[:, None] * np.hanning(size)[None, :]
+    F = np.abs(np.fft.fftshift(np.fft.fft2(res * w))) ** 2
+    c = size // 2
+    F[c - 1:c + 2, c - 1:c + 2] = 0.0
+    yy, xx = np.mgrid[0:size, 0:size]
+    fy, fx = (yy - c).astype(float), (xx - c).astype(float)
+    tot = F.sum() or 1.0
+    lam = size / max((F * np.hypot(fy, fx)).sum() / tot, 1e-9)
+    sxx = (F * fx * fx).sum() / tot
+    syy = (F * fy * fy).sum() / tot
+    sxy = (F * fx * fy).sum() / tot
+    tr, det = sxx + syy, sxx * syy - sxy * sxy
+    root = np.sqrt(max(tr * tr / 4.0 - det, 0.0))
+    l1, l2 = tr / 2.0 + root, tr / 2.0 - root
+    return {"brown": f, "feature_H": lam / hpx,
+            "elong": float(np.sqrt(l1 / max(l2, 1e-12))), "sd": float(res.std())}
+
+
 def main():
     paths = sys.argv[1:] or DEFAULT
     print("  THE MAP ITSELF (no shading, no projection — the gated number)")
@@ -178,6 +245,26 @@ def main():
               f"   sd x{r['sd'] / (ref['sd'] or 1):.2f}"
               f"  bump {r['bump'] - ref['bump']:+.2f}dB vs ref")
     print("")
+    print("  MANE GRAIN — is it DIRECTIONAL (see MANE_ELONG_MIN)")
+    mref = elongation(REF)
+    print(f"  {'REFERENCE ' + os.path.basename(REF):26s} "
+          f"feature {mref['feature_H'] * 100:5.2f}%H  elong {mref['elong']:5.2f}"
+          f"  sd {mref['sd']:6.2f}")
+    mrows = []
+    for mp in MANE_VIEWS:
+        if not os.path.exists(mp):
+            continue
+        e = elongation(mp)
+        mrows.append(e)
+        print(f"  {os.path.basename(mp):26s} "
+              f"feature {e['feature_H'] * 100:5.2f}%H  elong {e['elong']:5.2f}"
+              f"  sd {e['sd']:6.2f}")
+    mane_mean = sum(r["elong"] for r in mrows) / len(mrows) if mrows else 0.0
+    if mrows:
+        print(f"  mean elongation {mane_mean:.2f} against the reference's "
+              f"{mref['elong']:.2f} (limit {MANE_ELONG_MIN:.2f})"
+              f"{'   <-- NOT DIRECTIONAL' if mane_mean < MANE_ELONG_MIN else ''}")
+    print("")
     print("===NAP_QA===")
     if m:
         print(f"MAP_BUMP_DB={m['bump']:.2f} MAP_BUMP_R={m['bump_r']} "
@@ -186,7 +273,12 @@ def main():
     if rows:
         print(f"WORST_RENDER_BUMP_DB={max(r['bump'] for r in rows):.2f}")
         print(f"WORST_RENDER_SD={max(r['sd'] for r in rows):.2f}")
+    if mrows:
+        print(f"MANE_ELONG_MEAN={mane_mean:.2f} MANE_ELONG_MIN_VIEW="
+              f"{min(r['elong'] for r in mrows):.2f} REF_MANE_ELONG={mref['elong']:.2f}")
     bad = bool(m and m["bump"] > MAP_BUMP_MAX)
+    if mrows and mane_mean < MANE_ELONG_MIN:
+        bad = True
     print(f"NAP_PERIODIC={'1' if bad else '0'}")
     print("===NAP_QA_END===")
     return 1 if bad else 0

@@ -134,11 +134,29 @@ BAKE_SAMPLES = int(os.environ.get("LION_NRM_SAMPLES", "4"))
 # of magnitude more, and the sweep is in the commit: 4 -> +32% of
 # high-frequency energy, 12 -> +96%, 30 -> +131%. 12 is the knee; 30 starts
 # to read as noise rather than hair.
-MANE_BUMP = float(os.environ.get("LION_MANE_BUMP", "12.0"))
+# 8, down from 12, and the sweep is in `tools/cad/nap_qa.py`'s gate. With the
+# radial fan the relief is directional, so less of it reads as more hair rather
+# than less: bump 8 is both SOFTER and more uniformly elongated than 12 (side
+# 1.64 against 1.23), and 18 chased the reference's amplitude number into a
+# render that read as coarse corduroy.
+MANE_BUMP = float(os.environ.get("LION_MANE_BUMP", "8.0"))
 BODY_BUMP = float(os.environ.get("LION_BODY_BUMP", "4.0"))
 # How much the normal map is applied at render time, 0..1+. Separate from the
 # bake strength so the look can be tuned without a rebake.
 MANE_SCALE = float(os.environ.get("LION_MANE_NRM_SCALE", "1.0"))
+# How far the mane's noise is squashed along object Z, and how fine it is.
+# Tunable because the anisotropy is the whole point of the mane's field and it
+# has to be measured in the RENDER, not asserted in the node graph.
+MANE_STRETCH_Z = float(os.environ.get("LION_MANE_STRETCH_Z", "0.22"))
+MANE_DETAIL_SCALE = float(os.environ.get("LION_MANE_DETAIL", "11.0"))
+MANE_OCTAVES = float(os.environ.get("LION_MANE_OCTAVES", "3.0"))
+# The radial fan the mane's noise is sampled in. See `_procedural_height`.
+# FAN_Z is the mane's own axis height — `mane_foundation` builds every ring
+# about (0, y, face_centre_front.h) and 0.604 is that value.
+FAN_Z = float(os.environ.get("LION_MANE_FAN_Z", "0.604"))
+
+FAN_ACROSS = float(os.environ.get("LION_MANE_FAN_ACROSS", "5.0"))
+FAN_ALONG = float(os.environ.get("LION_MANE_FAN_ALONG", "0.4"))
 BODY_SCALE = float(os.environ.get("LION_BODY_NRM_SCALE", "0.12"))
 
 
@@ -187,25 +205,90 @@ def _procedural_height(nt, bsdf, stretch, detail_scale):
     change direction at every seam and the strands would visibly break. Object
     space is continuous across the whole form.
 
-    `stretch` squashes the noise along one axis. A mane's locks hang downward,
-    so sampling Z slowly makes the noise fine ACROSS the strand and smooth
-    ALONG it. Isotropic noise on a mane reads as gravel.
+    A RADIAL FAN, NOT ONE SQUASHED AXIS, and the measurement is why.
+
+    This used to squash the noise along object Z — `mapping.Scale = (1,1,0.22)`
+    — on the reasoning that "a mane's locks hang downward". Some of them do. The
+    locks on the flanks hang, the ones on the crown run outward and the ones on
+    the sides sweep back, so one global axis can only align with a third of the
+    mane. Measured as the elongation of the rendered grain (the ratio of the
+    major to minor eigenvalue of its power spectrum's second-moment matrix,
+    which is direction-agnostic), against the reference artwork's 2.24:
+
+        stretch Z    front   side    3/4
+        0.22 shipped  1.43   1.04   1.46
+        0.06          1.72   1.16   1.72
+        0.02          1.83   1.16   1.72
+
+    It saturates. Squashing harder buys nothing after 0.06 and the SIDE never
+    moves at all, because no amount of Z-stretching aligns with a lock that runs
+    along Y.
+
+    `reference_model.json` already said what the field should be — "a mane is a
+    radial fan around the face opening, not a tube swept backward" — and that is
+    a curvilinear frame, not an axis. So the noise is sampled at
+
+        v = normalize(d_xz) * FAN_ACROSS + d * FAN_ALONG
+
+    where d is the object position relative to the mane's own axis height.
+    Moving ACROSS a lock turns `normalize(d_xz)` quickly, so the field varies
+    fast; moving ALONG one leaves it unchanged and only the small `d` term
+    advances, so the field varies slowly. The elongation is about
+    (FAN_ACROSS / r) / FAN_ALONG, roughly 16:1 at the mane's own radius, and it
+    holds that ratio in every direction the locks actually run.
     """
     coord = nt.nodes.new("ShaderNodeTexCoord")
-    coord.location = (-1100, -320)
-    mapping = nt.nodes.new("ShaderNodeMapping")
-    mapping.location = (-900, -320)
-    mapping.inputs["Scale"].default_value = stretch
+    coord.location = (-1700, -320)
+    # d = object position - the mane's own axis height, so the fan is centred
+    # where the mane radiates from rather than on the world origin.
+    off = nt.nodes.new("ShaderNodeVectorMath")
+    off.location = (-1500, -320)
+    off.operation = "SUBTRACT"
+    off.inputs[1].default_value = (0.0, 0.0, FAN_Z)
+    # d with Y REMOVED, so the fan's angle is measured in the x-z plane.
+    #
+    # Fanning in 3D from a point at the face OPENING is the more obvious
+    # reading of "a radial fan around the face opening", and it measured worse
+    # everywhere: with the origin on the face plane, `d` points mostly backward
+    # for every point on the mane, so `normalize(d)` barely turns and the field
+    # goes flat. Elongation front 2.61 -> 1.40, 3/4 2.31 -> 1.68, side
+    # unchanged at 1.24, mean 2.05 -> 1.44. The x-z fan keeps `normalize(d)`
+    # turning through a full revolution around the axis, which is where the
+    # variation has to come from.
+    flat = nt.nodes.new("ShaderNodeVectorMath")
+    flat.location = (-1300, -420)
+    flat.operation = "MULTIPLY"
+    flat.inputs[1].default_value = (1.0, 0.0, 1.0)
+    norm = nt.nodes.new("ShaderNodeVectorMath")
+    norm.location = (-1150, -420)
+    norm.operation = "NORMALIZE"
+    ang = nt.nodes.new("ShaderNodeVectorMath")
+    ang.location = (-1000, -420)
+    ang.operation = "SCALE"
+    ang.inputs["Scale"].default_value = FAN_ACROSS
+    rad = nt.nodes.new("ShaderNodeVectorMath")
+    rad.location = (-1000, -240)
+    rad.operation = "SCALE"
+    rad.inputs["Scale"].default_value = FAN_ALONG
+    add = nt.nodes.new("ShaderNodeVectorMath")
+    add.location = (-850, -320)
+    add.operation = "ADD"
     noise = nt.nodes.new("ShaderNodeTexNoise")
     noise.location = (-700, -320)
     noise.inputs["Scale"].default_value = detail_scale
-    noise.inputs["Detail"].default_value = 6.0
+    noise.inputs["Detail"].default_value = MANE_OCTAVES
     if "Roughness" in noise.inputs:
         noise.inputs["Roughness"].default_value = 0.62
 
-    made = [coord, mapping, noise]
-    nt.links.new(coord.outputs["Object"], mapping.inputs["Vector"])
-    nt.links.new(mapping.outputs["Vector"], noise.inputs["Vector"])
+    nt.links.new(coord.outputs["Object"], off.inputs[0])
+    nt.links.new(off.outputs["Vector"], flat.inputs[0])
+    nt.links.new(flat.outputs["Vector"], norm.inputs[0])
+    nt.links.new(norm.outputs["Vector"], ang.inputs[0])
+    nt.links.new(off.outputs["Vector"], rad.inputs[0])
+    nt.links.new(ang.outputs["Vector"], add.inputs[0])
+    nt.links.new(rad.outputs["Vector"], add.inputs[1])
+    nt.links.new(add.outputs["Vector"], noise.inputs["Vector"])
+    made = [coord, off, flat, norm, ang, rad, add, noise]
 
     # EMIT bakes the emission colour, so the height has to arrive there. The
     # base colour is left alone: the coat's vertex colours are already in it.
@@ -562,7 +645,8 @@ def build(meshes):
         # Z squashed to 0.22: the noise is sampled slowly up the mane and
         # quickly around it, so the grain runs with the locks.
         p = bake_normal(mane, "lion_mane_normal", MANE_RES,
-                        (1.0, 1.0, 0.22), MANE_BUMP, 26.0, MANE_SCALE)
+                        (1.0, 1.0, MANE_STRETCH_Z), MANE_BUMP,
+                        MANE_DETAIL_SCALE, MANE_SCALE)
         if p:
             written.append(p)
 

@@ -7674,3 +7674,117 @@ working as described, not something to pin down with a hand-picked margin.
 2. **The crown tip** — front 0.95-1.00 at -0.071, the only failing band.
 3. **The eyes** — they bulge and read white-dominant; the reference's iris
    nearly fills the lid with a crescent of white.
+
+## GATE 23: the mane's normal map
+
+The mane read as gravel where the reference reads as hair. `_procedural_height`
+already knew it should not — "isotropic noise on a mane reads as gravel" — and
+already had a mechanism: `mapping.Scale = (1, 1, 0.22)`, the noise squashed
+along object Z, on the reasoning that "a mane's locks hang downward".
+
+Some of them do. The locks on the flanks hang, the ones on the crown run
+outward and the ones on the sides sweep back, so one global axis can only align
+with a third of the mane.
+
+### Measured as ELONGATION, which is the property that matters
+
+The square root of the ratio of the major to minor eigenvalue of the rendered
+grain's power-spectrum second-moment matrix. It is direction-AGNOSTIC, so it
+does not care which way the locks run in a particular view — only whether the
+grain has a direction at all. The reference artwork measures 2.24.
+
+    field                                front  side   3/4   mean
+    axis stretch Z=0.22 (shipped)         1.43  1.04  1.46   1.31
+    axis stretch Z=0.06                   1.72  1.16  1.72   1.53
+    axis stretch Z=0.02                   1.83  1.16  1.72   1.57
+    x-z fan 5.0/1.0, detail 26, oct 6     1.58  1.60  1.84   1.67
+    x-z fan 5.0/0.4, detail 26, oct 6     1.72  1.80  1.79   1.77
+    x-z fan 5.0/0.4, detail 26, oct 6, b6 1.88  1.50  2.01   1.80
+    x-z fan 7.0/0.4                       1.59  1.27  2.06   1.64
+    x-z fan 9.0/0.4                       1.48  1.25  2.03   1.59
+    3D fan from the face plane            1.40  1.24  1.68   1.44
+    x-z fan 5.0/0.4, detail 11, oct 3     2.61  1.23  2.31   2.05
+    ... at bump 8                 SHIPPED 2.59  1.64  2.17   2.13
+
+**The axis stretch saturates and the side never moves.** Squashing from 0.22 to
+0.02 buys 0.26 on the front and 0.12 on the side, because no amount of
+Z-stretching aligns with a lock that runs along Y.
+
+### A radial fan, which the reference model already asked for
+
+`reference_model.json` says it: "a mane is a radial fan around the face opening,
+not a tube swept backward". That is a curvilinear frame, not an axis. The noise
+is now sampled at
+
+    v = normalize(d_xz) * FAN_ACROSS + d * FAN_ALONG
+
+with `d` the object position relative to the mane's own axis height (0.604, the
+`face_centre_front.h` every ring in `mane_foundation` is built about). Moving
+ACROSS a lock turns `normalize(d_xz)` quickly so the field varies fast; moving
+ALONG one leaves it unchanged and only the small `d` term advances. The
+elongation is about `(FAN_ACROSS / r) / FAN_ALONG` and it holds in every
+direction the locks actually run.
+
+Mean elongation 1.31 -> 2.13, against the reference's 2.24: from 58% of it to
+95%. The side view — the one the axis stretch could never move — goes 1.04 to
+1.64.
+
+### Three things that measured worse
+
+**A 3D fan from the face OPENING**, which is the more obvious reading of the
+reference note, is worse everywhere: with the origin on the face plane `d`
+points mostly backward for every point on the mane, so `normalize(d)` barely
+turns and the field goes flat. Front 2.61 -> 1.40, mean 2.05 -> 1.44.
+
+**FAN_ACROSS above 5.0.** 7.0 and 9.0 both drop the side to 1.27 and 1.25 while
+only the 3/4 view gains.
+
+**Chasing the reference's amplitude.** The reference's high-passed patch has
+sd 15.48 against the shipped 9.0-11.3, and raising `MANE_BUMP` to 18 closes that
+to 11.8-14.6 — and the render comes out reading as coarse corduroy. `sd` is a
+bad target here for a specific reason: the reference's figure includes broad
+smooth lock shading that our high-pass window keeps and our own field does not
+have, so matching the number means over-driving the fine grain. `MANE_BUMP` went
+DOWN, 12 -> 8, and both the look and the uniformity improved (side 1.23 -> 1.64)
+because with a directional field less relief reads as more hair.
+
+That last one is the third time on this asset that an amplitude number has
+pointed the wrong way — after the mane's own scallop and the body nap's
+high-frequency energy. The metric that works here measures SHAPE, not size.
+
+### Where it still differs from the reference
+
+The reference's mane is broad soft ribbons with fine low-contrast lines inside
+them. Ours is a uniform fine directional grain — right direction, right scale
+to within 0.3-0.7% of H, but no large-scale lock structure. That structure is
+GEOMETRY (`mane_foundation`'s 65 clumps), not a normal map, and the clumps
+already exist; whether they read is a separate question from this one.
+
+Also worth knowing: the feature-size figure has a blind spot. Its high-pass
+removes everything coarser than a tenth of the patch, so it sees the
+reference's fine hair lines and not its broad locks — which is why the model
+measures COARSER than the reference (1.9-2.3% of H against 1.54%) while looking
+finer. Elongation is the number to trust here; feature size is context.
+
+### State
+
+    mane        MANE_ELONG_MEAN 2.13, min view 1.64 (limit 1.60, ref 2.24)
+    coat        MAP_BUMP 2.87 dB (limit 6.0), NAP_PERIODIC=0
+    silhouette  WEIGHTED_IOU 0.8780, front 0.9290 side 0.9036 3/4 0.8029
+    crease      CREASED_REGIONS=0
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    rig         reach 22.1/42.1 mm, planted paw 0.069 mm, slide 0.111 mm, 13 clips
+    glb         5929 KB against a 6144 cap, 4 meshes, both contracts pass
+    repo        typecheck 0, tests 29 failed / 765 passed (the baseline)
+
+`npm run lion:review` passes every stage.
+
+### Next, in order
+
+1. **The mane's clumps** — 65 exist and the large-scale lock structure the
+   reference has does not read. This is the geometry question the normal map
+   cannot answer.
+2. **The crown tip** — front 0.95-1.00 at -0.071, the only failing band.
+3. **The eyes** — they bulge and read white-dominant; the reference's iris
+   nearly fills the lid with a crescent of white.
