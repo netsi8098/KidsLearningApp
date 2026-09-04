@@ -193,14 +193,25 @@ def mane_depth_at_u(u):
 #
 # Amplitudes stay modest because `fit_to_measured` normalises the envelope
 # afterwards: relief decides silhouette, measurement decides extent.
+# A global multiplier on every lock's amplitude, so the depth can be swept
+# against a measurement instead of argued about. See LOCK DEPTH below.
+LOCK_AMP = float(os.environ.get("LION_LOCK_AMP", "1.0"))
+# ...and on the count and the azimuth sigma, which turn out to be the levers
+# the amplitude is not. See LOCK DEPTH below.
+LOCK_COUNT = float(os.environ.get("LION_LOCK_COUNT", "1.0"))
+LOCK_ASIG = float(os.environ.get("LION_LOCK_ASIG", "1.0"))
+
+
 def lock_ring(count, amp, asig, ssig, station, phase=0.0, az_from=-90.0,
               az_to=270.0):
     """`count` locks evenly spaced in azimuth, each long in station."""
     out = []
+    count = max(3, int(round(count * LOCK_COUNT)))
     span = az_to - az_from
     for i in range(count):
         az = az_from + span * ((i + 0.5) / count) + phase
-        out.append((f"lock_{station:.2f}_{i}", az, station, amp, asig, ssig))
+        out.append((f"lock_{station:.2f}_{i}", az, station, amp * LOCK_AMP,
+                    asig * LOCK_ASIG, ssig))
     return out
 
 

@@ -45,6 +45,7 @@ Outputs:
 """
 
 import json
+import math
 import os
 import sys
 
@@ -535,6 +536,107 @@ def curvature_shade(obj):
         out[i] = (1.0 - CURV_GAIN * c) if c > 0 else (1.0 - CURV_LIFT * c)
     return out
 
+LOCK_AXIS_Z = float(os.environ.get("LION_LOCK_AXIS_Z", "0.604"))
+LOCK_SHADE_GAIN = float(os.environ.get("LION_LOCK_SHADE", "1.2"))
+LOCK_SHADE_PASSES = int(os.environ.get("LION_LOCK_SHADE_PASSES", "14"))
+# The relief a trough actually has, so the gain means something. Measured on
+# the shipped mane: the radius of an outer-facing vertex deviates from a
+# 12-pass smoothing of the radius field with a standard deviation of 0.0064 and
+# a 99th percentile of 0.039. 0.020 maps a typical trough to about a third of
+# the gain and a deep one to full.
+LOCK_SHADE_SCALE = float(os.environ.get("LION_LOCK_SHADE_SCALE", "0.020"))
+
+
+def lock_shade(obj):
+    """Darken the mane's lock TROUGHS by value.
+
+    THE REFERENCE'S LOCKS ARE VALUE, NOT SILHOUETTE OR OCCLUSION.
+
+    `scallop_rim` established the first half of that: "the reference's own
+    boundary is smooth at every height — its lock tips are interior SHADING".
+    This is the second half. Measured as the standard deviation of shading in
+    the lock band (features 3% to 11% of subject height, which is a lock),
+    the reference's mane patch scores 22.31 and the shipped mane 5.74 to 7.30.
+
+    Four levers were swept for it and three do nothing:
+
+        lever                          front  side   3/4   mean
+        as shipped                      7.30  6.25  5.74   6.43
+        LOCK_AMP x2 (deeper locks)      7.49  6.39  6.04   6.64
+        CURV_GAIN 0.55 -> 1.20          7.66  5.89  5.76   6.44
+        LOCK_ASIG x0.55 (narrower)      7.41  8.41  9.57   8.46
+        LOCK_ASIG x0.55 + AMP x3        7.56 12.40  8.82   9.59
+
+    LOCK_AMP alone does nothing because `fit_to_measured` normalises each
+    band's MAXIMUM to the measured envelope, so a global amplitude change
+    cancels exactly. What sets the relief is the crest-to-trough CONTRAST, and
+    at an azimuth sigma of 5.5 degrees against a 15 degree spacing the
+    neighbouring locks overlap at 0.39 of peak, which caps the modulation ratio
+    at 1.33. Narrowing the sigma lets the troughs reach zero, and only then does
+    amplitude compound.
+
+    And CURV_GAIN does nothing because a corrugation 3% of the radius deep has
+    almost no curvature to find; its own band-pass never sees the lock.
+
+    Depth works and it costs the outline: sigma x0.55 with amplitude x3 takes
+    the lock band to 9.59 and WEIGHTED_IOU from 0.8780 to 0.8720, most of it the
+    front crown losing material to the deeper troughs.
+
+    WHAT SHIPPED, and why it is not the highest-scoring option:
+
+        config                          front  side   3/4   mean   IoU
+        as shipped (GATE 22)             7.30  6.25  5.74   6.43  0.8780
+        lock_shade 1.2                   8.14  7.57  9.90   8.54  0.8780
+        lock_shade 1.2 + ASIG x0.55      7.95  9.95  9.65   9.18  0.8758
+        ASIG x0.55 + AMP x3, no shade    7.56 12.40  8.82   9.59  0.8720
+
+    `lock_shade` alone is free — it moves no vertex, and the silhouette render
+    is a flat-white mask, so colour cannot affect it. The narrower locks score
+    higher and look WORSE: side by side against the reference, the shade-only
+    build shows the large clean ribbons the reference has and the narrowed one
+    shows more, finer ridges. The reference's locks are broad. Gain above about
+    1.2 saturates against the 0.45 clamp.
+
+    So the value is put where the locks are instead of hoping a shallow
+    corrugation casts it. `r` is the distance from the mane's own axis — the
+    same axis `mane_foundation` builds every ring about — and smoothing that
+    field over the mesh gives the hood's envelope. What is left is the lock
+    relief, signed: negative in a trough. Darkening by it is a lock-scale
+    curvature shade in the one parametrisation the locks are actually aligned
+    with, and it changes no vertex position, so the silhouette cannot move.
+    """
+    me = obj.data
+    col = me.color_attributes.get(face_lion.COLOR_ATTR)
+    if col is None or col.domain != "POINT":
+        print(f"[lock] {obj.name}: no POINT colour attribute — skipped")
+        return
+    n = len(me.vertices)
+    co = [v.co for v in me.vertices]
+    r = [math.hypot(c.x, c.z - LOCK_AXIS_Z) for c in co]
+    nb = [[] for _ in range(n)]
+    for e in me.edges:
+        a, b = e.vertices
+        nb[a].append(b)
+        nb[b].append(a)
+    s = list(r)
+    for _ in range(max(1, LOCK_SHADE_PASSES)):
+        s = [(s[i] + sum(s[j] for j in nb[i]) / len(nb[i])) * 0.5 if nb[i]
+             else s[i] for i in range(n)]
+    worst = 1.0
+    for i, d in enumerate(col.data):
+        k = 1.0 + LOCK_SHADE_GAIN * (r[i] - s[i]) / LOCK_SHADE_SCALE
+        k = max(0.45, min(1.15, k))
+        worst = min(worst, k)
+        c = d.color
+        d.color = (c[0] * k, c[1] * k, c[2] * k, c[3])
+    me.update()
+    dev = [abs(r[i] - s[i]) for i in range(n)]
+    dev.sort()
+    print(f"[lock] {obj.name}: lock trough shading, gain {LOCK_SHADE_GAIN}, "
+          f"relief p99 {dev[int(n * 0.99)]:.4f} over scale {LOCK_SHADE_SCALE}, "
+          f"darkest factor {worst:.3f}")
+
+
 def bake_ao_into_coat(objs):
     """Multiply baked occlusion INTO the coat's own vertex colours.
 
@@ -899,6 +1001,11 @@ def main():
     #     is the same trap `silhouette_render.py` fell into for the whole
     #     history of this asset.
     bake_ao_into_coat(meshes)
+    # After the cavity bake, because both multiply into `Col` and this one is
+    # the lock-scale term the generic curvature pass cannot see.
+    for _m in meshes:
+        if _m.type == "MESH" and _m.name == "LionMane":
+            lock_shade(_m)
 
     # ---- 3d. surface detail --------------------------------------------
     # Unwrap and bake a normal map per coat surface. After the cavity bake and

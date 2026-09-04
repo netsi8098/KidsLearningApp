@@ -7788,3 +7788,123 @@ finer. Elongation is the number to trust here; feature size is context.
 2. **The crown tip** — front 0.95-1.00 at -0.071, the only failing band.
 3. **The eyes** — they bulge and read white-dominant; the reference's iris
    nearly fills the lid with a crescent of white.
+
+## GATE 24: the mane's clumps
+
+The mane has 120 locks in six rings and the large lock structure the reference
+shows did not read. `scallop_rim` had already established half of why — "the
+reference's own boundary is smooth at every height, its lock tips are interior
+SHADING" — and this is the other half: the reference's locks are VALUE.
+
+### The measurement
+
+Shading variation in the lock band: features 3% to 11% of subject height, which
+is a lock rather than a hair. Measured on patches of mane-brown, the reference
+scores 19.46 and the shipped mane 7.54 — **40% of it.**
+
+### Four levers, and three of them do nothing
+
+    lever                            front  side   3/4   mean    IoU
+    as shipped (GATE 23)              8.45  6.45  7.73   7.54  0.8780
+    LOCK_AMP x2 (deeper locks)        7.49  6.39  6.04   6.64  ~
+    CURV_GAIN 0.55 -> 1.20            7.66  5.89  5.76   6.44  ~
+    LOCK_ASIG x0.55 (narrower)        7.41  8.41  9.57   8.46  ~
+    LOCK_ASIG x0.55 + LOCK_AMP x3     7.56 12.40  8.82   9.59  0.8720
+    lock_shade 1.2                    8.94  7.12  9.50   8.52  0.8780
+    lock_shade 1.2 + ASIG x0.55       7.95  9.95  9.65   9.18  0.8758
+
+**LOCK_AMP alone does nothing, exactly.** `fit_to_measured` normalises each
+height band's MAXIMUM to the measured envelope, so a global amplitude change
+cancels: crest goes to the target either way and the trough follows it. What
+sets the relief is the crest-to-trough CONTRAST, and at an azimuth sigma of 5.5
+degrees against a 15 degree spacing the neighbouring locks overlap at 0.39 of
+peak, which caps the modulation ratio at 1.33. Narrowing the sigma lets the
+troughs reach zero — and only THEN does amplitude compound, which is why
+`ASIG x0.55 + AMP x3` works where `AMP x3` alone did not.
+
+**CURV_GAIN does nothing** because a corrugation 3% of the radius deep has
+almost no curvature to find. Measured on the shipped mane, an outer-facing
+vertex's radius deviates from a 12-pass smoothing of the radius field by a
+standard deviation of 0.0064 on a mean radius of 0.2086 — a 6-degree
+corrugation on a 0.055 lock spacing. Its generic Laplacian band-pass never sees
+the lock at all.
+
+**Depth works and it costs the outline.** `ASIG x0.55 + AMP x3` reaches 9.59 and
+takes WEIGHTED_IOU 0.8780 -> 0.8720, most of it the front crown losing material
+into the deeper troughs.
+
+### What shipped: put the value where the locks are
+
+`lock_shade` in `assemble_lion.py`. `r` is the distance from the mane's own axis
+— the same axis `mane_foundation` builds every ring about — and smoothing that
+field over the mesh gives the hood's envelope. What is left is the lock relief,
+signed, negative in a trough. Darkening by it is a lock-scale curvature shade in
+the one parametrisation the locks are actually aligned with.
+
+It moves no vertex, and the silhouette render is a flat-white mask, so **the
+silhouette cannot move**: WEIGHTED_IOU is 0.8780 before and after, bit-for-bit.
+
+It is also NOT the highest-scoring option, and that was a deliberate choice.
+Side by side against the reference, `lock_shade` alone shows the large clean
+ribbons the reference has and the narrowed-lock builds show more, finer ridges.
+The reference's locks are broad. Gain above about 1.2 saturates against the 0.45
+clamp.
+
+### The metric is weak, and it is REPORTED rather than gated
+
+Two things had to be fixed about it before it could be trusted at all, and one
+could not be.
+
+**One window is a lottery.** The same build scored 8.54 and 7.31 on two runs
+whose only difference was the step the patch search walked in — 8 px against 6.
+A gate that swings 15% on that is not measuring the asset. It now takes the
+MEDIAN over 7 to 12 non-overlapping windows, and the patch is 0.22 of subject
+height rather than 0.34 so that several actually fit: at 0.34, three of the four
+images held exactly one.
+
+**It still cannot separate the change it was built for.** Baseline 7.54 against
+shipped 8.52 is 13%, and the patch size alone moves it 5% (7.77 at 0.20, 8.52 at
+0.22, 8.07 at 0.24). A threshold that caught the 7.54 would sit inside that
+spread and fail good builds. So there is no honest limit here yet and none is
+asserted — the number is printed, with the gap to the reference, and the
+elongation gate from GATE 23 (shipped 2.05 against a limit of 1.60 and the old
+field's 1.31) remains the gating one because it separates cleanly.
+
+The visual difference between those two builds is large and obvious and this
+number sees an eighth of it. That is a statement about the metric.
+
+### The honest state of the mane
+
+    lock band   8.52 against the reference's 19.46 — 44% of it
+    grain       MANE_ELONG_MEAN 2.05 against 2.37 (limit 1.60)
+
+The grain is right. The lock ribbons now exist where they did not, and they are
+still less than half the reference's value separation. Getting the rest means
+either lock geometry deep enough to cost the silhouette, or the reference's
+approach — painted value variation authored per lock rather than derived from
+relief — which is a different kind of change from anything in this pipeline so
+far.
+
+### State
+
+    silhouette  WEIGHTED_IOU 0.8780 (unchanged — lock_shade writes colour only)
+                front 0.9290 side 0.9036 3/4 0.8029 rear 0.8109
+    mane        lock band 8.52 (ref 19.46), elongation 2.05 (limit 1.60)
+    coat        MAP_BUMP 2.87 dB (limit 6.0), NAP_PERIODIC=0
+    crease      CREASED_REGIONS=0
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    rig         reach 22.1/42.1 mm, planted paw 0.069 mm, slide 0.111 mm, 13 clips
+    glb         5929 KB against a 6144 cap, 4 meshes, both contracts pass
+    repo        typecheck 0, tests 29 failed / 765 passed (the baseline)
+
+`npm run lion:review` passes every stage.
+
+### Next, in order
+
+1. **The crown tip** — front 0.95-1.00 at -0.071, the only failing band, and now
+   the largest single silhouette error.
+2. **The eyes** — they bulge and read white-dominant; the reference's iris nearly
+   fills the lid with a crescent of white.
+3. The mane's remaining 56% of lock value, if it is wanted: authored per-lock
+   colour rather than relief-derived.

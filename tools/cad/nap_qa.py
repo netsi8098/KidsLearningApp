@@ -169,50 +169,121 @@ MANE_VIEWS = [os.path.join(REPO, "docs", "assets", "lion-review", n)
 #
 # 1.60 sits clear of the old field's 1.31 and well below the shipped 2.13.
 MANE_ELONG_MIN = float(os.environ.get("LION_MANE_ELONG_MIN", "1.60"))
+# The mane's LOCK band: shading variation at features 3% to 11% of subject
+# height, which is a lock rather than a hair. Separate from the elongation
+# above because they came apart — the grain can be perfectly directional while
+# the large lock ribbons the reference has are simply absent, which is what
+# GATE 23 shipped.
+#
+# REPORTED, NOT GATED, and that is deliberate. Measured over 7-12 patches per
+# view, the reference scores 19.46 and the mane 7.54 before `lock_shade` and
+# 8.52 after — a 13% separation, against a spread of 5% from the patch size
+# alone (7.77 at 0.20 of subject height, 8.52 at 0.22, 8.07 at 0.24). A limit
+# that caught the 7.54 would sit inside that spread and fail good builds, so
+# there is no honest threshold here yet. The visual difference between those
+# two builds is large and obvious; this number sees an eighth of it, which is a
+# statement about the metric and not about the mane. It is printed because the
+# GAP to the reference — 8.52 against 19.46, still only 44% — is the real
+# finding and the next person should see it.
+LOCK_BAND = (0.030, 0.110)
+# The lock patch has to hold several lock periods (a lock is 3-11% of subject
+# height) AND fit into the mane several times over, or the median is taken over
+# one window and is a lottery again. 0.22 of subject height holds two to seven
+# periods and fits repeatedly; 0.34 fitted once on three of the four images.
+LOCK_PATCH = float(os.environ.get("LION_LOCK_PATCH", "0.22"))
+LOCK_MIN_BROWN = float(os.environ.get("LION_LOCK_MIN_BROWN", "0.60"))
 
 
-def brown_window(im, size):
-    """The densest window of mane-brown, chosen by the image."""
-    a = np.asarray(im.convert("RGB")).astype(int)
-    r, g, b = a[..., 0], a[..., 1], a[..., 2]
-    m = (r > 90) & (r < 200) & (g > 40) & (g < 130) & (b < 90) & ((r - b) > 45)
-    best = None
-    h, w = m.shape
-    for y in range(0, max(1, h - size), 6):
-        for x in range(0, max(1, w - size), 6):
-            f = m[y:y + size, x:x + size].mean()
-            if best is None or f > best[0]:
-                best = (f, x, y)
-    return best
-
-
-def elongation(path, size=96):
-    """How directional the grain is, and how big its features are."""
+def lock_band(path):
+    """Shading variation in the lock band, as a standard deviation."""
     im = Image.open(path)
     a = np.asarray(im.convert("RGB")).astype(int)
     corners = [tuple(a[0, 0]), tuple(a[0, -1]), tuple(a[-1, 0]), tuple(a[-1, -1])]
     bg = np.array(max(set(corners), key=corners.count))
     ys, _ = np.nonzero(np.abs(a - bg).sum(axis=2) > 40)
     hpx = (ys.max() - ys.min()) if ys.size else a.shape[0]
+    size = max(32, int(hpx * 0.34))
     f, x, y = brown_window(im, size)
     p = np.asarray(im.convert("L").crop((x, y, x + size, y + size))).astype(float)
-    res = p - box_blur(p, max(2, size // 10))
-    w = np.hanning(size)[:, None] * np.hanning(size)[None, :]
-    F = np.abs(np.fft.fftshift(np.fft.fft2(res * w))) ** 2
-    c = size // 2
-    F[c - 1:c + 2, c - 1:c + 2] = 0.0
-    yy, xx = np.mgrid[0:size, 0:size]
-    fy, fx = (yy - c).astype(float), (xx - c).astype(float)
-    tot = F.sum() or 1.0
-    lam = size / max((F * np.hypot(fy, fx)).sum() / tot, 1e-9)
-    sxx = (F * fx * fx).sum() / tot
-    syy = (F * fy * fy).sum() / tot
-    sxy = (F * fx * fy).sum() / tot
-    tr, det = sxx + syy, sxx * syy - sxy * sxy
-    root = np.sqrt(max(tr * tr / 4.0 - det, 0.0))
-    l1, l2 = tr / 2.0 + root, tr / 2.0 - root
-    return {"brown": f, "feature_H": lam / hpx,
-            "elong": float(np.sqrt(l1 / max(l2, 1e-12))), "sd": float(res.std())}
+    k1 = max(1, int(hpx * LOCK_BAND[0] / 2))
+    k2 = max(2, int(hpx * LOCK_BAND[1] / 2))
+    band = box_blur(p, k1) - box_blur(p, k2)
+    return {"brown": f, "sd": float(band.std()), "k": (k1, k2)}
+
+
+def brown_patches(im, size, want=9, min_frac=0.75):
+    """Several windows of mane-brown, not one.
+
+    ONE WINDOW IS A LOTTERY, and it was measured as such: the same build scored
+    a mean lock sd of 8.54 and 7.31 on two runs whose only difference was the
+    step the window search walked in (8 px against 6). A gate that swings 15%
+    on that is not measuring the asset.
+
+    So the metric is the MEDIAN over up to `want` non-overlapping windows that
+    are at least `min_frac` brown, walked on a coarse grid. Where the mane is
+    large enough to hold several, the median is stable; where it is not, this
+    falls back to the densest single window and says so by returning fewer.
+    """
+    a = np.asarray(im.convert("RGB")).astype(int)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    m = (r > 90) & (r < 200) & (g > 40) & (g < 130) & (b < 90) & ((r - b) > 45)
+    h, w = m.shape
+    step = max(8, size // 2)
+    cands = []
+    for y in range(0, max(1, h - size), step):
+        for x in range(0, max(1, w - size), step):
+            cands.append((m[y:y + size, x:x + size].mean(), x, y))
+    cands.sort(reverse=True)
+    keep = [c for c in cands if c[0] >= min_frac][:want] or cands[:1]
+    grey = np.asarray(im.convert("L")).astype(float)
+    return [(f, grey[y:y + size, x:x + size]) for f, x, y in keep]
+
+
+def subject_px(im):
+    a = np.asarray(im.convert("RGB")).astype(int)
+    corners = [tuple(a[0, 0]), tuple(a[0, -1]), tuple(a[-1, 0]), tuple(a[-1, -1])]
+    bg = np.array(max(set(corners), key=corners.count))
+    ys, _ = np.nonzero(np.abs(a - bg).sum(axis=2) > 40)
+    return (ys.max() - ys.min()) if ys.size else a.shape[0]
+
+
+def elongation(path, size=96):
+    """How directional the grain is, as a median over several patches."""
+    im = Image.open(path)
+    hpx = subject_px(im)
+    es, ls, sds = [], [], []
+    pats = brown_patches(im, size)
+    for _f, p in pats:
+        res = p - box_blur(p, max(2, size // 10))
+        w = np.hanning(size)[:, None] * np.hanning(size)[None, :]
+        F = np.abs(np.fft.fftshift(np.fft.fft2(res * w))) ** 2
+        c = size // 2
+        F[c - 1:c + 2, c - 1:c + 2] = 0.0
+        yy, xx = np.mgrid[0:size, 0:size]
+        fy, fx = (yy - c).astype(float), (xx - c).astype(float)
+        tot = F.sum() or 1.0
+        ls.append(size / max((F * np.hypot(fy, fx)).sum() / tot, 1e-9) / hpx)
+        sxx = (F * fx * fx).sum() / tot
+        syy = (F * fy * fy).sum() / tot
+        sxy = (F * fx * fy).sum() / tot
+        tr, det = sxx + syy, sxx * syy - sxy * sxy
+        root = np.sqrt(max(tr * tr / 4.0 - det, 0.0))
+        es.append(float(np.sqrt((tr / 2.0 + root) / max(tr / 2.0 - root, 1e-12))))
+        sds.append(float(res.std()))
+    return {"n": len(pats), "feature_H": float(np.median(ls)),
+            "elong": float(np.median(es)), "sd": float(np.median(sds))}
+
+
+def lock_band(path):
+    """Shading variation in the lock band, as a median over several patches."""
+    im = Image.open(path)
+    hpx = subject_px(im)
+    size = max(32, int(hpx * LOCK_PATCH))
+    k1 = max(1, int(hpx * LOCK_BAND[0] / 2))
+    k2 = max(2, int(hpx * LOCK_BAND[1] / 2))
+    pats = brown_patches(im, size, want=12, min_frac=LOCK_MIN_BROWN)
+    sds = [float((box_blur(p, k1) - box_blur(p, k2)).std()) for _f, p in pats]
+    return {"n": len(pats), "sd": float(np.median(sds)), "k": (k1, k2)}
 
 
 def main():
@@ -249,7 +320,7 @@ def main():
     mref = elongation(REF)
     print(f"  {'REFERENCE ' + os.path.basename(REF):26s} "
           f"feature {mref['feature_H'] * 100:5.2f}%H  elong {mref['elong']:5.2f}"
-          f"  sd {mref['sd']:6.2f}")
+          f"  sd {mref['sd']:6.2f}  ({mref['n']} patches)")
     mrows = []
     for mp in MANE_VIEWS:
         if not os.path.exists(mp):
@@ -258,12 +329,31 @@ def main():
         mrows.append(e)
         print(f"  {os.path.basename(mp):26s} "
               f"feature {e['feature_H'] * 100:5.2f}%H  elong {e['elong']:5.2f}"
-              f"  sd {e['sd']:6.2f}")
+              f"  sd {e['sd']:6.2f}  ({e['n']} patches)")
     mane_mean = sum(r["elong"] for r in mrows) / len(mrows) if mrows else 0.0
     if mrows:
         print(f"  mean elongation {mane_mean:.2f} against the reference's "
               f"{mref['elong']:.2f} (limit {MANE_ELONG_MIN:.2f})"
               f"{'   <-- NOT DIRECTIONAL' if mane_mean < MANE_ELONG_MIN else ''}")
+    print("")
+    print("  MANE LOCKS — how much of the reference's lock structure is there")
+    lref = lock_band(REF)
+    print(f"  {'REFERENCE ' + os.path.basename(REF):26s} lock sd {lref['sd']:6.2f}"
+          f"  ({lref['n']} patches)")
+    lrows = []
+    for mp in MANE_VIEWS:
+        if not os.path.exists(mp):
+            continue
+        lb = lock_band(mp)
+        lrows.append(lb)
+        print(f"  {os.path.basename(mp):26s} lock sd {lb['sd']:6.2f}"
+              f"  ({lb['n']} patches)")
+    lock_mean = sum(r["sd"] for r in lrows) / len(lrows) if lrows else 0.0
+    if lrows:
+        print(f"  mean lock sd {lock_mean:.2f} against the reference's "
+              f"{lref['sd']:.2f} — "
+              f"{100.0 * lock_mean / (lref['sd'] or 1):.0f}% of it. "
+              f"REPORTED, NOT GATED: see the note on LOCK_BAND.")
     print("")
     print("===NAP_QA===")
     if m:
@@ -277,6 +367,8 @@ def main():
         print(f"MANE_ELONG_MEAN={mane_mean:.2f} MANE_ELONG_MIN_VIEW="
               f"{min(r['elong'] for r in mrows):.2f} REF_MANE_ELONG={mref['elong']:.2f}")
     bad = bool(m and m["bump"] > MAP_BUMP_MAX)
+    if lrows:
+        print(f"MANE_LOCK_SD_MEAN={lock_mean:.2f} REF_LOCK_SD={lref['sd']:.2f}")
     if mrows and mane_mean < MANE_ELONG_MIN:
         bad = True
     print(f"NAP_PERIODIC={'1' if bad else '0'}")

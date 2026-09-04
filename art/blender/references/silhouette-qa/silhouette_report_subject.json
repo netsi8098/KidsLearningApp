@@ -1,0 +1,305 @@
+{
+  "front": {
+    "iou": 0.9094,
+    "iou_unregistered": 0.9074,
+    "registration_px": 3,
+    "missing_pct": 4.83,
+    "extra_pct": 4.65,
+    "ref_px": 142621,
+    "model_px": 142373,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.7426,
+        "missing": 15,
+        "extra": 2284
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.9548,
+        "missing": 148,
+        "extra": 533
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.958,
+        "missing": 21,
+        "extra": 726
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.9778,
+        "missing": 43,
+        "extra": 381
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.9829,
+        "missing": 0,
+        "extra": 328
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.9617,
+        "missing": 12,
+        "extra": 679
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.8962,
+        "missing": 0,
+        "extra": 1606
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.8937,
+        "missing": 1308,
+        "extra": 36
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.752,
+        "missing": 2863,
+        "extra": 0
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.7848,
+        "missing": 2380,
+        "extra": 30
+      }
+    ]
+  },
+  "side": {
+    "iou": 0.8289,
+    "iou_unregistered": 0.8786,
+    "registration_px": 12,
+    "missing_pct": 11.86,
+    "extra_pct": 6.33,
+    "ref_px": 175397,
+    "model_px": 165684,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.844,
+        "missing": 590,
+        "extra": 737
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.9166,
+        "missing": 149,
+        "extra": 1000
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.9215,
+        "missing": 422,
+        "extra": 807
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.89,
+        "missing": 575,
+        "extra": 1411
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.8909,
+        "missing": 624,
+        "extra": 1492
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.9281,
+        "missing": 792,
+        "extra": 911
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.9339,
+        "missing": 717,
+        "extra": 927
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.8901,
+        "missing": 1176,
+        "extra": 1711
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.493,
+        "missing": 9325,
+        "extra": 1436
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.531,
+        "missing": 6286,
+        "extra": 639
+      }
+    ]
+  },
+  "rear": {
+    "iou": 0.7717,
+    "iou_unregistered": 0.7717,
+    "registration_px": 0,
+    "missing_pct": 4.75,
+    "extra_pct": 23.44,
+    "ref_px": 119952,
+    "model_px": 142371,
+    "bands": [
+      {
+        "band_h": [
+          0.9,
+          1.0
+        ],
+        "iou": 0.6891,
+        "missing": 0,
+        "extra": 2772
+      },
+      {
+        "band_h": [
+          0.8,
+          0.9
+        ],
+        "iou": 0.9013,
+        "missing": 0,
+        "extra": 1471
+      },
+      {
+        "band_h": [
+          0.7,
+          0.8
+        ],
+        "iou": 0.8389,
+        "missing": 0,
+        "extra": 2862
+      },
+      {
+        "band_h": [
+          0.6,
+          0.7
+        ],
+        "iou": 0.8153,
+        "missing": 0,
+        "extra": 3526
+      },
+      {
+        "band_h": [
+          0.5,
+          0.6
+        ],
+        "iou": 0.757,
+        "missing": 0,
+        "extra": 4658
+      },
+      {
+        "band_h": [
+          0.4,
+          0.5
+        ],
+        "iou": 0.6495,
+        "missing": 0,
+        "extra": 6326
+      },
+      {
+        "band_h": [
+          0.3,
+          0.4
+        ],
+        "iou": 0.714,
+        "missing": 0,
+        "extra": 4426
+      },
+      {
+        "band_h": [
+          0.2,
+          0.3
+        ],
+        "iou": 0.9343,
+        "missing": 115,
+        "extra": 637
+      },
+      {
+        "band_h": [
+          0.1,
+          0.2
+        ],
+        "iou": 0.7841,
+        "missing": 2390,
+        "extra": 0
+      },
+      {
+        "band_h": [
+          0.0,
+          0.1
+        ],
+        "iou": 0.629,
+        "missing": 3188,
+        "extra": 1267
+      }
+    ]
+  }
+}
