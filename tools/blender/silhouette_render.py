@@ -120,8 +120,48 @@ def flat_white(objs):
                 o.modifiers.remove(mod)
 
 
+def rest_pose():
+    """Put every armature back on its REST pose before anything is measured.
+
+    THIS WAS SILENTLY WRONG FOR THE WHOLE HISTORY OF THIS ASSET.
+
+    `lion_assembled.blend` is saved by the assembler with the `Idle` action
+    assigned, `pose_position = POSE` and the scene sitting on frame 91. Nothing
+    here cleared it, so every silhouette IoU ever recorded for this model —
+    including the weighted 0.86 headline and every band-span correction typed
+    out of it — was measured on a lion caught mid-idle and compared against a
+    reference turnaround standing still.
+
+    It is not a small effect where it matters most. Measured on the assembled
+    mesh, the rear foot is 0.289 long at z 0.028; the posed side silhouette
+    reported 0.167 at the same height, because the Idle pose had moved the leg.
+    A paw tuned against that number is being tuned against the pose.
+
+    `review_render.py` already clears the action for exactly this reason ("a
+    review sheet shot on whatever frame the file was saved on is not comparable
+    with the previous one") and `face_lion.py` builds in REST because ray casts
+    read evaluated geometry. This is the third time the same trap has been
+    found in a different script, which is why it is spelled out here rather
+    than fixed quietly.
+    """
+    n = 0
+    for o in bpy.data.objects:
+        if o.type != "ARMATURE":
+            continue
+        if o.animation_data:
+            o.animation_data.action = None
+        o.data.pose_position = "REST"
+        for pb in o.pose.bones:
+            pb.matrix_basis.identity()
+        n += 1
+    bpy.context.view_layer.update()
+    print(f"[sil] rest pose forced on {n} armature(s)")
+    return n
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    rest_pose()
     objs = targets()
     print(f"[sil] rendering: {', '.join(o.name for o in objs)}")
     for o in bpy.data.objects:

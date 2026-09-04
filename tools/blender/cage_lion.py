@@ -337,6 +337,21 @@ BODY_INDEX = {name: i for i, (name, *_rest) in enumerate(BODY)}
 # ── limb / appendage station tables ─────────────────────────────────────────
 # Each entry: (name, centre, tangent, radius). Ring 0 is always the patch
 # boundary on the body, so these start at ring 1.
+# How hard to crease the sole rim, 0 (round) to 1 (a boundary curve).
+#
+# EFFECTIVELY BINARY at the shipped subdivision level. Blender spends a crease
+# over the available levels, so at L2 a crease of 0.6 and one of 1.0 produce
+# renders that are identical to the pixel — measured, not assumed. The knob
+# stays because the level is itself a parameter.
+#
+# What it buys, at the final ring geometry, is not silhouette: creased and
+# uncreased differ by 0.0002 of weighted IoU. It is the GROUND-CONTACT PATCH.
+# Uncreased, the flat part of the pad is 0.181 long on the front paw; creased
+# it is 0.252, the full length of the ring. A planted paw reading as planted is
+# the whole reason this asset has big feet.
+SOLE_CREASE = float(os.environ.get("LION_SOLE_CREASE", "1.0"))
+
+
 def front_limb(sx):
     """MEASURED against the reference's leg band.
 
@@ -416,9 +431,32 @@ def front_limb(sx):
         #     front paw            0.154 -> 0.412     0.144 -> 0.400
         #     rear paw            -0.102 -> -0.373   -0.106 -> -0.370
         #     front-view width     0.479              0.480
-        ("paw_top",  (sx * 0.130, 0.250, 0.052), (0, 0.35, -1), 0.100, 0.110),
+        ("paw_top",  (sx * 0.130, 0.252, 0.052), (0, 0.20, -1), 0.100, 0.126),
         ("paw_mid",  (sx * 0.132, 0.268, 0.028), (0, 0.15, -1), 0.112, 0.130),
-        ("paw_sole", (sx * 0.132, 0.272, 0.010), (0, 0.05, -1), 0.108, 0.128),
+        # THE SOLE RING IS HORIZONTAL AND LOW, and both halves matter.
+        #
+        # A ring is a section in the plane perpendicular to its tangent, so a
+        # tangent of (0, 0.05, -1) tilts the sole by 2.9 degrees — which does
+        # not sound like much until it is measured on the built cage: the
+        # sole's eight vertices spanned z 0.0037 to 0.0164, a 12.7 mm wedge
+        # with the toe edge high and the heel low. The shipped paw then touched
+        # the ground on a 31 mm patch at the heel and sloped up from there,
+        # which is the "rounded sole" the silhouette had been reporting for
+        # three passes as a length deficit at the lowest rows.
+        #
+        # Creasing the rim (see `crease_loop`) stops Catmull-Clark rounding the
+        # cap away, but a creased tilted ring is a flat RAMP. The tangent has
+        # to be straight down for the pad to be a pad.
+        #
+        # And the height had to come down with it. The old station sat at
+        # z 0.010 and only reached the ground because the uncreased cap
+        # bulged below its own ring plane; a creased pad sits exactly where the
+        # ring is, so 0.010 would have floated the whole foot 10 mm. 0.004 puts
+        # the pad on the floor while staying above it — the clip gate rejects
+        # anything below z 0 — and the reference's sole is full length from its
+        # lowest measurable row upward.
+        ("paw_rim",  (sx * 0.132, 0.270, 0.012), (0, 0, -1), 0.116, 0.136),
+        ("paw_sole", (sx * 0.132, 0.270, 0.004), (0, 0, -1), 0.110, 0.128),
     ]
 
 
@@ -437,17 +475,31 @@ def rear_limb(sx):
         # headroom the planted-paw proof depends on.
         ("hock_up",  (sx * 0.128, -0.284, 0.092), (0, -0.20, -1), 0.074),
         ("hock",     (sx * 0.128, -0.290, 0.076), (0, 0.05, -1), 0.076),
-        ("hock_lo",  (sx * 0.128, -0.276, 0.059), (0, 0.32, -1), 0.072),
-        ("ankle",    (sx * 0.130, -0.256, 0.043), (0, 0.34, -1), 0.076),
+        # ELLIPTICAL FROM THE HOCK DOWN. The rear foot is a metatarsus: long,
+        # low and level. The reference measures 0.256 of fore-aft length at
+        # z 0.060 and 0.206 at 0.080, where circular rings of radius 0.072 and
+        # 0.076 can only give 0.144 and 0.152 — half the length missing, which
+        # is why a correctly sized pad underneath read as a saucer on the end of
+        # a stick instead of as a foot.
+        ("hock_lo",  (sx * 0.128, -0.276, 0.061), (0, 0.32, -1), 0.072, 0.114),
+        ("ankle",    (sx * 0.130, -0.266, 0.047), (0, 0.10, -1), 0.080, 0.144),
         # Same rebuild. The reference rear paw spans -0.102 to -0.373 — centred
         # almost exactly where the old one was, but 5x longer, reaching back into
         # a heel and forward into toes. So the chain drops past the ankle to form
         # the heel by radius at the turn, then runs forward along +Y.
-        # Same construction. The reference rear paw spans -0.102 to -0.373, centred
-        # almost exactly where the old one was but five times longer.
-        ("paw_top",  (sx * 0.132, -0.244, 0.052), (0, -0.20, -1), 0.100, 0.112),
-        ("paw_mid",  (sx * 0.132, -0.240, 0.028), (0, -0.05, -1), 0.112, 0.134),
-        ("paw_sole", (sx * 0.132, -0.238, 0.010), (0,  0.05, -1), 0.108, 0.132),
+        # The reference rear paw spans -0.102 to -0.373.
+        #
+        # ALL FOUR RINGS LEVEL, and that replaces a fold. The old chain climbed
+        # from the ankle at z 0.043 to a paw_top at 0.052 and then dropped to
+        # the sole, which put a crease across the foot and left the heel missing
+        # above the pad: measured, the rear foot was 0.158 long at z 0.028
+        # against the reference's 0.275, while the pad below it was full length.
+        # A stack of level rings is a foot. A pad hung off a fold is a plate,
+        # and that is exactly how it rendered.
+        ("paw_top",  (sx * 0.132, -0.248, 0.036), (0, 0, -1), 0.106, 0.143),
+        ("paw_mid",  (sx * 0.132, -0.244, 0.024), (0, 0, -1), 0.112, 0.136),
+        ("paw_rim",  (sx * 0.132, -0.240, 0.014), (0, 0, -1), 0.116, 0.136),
+        ("paw_sole", (sx * 0.132, -0.238, 0.004), (0, 0, -1), 0.110, 0.129),
     ]
 
 
@@ -871,6 +923,52 @@ class Cage:
     def cap_loop(self, loop):
         self.quad_cap(loop)
 
+    def crease_loop(self, verts, value=1.0):
+        """Sharpen the edges running around a closed ring.
+
+        WHY THE SOLE NEEDS THIS
+
+        The paw's three rings are horizontal and the right size — measured on
+        the cage, the front sole spans 0.256 against the reference's 0.253 —
+        and then Catmull-Clark throws most of it away. A capped ring is a
+        corner in every direction at once, so the limit surface pulls it hard
+        inward and upward, and the shipped sole measured 0.152 where the cage
+        said 0.256. The silhouette recorded that as the model being short at
+        the lowest rows and full length just above them: a ROUNDED sole against
+        the reference's flat one, worth 0.098 H of contact length.
+
+        Three passes read that delta off the band table and reached for the
+        ring radii, which were never the problem. The cap profile was.
+
+        A crease of 1.0 on the rim makes the ring behave as a boundary curve
+        instead of a corner, so it converges to the cubic B-spline through the
+        control polygon — 0.902 of the polygon radius for an octagon, against
+        roughly 0.59 uncreased — and the cap's interior, all of which sits in
+        one plane, stays planar. Which is what a foot pad is.
+
+        Sharpening the rim is also right for its own sake: a real paw pad has a
+        defined edge where it meets the ground, and it is the only silhouette
+        event below the belly.
+        """
+        layer = (self.bm.edges.layers.float.get("crease_edge")
+                 or self.bm.edges.layers.float.new("crease_edge"))
+        n = 0
+        for k, v in enumerate(verts):
+            w = verts[(k + 1) % len(verts)]
+            e = self.bm.edges.get((v, w))
+            if e is not None:
+                e[layer] = value
+                n += 1
+        return n
+
+    def crease_ring(self, name, value=1.0):
+        """Crease the ring recorded under `name` by `grow`."""
+        for gname, verts in self.rings:
+            if gname == name:
+                return self.crease_loop([v for v in verts if v.is_valid], value)
+        print(f"[cage] WARNING crease_ring: no ring named {name}")
+        return 0
+
     # -- facial deformation loops -------------------------------------------
     def nearest_face(self, target, predicate=None):
         best, bd = None, 1e9
@@ -1079,6 +1177,14 @@ def build():
 
     tl = cage.open_patch(BODY_INDEX["rump"], 3)
     cage.cap_loop(cage.grow(tl, TAIL, prefix="tail")[-1])
+
+    # FLAT SOLES. See `crease_loop` for why the rim rather than the radii: the
+    # paw rings measure right on the cage and Catmull-Clark rounds them away,
+    # and the tail's tapering tip cap is the one place that rounding is wanted.
+    for limb in ("frontR", "frontL", "rearR", "rearL"):
+        n = cage.crease_ring(f"{limb}:paw_sole", SOLE_CREASE)
+        if n != 8:
+            print(f"[cage] WARNING {limb} sole crease hit {n} edges, expected 8")
 
     # THE EARS ARE NO LONGER CAGE GEOMETRY. See `ear()` below for the full
     # reasoning and the five attempts it took to get here. In short: the

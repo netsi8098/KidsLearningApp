@@ -6414,3 +6414,178 @@ asset rebuilt — runtime only.
 3. Optional, and a behaviour question rather than a rig one: should the lion
    TURN toward something worth looking at when it is out of the gaze's reach?
    `turnTo` already exists; nothing calls it for attention.
+
+## 2026-09-04 (twenty-ninth pass) — the paw's flat sole, and the pose the silhouette was measured in
+
+Two things here. The sole is now flat, full length and sitting on the floor. And
+finding that out turned up a measurement fault that makes every silhouette
+number in this document's history not directly comparable with the ones below.
+
+### FIRST, THE CORRECTION: every IoU ever recorded here was of a POSED lion
+
+`assemble_lion.py` saves `lion_assembled.blend` with the `Idle` action assigned,
+`pose_position = POSE` and the scene sitting on **frame 91**.
+`silhouette_render.py` never touched any of that — no action clear, no rest
+pose, no `frame_set`. So every silhouette IoU for this model, including the
+weighted 0.86 headline and every band-span correction typed out of it, was
+measured on a lion caught mid-idle and compared against a reference turnaround
+standing still.
+
+It is not a small effect where it matters most. On the assembled mesh the rear
+foot measures **0.289** of fore-aft length at z 0.028; the posed side silhouette
+reported **0.167** at the same height, because Idle had moved the leg. A paw
+tuned against that number is being tuned against the pose — which is exactly
+what the first three attempts in this pass were doing, and why they kept
+disagreeing with the 3D probe.
+
+`review_render.py` already clears the action for this reason, and `face_lion.py`
+already builds in REST because ray casts read evaluated geometry. This is the
+same trap in a third script, so `rest_pose()` now spells it out where it lives.
+
+**Re-baselined.** The ORIGINAL cage, measured at rest:
+
+| view | posed (what was recorded) | at rest (the truth) |
+|---|---|---|
+| front | 0.9258 | **0.9318** |
+| side | 0.8507 | **0.8547** |
+| rear | 0.8300 | **0.8167** |
+| 3/4 | 0.8025 | **0.8072** |
+| weighted | 0.8629 | **0.8660** |
+
+Every historical figure above this entry should be read as a posed measurement.
+
+### The sole: three things were wrong, and the radii were not one of them
+
+A previous pass established that the station rings are the right size (front
+0.256 against the reference's 0.253) and that the fault was "the cap profile".
+That was correct as far as it went. Measured properly, it was three faults:
+
+**1. The sole ring was TILTED.** A ring is a section perpendicular to its
+tangent, and the tangent was `(0, 0.05, -1)` — 2.9 degrees off vertical. On the
+built cage the sole's eight vertices spanned z 0.0037 to 0.0164: a 12.7 mm
+wedge, toe high and heel low. The shipped paw touched the ground on a **31 mm
+patch at the heel** and ramped up from there.
+
+**2. Catmull-Clark was rounding the cap away.** A capped ring is a corner in
+every direction, so the limit surface pulls it hard inward. The cage said 0.256
+and the shipped sole measured 0.152.
+
+**3. The rear foot was a stub above the pad.** `neck` of the problem, and the
+reason a correctly sized pad still rendered as a saucer on the end of a stick:
+the old chain climbed from the ankle at z 0.043 to a `paw_top` at 0.052 and then
+dropped to the sole, folding the foot. Measured, the rear foot was 0.158 long at
+z 0.028 against the reference's 0.275. And `hock_lo` and `ankle` were CIRCULAR
+rings of radius 0.072 and 0.076, which can only ever give 0.144 and 0.152 of
+fore-aft length where the reference asks for 0.256 and 0.206.
+
+### What was actually changed
+
+* **A `paw_rim` ring** between mid and sole, on all four limbs, so the pad is
+  held flat by ring spacing rather than by the cap alone. 32 cage verts, mapped
+  rigidly to the same paw bone in `RING_WEIGHTS`.
+* **The sole ring is horizontal** — tangent `(0, 0, -1)` — and **lowered to
+  z 0.004**. The old 0.010 only reached the ground because the uncreased cap
+  bulged below its own ring plane; a flat pad sits exactly where the ring is, so
+  0.010 would have floated the whole foot 10 mm. 0.004 is on the floor and above
+  it, which the clip gate requires.
+* **The rim is creased** (`crease_edge`, `LION_SOLE_CREASE`, default 1.0).
+* **The rear foot is a level block**: four horizontal rings from z 0.036 down to
+  0.004, and `hock_lo` / `ankle` made elliptical so the pastern has the
+  reference's length.
+* **The front `paw_top`** got the same treatment, less of it.
+
+### Measured: the sole no longer tapers
+
+    per-row fore-aft length, side view, units of H
+
+      z      ref front  model    ref rear  model
+     0.004     0.254     0.263     0.269    0.265
+     0.012     0.256     0.265     0.271    0.271
+     0.020     0.258     0.267     0.271    0.273
+     0.028     0.262     0.263     0.275    0.283
+     0.036     0.262     0.262     0.271    0.267
+     0.048     0.258     0.254     0.267    0.242
+     0.060     0.250     0.244     0.256    0.225
+
+Both paws inside 0.02 of the reference from the ground to z 0.060, against
+deficits of 0.10 to 0.25 before. The headline is the taper across the bottom
+0.036 H:
+
+    reference   +0.0096   (a flat sole, near enough)
+    before      +0.1692   (a rounded one)
+    after       +0.0000
+
+### The QA the docs were worried about got BETTER
+
+The previous entry left this item alone because "reshaping the cap risks the
+ground-contact metrics that took several passes to earn". It did not:
+
+| | before | after |
+|---|---|---|
+| planted paw, animation | 0.105 mm | **0.069 mm** |
+| walk support slide | 0.166 mm | **0.111 mm** |
+| worst IK residual | pass | pass, all 13 clips |
+| battery pinched / flipped | 0 / 0 | 0 / 0 |
+| worst area ratio | 0.252 | 0.252 |
+| reach headroom | 22.1 / 42.1 mm | 22.1 / 42.1 mm |
+| cage slivers / non-manifold | 0 / 0 | 0 / 0 |
+
+The contact patch is the reason: it went from **46 vertices** on a 31 mm heel to
+**276 vertices** on a full-length pad, front 0.2505 and rear 0.2542 against the
+reference's 0.253 and 0.271. A broader pad is a more stable measurement as well
+as a better-looking foot.
+
+One sliver pair did appear at (±0.061, -0.313, 0.046) when the ankle's fore-aft
+radius went to 0.156 against `hock_lo`'s 0.124 over 11 mm of z — the quad was
+being squashed. Easing that to 0.144 / 0.114 and spreading the two stations by
+2 mm cleared it.
+
+### What the crease actually buys, which is not silhouette
+
+Creased against uncreased, at the final ring geometry, differ by **0.0002** of
+weighted IoU. What differs is the ground-contact patch: uncreased, the flat part
+of the front pad is 0.181 long; creased it is 0.252, the full ring. Big feet that
+plant are the point of this mascot, so the crease stays.
+
+It is also **effectively binary at the shipped subdivision level**. Blender
+spends a crease over the available levels, so at L2 a crease of 0.6 and one of
+1.0 render identically — verified pixel-for-pixel, max difference 0.0. The knob
+stays because the level is itself a parameter.
+
+### New tool: `tools/cad/sole_profile.py`
+
+`band_spans` reports a band's OUTER extent, and in a side view the lowest band
+runs from the rear heel to the front toe — one number summing four independent
+things. Three passes argued about the paws from exactly that number. This splits
+each row into its separate horizontal RUNS, so each paw's length at each height
+is its own figure, and prints them against the reference from the ground up. A
+flat sole holds its length as z falls; a rounded one loses it, and that is the
+whole reading.
+
+### State
+
+    969 cage verts, quad ratio 1.0000, 0 slivers, 0 non-manifold, 0 boundary
+    40 deform bones, 13 clips, 16 morphs, 4 meshes, 4436.8 KB, both contracts pass
+    weighted IoU 0.8675  (front 0.9287  side 0.8635  rear 0.8147  3/4 0.8078)
+
+Against the corrected rest-pose baseline of 0.8660, that is **+0.0015 weighted
+and +0.0088 on the side view**, which is where the paw lives. Front is 0.0031
+down and rear 0.0020 down — the rear view already carried 16.9% extra material
+before this pass and still does.
+
+Repo baseline unmoved: typecheck 52, `npm test` 29 failed / 756 passed.
+
+### Next, in order
+
+1. The mane still reads as a smooth hood from the FRONT — its locks run
+   front-to-back, so the hero angle sees them end-on.
+2. **Re-read the band tables now that the silhouette renders at rest.** Every
+   correction in this document was derived from posed masks, so the standing
+   conclusions about the 3/4 deficit and the rear view's 16.9% extra deserve
+   re-deriving before anything is built on them. The 3/4 camera sweep in
+   particular (which peaked at 50 degrees against a documented 47) was a sweep
+   of posed renders.
+3. The front paw is still 0.036 short at z 0.080 — the pastern, one band above
+   the work done here.
+4. Optional behaviour question: should the lion TURN toward something out of the
+   gaze's reach? `turnTo` exists and nothing calls it for attention.

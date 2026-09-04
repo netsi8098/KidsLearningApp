@@ -292,6 +292,10 @@ FRONT_WEIGHTS = {
     "paw_top":  {"wrist_F{SD}": 0.46, "paw_F{SD}": 0.54},
     # The sole rides the paw bone rigidly. A foot is a plate, not a whip.
     "paw_mid":  {"paw_F{SD}": 1.0},
+    # The rim ring that holds the pad flat — same rigid weight as the rest of
+    # the foot, so the pad travels as one piece and the planted-paw metric does
+    # not care that it exists.
+    "paw_rim":  {"paw_F{SD}": 1.0},
     "paw_sole": {"paw_F{SD}": 1.0},
 }
 
@@ -314,6 +318,7 @@ REAR_WEIGHTS = {
     "ankle":    {"hock_R{SD}": 0.46, "ankle_R{SD}": 0.54},
     "paw_top":  {"ankle_R{SD}": 0.50, "paw_R{SD}": 0.50},
     "paw_mid":  {"paw_R{SD}": 1.0},
+    "paw_rim":  {"paw_R{SD}": 1.0},
     "paw_sole": {"paw_R{SD}": 1.0},
 }
 
