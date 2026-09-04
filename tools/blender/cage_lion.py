@@ -642,9 +642,10 @@ def ear(sx):
 #     0.15-0.20            1.108        0.635       -0.473
 #
 # Both numbers are the same mistake: the tail was carrying its mass a third of a
-# body height too high. The reference tail leaves the rump, turns DOWN, and ends
-# in a distinct oval tuft — traced off the side view at centre y = -0.585,
-# z = 0.169, radii 0.069 (fore-aft) by 0.091 (vertical).
+# body height too high. The reference tail leaves the rump, DIPS behind it, and
+# then rises into a distinct oval tuft. Re-measured at rest, column by column,
+# the tuft is centred at mask y -0.61, z 0.158 with half-extents 0.065 fore-aft
+# and 0.083 vertical — an upright oval, taller than it is long.
 #
 # The old tail also had no tuft at all, which for a lion is not a detail. It is
 # the feature that makes the back half read as a lion rather than a cub-shaped
@@ -654,59 +655,168 @@ def ear(sx):
 # travel BACKWARD so the tuft's bulge lands in the x-z plane. That matters —
 # a ring's radius spans the two axes perpendicular to its direction, so a tuft
 # built on a downward-travelling shaft would have bulged fore-aft and sideways
-# instead of standing up the way the reference draws it.
+# instead of standing up the way the reference draws it. Those backward-running
+# rings are also what lets the tuft be ELLIPTICAL in the way it needs to be:
+# with the tangent along -Y, `ring_frame` hands r_right the X axis and r_up the
+# Z axis, so height and width become independent parameters.
 TAIL = [
-    # SECOND PASS, from the reference's rear-extent profile rather than its
-    # outline. Measuring the rearmost point of each mask at each height gave the
-    # tail's actual route, and it is stricter than the overlay suggested:
+    # THE REFERENCE SHEET DISAGREES WITH ITSELF ABOUT THE TAIL, twice, and this
+    # table fits the SIDE view. Both disagreements are measured, not asserted:
     #
-    #     z      reference y_rear
-    #     0.400      -0.319
-    #     0.350      -0.362
-    #     0.300      -0.387
-    #     0.250      -0.406
-    #     0.225      -0.669   <- the tuft begins, in one step
-    #     0.075      -0.638
-    #     0.050      -0.377   <- and ends
+    #   * the tuft's HEIGHT. The tail sits on the midline, so an orthographic
+    #     view cannot change its z — and the reference's side view puts the tuft
+    #     at z 0.075-0.242 while its own 3/4 view puts it at z 0.19-0.345. That
+    #     is 0.11 H of disagreement about one object's height. The gradient was
+    #     worked out before choosing: at the graded weights a 1 px lift is worth
+    #     -1.9e-4 to the side and +1.8e-4 to the 3/4, so the two views very
+    #     nearly cancel and the tie goes to the view that is 0.30 rather than
+    #     0.25. Lifting it was then tried anyway and measured worse (below).
     #
-    # Two things follow. The shaft is INVISIBLE above z 0.235 — it runs inside the
-    # rump's own outline, so a shaft thick enough to poke past it is a defect, not
-    # a tail. And the tuft is a compact mass between z 0.075 and 0.235, lower than
-    # the first pass put it, which is why the band at 0.05-0.10 was still 0.371 H
-    # short after the tail was supposedly fixed.
-    # Shaft. Thin, and tucked against the rump rather than trailing behind it.
-    # THE UPPER TAIL LEFT THE BODY TOO EARLY.
+    #   * the tail's EXISTENCE below z 0.13. The reference's front view has a
+    #     clean 0.042 H crotch gap at z 0.07-0.12 with nothing in it, and its own
+    #     side view has 0.010 H^2 of tail in exactly those rows. Putting the tail
+    #     where the side view wants it therefore costs the front view 638 px —
+    #     front IoU 0.9287 -> 0.9272 — and buys the side view 7300 px of
+    #     symmetric difference. That trade is +0.0108 weighted against -0.0005.
     #
-    # The side view's rear edge at h 0.25-0.35 measured 0.062-0.082 H too far
-    # back, and per-vertex attribution showed every rearmost vertex there is a
-    # `tail:*` group — not the rump, which is what "the torso is too long" had
-    # been read as. Converted out of mask units, the reference's rear edge at
-    # h 0.25-0.30 sits at y = -0.370, which is the RUMP; the model's tail was
-    # already at -0.450, well behind it.
+    # This is the same class of defect as REAR_CEILING: the turnaround is a
+    # rendered study, not four consistent projections of one form. Chasing the
+    # 3/4 tuft or the empty crotch gap can only be done by unbuilding the side.
     #
-    # So the reference's tail hangs close to the body at rump height and only
-    # flicks out lower down, where the side reference is clipped at the canvas
-    # edge and its true extent is unknowable anyway. The upper stations come
-    # forward; the tuft is left where it measured.
-    ("root_02", (0.0, -0.392, 0.328), (0, -0.40, -1.00), 0.038),
-    ("root_01", (0.0, -0.394, 0.294), (0, -0.25, -1.00), 0.032),
-    ("tail_03", (0.0, -0.396, 0.262), (0, -0.55, -1.00), 0.028),
-    ("tail_04", (0.0, -0.404, 0.236), (0, -1.00, -0.70), 0.028),
-    ("tail_05", (0.0, -0.436, 0.206), (0, -1.00, -0.35), 0.030),
-    # Tuft. Swings back to horizontal and bulges, so the oval stands upright.
+    # THIRD PASS, from the reference's tail as a SEPARATE RUN rather than from
+    # the outline's rearmost point. In the side view the tail is a distinct
+    # horizontal run from the body at every height between z 0.09 and 0.28, and
+    # a distinct VERTICAL run in every column behind y -0.45, so the shaft's
+    # route and the tuft's mass can each be measured directly instead of being
+    # inferred from where the union happens to end.
     #
-    # Centres dropped ~0.012 after the first attempt measured one band high at the
-    # top (z 0.245 reached -0.617 where the reference is still on the rump at
-    # -0.408) and 0.296 H short at the bottom. Note the apothem: these rings carry
-    # 8 vertices, so an inscribed octagon reaches only cos(pi/8) = 0.924 of the
-    # nominal radius, and the cage is graded UNSUBDIVIDED. The radii below are set
-    # from the effective extent, not the nominal one — reading r straight off the
-    # reference leaves the tuft visibly small.
-    ("tuft_01", (0.0, -0.492, 0.186), (0, -1.00, -0.20), 0.046),
-    ("tuft_02", (0.0, -0.536, 0.166), (0, -1.00, -0.10), 0.074),
-    ("tuft_03", (0.0, -0.592, 0.154), (0, -1.00,  0.10), 0.086),
-    ("tuft_04", (0.0, -0.624, 0.152), (0, -1.00,  0.30), 0.070),
-    ("tuft_05", (0.0, -0.642, 0.160), (0, -1.00,  0.50), 0.034),
+    #   the shaft, by row (centre of the tail's own run, and its half-width)
+    #     z 0.275   y -0.368  h 0.031      z 0.200   y -0.401  h 0.030
+    #     z 0.250   y -0.377  h 0.029      z 0.175   y -0.415  h 0.030
+    #     z 0.225   y -0.388  h 0.030      z 0.150   y -0.436  h 0.034
+    #
+    #   the shaft, by column (centre of the tail's own run, and its half-height)
+    #     y -0.450  z 0.138  h 0.032       y -0.519  z 0.110  h 0.022
+    #     y -0.473  z 0.121  h 0.023       y -0.542  z 0.111  h 0.023
+    #     y -0.496  z 0.111  h 0.023
+    #
+    #   the tuft, by column
+    #     y -0.554  z 0.092..0.192         y -0.623  z 0.075..0.242
+    #     y -0.577  z 0.088..0.221         y -0.646  z 0.079..0.242
+    #     y -0.600  z 0.075..0.235         y -0.669  z 0.090..0.225 (clipped)
+    #
+    # THE SHAFT DIPS AND THE TUFT RISES OFF IT. That is the shape the previous
+    # table missed. The reference's shaft descends steeply behind the rump to a
+    # LOW point — centre z 0.110 at y -0.50, its underside at z 0.088 — and runs
+    # nearly level from there, while the tuft's mass sits 0.046 ABOVE that
+    # centreline: its underside is only 0.035 below the shaft's centre and its
+    # crown is 0.127 above it. The old table ran the shaft straight down to a
+    # tuft at z 0.15-0.19 and so put geometry through the wedge of empty canvas
+    # the reference leaves between its shaft and its tuft — 2420 extra pixels —
+    # while leaving the low sweep at z 0.09-0.15 empty at 1279 missing.
+    #
+    # THE UPPER SHAFT IS NOT A SILHOUETTE EVENT AT ALL. Above z 0.24 the model's
+    # own rump cap already reaches y -0.411 in mask units, which is behind the
+    # rearmost pixel the reference has anywhere in those rows (-0.406). So the
+    # only thing the shaft can do up there is stay inside the rump and stop
+    # poking past it, which is worth 1337 extra pixels. The radii above z 0.20
+    # are set from that, not from the reference's shaft thickness — the
+    # reference's shaft is THICKER than the model's there and the extra
+    # thickness would be invisible material that costs IoU.
+    #
+    # THE TAIL'S MASS STEERS THE WHOLE SILHOUETTE'S REGISTRATION, so none of the
+    # numbers above can be converted with a fixed offset. `silhouette_render.fit`
+    # recentres the model on its own bounding box and `silhouette_qa` then rolls
+    # it to match the reference's centroid, and the tail is the rearmost thing on
+    # the animal: moving the tuft 0.02 back moved the side view's registration
+    # from -1 px to -5 px, which shifts the ENTIRE body outline. So the loop here
+    # is measure the built model, take the delta, convert the DELTA, rebuild:
+    #     dy_cage = 0.977 * dy_mask     dz_cage = 0.977 * dz_mask
+    # An absolute conversion is only good for the run it was measured on; at the
+    # values that shipped it is y_cage = 0.977 * y_mask + 0.0004.
+    #
+    # A ring's silhouette half-extent comes back at 0.757 of r_cage * 1.0235 —
+    # measured on the built tuft and on the built shaft, which agree to three
+    # figures. That is the octagon's cubic-B-spline factor (0.902 for 8 control
+    # points) times the along-path averaging, and it is NOT 0.902: two levels of
+    # Catmull-Clark on rings this coarse have not converged to the limit surface.
+    # So r_cage = r_mask / 0.775. Reading 0.902 off the crease_loop note and
+    # sizing a ring from it comes out 15% small.
+    # KNOWN ARTIFACT, AND TWO REMEDIES THAT MEASURED WORSE. These two rings are
+    # small circles sitting INSIDE the attachment loop — the 3x3 patch spans
+    # rump -> haunch_back -> haunch, so its boundary runs from (-0.378, 0.320)
+    # up to (-0.320, 0.400) and its centroid is at about (-0.350, 0.362), above
+    # and forward of root_02. The tail then has to turn back down through that
+    # loop, and Catmull-Clark answers by funnelling the rump's top surface into
+    # a groove on the midline: measured by ray-casting straight down, the top of
+    # the model at (x 0, y -0.384) is z 0.182 while 0.04 to the side it is 0.326.
+    #
+    # It is NOT new — the same probe on the previous table gives 0.238 against
+    # 0.325, an 0.087 groove against this table's 0.144 — and it is confined to
+    # a strip about 0.04 wide that no silhouette view sees (the side view takes
+    # the max over x, and off the midline the surface is untouched). Both
+    # attempts to close it made a gate worse:
+    #
+    #   r 0.026 -> 0.032/0.031, to fatten the neck: TOTAL_PINCHED 0 -> 3 and
+    #   WORST_AREA_RATIO 0.252 -> 0.174, and the groove did not move.
+    #
+    #   y -0.368 -> -0.386, so the tail leaves off the rump's REAR instead of
+    #   through its top: SLIVER_FACES 0 -> 10, side IoU 0.9029 -> 0.8998, and
+    #   the groove did not move either.
+    #
+    # The real fix is a ring in the attach transition, which costs 8 cage
+    # vertices and 128 after L2 — a budget decision, not a tail-table one.
+    ("root_02", (0.0, -0.368, 0.320), (0, -0.30, -1.00), 0.026),
+    ("root_01", (0.0, -0.374, 0.268), (0, -0.30, -1.00), 0.026),
+    ("tail_03", (0.0, -0.385, 0.204), (0, -0.50, -1.00), 0.034),
+    ("tail_04", (0.0, -0.420, 0.145), (0, -0.95, -1.00), 0.034),
+    # The low point. This ring is nearly perpendicular to Y, so its r spends
+    # itself on Z rather than fore-aft. Built and measured: the shaft's underside
+    # comes out at z 0.088 against the reference's 0.088, and its crown at 0.135
+    # against 0.133, over the whole run from y -0.45 to -0.52.
+    ("tail_05", (0.0, -0.487, 0.103), (0, -1.00, -0.20), 0.030),
+    # THE TUFT IS A BULB AND IT NEEDS ITS OWN RING SPACING, NOT ONE FAT RING.
+    #
+    # A ring is a section perpendicular to its tangent, so the tuft's height has
+    # to come from r_up and its width from r_right — the previous table used
+    # CIRCULAR rings, which meant the only way to buy 0.167 H of height was to
+    # buy the same in width, and the ring that tried peaked at r 0.086 and still
+    # measured 0.121 H tall because a single peak between two much smaller
+    # neighbours is averaged away: 0.086 came back as 0.060 (a factor of 0.69,
+    # against 0.87 for a ring whose neighbours match it).
+    #
+    # So: four rings at a sustained radius, spaced 0.028-0.032 apart, elliptical
+    # at r_up/r_right = 1.94 so the crown reaches z 0.235 without the tuft
+    # becoming a beach ball. tuft_01 stays SHAFT-SIZED — the reference's ball has
+    # a hard leading edge at y -0.545 where its half-height is still 0.023, and a
+    # fat ring there would hang above and below material the reference does not
+    # have. The leading edge is the one place the model is still visibly softer
+    # than the reference: 0.021 H too tall at y -0.531 and 0.042 at y -0.542,
+    # which is what four rings can do to a tangent discontinuity.
+    #
+    # TWO CORRECTIONS THAT MEASURED WORSE, so nobody builds them again.
+    #
+    # Narrowing the tuft in X to keep it out of the front view's crotch gap
+    # (r_right 0.050 -> 0.042 with the shaft to match): SLIVER_FACES went 0 -> 3,
+    # two faces flipped, and the front view did not improve at all — 0.83% extra
+    # against 0.81%. The gap is 0.042 H wide and offset +0.012 from the midline,
+    # so a tail centred on x = 0 would have to be under 0.020 H WIDE to clear it.
+    # It cannot be narrowed out of that gap, only out of proportion.
+    #
+    # Lifting the whole tuft 0.010 to split the difference with the 3/4 view:
+    # 3/4 +0.0021 and rear -0.0024 and side -0.0026, weighted 0.8794 -> 0.8780.
+    # The side view's placement is the one to fit; see the note above the table.
+    #
+    # tuft_05 lands at mask y -0.684, past the canvas edge at -0.673, because
+    # the reference's tuft is CLIPPED there and "reach the edge" is the only
+    # target a clipped band can set (see silhouette_qa's clipping warning). Its
+    # cap is NOT creased: a tapering tip is the one place Catmull-Clark's inward
+    # pull is wanted, which is the opposite of the paw soles (see crease_loop).
+    ("tuft_01", (0.0, -0.540, 0.118), (0, -1.00,  0.35), 0.030, 0.034),
+    ("tuft_02", (0.0, -0.575, 0.141), (0, -1.00,  0.40), 0.046, 0.084),
+    ("tuft_03", (0.0, -0.602, 0.153), (0, -1.00,  0.15), 0.050, 0.097),
+    ("tuft_04", (0.0, -0.630, 0.155), (0, -1.00,  0.00), 0.048, 0.092),
+    ("tuft_05", (0.0, -0.662, 0.150), (0, -1.00, -0.10), 0.038, 0.072),
 ]
 
 
