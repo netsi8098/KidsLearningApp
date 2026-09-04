@@ -467,7 +467,47 @@ def rear_limb(sx):
         ("thigh_01", (sx * 0.128, -0.268, 0.199), (0, 0.22, -1), 0.092),
         # Stifle (knee) — points FORWARD.
         ("knee_up",  (sx * 0.128, -0.244, 0.176), (0, 0.20, -1), 0.090),
-        ("knee",     (sx * 0.128, -0.236, 0.159), (0, 0.05, -1), 0.088),
+        # THE REAR LIMB'S TANGENTS ROTATE MONOTONICALLY TO LEVEL. They used to
+        # reverse twice, and that is a self-intersection, not a style choice.
+        #
+        # A tube of radius r swept along a curve of radius R passes through
+        # ITSELF on the inside of the bend whenever r > R, and R for a station
+        # pair is the arc between them divided by the turn across them. The
+        # shipped chain, measured:
+        #
+        #     segment              R      r_fore   r/R
+        #     knee -> knee_lo    0.0954   0.144    1.51   FOLD
+        #     hock_up -> hock    0.0691   0.076    1.10   FOLD
+        #     hock -> hock_lo    0.0790   0.114    1.44   FOLD
+        #     hock_lo -> ankle   0.0819   0.144    1.76   FOLD
+        #
+        # Those are exactly the stations `crease_qa_lion.py` blames: 7.6% of the
+        # knee's edges over 25 degrees, 6.2% of the hock's at up to 177.9, and
+        # 13.1% of hock_lo's. And the creased edges sit at y -0.22 against a
+        # hock station at -0.290 — 0.065 forward of it, which is one radius, on
+        # the INSIDE of the bend. That is where a fold goes.
+        #
+        # MAKING THE TANGENTS GEOMETRICALLY HONEST MAKES IT WORSE, which is the
+        # part worth knowing. The authored tangents disagreed with the actual
+        # path by 0.20 to 1.02 in ty (42 degrees at the ankle), and following
+        # the path instead gives a direction rotating from 37 degrees back at
+        # the shin to 43 forward at hock_lo — 80 degrees over 0.064 of arc, so
+        # R = 0.046 against r_r 0.09-0.11 and r/R reaches 2.4. The rear leg's
+        # centreline genuinely bends tighter than the limb is thick. NO tangent
+        # choice makes a swept tube fit it.
+        #
+        # So it stops being a swept tube. The paw already found this out one
+        # level down — "ALL FOUR RINGS LEVEL, and that replaces a fold" — and a
+        # stack of rings whose orientation changes slowly cannot fold at all,
+        # whatever the centreline does: the surface just slants. The tangents
+        # now rotate once, monotonically, from the shin's backward tilt to level
+        # at the ankle, and the heel comes from the paw's own level rings
+        # reaching back to y -0.391 rather than from a forward-tilted hock ring.
+        #
+        # Positions and radii are untouched — every measured extent this chain
+        # was tuned to is still exactly where it was. Only the ring PLANES move,
+        # and the worst r/R goes 1.76 -> 0.55.
+        ("knee",     (sx * 0.128, -0.236, 0.159), (0, -0.05, -1), 0.088),
         # THE HAUNCH, and ONE ELLIPSE IS ALL THIS LOFT WILL TAKE.
         #
         # The rear leg read as a thin crumpled stick beside the front one, and
@@ -500,21 +540,48 @@ def rear_limb(sx):
         # -0.063 to -0.023 — and the rest is not reachable by ring radius here.
         # The real fix for the remainder is the haunch as body mass rather than
         # limb mass, in the BODY table, which is a bigger change than a station.
-        ("knee_lo",  (sx * 0.128, -0.242, 0.142), (0, -0.14, -1), 0.090, 0.144),
+        ("knee_lo",  (sx * 0.128, -0.242, 0.142), (0, -0.12, -1), 0.090, 0.144),
+        # NO ELLIPSE HERE, AND THE OLD STATION-COUNT WARNING IS NOT STALE.
+        #
+        # The side run has been short since the haunch note below was written:
+        # reference 0.204 at z 0.090 and 0.223 at 0.120, against circular rings
+        # giving 0.148 and 0.156. r_r is the obvious fix and it used to be
+        # unavailable for a second reason — r_r is the radius in the plane the
+        # limb bends in, so raising it drove r/R past 1 and bought a fold for
+        # every millimetre of depth. With the planes rotating monotonically that
+        # particular trade is gone: r_r 0.111 / 0.102 / 0.105 on shin, hock_up
+        # and hock leaves the worst r/R in the chain at 0.50.
+        #
+        # It still costs what the haunch note said it costs. Measured:
+        #
+        #     SLIVER_FACES      0 -> 6      (the note predicts 6 for 3 stations)
+        #     TOTAL_PINCHED     0 -> 4
+        #     WORST_AREA_RATIO  0.252 -> 0.132
+        #     WEIGHTED_IOU      0.8879 -> 0.8884
+        #
+        # Three hard gates for +0.0005 of the headline. `grow` re-projects the
+        # previous ring's vertex directions, so an elliptical ring hands on an
+        # already-stretched distribution and the next stretch compounds it —
+        # that is independent of the fold, and the fold fix does not touch it.
+        # The depth deficit remains what the haunch note called it: a job for
+        # the BODY table, not this chain.
         ("shin",     (sx * 0.128, -0.268, 0.113), (0, -0.26, -1), 0.078),
-        # Hock — points BACKWARD. This reversal is the whole reason a rear leg
-        # does not behave like a human leg, and it also gives the chain the reach
-        # headroom the planted-paw proof depends on.
-        ("hock_up",  (sx * 0.128, -0.284, 0.092), (0, -0.20, -1), 0.074),
-        ("hock",     (sx * 0.128, -0.290, 0.076), (0, 0.05, -1), 0.076),
+        # Hock. The limb's fore-aft reversal is in the POSITIONS — y runs back
+        # to -0.290 here and forward again below — which is the whole reason a
+        # rear leg does not behave like a human leg, and it is what gives the
+        # chain the reach headroom the planted-paw proof depends on. The
+        # reversal stays. What is gone is the reversal in the ring PLANES that
+        # used to accompany it; see the block above `knee`.
+        ("hock_up",  (sx * 0.128, -0.284, 0.092), (0, -0.18, -1), 0.074),
+        ("hock",     (sx * 0.128, -0.290, 0.076), (0, -0.10, -1), 0.076),
         # ELLIPTICAL FROM THE HOCK DOWN. The rear foot is a metatarsus: long,
         # low and level. The reference measures 0.256 of fore-aft length at
         # z 0.060 and 0.206 at 0.080, where circular rings of radius 0.072 and
         # 0.076 can only give 0.144 and 0.152 — half the length missing, which
         # is why a correctly sized pad underneath read as a saucer on the end of
         # a stick instead of as a foot.
-        ("hock_lo",  (sx * 0.128, -0.276, 0.061), (0, 0.32, -1), 0.072, 0.114),
-        ("ankle",    (sx * 0.130, -0.266, 0.047), (0, 0.10, -1), 0.080, 0.144),
+        ("hock_lo",  (sx * 0.128, -0.276, 0.061), (0, -0.04, -1), 0.072, 0.114),
+        ("ankle",    (sx * 0.130, -0.266, 0.047), (0, 0.0, -1), 0.080, 0.144),
         # Same rebuild. The reference rear paw spans -0.102 to -0.373 — centred
         # almost exactly where the old one was, but 5x longer, reaching back into
         # a heel and forward into toes. So the chain drops past the ankle to form

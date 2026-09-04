@@ -7179,3 +7179,122 @@ ripples and the ear's ring sampling.
    cause of the crown band, it has bitten four times in different disguises, and
    every local correction for it has measured worse than leaving it.
 3. Retire the proxy; a second world for the bridge to arrive at.
+
+## GATE 19: the rear limb rebuild
+
+The rear leg was the last region failing the crease gate, at p99 71.86 and 6.10%
+of edges over 25 degrees. It was folded, provably, and the proof is a ratio.
+
+### r > R is a self-intersection, not a style
+
+A tube of radius r swept along a curve of radius R passes through ITSELF on the
+inside of the bend whenever r > R, and R across a station pair is the arc between
+them divided by the turn across them. The shipped chain:
+
+    segment              R      r_fore   r/R
+    knee -> knee_lo    0.0954   0.144    1.51   FOLD
+    hock_up -> hock    0.0691   0.076    1.10   FOLD
+    hock -> hock_lo    0.0790   0.114    1.44   FOLD
+    hock_lo -> ankle   0.0819   0.144    1.76   FOLD
+
+Those are exactly the stations the gate blamed — 7.6% of the knee's edges over
+25 degrees, 6.2% of the hock's at up to 177.9, 13.1% of hock_lo's — and the
+creased edges sat at y -0.22 against a hock station at -0.290, one radius
+forward of it, on the INSIDE of the bend. Which is where a fold goes.
+
+**Making the tangents geometrically honest makes it worse.** The authored
+tangents disagreed with the actual path by 0.20 to 1.02 in ty — 42 degrees at
+the ankle — and following the path instead gives a direction rotating from 37
+degrees back at the shin to 43 forward at hock_lo: 80 degrees over 0.064 of arc,
+R = 0.046 against r_r 0.09-0.11, r/R up to 2.4. The rear leg's centreline
+genuinely bends tighter than the limb is thick. No tangent choice makes a swept
+tube fit it.
+
+So it stops being a swept tube. The paw had already found this one level down —
+"ALL FOUR RINGS LEVEL, and that replaces a fold" — because a stack of rings
+whose orientation changes slowly cannot fold whatever the centreline does; the
+surface just slants. The tangents now rotate ONCE, monotonically, from the
+shin's backward tilt to level at the ankle, and the heel comes from the paw's
+own level rings reaching back to y -0.391 rather than from a forward-tilted hock
+ring. Positions and radii are untouched, so every measured extent this chain was
+tuned to is still where it was. Worst r/R **1.76 -> 0.55**.
+
+    station    before          after
+    hock       6.2%, max 177.9   2.1%, max 51.0
+    hock_lo   13.1%, max  70.9   3.2%, max 55.0
+    paw_top    4.4%, max 169.9   4.8%, max 39.0
+    region    p99 71.86, 6.10%   p99 60.38, 4.88%
+
+### The old station-count warning is NOT stale
+
+With the fold gone, r_r finally looked available — the side run has been short
+here for as long as the haunch note has existed, reference 0.204 at z 0.090
+against 0.148. Adding r_r 0.111 / 0.102 / 0.105 to shin, hock_up and hock leaves
+the worst r/R at 0.50, and costs exactly what the haunch note predicted for
+three elliptical stations:
+
+    SLIVER_FACES      0 -> 6      (the note's table predicts 6 for 3)
+    TOTAL_PINCHED     0 -> 4
+    WORST_AREA_RATIO  0.252 -> 0.132
+    WEIGHTED_IOU      0.8879 -> 0.8884
+
+Three hard gates for +0.0005 of the headline. `grow` re-projects the previous
+ring's vertex directions, so an elliptical ring hands on an already-stretched
+distribution — independent of the fold, and untouched by fixing it. Reverted.
+
+### The gate was hiding the real defect, in both legs
+
+"rear leg" and "front leg" each covered three unrelated things: the limb's own
+chain, the transition where the limb grows out of the body tube, and the paw's
+deliberately creased sole rim. Split:
+
+    sub-region           edges  median     p99      max     >25
+    front limb chain      4542    8.68   27.58    68.53   1.37%
+    front sole rim         550    5.97   50.67    51.27  11.27%
+    front upper attach    1528    9.00  137.50   175.37   6.68%
+    rear limb chain       4930    8.36   35.14   116.72   2.47%
+    rear sole rim          384    1.63   59.10    59.15  12.50%
+    rear upper attach     2720    6.80  114.69   178.26   8.16%
+
+**Both limb chains pass. Both attaches fail, and the FRONT one is worse** — p99
+137.5 against the rear's 114.7 — while the old "front leg" region reported 48.87
+and passed, because 4,542 clean chain edges diluted 1,528 bad ones. That is the
+extremum-versus-average trap this file's own header warns about, happening inside
+the gate that warns about it.
+
+It also misdirected this task: "rear leg" pointed at the limb's station table,
+where 55% of the region's creased edges were ABOVE the knee — in the haunch and
+the groove where the tail leaves the rump, which the tail table already
+diagnoses and prices ("a ring in the attach transition, 8 cage vertices and 128
+after L2").
+
+The sole rims are gated on the MAX now, not the fraction. They are designed
+folds — medians of 5.97 and 1.63 with a thin band of rim at 51 and 59 degrees —
+so a fraction-over-25 reads 11-13% forever and means nothing. `SOLE_MAX` 65
+passes the rim the design asks for and catches one that has become a fold.
+
+The split raised the visible failures from one to two. Nothing was excused.
+
+### The trade, stated
+
+    WEIGHTED_IOU  0.8897 -> 0.8879   side 0.9176 -> 0.9142
+    rear limb     p99 71.86 -> 35.14, 6.10% -> 2.47%  (chain only, gate PASSES)
+    integrity     slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform        worst area 0.252, pinched 0, flipped 0
+    rig           reach FL/FR 22.1, RL/RR 42.1 mm; planted paw 0.069 mm;
+                  support slide 0.111 mm; all 13 clips within 3 mm — all unchanged
+    glb           5939 KB against a 6144 cap, 4 meshes, both contracts pass
+
+0.0018 of outline IoU for a surface that was passing through itself. The side
+and three-quarter renders confirm it: the rear view's hard horizontal banding is
+largely gone and the side view's protruding facets are reduced.
+
+### Next, in order
+
+1. **The limb-to-body attach transition, both limbs.** Now the correctly named
+   defect and the worst crease in the asset: front p99 137.5 / 6.68%, rear
+   114.7 / 8.16%. The tail table has already costed the fix at 8 cage vertices
+   per attachment.
+2. Re-frame the asset so model z is h, once, everywhere — the known cause of the
+   crown band, four times bitten, every local correction measured worse.
+3. Retire the proxy; a second world for the bridge to arrive at.
