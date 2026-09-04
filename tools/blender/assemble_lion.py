@@ -55,6 +55,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import face_lion  # noqa: E402
 import face_shapes  # noqa: E402
+import detail_normals  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VIEWS = os.path.join(REPO, "art", "blender", "references", "turnaround-views")
@@ -844,6 +845,18 @@ def main():
     #     is the same trap `silhouette_render.py` fell into for the whole
     #     history of this asset.
     bake_ao_into_coat(meshes)
+
+    # ---- 3d. surface detail --------------------------------------------
+    # Unwrap and bake a normal map per coat surface. After the cavity bake and
+    # in the same rest, morph-neutral state, and for the same reason: the map
+    # has to describe the surface that ships.
+    #
+    # This is the stage that modulates the LIGHTING rather than the albedo. The
+    # cavity pass bought +20% of local contrast on the mane and could not buy
+    # more, because an albedo modulation works against the light instead of
+    # with it.
+    if os.environ.get("LION_NORMAL_MAPS", "1") != "0":
+        detail_normals.build(meshes)
 
     # Back to pose position: the clips are the point of shipping one file.
     arm.data.pose_position = "POSE"

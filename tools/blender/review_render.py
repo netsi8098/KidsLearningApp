@@ -77,6 +77,39 @@ def setup():
     return cam
 
 
+def raking_lights(azimuth_deg):
+    """A low, near-tangential key. The only way to judge SURFACE detail.
+
+    The front-lit rig below exists because a surface in shadow cannot be
+    judged, and it has now hidden two consecutive surface passes:
+
+      * the cavity + curvature bake shifted the isolated mane's mean luminance
+        by 5 of 255 here and reads plainly in the browser;
+      * the mane's normal map changed this sheet by EXACTLY NOTHING — identical
+        local contrast to three decimal places — while being verifiably wired,
+        1024x1024, with live pixel data.
+
+    The second one is not a coincidence, it is Lambert. Front lighting puts the
+    light along the view axis, and cos(theta) is flattest at theta = 0, so a
+    perturbed normal barely changes its own shading. A normal map is invisible
+    under a head-on key by construction.
+
+    So the detail shots get a key raked round to 78 degrees off the view axis
+    and dropped to 12 degrees of elevation, which is what makes relief throw a
+    shadow across itself. Front-lit for form and silhouette; raked for surface.
+    """
+    for o in [o for o in bpy.data.objects if o.type == "LIGHT"]:
+        bpy.data.objects.remove(o, do_unlink=True)
+    key = bpy.data.objects.new("rake", bpy.data.lights.new("rake", type="SUN"))
+    bpy.context.scene.collection.objects.link(key)
+    key.data.energy = 3.9
+    key.rotation_euler = (math.radians(78), 0.0, math.radians(azimuth_deg + 74))
+    fill = bpy.data.objects.new("rakefill", bpy.data.lights.new("rakefill", type="SUN"))
+    bpy.context.scene.collection.objects.link(fill)
+    fill.data.energy = 0.55
+    fill.rotation_euler = (math.radians(30), 0.0, math.radians(azimuth_deg - 120))
+
+
 def lights(azimuth_deg):
     """Key from the camera's side, fill from the other. Rebuilt per shot.
 
@@ -126,8 +159,8 @@ def bounds(names=None):
     return (lo + hi) / 2.0, max((hi - lo).x, (hi - lo).y, (hi - lo).z)
 
 
-def shoot(cam, tag, target, dist, azimuth, elevation=8.0, lens=52.0):
-    lights(azimuth)
+def shoot(cam, tag, target, dist, azimuth, elevation=8.0, lens=52.0, rake=False):
+    raking_lights(azimuth) if rake else lights(azimuth)
     a, e = math.radians(azimuth), math.radians(elevation)
     cam.data.lens = lens
     cam.location = (target.x + math.sin(a) * math.cos(e) * dist,
@@ -266,6 +299,17 @@ def main():
     clear_morphs()
     if arm:
         clear_pose(arm)
+
+    # ---- surface detail, RAKED ------------------------------------------
+    # See `raking_lights`. These are the only shots on the sheet that can show
+    # a normal map or a baked cavity at all.
+    for tag, names, az in (("19-detail-mane-raked", mane, 178),
+                           ("20-detail-head-raked", None, 172)):
+        show_only(names)
+        c, sz = (bounds(names) if names else (head_c, head_d / 4.2))
+        d = sz * 1.9 if names else head_d
+        shoot(cam, tag, c, d, az, elevation=6.0, lens=58.0, rake=True)
+        show_only(None)
 
     files = sorted(f for f in os.listdir(OUT) if f.endswith(".png"))
     print("")
