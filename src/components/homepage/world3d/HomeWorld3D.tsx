@@ -19,6 +19,7 @@ import { EffectComposer, Bloom, DepthOfField, N8AO, Vignette } from '@react-thre
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { LionBrain, NECK_SHARE, type LionClip } from './lionBrain';
+import WorldLife from './WorldLife';
 
 const ENV_URL = '/assets/worlds/river-garden/home_environment.glb';
 /* Rigged lion: one continuous skinned quad mesh plus separate eye, tooth and
@@ -947,6 +948,10 @@ export default function HomeWorld3D({
         <Lighting />
         <Suspense fallback={null}>
           <Environment onReady={handleEnvReady} />
+          {/* The environment GLB is a photograph until something animates it.
+              See WorldLife: water, waterfall, bubbles, clouds, reeds, blossom
+              and lily pads, at zero extra draw calls. */}
+          <WorldLife scene={envScene} />
           {showLion && (
             <Lion
               spawn={markers.MARK_LionSpawn ?? null}
