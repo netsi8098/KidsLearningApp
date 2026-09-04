@@ -16,6 +16,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useAnimations, Preload } from '@react-three/drei';
 import { EffectComposer, Bloom, DepthOfField, N8AO, Vignette } from '@react-three/postprocessing';
+import type { DepthOfFieldEffect } from 'postprocessing';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { LionBrain, NECK_SHARE, type LionClip } from './lionBrain';
@@ -24,7 +25,7 @@ import WorldLife from './WorldLife';
 const ENV_URL = '/assets/worlds/river-garden/home_environment.glb';
 /* Rigged lion: one continuous skinned quad mesh plus separate eye, tooth and
    claw geometry, 41 joints, ten authored clips. */
-const LION_URL = '/assets/lion/rigged/lion_v2.glb';
+const LION_URL = '/assets/lion/cage/lion.glb';
 
 /* The bone-local axis that pitches a bone in this rig. Measured, not assumed:
    +10 degrees about local X moves the gaze +10 degrees of world pitch and zero
@@ -919,23 +920,91 @@ function AnchorProjector({
  * Everything here is off on low-end devices and under reduced-motion; see
  * RiverGarden3DWorld.
  */
-function LookPass({ focusZ }: { focusZ: number }) {
+/**
+ * The production look: ambient occlusion, depth of field, bloom, vignette.
+ *
+ * THE FOCUS PLANE WAS 62 CENTIMETRES FROM THE CAMERA.
+ *
+ * This shipped as `focusDistance={0.62}`, and in postprocessing 6.39 that
+ * property is in WORLD UNITS — so the focus sat 0.62 m away while the mascot
+ * stands about 13 m away. Everything in the scene was out of focus, the
+ * character included. It read as a soft, dreamy look and was actually a mascot
+ * whose eyes could not be seen: the production cage lion's irises washed out
+ * to blank ovals here while being perfectly crisp on the proof route, which
+ * has never enabled this chain.
+ *
+ * Two wrong turns on the way, both worth recording because both looked right.
+ * The bloom took the blame first — `luminanceThreshold` 0.86 against a white
+ * sclera is a plausible story, and `?nobloom` cleared it. And the fix was
+ * first written against the OLD normalized-depth semantics of this property,
+ * complete with a table of four-decimal-place values; that was a derivation of
+ * a version of the library this project does not use.
+ *
+ * `focusDistance` is now driven from the LIVE camera-to-subject distance every
+ * frame rather than memoized, because `AdoptedCamera` positions the camera in
+ * an effect that runs after this component mounts, and the homepage dollies it
+ * along the authored view axis at different screen sizes. A value computed
+ * once was measured before the camera had moved and put the plane at 5 m.
+ *
+ * The debug flags stay: `?nofx` narrowed this to the chain, `?nodof` to the
+ * pass, `?nobloom` and `?noao` are there so the next surprise costs the same.
+ */
+function LookPass({ target, subjectRef }: {
+  target: THREE.Vector3 | null;
+  /** The brain, so the focus can follow the MASCOT rather than a fixed point. */
+  subjectRef?: React.RefObject<{ x: number; z: number; eyeWorldY: number } | null>;
+}) {
+  const q = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const { camera } = useThree();
+  const dof = useRef<DepthOfFieldEffect | null>(null);
+  const subject = useMemo(
+    () => (target ? target.clone() : new THREE.Vector3(0, 1, 0)),
+    [target],
+  );
+  useFrame(() => {
+    const e = dof.current;
+    if (!e) return;
+    /* THE MASCOT IS THE SUBJECT, so it is what the focus follows — at its eye
+       line, which is the part that has to read. `MARK_CameraTarget` is only the
+       fallback: it is the composition's anchor, not the character, and during a
+       bridge crossing the two are metres apart. */
+    const b = subjectRef?.current;
+    if (b) subject.set(b.x, b.eyeWorldY, b.z);
+    const d = camera.position.distanceTo(subject);
+    /* Cast because postprocessing 6.39's shipped .d.ts declares
+       `focusDistance` only as a CONSTRUCTOR option while the class carries a
+       public getter/setter for it — verified in build/index.js. Setting it is
+       the supported runtime path; the types simply lag. */
+    if (d > 0.5) (e as unknown as { focusDistance: number }).focusDistance = d;
+  });
   return (
     <EffectComposer multisampling={4} enableNormalPass>
-      <N8AO
+      {!q.has('noao') && <N8AO
         aoRadius={0.55}
         distanceFalloff={0.9}
         intensity={2.4}
         color="#3a3350"
         halfRes
-      />
-      <DepthOfField
-        focusDistance={focusZ}
-        focalLength={0.06}
-        bokehScale={2.6}
-        height={520}
-      />
-      <Bloom luminanceThreshold={0.86} luminanceSmoothing={0.28} intensity={0.42} mipmapBlur />
+      />}
+      {!q.has('nodof') && <DepthOfField
+        ref={dof}
+        /* The sharp band, in metres. Wide enough to hold the whole island and
+           the mascot standing on it — a mascot with a soft face is not a depth
+           cue, it is a bug, which is exactly how this shipped. The far bank
+           sits 20 m and beyond and softens, which is the cue actually wanted. */
+        /* focusRange and bokehScale in metres and pixels respectively. The
+           pass shipped at `height={480}`, which renders it at 480p and
+           composites back up — so even perfectly focused geometry lost
+           resolution, and on a mascot whose iris is twenty pixels across that
+           is the difference between an eye and a blank oval. Full resolution,
+           and a gentler bokeh than the 2.6 it shipped with, which was tuned
+           against a focus plane that was never on the subject. */
+        focusRange={7}
+        bokehScale={1.4}
+        resolutionScale={1}
+      />}
+      {!q.has('nobloom') && <Bloom luminanceThreshold={0.86} luminanceSmoothing={0.28} intensity={0.42} mipmapBlur />}
       <Vignette offset={0.36} darkness={0.34} eskil={false} />
     </EffectComposer>
   );
@@ -1123,7 +1192,7 @@ export default function HomeWorld3D({
           )}
           <Preload all />
         </Suspense>
-        {effects && <LookPass focusZ={0.62} />}
+        {effects && <LookPass target={markers.MARK_CameraTarget ?? null} subjectRef={activeBrain} />}
         <AdoptedCamera
           source={glbCamera}
           target={markers.MARK_CameraTarget ?? null}
