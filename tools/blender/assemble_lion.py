@@ -423,6 +423,239 @@ def subdivide(cage, levels):
           f"{len(cage.vertex_groups)} vertex groups preserved")
 
 
+# The AO bake. Distance is the parameter that matters, and it is small on
+# purpose — see `bake_ao_into_coat`.
+AO_SAMPLES = int(os.environ.get("LION_AO_SAMPLES", "16"))
+AO_DISTANCE = float(os.environ.get("LION_AO_DISTANCE", "0.11"))
+AO_FLOOR = float(os.environ.get("LION_AO_FLOOR", "0.52"))
+
+
+CURV_GAIN = float(os.environ.get("LION_CURV_GAIN", "0.55"))
+CURV_LIFT = float(os.environ.get("LION_CURV_LIFT", "0.16"))
+# How wide a neighbourhood the concavity is measured over, in smoothing passes.
+# This is the parameter that decides whether the mane's locks are visible at
+# all — see `curvature_shade`.
+CURV_SCALE = int(os.environ.get("LION_CURV_SCALE", "10"))
+
+
+def curvature_shade(obj):
+    """Per-vertex concavity, for relief that occlusion cannot see.
+
+    WHY OCCLUSION IS NOT ENOUGH, measured.
+
+    The cavity bake works and is far too weak to make the mane read: with the
+    floor at 0.52 the isolated mane render shifts mean luminance by 4 of 255
+    and the head by 7. The reason is what AO answers — "how much of the sky can
+    this point see". The mane's locks are BROAD GENTLE BUMPS (azimuth sigmas of
+    5.5 to 8 degrees on a 0.70-wide hood), and a gentle valley sees almost as
+    much sky as the ridge beside it. AO catches contact — the mane against the
+    neck, under the chin, inside the aperture — and those are exactly the
+    places a front-lit render does not show.
+
+    Curvature answers a different question: "is this a valley". A discrete
+    Laplacian dotted with the vertex normal gives the sign and the magnitude of
+    the local concavity, which is precisely the signal a shallow undulation
+    carries and occlusion does not. It is also pure mesh arithmetic — no
+    Cycles, no ray budget, no operator context, and deterministic.
+
+    Valleys darken by `CURV_GAIN` and ridges lift by `CURV_LIFT`. The lift
+    matters as much as the darkening: shading only the valleys reads as dirt in
+    the creases, and lifting the ridges is what makes it read as form.
+
+    Normalised by the mesh's own mean edge length, so the same gain works on
+    the 16k cage and the 19k mane without retuning.
+    """
+    me = obj.data
+    n = len(me.vertices)
+    if n == 0:
+        return {}
+
+    # Adjacency once, as flat lists — this runs over 37,000 vertices and a
+    # Vector per neighbour per pass is the difference between two seconds and
+    # thirty.
+    nbr_a, nbr_b = [], []
+    elen = 0.0
+    for e in me.edges:
+        a, b = e.vertices
+        nbr_a.append(a)
+        nbr_b.append(b)
+        elen += (me.vertices[b].co - me.vertices[a].co).length
+    elen = (elen / max(1, len(me.edges))) or 1.0
+
+    px = [v.co.x for v in me.vertices]
+    py = [v.co.y for v in me.vertices]
+    pz = [v.co.z for v in me.vertices]
+    deg = [0] * n
+    for a, b in zip(nbr_a, nbr_b):
+        deg[a] += 1
+        deg[b] += 1
+
+    # MEASURED AT THE LOCKS' OWN SCALE, and that is the whole trick.
+    #
+    # A one-ring Laplacian is a high-pass filter at EDGE length. On an
+    # L2-subdivided surface the edges are tiny and the mane's locks are broad
+    # — azimuth sigmas of 5.5 to 8 degrees — so a one-ring measure sees almost
+    # nothing of them. Measured: it moved the isolated mane render's mean
+    # luminance by under one part in 255 more than the AO alone.
+    #
+    # So the position field is smoothed over several passes and the ORIGINAL is
+    # differenced against it. That is a band-pass whose scale is set by the
+    # pass count rather than by the mesh, which is what lets one gain work on
+    # both the 16k cage and the 19k mane. Same family of error as the mane's
+    # own `nh` fix and the river's ripples: a filter narrower than the feature
+    # cannot see the feature.
+    sx, sy, sz = list(px), list(py), list(pz)
+    for _ in range(max(1, CURV_SCALE)):
+        ax = [0.0] * n
+        ay = [0.0] * n
+        az = [0.0] * n
+        for a, b in zip(nbr_a, nbr_b):
+            ax[a] += sx[b]
+            ay[a] += sy[b]
+            az[a] += sz[b]
+            ax[b] += sx[a]
+            ay[b] += sy[a]
+            az[b] += sz[a]
+        for i in range(n):
+            d = deg[i]
+            if d:
+                sx[i] = ax[i] / d
+                sy[i] = ay[i] / d
+                sz[i] = az[i] / d
+
+    out = {}
+    for i, v in enumerate(me.vertices):
+        nv = v.normal
+        # Positive: the smoothed surface sits ABOVE this point along its own
+        # normal, so this is a valley.
+        c = ((sx[i] - px[i]) * nv.x + (sy[i] - py[i]) * nv.y
+             + (sz[i] - pz[i]) * nv.z) / elen
+        c = max(-1.0, min(1.0, c * 0.9))
+        out[i] = (1.0 - CURV_GAIN * c) if c > 0 else (1.0 - CURV_LIFT * c)
+    return out
+
+def bake_ao_into_coat(objs):
+    """Multiply baked occlusion INTO the coat's own vertex colours.
+
+    WHY THIS IS THE FIX AND NOT MORE GEOMETRY.
+
+    The mane already carries its locks: 65 clumps over six rows, and `nh` was
+    raised to 56 specifically so the mesh could sample them. They do not READ,
+    and an attempt to give the mane a scalloped outline instead proved the
+    reference's own boundary is smooth at every height — its lock tips are
+    interior SHADING. Flat vertex colour under soft light has nothing to darken
+    where a lock meets its neighbour, so relief that exists in the geometry is
+    invisible in the render. This is the missing stage.
+
+    SHORT DISTANCE. `optimize_and_bake.py` uses 2.20 m for the world, which is
+    ambient occlusion — the big soft gradient that stops a landscape reading
+    flat. That is the wrong tool here: at that range the lion's whole underside
+    goes dark and the lock creases vanish inside one gradient. 0.11 in cage
+    units is roughly two lock widths, which makes this a CAVITY bake — it
+    darkens where surfaces face each other and leaves everything else alone.
+
+    MULTIPLIED, NOT WRITTEN. The world's version bakes into the active colour
+    attribute, which is fine there because nothing else uses it. Here `Col`
+    already carries the measured coat regions — the cream muzzle, the paws, the
+    inner ear, the tail tuft — painted by `paint_regions`. So the bake goes to
+    its own attribute, is multiplied into `Col`, and is then removed.
+
+    AFTER THE JOIN, so the four meshes occlude EACH OTHER: the mane has to
+    darken the neck it sits on and the face parts have to darken their own
+    sockets. Baking them separately would light each as if it were alone, which
+    is the one thing a cavity pass must not do.
+    """
+    scene = bpy.context.scene
+    keep_engine = scene.render.engine
+    scene.render.engine = "CYCLES"
+    scene.cycles.samples = AO_SAMPLES
+    scene.cycles.use_denoising = False
+    scene.cycles.device = "CPU"
+    scene.render.bake.target = "VERTEX_COLORS"
+    scene.render.bake.use_pass_direct = False
+    scene.render.bake.use_pass_indirect = False
+    if scene.world and hasattr(scene.world, "light_settings"):
+        scene.world.light_settings.distance = AO_DISTANCE
+
+    targets = [o for o in objs if o.type == "MESH" and o.data.color_attributes]
+    if not targets:
+        print("[ao] no meshes carry a colour attribute — skipped")
+        scene.render.engine = keep_engine
+        return False
+
+    # A scratch attribute per mesh, made active so the bake lands in it.
+    for o in targets:
+        me = o.data
+        if "AO" in me.color_attributes:
+            me.color_attributes.remove(me.color_attributes["AO"])
+        me.color_attributes.new(name="AO", type="BYTE_COLOR", domain="CORNER")
+        me.color_attributes.active_color = me.color_attributes["AO"]
+
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in targets:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = targets[0]
+
+    try:
+        bpy.ops.object.bake(type="AO")
+    except Exception as exc:                       # noqa: BLE001
+        print(f"[ao] bake FAILED: {exc}")
+        for o in targets:
+            me = o.data
+            if "AO" in me.color_attributes:
+                me.color_attributes.remove(me.color_attributes["AO"])
+            if face_lion.COLOR_ATTR in me.color_attributes:
+                me.color_attributes.active_color = me.color_attributes[face_lion.COLOR_ATTR]
+        scene.render.engine = keep_engine
+        return False
+
+    darkest = 1.0
+    hist = [0] * 10
+    total_n = 0
+    ao_sum = 0.0
+    for o in targets:
+        me = o.data
+        ao = me.color_attributes["AO"]
+        col = me.color_attributes.get(face_lion.COLOR_ATTR)
+        if col is None:
+            me.color_attributes.remove(ao)
+            continue
+        curv = curvature_shade(o)
+        # Corner -> vertex lookup, so the per-vertex curvature lands on the
+        # corner-domain colour attribute glTF exports.
+        corner_vert = [lp.vertex_index for lp in me.loops]
+        for i, d in enumerate(col.data):
+            # The bake writes greyscale occlusion; take one channel and lift it
+            # off the floor so shadows stay OPEN. Children's art does not have
+            # black in it, and a cavity pass that closes up reads as dirt.
+            a = ao.data[i].color[0]
+            k = AO_FLOOR + (1.0 - AO_FLOOR) * a
+            if i < len(corner_vert):
+                k *= curv.get(corner_vert[i], 1.0)
+            k = max(0.35, min(1.25, k))
+            darkest = min(darkest, k)
+            hist[min(9, int(a * 10))] += 1
+            ao_sum += a
+            total_n += 1
+            c = d.color
+            d.color = (c[0] * k, c[1] * k, c[2] * k, c[3])
+        me.color_attributes.remove(ao)
+        me.color_attributes.active_color = me.color_attributes[face_lion.COLOR_ATTR]
+
+    scene.render.engine = keep_engine
+    # The DISTRIBUTION, not just the minimum. "darkest 0.52" is what a deep
+    # crevice looks like and also what an all-black failed bake looks like, and
+    # a bake that silently returns zeros would sail past a min-only check.
+    print(f"[ao] cavity + curvature multiplied into '{face_lion.COLOR_ATTR}' on "
+          f"{len(targets)} meshes: samples {AO_SAMPLES}, distance {AO_DISTANCE}, "
+          f"floor {AO_FLOOR}, darkest factor {darkest:.3f}")
+    if total_n:
+        bars = "  ".join(f"{i / 10:.1f}:{100 * c / total_n:.0f}%"
+                         for i, c in enumerate(hist) if c)
+        print(f"[ao] occlusion mean {ao_sum / total_n:.3f} over {total_n} corners")
+        print(f"[ao] histogram  {bars}")
+    return True
+
 def main():
     fm = json.load(open(FACE_JSON))
     contract = json.load(open(CONTRACT))["morphTargets"]
@@ -599,6 +832,18 @@ def main():
     parts = [o for o in meshes if o is not cage]
     # Joining rewrites shape keys; re-assert that neutral is still neutral.
     face_shapes.assert_neutral_is_neutral()
+
+    # ---- 3c. the cavity bake -------------------------------------------
+    # Here and not earlier, for three reasons that are all about what the bake
+    # can SEE:
+    #   * after the join, so the four meshes occlude each other — the mane must
+    #     darken the neck it sits on and the face parts their own sockets;
+    #   * after the coat, because the occlusion is MULTIPLIED into it;
+    #   * still in REST with the morphs neutral, so the bake reads the surface
+    #     the asset ships rather than whatever pose the file was saved on. That
+    #     is the same trap `silhouette_render.py` fell into for the whole
+    #     history of this asset.
+    bake_ao_into_coat(meshes)
 
     # Back to pose position: the clips are the point of shipping one file.
     arm.data.pose_position = "POSE"
