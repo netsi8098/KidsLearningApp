@@ -51,6 +51,63 @@ const AIM_TOL = 1.5;
 
 let scene: THREE.Object3D;
 
+/**
+ * Remove every texture reference from a GLB's JSON chunk, in place.
+ *
+ * This test measures GEOMETRY and the SKELETON — where the eye bone points
+ * once the gaze is composed onto it — and has no interest in materials. It
+ * cannot afford them either: the moment the lion started shipping a normal map,
+ * `parseAsync` stopped resolving under jsdom and `beforeAll` timed out at ten
+ * seconds, silently SKIPPING all fifteen assertions. jsdom cannot decode an
+ * embedded PNG, so the image promise never settles, and a skipped test file
+ * looks a lot like a passing one in a summary line.
+ *
+ * Stripping the references rather than raising the timeout, because waiting
+ * longer for something that will never resolve is not a fix, and a test that
+ * quietly depends on the material stack is a test that breaks again the next
+ * time the material stack changes.
+ */
+function stripTextures(ab: ArrayBuffer): ArrayBuffer {
+  const dv = new DataView(ab);
+  const jsonLen = dv.getUint32(12, true);
+  const jsonBytes = new Uint8Array(ab, 20, jsonLen);
+  const json = JSON.parse(new TextDecoder().decode(jsonBytes));
+  delete json.images;
+  delete json.textures;
+  delete json.samplers;
+  for (const m of json.materials ?? []) {
+    delete m.normalTexture;
+    delete m.occlusionTexture;
+    delete m.emissiveTexture;
+    if (m.pbrMetallicRoughness) {
+      delete m.pbrMetallicRoughness.baseColorTexture;
+      delete m.pbrMetallicRoughness.metallicRoughnessTexture;
+    }
+  }
+  /* Re-encode, padded to 4 bytes with spaces as the glTF spec requires, and
+     kept the SAME LENGTH OR SHORTER so the binary chunk's offsets stay valid —
+     only keys are removed, so it always is. */
+  let out = new TextEncoder().encode(JSON.stringify(json));
+  const pad = (4 - (out.length % 4)) % 4;
+  if (pad) {
+    const padded = new Uint8Array(out.length + pad);
+    padded.set(out);
+    padded.fill(0x20, out.length);
+    out = padded;
+  }
+  const tail = new Uint8Array(ab, 20 + jsonLen);
+  const total = 20 + out.length + tail.length;
+  const res = new ArrayBuffer(total);
+  const u8 = new Uint8Array(res);
+  u8.set(new Uint8Array(ab, 0, 20));
+  u8.set(out, 20);
+  u8.set(tail, 20 + out.length);
+  const rv = new DataView(res);
+  rv.setUint32(8, total, true);      // total GLB length
+  rv.setUint32(12, out.length, true); // JSON chunk length
+  return res;
+}
+
 beforeAll(async () => {
   const buf = readFileSync(GLB);
   const loader = new GLTFLoader();
@@ -62,9 +119,9 @@ beforeAll(async () => {
      supported". Allocating here makes the constructor match. */
   const ab = new ArrayBuffer(buf.byteLength);
   new Uint8Array(ab).set(buf);
-  const gltf = await loader.parseAsync(ab, '');
+  const gltf = await loader.parseAsync(stripTextures(ab), '');
   scene = gltf.scene;
-});
+}, 30000);
 
 /**
  * The runtime's own arrangement: a group holding the scaled model, rotated by
