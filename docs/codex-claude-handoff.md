@@ -6854,3 +6854,128 @@ open.
    nowhere to go.
 4. Two open design questions: re-stage the rainbow or widen the camera; and
    should the lion TURN toward something out of its gaze's reach.
+
+## GATE 16: the brows and the ears
+
+The brows and the ears were the two things a side-by-side against the reference
+still called out on the face. Both were built, both were measured, and both were
+wrong in a way no gate was looking at.
+
+### The brows were half their measured height
+
+`build_brows` sized the mark at `half_h_H * 0.52`. The reference brow spans
+h 0.7267-0.7805 on the right and 0.7288-0.7805 on the left — 0.0538 of dark
+mass. Built at 0.52 it came out **0.0318 tall**, and because the disc is centred
+on the measured CENTROID h (0.7618, which on a wedge that rises toward the
+midline sits well above its own bbox centre) the thinning ate the brow from
+BELOW: the built top edge landed at 0.7795 against a reference 0.7805, correct,
+while the underside sat at 0.7477 against 0.7267 — 21 mm high, with a 33 mm gap
+under it. What was left read as eyeliner, and on this character the brows carry
+the expression.
+
+The span now comes from `h_top`/`h_bot` instead of a centroid plus a guessed
+fraction. Same correction the muzzle needed on the other axis: measure the
+extent, do not infer it.
+
+### The ears were an ellipsoid, and an ellipsoid cannot hold that profile
+
+The reference's ear holds ~0.31 half-width nearly straight-sided from h 0.72 to
+0.84 and only then tapers. Measured against the front reference at the same
+heights, the ellipsoid it replaces:
+
+    h      ref    ellipsoid   deficit
+    0.72  0.3173    0.2769     -0.040
+    0.74  0.3135    0.2442     -0.069
+    0.76  0.3192    0.2865     -0.033
+    0.86  0.2712    0.2481     -0.023
+
+An ellipse pinches at both ends, so it can match that profile at exactly one
+height. Matching it in the middle is the whole content of the older note that
+"every placement trades one band for another": the form had one free parameter
+and four bands to satisfy. `EAR_PROFILE` has one per station, and reproduces the
+reference row by row by construction.
+
+Two things the old ellipsoid was RIGHT about, and both are kept. It spanned
+x -0.045 to 0.305 because **the skull does not reach the ears** — classifying
+the assembled cage against the old ellipsoid and measuring what is left gives a
+skull half-width of 0.1799 at z 0.70, 0.1447 at 0.74, 0.1143 at 0.78 and 0.0317
+by z 0.82. It domes over and is gone before the ear's midpoint, so from z 0.72
+up the outer silhouette IS the ear and an ear rooted at its own visible base
+would be a detached flake. And its forward cap was convex, which is why no
+colour made it read as an inner ear; the new one is dished 0.058, six
+millimetres PAST its own axis, so the cup is genuinely concave.
+
+### Four things this cost, all of them frame or sampling errors
+
+**The table was in the wrong frame.** `silhouette_qa` fits the model to the
+reference height before rendering — it prints `scale=1.0235` — so a model z is
+not a silhouette h. Using the reference's h values directly as z put the whole
+ear 2.35% high and wide, and the band table caught it as `0.85-0.90 +0.058`.
+That is the third confident wrong number from a frame mismatch on this asset,
+after the eye height measured above the feet and applied in world y, and the
+head assist expressed about the bone's inclined local axis. The conversion is
+now written out rather than folded into the constants.
+
+**The two lowest stations are the mane's edge, not the ear's.** At h 0.713 the
+reference measures 0.330, but down there the mane supplies 0.334 on its own.
+Taking that as the ear's width made the BOTTOM ring the widest, so the loft
+flared out at 72 degrees from vertical and came straight back in at 49 — a
+119-degree reversal, as a hard ring of 24 edges per ear. It cost head/neck
+46.6 -> 57.7 degrees of p99, and it was invisible, because the mane covers
+exactly the heights that produced it.
+
+**The rings were undersampled where all the curvature is.** The section is about
+three times wider in x than deep in y, so almost all of its curvature is at the
+two x-extremes. The ellipsoid got this free — it was a UV sphere scaled in x, so
+its own poles landed on those extremes — and the loft had to be told:
+`t - 0.25*sin(2t)` gives the turns twice the density and the near-straight walls
+less. Refinement confirmed the surface is sound rather than folded: **11.77% of
+ear edges over 25 degrees at 24 segments, 7.55% at 48, 4.76% at 64.** They
+converge.
+
+**A wide ring cannot close as a pole.** The lowest ring is 0.209 across in x and
+there is nowhere near 0.2 of z below the ear, so every closing run ended in a
+cone a couple of millimetres tall and 100 mm wide — the flat cap the closing run
+exists to avoid, 84 creased edges in one ring. `EAR_ROOT` brings the section
+down to something a pole can close: four stations shrinking x_out 0.249 -> 0.070
+at a steady 3.0-3.7 slope against the 2.9 of the wall above, then a closing run.
+
+### And one negative result
+
+Matching the a_y slope across the root join looked obviously right — a_y rises
+at 0.85 above the join and the root came up at 0.38, and 38 edges at up to 70
+degrees sat exactly there. Thinning the root to match took the gate the wrong
+way, 4.45% -> 4.54%, and failed it. A ring's curvature at its x-extremes goes as
+`a_x / a_y**2`, so thinning sharpens the very rim that dominates this region's
+edge count: the kink is linear in the slope error, the rim penalty is quadratic
+in the thinning. Reverted, and recorded in place.
+
+### The one that was already there
+
+The dark hard-edged band across the forehead is **not** from this change — it is
+in the committed BEFORE render too. The mane's front edge stands off the skull.
+Separate defect, not touched here.
+
+### State
+
+    silhouette  WEIGHTED_IOU 0.8801 -> 0.8831   front 0.9346  side 0.9072
+                rear 0.8140 (ceiling 0.8097, headroom +0.0043)  3/4 0.8097
+    front band  every band h 0.70-0.90 now within +/-0.017
+                (was -0.040 / -0.069 / -0.033 deficits, then +0.058 over)
+    crease      head/neck PASSES: p99 51.10 (limit 56), 4.45% over 25 (limit 4.5)
+                CREASED_REGIONS=1 ['rear leg'] — the pre-existing one
+    integrity   SLIVER 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      WORST_AREA_RATIO 0.252, pinched 0, flipped 0
+    glb         5873 KB against a 6144 cap, 4 meshes, both contracts pass
+
+The crease margin is thin — 4.45% against a 4.5% ceiling is about seven edges.
+Worth knowing before the next change to the head.
+
+### Next, in order
+
+1. **The rear limb rebuild.** It is the only region still failing the crease
+   gate, at 71.9 degrees p99 and 6.10% over 25, and its station chain reverses
+   direction twice.
+2. **The mane's front edge** — the band across the forehead, and the hairline
+   crowding the brows the reference gives an open forehead.
+3. Retire the proxy; a second world for the bridge to arrive at.

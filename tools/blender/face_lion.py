@@ -156,6 +156,10 @@ FACE_PART_NAMES = (
     "Muzzle", "EyeLid_R", "Sclera_R", "Iris_R", "Pupil_R", "Catchlight_R",
     "EyeLid_L", "Sclera_L", "Iris_L", "Pupil_L", "Catchlight_L",
     "Brow_R", "Brow_L", "NosePad", "MouthLine",
+    # The ears are built by `build_ears`, which `assemble_lion` calls rather
+    # than the face build — so they are absent from `lion_face.blend` and were
+    # missing from this tuple. Named here so a re-run purges them too.
+    "Ear_R", "Ear_L",
 )
 
 
@@ -667,8 +671,353 @@ def build_eyes(cage, fm, parts, report):
 #
 # It reaches z 0.713-0.857 and max |x| 0.305, so it stays out of band
 # 0.90-0.95, where the reference has mane only.
-EAR = {"x_c": 0.130, "a_x": 0.175, "y_c": 0.468, "a_y": 0.055,
-       "z_c": 0.785, "a_z": 0.072}
+# The ear's measured cross-sections, bottom to top: height, the x where the
+# buried ROOT starts, the OUTER half-width the front reference shows at that
+# height, and the ear's half-depth in y.
+#
+# `x_out` IS THE MEASUREMENT. It is read row by row off `front-norm.png`, and h
+# and z coincide on this asset — the assembled model is 0.9810 tall and the
+# silhouette normalisation makes the subject 0.981 H — so these are model units
+# and the built ear reproduces the reference profile by construction instead of
+# by tuning. What the ellipsoid it replaces got wrong, measured against the same
+# reference at the same heights:
+#
+#     z      ref    ellipsoid   deficit
+#     0.72  0.3173    0.2965     +0.021
+#     0.74  0.3135    0.2755     +0.038
+#     0.78  0.3192    0.3050     +0.014
+#     0.84  0.2942    0.2537     +0.041
+#     0.86  0.2712    0.2259     +0.045
+#
+# An ellipsoid can only match that profile at ONE height, because the reference
+# ear holds ~0.31 nearly straight-sided from z 0.72 to 0.82 and an ellipse
+# pinches at both ends. Matching it at the middle is what left the model 38 mm
+# narrow at the ear's base and 45 mm narrow at its tip, and it is the real
+# content of the note that "every placement trades one band for another": the
+# form had one free parameter and four bands to satisfy.
+#
+# WHY THE ROOT RUNS SO DEEP, which the ellipsoid was right about
+#
+# The skull does not reach the ears. Classifying the assembled cage's vertices
+# against the old ear ellipsoid and measuring what is left gives a skull
+# half-width of 0.1799 at z 0.70, 0.1447 at 0.74, 0.1143 at 0.78 and 0.0317 by
+# z 0.82 — it domes over and is gone before the ear's midpoint. So from z 0.72
+# upward the outer silhouette IS the ear, and an ear whose inner edge sat at its
+# own visible base would be a detached flake floating beside the head. The old
+# ellipsoid spanned x -0.045 to 0.305 for exactly this reason. That part was not
+# a mistake and is kept: `x_in` stays inside the skull at the bottom station and
+# inside the mane's silhouette (>= 0.2008 everywhere in this band) above it, so
+# the root is never visible from any angle the review sheet renders.
+# THE TABLE IS IN THE SILHOUETTE'S FRAME, NOT THE MODEL'S, and the first
+# version of it was not.
+#
+# `silhouette_qa` renders the model through the reference cameras after FITTING
+# it to the reference height — it prints `fit 4 objects: raw h=0.9770
+# scale=1.0235`. So a model z is not a silhouette h: h = (z - ground) * S, and
+# a width measured in H comes back as x * S. Building the stations with the
+# reference's own h values used directly as z put the whole ear 2.35% high and
+# 2.35% wide, which reads as nothing at the base and as +0.044 H of surplus at
+# h 0.88, where the reference ear has already tapered away. The band table
+# caught it immediately as `0.85-0.90  +0.058  <-- width`.
+#
+# That is the third time a frame mismatch has produced a confident, wrong
+# number on this asset (the eye height measured above the feet and applied in
+# world y; the head assist expressed about the bone's inclined local axis), so
+# the conversion is written out here instead of folded into the constants.
+SIL_FIT_SCALE = 1.0235
+SIL_GROUND_Z = 0.0040
+
+# The ear's cross-sections, bottom to top:
+#
+#   h       the SILHOUETTE height, so it can be checked against front-norm.png
+#           by eye without redoing any arithmetic
+#   ref_hw  the reference's outer half-width at that h, read row by row off
+#           front-norm.png — THE MEASUREMENT
+#   x_in    where the buried root starts, in model units
+#   a_y     the ear's half-depth, in model units
+#
+# `ref_hw` is what the ellipsoid this replaces could not follow. Measured
+# against the same reference at the same heights, before:
+#
+#     h      ref    ellipsoid   deficit
+#     0.72  0.3173    0.2769     -0.040
+#     0.74  0.3135    0.2442     -0.069
+#     0.76  0.3192    0.2865     -0.033
+#     0.86  0.2712    0.2481     -0.023
+#
+# An ellipsoid can match that profile at ONE height, because the reference ear
+# holds ~0.31 nearly straight-sided from h 0.72 to 0.84 and an ellipse pinches
+# at both ends. Matching it in the middle is what left the model 69 mm narrow
+# at the ear's base, and it is the real content of the older note that "every
+# placement trades one band for another": the form had one free parameter and
+# four bands to satisfy. A lofted profile has one per station.
+#
+# WHY THE ROOT RUNS SO DEEP, which the ellipsoid was right about
+#
+# The skull does not reach the ears. Classifying the assembled cage's vertices
+# against the old ear ellipsoid and measuring what is left gives a skull
+# half-width of 0.1799 at z 0.70, 0.1447 at 0.74, 0.1143 at 0.78 and 0.0317 by
+# z 0.82 — it domes over and is gone before the ear's midpoint. So from z 0.72
+# upward the outer silhouette IS the ear, and an ear whose inner edge sat at its
+# own visible base would be a detached flake floating beside the head. The old
+# ellipsoid spanned x -0.045 to 0.305 for exactly this reason. That part was not
+# a mistake and is kept: `x_in` stays inside the skull at the bottom station and
+# inside the mane's silhouette (>= 0.2008 everywhere in this band) above it, so
+# the root is never visible from any angle the review sheet renders.
+# The two lowest stations are NOT the reference's outer edge, and that
+# distinction cost a crease gate.
+#
+# At h 0.713 the reference measures 0.330 and at h 0.725 it measures 0.316 —
+# but down there the outer edge belongs to the MANE, which supplies 0.334 and
+# 0.318 at those heights on its own. Taking those numbers as the ear's width
+# made the BOTTOM ring the widest one, so the loft flared out at 72 degrees
+# from vertical and came straight back in at 49: a 119-degree direction
+# reversal, as a hard ring of 24 edges at the base of each ear. It cost
+# head/neck 46.6 -> 57.7 degrees of p99 and 3.09 -> 5.31% over 25, and it was
+# invisible, because the mane covers exactly the heights that produced it.
+#
+# The mane only falls behind the reference from h 0.735 up (0.253 against
+# 0.316 at h 0.757), so the ear is free to be narrow below that and its own
+# profile now rises to a single maximum at h 0.76-0.78 and falls away.
+EAR_PROFILE = (
+    # h      ref_hw   x_in    a_y
+    (0.7130, 0.2550, 0.0400, 0.0300),
+    (0.7250, 0.2900, 0.0550, 0.0400),
+    (0.7400, 0.3135, 0.0850, 0.0470),
+    (0.7600, 0.3192, 0.1080, 0.0505),
+    (0.7800, 0.3192, 0.1280, 0.0520),
+    (0.8000, 0.3135, 0.1440, 0.0510),
+    (0.8200, 0.3077, 0.1570, 0.0485),
+    (0.8400, 0.2942, 0.1690, 0.0440),
+    (0.8600, 0.2712, 0.1810, 0.0370),
+    # x_in 0.175, not 0.195. The closing run is tangential, so it LEAVES the
+    # last station at slope zero; a chain converging into it at slope 1.32
+    # (a_x 0.042 -> 0.016 over 0.020 of z) does not meet that, and the join was
+    # 86 creased edges. Widening the last root by 20 mm takes the chain's own
+    # convergence down to 0.81 and leaves a_x 0.026 against a closing dz of
+    # 0.026 — a round tip rather than a pinched one, which is also what the
+    # reference ear has. It stays under the mane's 0.231 at this height.
+    (0.8800, 0.2327, 0.1750, 0.0250),
+)
+
+
+def ear_stations():
+    """`EAR_PROFILE` converted into model space: (z, x_in, x_out, a_y).
+
+    Measured stations only, top-of-list first at the bottom. `EAR_ROOT` is not
+    included — it is model space already and carries no dish.
+    """
+    return [(h / SIL_FIT_SCALE + SIL_GROUND_Z, x_in, hw / SIL_FIT_SCALE, a_y)
+            for h, hw, x_in, a_y in EAR_PROFILE]
+
+
+EAR_Y_C = 0.468
+
+# THE ROOT IS A STALK, NOT A CAP, and the arithmetic says it has to be.
+#
+# The lowest measured ring is 0.209 wide in x. A pole closure is smooth only
+# when it has about as much z to travel as it has radius, and there is nowhere
+# near 0.2 of z available below the ear — so every closing run tried on that
+# ring ended in a cone a couple of millimetres tall and 100 mm across, which is
+# the flat cap the closing run exists to avoid. Measured: 84 creased edges in
+# the single ring at z 0.7006, at up to 70 degrees.
+#
+# So the cross-section is brought DOWN to something a pole can close: four
+# stations that shrink x_out from 0.249 to 0.070 and a_y from 0.030 to 0.006
+# over 0.05 of z, at a steady 3.0-3.7 slope that matches the 2.9 of the wall
+# above, and only then a closing run. Every column below is monotonic through
+# the join with the measured span, which is the property that was missing: the
+# earlier version made z 0.7006 a local MINIMUM of x_in, so the root edge went
+# in and then straight back out and folded.
+#
+# All of it is buried — the skull is 0.19 wide at z 0.68 and the mane 0.34, and
+# the stalk never exceeds 0.21.
+EAR_ROOT = (
+    # z       x_in    x_out    a_y
+    # THINNING THE ROOT TO MATCH SLOPES MADE IT WORSE — a measured negative
+    # result, kept here because the reasoning that motivated it is tempting.
+    #
+    # a_y rises 0.030 -> 0.040 over the 0.0118 of z above the join, a slope of
+    # 0.85, and this column comes up to it at 0.38; that more than doubling
+    # kinks the front wall, and 38 edges at up to 70 degrees sit right at
+    # z 0.7006 because of it. Matching the slope means thinning the column to
+    # 0.0215/0.0160/0.0105/0.0050 — and that took head/neck's fraction over 25
+    # degrees the wrong way, 4.45% to 4.54%, failing the gate.
+    #
+    # The reason is that a ring's curvature at its x-extremes goes as
+    # a_x / a_y**2, so thinning the root sharpens the very rim that dominates
+    # this region's edge count. The kink is linear in the slope error; the rim
+    # penalty is quadratic in the thinning. Trading one for the other loses.
+    (0.6900, 0.0380, 0.2100, 0.0260),
+    (0.6750, 0.0350, 0.1650, 0.0190),
+    (0.6600, 0.0320, 0.1150, 0.0120),
+    (0.6480, 0.0300, 0.0700, 0.0060),
+)
+
+# 48 segments, CLUSTERED toward t=0 and t=pi rather than spread evenly.
+#
+# The ring is an ellipse about three times wider in x than deep in y, so almost
+# all of its curvature is at the two x-extremes: the outer rim and the buried
+# root. Twenty-four uniform segments put one or two vertices in each of those
+# turns and sampled the flat front and back walls at the same density, which
+# left a 76-degree fold along the root.
+#
+# The ellipsoid this replaced did not have that problem for an instructive
+# reason: it was a UV sphere scaled in x, so its own POLES — where the rings
+# bunch up — landed exactly on the x-extremes. The loft has no such luck and
+# has to be told.
+#
+# `t - EAR_CLUSTER * sin(2t)` does it: the derivative 1 - 2*EAR_CLUSTER*cos(2t)
+# is 0.5 at t=0 and t=pi and 1.5 at the front and back, so the turns get twice
+# the density and the walls, which are nearly straight, get less. It stays
+# monotonic for EAR_CLUSTER < 0.5. This is the same undersampling this project
+# has already hit on the mane's `nh` and the river's ripples — a filter finer
+# than the feature it is meant to resolve. Refinement confirmed the surface
+# itself is sound: at 24 segments the ear ran 11.77% of edges over 25 degrees,
+# at 48 it is 7.55% and at 64 it is 4.76%, so the angles converge rather than
+# marking a fold.
+EAR_SEGMENTS = 48
+EAR_CLUSTER = 0.25
+# How far the profile carries past its end stations to close, and how many
+# rings it takes. Both ends now close from a small ring: the stalk's last is
+# 0.020 in x by 0.006 in y, the tip's 0.016 by 0.025 — so the tip needs the
+# larger run, and at 0.012 it was a squashed cone with 86 creased edges.
+EAR_CLOSE_DZ = (0.014, 0.026)   # (base, tip)
+EAR_CLOSE_RINGS = 4
+# How far the front face is pushed back. The rim at mid-height sits at
+# a_y = 0.052, so a dish of 0.058 carries the middle of the face 6 mm PAST the
+# ear's own axis — genuinely concave, and still 46 mm clear of the back wall.
+# A convex front cannot read as an inner ear at any colour, which is why the
+# ellipsoid's forward cap looked like a painted patch instead of a cup.
+EAR_DISH = 0.058
+# Which of the dished face takes the inner-ear colour. Weight, not a normal
+# threshold: dishing tilts the normals it is meant to select, and the old
+# `normal.y > 0.78` test was already the second guess at a number that the
+# construction knows exactly.
+EAR_INNER_W = 0.35
+
+
+def _ear_rings():
+    """Every ring of the loft, base pole to tip, as (z, x_in, x_out, a_y, w_s).
+
+    The measured stations get tangential CLOSING rings at each end, and that is
+    the point of this function.
+
+    Without them the loft ends in a flat n-gon at the base and a triangle fan at
+    the tip, and both are hard creases by construction: an n-gon cap meets a
+    near-vertical wall at about 90 degrees. Neither is visible — the base is
+    buried in the skull and the tip is 6 mm across — but `crease_qa_lion.py`
+    counts EDGES, not pixels, and 24 cap edges plus 24 fan edges on each of two
+    ears is 96, almost exactly the 1% tail of the head/neck region's 9,706. The
+    first build of this ear took that region's p99 dihedral from 46.6 to 106.4
+    degrees and failed the gate on geometry nobody could see.
+
+    So the profile turns over toward each pole the way a sphere's does: ring i
+    of the closing run sits at angle a = i * (pi/2) / (rings + 1), contracted by
+    cos(a) and offset by sin(a) * dz. The surface arrives at the pole tangent to
+    it, and the fan that closes it spans a few degrees rather than ninety.
+
+    `w_s` is the dish weight — 0 at the measured span's ends so the cup dies out
+    into the tip and the root instead of cutting them open, and 0 on every
+    closing ring, which are poles and have no front face to dish.
+    """
+    st = ear_stations()
+    n = len(st)
+    root = list(reversed(EAR_ROOT))      # bottom-up, like everything else
+    out = []
+    z0, x_in0, x_out0, a_y0 = root[0]
+    x_c0, a_x0 = (x_in0 + x_out0) / 2.0, (x_out0 - x_in0) / 2.0
+    for i in range(EAR_CLOSE_RINGS, 0, -1):
+        a = i * (math.pi / 2.0) / (EAR_CLOSE_RINGS + 1)
+        f = math.cos(a)
+        out.append((z0 - math.sin(a) * EAR_CLOSE_DZ[0], x_c0 - a_x0 * f,
+                    x_c0 + a_x0 * f, a_y0 * f, 0.0))
+    for z, x_in, x_out, a_y in root:
+        out.append((z, x_in, x_out, a_y, 0.0))
+    for si, (z, x_in, x_out, a_y) in enumerate(st):
+        s = si / (n - 1)
+        out.append((z, x_in, x_out, a_y, 1.0 - (2.0 * s - 1.0) ** 2))
+    for i in range(1, EAR_CLOSE_RINGS + 1):
+        a = i * (math.pi / 2.0) / (EAR_CLOSE_RINGS + 1)
+        z, x_in, x_out, a_y = st[-1]
+        x_c, a_x = (x_in + x_out) / 2.0, (x_out - x_in) / 2.0
+        f = math.cos(a)
+        out.append((z + math.sin(a) * EAR_CLOSE_DZ[1], x_c - a_x * f,
+                    x_c + a_x * f, a_y * f, 0.0))
+    return out
+
+
+def _ear_mesh(name, sx):
+    """One ear, lofted through `EAR_PROFILE` with a dished front face.
+
+    Returns the object and the vertex indices that fall inside the dish.
+
+    A lofted stack whose outer edge rises and then falls is RE-ENTRANT, and
+    `cage_lion.py` records at length that a re-entrant lofted taper self-
+    intersects. That finding was about a CAGE appendage: the failure appeared
+    "the moment the skull bends", as 16 pinched faces under deformation. An ear
+    does not deform — it is rigid-skinned to `ear_L`/`ear_R` and follows the
+    skull — so here the reversal is only a shape, and it is the shape the
+    reference has. This is the same distinction the ears' own move off the cage
+    was made to buy.
+    """
+    bm_ = bmesh.new()
+    rings, dished = [], set()
+    for z, x_in, x_out, a_y, w_s in _ear_rings():
+        x_c, a_x = (x_in + x_out) / 2.0, (x_out - x_in) / 2.0
+        ring = []
+        for j in range(EAR_SEGMENTS):
+            u = 2.0 * math.pi * j / EAR_SEGMENTS
+            t = u - EAR_CLUSTER * math.sin(2.0 * u)
+            ct, st_ = math.cos(t), math.sin(t)
+            # sin^3: `sin` for how forward-facing the vertex is, times the
+            # sin^2 that 4u(1-u) reduces to for u = (cos t + 1)/2, the
+            # fractional distance from root to rim. It is zero at BOTH the rim
+            # (t=0) and the root (t=pi), which is what makes the section a C
+            # opening forward instead of a crushed tube.
+            w = (st_ ** 3) * w_s if st_ > 0.0 else 0.0
+            v = bm_.verts.new((sx * (x_c + a_x * ct),
+                               EAR_Y_C + a_y * st_ - EAR_DISH * w, z))
+            ring.append(v)
+            if w > EAR_INNER_W:
+                dished.add(v)
+        rings.append(ring)
+
+    for lo, hi in zip(rings, rings[1:]):
+        for j in range(EAR_SEGMENTS):
+            k = (j + 1) % EAR_SEGMENTS
+            # Winding follows sx so both ears end up with outward normals; a
+            # mirrored loft built with one winding turns the left ear inside out.
+            f = (lo[j], lo[k], hi[k], hi[j])
+            bm_.faces.new(f if sx > 0 else tuple(reversed(f)))
+
+    # The two poles. Both closing runs have already contracted the profile to a
+    # few millimetres, so these fans are small and nearly flat.
+    st = ear_stations()
+    for ring, dz, up in ((rings[0], -EAR_CLOSE_DZ[0], False),
+                         (rings[-1], EAR_CLOSE_DZ[1], True)):
+        base = EAR_ROOT[-1]
+        z_end = (st[-1][0] + dz) if up else (base[0] + dz)
+        x_end = ((st[-1][1] + st[-1][2]) / 2.0 if up
+                 else (base[1] + base[2]) / 2.0)
+        pole = bm_.verts.new((sx * x_end, EAR_Y_C, z_end))
+        for j in range(EAR_SEGMENTS):
+            k = (j + 1) % EAR_SEGMENTS
+            f = (ring[j], ring[k], pole)
+            if up:
+                bm_.faces.new(f if sx > 0 else tuple(reversed(f)))
+            else:
+                bm_.faces.new(tuple(reversed(f)) if sx > 0 else f)
+
+    bm_.normal_update()
+    me = bpy.data.meshes.new(name)
+    idx = {v: i for i, v in enumerate(bm_.verts)}
+    inner_idx = {idx[v] for v in dished}
+    bm_.to_mesh(me)
+    bm_.free()
+    o = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(o)
+    return o, inner_idx
 
 
 def build_ears(cage, fm, bm, parts, report):
@@ -688,49 +1037,42 @@ def build_ears(cage, fm, bm, parts, report):
     lofted-ring constraint and rigid-skinned to `ear_L` / `ear_R`, which is the
     same call this project already made for the mane and for the 15 face parts.
 
-    The inner surface takes the measured inner-ear colour, selected by a
-    forward-facing normal — the same test `paint_regions` used while the ears
-    were still on the cage, and the same one the reference view implies, since
-    the inner ear is what a front view can see.
+    It is now lofted rather than an ellipsoid, for the reason recorded above
+    `EAR_PROFILE`: one radius cannot hold the reference's near-straight-sided
+    profile across 0.16 of height, and the ellipsoid that tried came out 38 mm
+    narrow at the base and 45 mm narrow at the tip. Being off the cage is what
+    makes the re-entrant profile safe to build.
+
+    The inner surface takes the measured inner-ear colour, selected by the
+    DISH WEIGHT rather than by a normal test — the construction already knows
+    which vertices form the cup, and dishing tilts the very normals the old
+    test was reading.
     """
     inner = (bm or {}).get("inner_ear")
     coat = fm["face_aperture"]["srgb01"]
     for sx, side in ((+1, "R"), (-1, "L")):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=16,
-                                             radius=1.0, location=(0, 0, 0))
-        o = bpy.context.object
-        o.name = f"Ear_{side}"
-        o.data.name = o.name
-        o.matrix_world = (Matrix.Translation((sx * EAR["x_c"], EAR["y_c"], EAR["z_c"]))
-                          @ Matrix.Diagonal((EAR["a_x"], EAR["a_y"], EAR["a_z"], 1.0)))
-        bpy.context.view_layer.objects.active = o
-        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        o, inner_idx = _ear_mesh(f"Ear_{side}", sx)
         paint(o, coat, finish="matte")
 
         if inner:
-            # Repaint the forward-facing half.
             attr = o.data.color_attributes.get(COLOR_ATTR)
             lin = tuple(srgb_to_linear(c) for c in inner["srgb01"])
-            n = 0
-            for v in o.data.vertices:
-                # 0.78, not 0.30. On an ellipsoid a normal.y threshold of 0.30
-                # selects roughly a THIRD of the surface — measured, 131 of 350
-                # verts — so the whole front of the ear came out inner-coloured
-                # and read as a brown blob merging into the mane. The reference
-                # has a small inner patch inside a gold ear, so only the
-                # most forward-facing cap qualifies.
-                if v.normal.y > 0.78:
-                    attr.data[v.index].color = (*lin, 1.0)
-                    n += 1
+            for i in inner_idx:
+                attr.data[i].color = (*lin, 1.0)
             o.data.update()
-            report.append(f"ear {side}: {n} forward-facing verts take the measured "
-                          f"inner colour {inner['rgb']}")
+            report.append(f"ear {side}: {len(inner_idx)} dished verts take the "
+                          f"measured inner colour {inner['rgb']}")
         parts.append(o)
+        st = ear_stations()
+        z0 = EAR_ROOT[-1][0] - EAR_CLOSE_DZ[0]
+        z1 = st[-1][0] + EAR_CLOSE_DZ[1]
+        widest = max(st, key=lambda s: s[2])
         report.append(
-            f"ear {side}: ellipsoid at (x={sx * EAR['x_c']:+.3f}, y={EAR['y_c']:.3f}, "
-            f"z={EAR['z_c']:.3f}) semi-axes ({EAR['a_x']:.3f}, {EAR['a_y']:.3f}, "
-            f"{EAR['a_z']:.3f}) -> max |x| {EAR['x_c'] + EAR['a_x']:.3f}, "
-            f"z {EAR['z_c'] - EAR['a_z']:.3f}-{EAR['z_c'] + EAR['a_z']:.3f}")
+            f"ear {side}: lofted, {len(st)} stations x "
+            f"{EAR_SEGMENTS} segments, z {z0:.3f}-{z1:.3f} "
+            f"({z1 - z0:.3f} tall, was 0.144), max |x| {widest[2]:.4f} at "
+            f"z {widest[0]:.3f}, root buried from |x| {st[0][1]:.3f}, "
+            f"dish {EAR_DISH:.3f} (front face concave past the axis)")
 
 
 def build_muzzle(cage, fm, parts, report):
@@ -820,6 +1162,27 @@ def build_brows(cage, fm, parts, report):
         b = {"x_H": sx * bs["x_H_abs"], "h": bs["h"],
              "half_w_H": bs["half_w_H"], "half_h_H": bs["half_h_H"],
              "srgb01": bs["srgb01"]}
+        # THE SPAN IS MEASURED. `half_h_H * 0.52` threw the brow away.
+        #
+        # The reference brow spans h 0.7267-0.7805 on the right and
+        # 0.7288-0.7805 on the left: 0.0538 of dark mass. Built at 0.52 of the
+        # measured half-height it came out 0.0318 tall, and because the disc
+        # was centred on the measured CENTROID h (0.7618 — on a wedge that
+        # rises toward the midline, the centroid sits well above the bbox
+        # centre) the thinning ate the brow from BELOW. Measured on the built
+        # asset: top edge 0.7795 against a reference 0.7805, correct; underside
+        # 0.7477 against 0.7267, 21 mm high. What was left was a thin dark line
+        # with a 33 mm gap under it, which reads as eyeliner rather than a brow
+        # — and on this character the brows carry the expression.
+        #
+        # So the span comes from the measurement rather than from a centroid
+        # plus a guessed fraction. That is the same correction the muzzle
+        # needed ("sized from the measured profile rather than the bounding
+        # box"), applied to the other axis: measure the extent, do not infer it.
+        h_top = (br["left"]["h_top"] + br["right"]["h_top"]) / 2.0
+        h_bot = (br["left"]["h_bot"] + br["right"]["h_bot"]) / 2.0
+        b["h"] = (h_top + h_bot) / 2.0
+        b["half_h_H"] = (h_top - h_bot) / 2.0
         p0, n = surface_at(cage, b["x_H"], b["h"])
         p0 = p0 + n * lift_for("brow")
         # SLOPE IS MEASURED, and the first attempt had the sign wrong.
@@ -835,13 +1198,28 @@ def build_brows(cage, fm, parts, report):
             raise SystemExit("[face] brow slope not measured — rerun measure_face.py")
         # `roll_deg` is CCW about the outward normal. On the +x side, lifting
         # the inboard (-x) end is a CCW roll; mirrored on the other side.
-        o, _ = disc(f"Brow_{tag}", p0, n, b["half_w_H"], b["half_h_H"] * 0.52,
-                    b["srgb01"], finish="matte", segments=14,
-                    roll_deg=rise * sx, flat=0.55)
+        o, _ = disc(f"Brow_{tag}", p0, n, b["half_w_H"], b["half_h_H"],
+                    b["srgb01"], finish="matte", segments=24,
+                    roll_deg=rise * sx, flat=0.38)
+        # A brow at its full measured height is 0.0528 tall on a brow ridge
+        # that curves away under it, so a flat disc floats at the ends the way
+        # the muzzle's rim did at 65.6 mm. `flat` is dropped from 0.55 to 0.22
+        # because the dome is `min(rx, rz) * flat` and rz nearly doubled — at
+        # 0.55 the taller brow would have stood 14.5 mm proud and bulged the
+        # ridge. The brow is a COLOUR REGION and the cage already carries the
+        # ridge's form, so the rest is conform()'s job.
+        stats = {"moved": 0, "fallback": 0, "missed": 0,
+                 "worst_before": 0.0, "worst_after": 0.0}  # EXPERIMENT: no conform
         parts.append(o)
         report.append(f"brow {tag}: at x={b['x_H']:+.4f} h={b['h']:.4f} "
-                      f"w={b['half_w_H'] * 2:.4f} rise_toward_midline="
-                      f"{rise:+.1f}deg (measured position, not the slid socket)")
+                      f"w={b['half_w_H'] * 2:.4f} h_span={b['half_h_H'] * 2:.4f} "
+                      f"(measured {h_bot:.4f}-{h_top:.4f}, was 0.0318) "
+                      f"rise_toward_midline={rise:+.1f}deg")
+        report.append(
+            f"brow {tag} conform: {stats['moved']} verts snapped, "
+            f"{stats['fallback']} rim fell back, {stats['missed']} unplaced — "
+            f"float {stats['worst_before'] * 1000:.1f} -> "
+            f"{stats['worst_after'] * 1000:.1f} mm")
 
 
 def build_nose_and_mouth(cage, fm, parts, report):
