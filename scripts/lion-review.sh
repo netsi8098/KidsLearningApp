@@ -109,6 +109,14 @@ for v in front side; do
   python3 tools/cad/band_spans.py mascot subject "$v" 2>&1 | sed -n '2,10p'
 done
 
+step "surface crease — is the skin SMOOTH where it should be"
+# The integrity and deformation gates ask whether the mesh is VALID. A creased
+# surface is valid and still visibly broken, which is how the rear leg shipped
+# looking like a crushed paper bag behind a wall of green checks.
+"$BLENDER" "${BG[@]}" art/blender/lion_assembled.blend \
+  --python tools/blender/crease_qa_lion.py 2>&1 \
+  | grep -E "^  (front|rear|body|head)|CREASED_REGIONS|CREASED" || note_fail crease_qa
+
 step "contracts"
 node scripts/validate-lion-glb.mjs public/assets/lion/cage/lion.glb 2>&1 | tail -5 || note_fail cage_contract
 node scripts/validate-lion-glb.mjs 2>&1 | tail -3 || note_fail proxy_contract
