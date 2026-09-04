@@ -154,6 +154,37 @@ BACK_LOCKS = (lock_ring(22, 0.130, 6.0, 0.26, 0.42)
 
 LOCKS = FRONT_LOCKS + BACK_LOCKS
 
+# The rim scallop, OFF BY DEFAULT — a measured negative result.
+#
+# The premise was that the reference's mane has a scalloped rim of teardrop
+# tips, so the outline itself is made of locks and no Gaussian on a smooth hood
+# could ever produce it. The mechanism works and the premise was wrong:
+#
+#     reference front silhouette, runs per row (>= 0.02 H)
+#       h 0.62   ONE run  0.317-1.031
+#       h 0.68   ONE run  0.337-1.017
+#       h 0.74   ONE run  0.365-0.987
+#       h 0.80   ONE run  0.363-0.987
+#       h 0.86   ONE run  0.412-0.944
+#       h 0.92   ONE run  0.487-0.869
+#
+# The reference's mane outline is smooth at every height. Its lock tips are
+# INTERIOR SHADING on a continuous boundary, and reading them as silhouette is
+# a mistake this file's own history warns about in the other direction — the
+# width profile's docstring calls the per-scanline variation "the drawing's own
+# noise ... rows where the silhouette breaks into up to five runs", which is
+# the BODY rows, not these.
+#
+# Switched on at amp 0.055 it cost front IoU 0.9257 -> 0.9000 and weighted
+# 0.8801 -> 0.8683, because notching a boundary the reference fills removes
+# material the reference has. Kept because the machinery is correct and cheap,
+# and because a future reference genuinely might have a broken outline — but it
+# is not this one, and the real gap is that the existing lock RELIEF does not
+# read under flat vertex colour and soft light. That wants baked occlusion, not
+# a new outline.
+SCALLOP_COUNT = int(os.environ.get("LION_SCALLOP_COUNT", "17"))
+SCALLOP_AMP = float(os.environ.get("LION_SCALLOP_AMP", "0.0"))
+
 CLUMPS = [
     ("crown",      90.0, 0.30, 0.17, 30.0, 0.42),
     ("quiff",      90.0, 0.07, 0.21, 24.0, 0.26),
@@ -782,6 +813,79 @@ def clay_render(objs):
         bpy.ops.render.render(write_still=True)
 
 
+def scallop_rim(obj, count=17, amp=0.052, phase=11.0, rim_pow=3.2):
+    """Scallop the mane's OUTLINE, which no clump can do.
+
+    THE STRUCTURAL LIMIT THIS EXISTS TO GET AROUND.
+
+    Every lock in `LOCKS` is a Gaussian pushed along the vertex normal — it is
+    RELIEF on a smooth hood. The approved reference's mane is not relief: its
+    rim is a scalloped edge of individual teardrop tips, so the OUTLINE itself
+    is made of locks. A bump on a smooth dome cannot produce a scalloped
+    silhouette however large it is, which is why raising the clump count from
+    11 to 65, then adding three front rows, then raising `nh` to 56 all made
+    the surface better and left the outline a circle. Same class of finding as
+    "a ring cannot be both wide and flat" on the paw and "one ellipse is all
+    this loft will take" on the rear leg: the mechanism could not express the
+    thing being asked of it.
+
+    So this modulates the RADIUS in the front-view plane, about the mane's own
+    axis, at `count` periods around the circle. The weight is the product of
+    two terms:
+
+      * `1 - |n . y|` — how much a vertex sits ON the silhouette. A vertex
+        whose normal points at the camera is interior and must not move, or the
+        scallop becomes a corrugation across the whole face of the hood.
+      * a radial ramp raised to `rim_pow`, so the displacement is confined to
+        the outer band and the inner shell around the face is untouched.
+
+    Runs AFTER `fit_to_measured`, and that ordering is not optional: the fit is
+    a per-axis normalisation to the measured width, so scalloping before it
+    would be squashed straight back out.
+    """
+    me = obj.data
+    me.calc_loop_triangles()
+    lo = LM["mane_band"]["low"]
+    hi = LM["mane_band"]["high"]
+    cz = (lo + hi) / 2.0
+    pts = [v.co for v in me.vertices]
+    # The axis is the mane's own centre in x and its band centre in z; the
+    # front view looks along y, so the outline lives in (x, z).
+    cx = (max(p.x for p in pts) + min(p.x for p in pts)) / 2.0
+    rmax = max(math.hypot(p.x - cx, p.z - cz) for p in pts) or 1.0
+
+    moved = 0
+    for v in me.vertices:
+        dx = v.co.x - cx
+        dz = v.co.z - cz
+        r = math.hypot(dx, dz)
+        if r < 1e-6:
+            continue
+        # On-silhouette weight: 1 where the normal is perpendicular to the view
+        # axis, 0 where it faces the camera.
+        n = Vector(v.normal)
+        sil = 1.0 - min(1.0, abs(n.normalized().y)) if n.length > 1e-9 else 1.0
+        rim = (r / rmax) ** rim_pow
+        w = sil * rim
+        if w < 1e-3:
+            continue
+        az = math.atan2(dz, dx)
+        # NOTCH ONLY, never bulge. A plain cosine is zero-mean around the
+        # circle but its PEAKS land on the widest point, so the measured mane
+        # width grew 7.1% at amp 0.052 and 13.5% at 0.090 — the fit had just
+        # been normalised to the reference and this undid it.
+        # The reference's lock tips sit AT the fitted outline and the gaps
+        # between them are cut inside it, so the displacement runs [-amp, 0]:
+        # peaks move nothing and valleys carve in. The width is preserved by
+        # construction rather than by re-fitting afterwards.
+        lobe = (1.0 - math.cos(count * az + math.radians(phase))) * 0.5
+        d = -amp * lobe * w
+        v.co.x += (dx / r) * d
+        v.co.z += (dz / r) * d
+        moved += 1
+    print(f"[mane] rim scalloped: {count} lobes, amp {amp:.3f}, {moved} verts moved")
+
+
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     mane = build_hood()
@@ -792,6 +896,9 @@ def main():
     # pre-modifier mesh was exact. Normalising afterwards is a per-axis scale, so
     # the clump relief is preserved in proportion.
     fit_to_measured(mane)
+    # After the fit: see `scallop_rim`. The fit is a per-axis normalisation and
+    # would squash the scallop straight back out.
+    scallop_rim(mane, count=SCALLOP_COUNT, amp=SCALLOP_AMP)
     body = import_donor_body()
 
     pts = [v.co for v in mane.data.vertices]
