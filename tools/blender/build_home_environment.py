@@ -507,26 +507,40 @@ def build_foliage(col):
     r ~ 1.9, on real dome surface, still well off the lion's centre line and
     BEHIND it in y so they cannot mask the character.
 
-    Their crowns are NARROWER than the default 0.30 x trunk. The first pass at
-    this size filled the top 45% of the production frame with leaves and put out
-    the rainbow; a crown at 0.265 x trunk is 2.1 m across instead of 2.5 m,
-    which is the difference between framing the sky and being it.
+    Their crowns are NARROWER than the default 0.30 x trunk, and 0.265 was not
+    narrow enough. `world_audit`'s composition gate measured the result of that
+    pass: foliage covering 64.6% of the production frame's top third, of which
+    these two trees were 25.0 percentage points on their own — the biggest
+    single contribution, because they are the nearest trees to the camera and
+    subtend the most.
+    0.205 x trunk is a 1.66 m crown instead of 2.15 m, and they are pushed
+    0.2 m further back in y, which both shrinks them perspectively and puts
+    more of the character in front of them. Area falls as the SQUARE of the
+    crown radius, so a 23% narrower crown is a 41% smaller hole in the sky.
     """
     for name, x, y, trunk_h, twist in (
-        ("ENV_TreeIslandL", -1.58, 1.20, 4.05, 0.0),
-        ("ENV_TreeIslandR", 1.72, 0.92, 3.95, 1.1),
+        ("ENV_TreeIslandL", -1.62, 1.42, 4.05, 0.0),
+        ("ENV_TreeIslandR", 1.75, 1.14, 3.95, 1.1),
     ):
         build_tree(name, (x, y, island_surface_z(x, y) - 0.05), col, trunk_h,
-                   crown_r=trunk_h * 0.265, twist=twist)
+                   crown_r=trunk_h * 0.205, twist=twist)
 
     # Bank trees frame the composition; they sit at or just past the frame edge
     # so their trunks are vertical bookends rather than subjects.
-    build_tree("ENV_TreeBankL", (-8.2, 5.0, WATER_Z + 0.55), col, 4.40, twist=0.6)
-    build_tree("ENV_TreeBankR", (8.6, 4.2, WATER_Z + 0.55), col, 4.65, twist=2.2)
-    build_tree("ENV_TreeBankFarL", (-12.0, 8.5, WATER_Z + 0.90), col, 4.20,
-               blossom=False, twist=1.7)
-    build_tree("ENV_TreeBankFarR", (12.4, 9.2, WATER_Z + 0.90), col, 4.55,
-               blossom=False, twist=0.3)
+    #
+    # Which is what they were NOT doing. These four kept the default 0.30 x
+    # trunk crown, and the composition gate found ENV_TreeBankL alone holding
+    # 6.9% of the frame's top third — a bookend does not fill the page. Crowns
+    # to 0.24 and all four pushed further out, so the trunks still frame and
+    # the canopies leave the top of frame to the sky.
+    build_tree("ENV_TreeBankL", (-9.35, 5.4, WATER_Z + 0.55), col, 4.40,
+               crown_r=4.40 * 0.24, twist=0.6)
+    build_tree("ENV_TreeBankR", (9.70, 4.6, WATER_Z + 0.55), col, 4.65,
+               crown_r=4.65 * 0.24, twist=2.2)
+    build_tree("ENV_TreeBankFarL", (-13.2, 9.1, WATER_Z + 0.90), col, 4.20,
+               crown_r=4.20 * 0.24, blossom=False, twist=1.7)
+    build_tree("ENV_TreeBankFarR", (13.6, 9.8, WATER_Z + 0.90), col, 4.55,
+               crown_r=4.55 * 0.24, blossom=False, twist=0.3)
 
     # Bushes soften the island rim. Kept at waist-to-shoulder on the character
     # deliberately — with the trees now four times the lion's height, the bushes
@@ -872,15 +886,23 @@ def build_far_bank_detail(col):
     # and 1155 of 1280, interleaved with the island pair and leaving the middle
     # third of the frame — where the rainbow arcs and MARK_TitleZoneHero sits —
     # open sky. All four stay clear of the waterfall notch at (-9.4, 9.2).
+    #
+    # PUSHED BACK AND NARROWED after the composition gate measured them: these
+    # four were 28.3 of the 64.6 percentage points of foliage in the frame's
+    # top third. They sit further out along the bank's tube — still on it, so
+    # `bank_z` is still their real surface — which shrinks them perspectively
+    # while leaving them the tallest things in the world, and their crowns come
+    # down from 0.28 to 0.235 x trunk. Distance is what a skyline is for; these
+    # were reading as near trees that happened to be behind the water.
     for i, (x, y, trunk_h, twist) in enumerate((
-        (-7.12, 10.90, 5.35, 0.0),
-        (-4.67, 12.15, 5.20, 1.3),
-        (5.94, 11.55, 5.25, 2.4),
-        (8.31, 10.00, 5.40, 0.8),
+        (-8.05, 12.05, 5.35, 0.0),
+        (-5.20, 13.30, 5.20, 1.3),
+        (6.75, 12.75, 5.25, 2.4),
+        (9.35, 11.15, 5.40, 0.8),
     )):
         r = math.hypot(x, y)
         build_tree(f"ENV_BankTree_{i}", (x, y, bank_z(r) - 0.55), col, trunk_h,
-                   crown_r=trunk_h * 0.28, blossom=(i % 2 == 0), twist=twist)
+                   crown_r=trunk_h * 0.215, blossom=(i % 2 == 0), twist=twist)
 
 
 # ── Sky detail ──────────────────────────────────────────────────────────────
@@ -922,7 +944,19 @@ def build_rainbow(col):
         ("Cyan", (0.510, 0.804, 0.918)), ("Blue", (0.514, 0.620, 0.918)),
         ("Violet", (0.749, 0.663, 0.937)),
     ]
-    cx, cy, cz = 7.0, 40.0, -4.2
+    # SMALLER AND LOWER, so the ARC is in frame instead of its legs.
+    #
+    # At radius 14 centred (7, 40, -4.2) the apex sat above the top of the
+    # production frame entirely: what crossed the picture was the two LEGS,
+    # descending exactly through the height band the tree canopies occupy. The
+    # composition gate measured the result — 32% of the arc behind foliage,
+    # against 30% behind clouds and hills, which is the intended look.
+    #
+    # Pulling the arc in and down puts its apex in the sky gap above the island
+    # and its legs down behind the far hills, which is what `build_rainbow`'s
+    # own docstring says it is for: "sunk so only the arc clears the hills".
+    # Tuned against RAINBOW_BY_FOLIAGE rather than by eye.
+    cx, cy, cz = 4.5, 34.0, -1.6
     for i, (name, rgb) in enumerate(bands):
         mat = material(f"ENV_Rainbow{name}", rgb, roughness=0.9, emission=rgb)
         mat.blend_method = "BLEND"
@@ -932,7 +966,7 @@ def build_rainbow(col):
         if "Emission Strength" in bsdf.inputs:
             bsdf.inputs["Emission Strength"].default_value = 0.55
         bpy.ops.mesh.primitive_torus_add(
-            major_radius=14.0 - i * 0.55, minor_radius=0.31,
+            major_radius=10.6 - i * 0.42, minor_radius=0.24,
             major_segments=64, minor_segments=8,
             location=(cx, cy, cz), rotation=(math.radians(90), 0, 0))
         o = bpy.context.object
