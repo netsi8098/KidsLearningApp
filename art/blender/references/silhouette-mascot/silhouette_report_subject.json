@@ -1,21 +1,21 @@
 {
   "front": {
-    "iou": 0.929,
-    "iou_unregistered": 0.9265,
+    "iou": 0.938,
+    "iou_unregistered": 0.9346,
     "registration_px": 3,
-    "missing_pct": 6.02,
-    "extra_pct": 1.16,
+    "missing_pct": 4.95,
+    "extra_pct": 1.33,
     "ref_px": 142621,
-    "model_px": 135692,
+    "model_px": 137461,
     "bands": [
       {
         "band_h": [
           0.9,
           1.0
         ],
-        "iou": 0.6677,
-        "missing": 2005,
-        "extra": 305
+        "iou": 0.8573,
+        "missing": 479,
+        "extra": 548
       },
       {
         "band_h": [
@@ -202,22 +202,22 @@
     ]
   },
   "rear": {
-    "iou": 0.8109,
-    "iou_unregistered": 0.8109,
+    "iou": 0.8158,
+    "iou_unregistered": 0.8158,
     "registration_px": 0,
-    "missing_pct": 4.57,
-    "extra_pct": 17.69,
+    "missing_pct": 3.59,
+    "extra_pct": 18.18,
     "ref_px": 119952,
-    "model_px": 135688,
+    "model_px": 137454,
     "bands": [
       {
         "band_h": [
           0.9,
           1.0
         ],
-        "iou": 0.7648,
-        "missing": 1336,
-        "extra": 142
+        "iou": 0.8713,
+        "missing": 156,
+        "extra": 728
       },
       {
         "band_h": [
@@ -303,22 +303,22 @@
     ]
   },
   "three-quarter": {
-    "iou": 0.8029,
-    "iou_unregistered": 0.801,
+    "iou": 0.804,
+    "iou_unregistered": 0.8024,
     "registration_px": -3,
-    "missing_pct": 13.65,
-    "extra_pct": 7.54,
+    "missing_pct": 13.41,
+    "extra_pct": 7.71,
     "ref_px": 184111,
-    "model_px": 172873,
+    "model_px": 173617,
     "bands": [
       {
         "band_h": [
           0.9,
           1.0
         ],
-        "iou": 0.8302,
-        "missing": 958,
-        "extra": 300
+        "iou": 0.856,
+        "missing": 514,
+        "extra": 595
       },
       {
         "band_h": [
@@ -326,8 +326,8 @@
           0.9
         ],
         "iou": 0.957,
-        "missing": 327,
-        "extra": 287
+        "missing": 324,
+        "extra": 289
       },
       {
         "band_h": [

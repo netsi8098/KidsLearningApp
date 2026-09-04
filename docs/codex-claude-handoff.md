@@ -7908,3 +7908,109 @@ far.
    fills the lid with a crescent of white.
 3. The mane's remaining 56% of lock value, if it is wanted: authored per-lock
    colour rather than relief-derived.
+
+## GATE 25: the crown tip
+
+Front band 0.95-1.00 read `-0.071`, the only failing band and the largest single
+silhouette error left. It was not a build error. It was a segmentation error in
+the reference measurement, and the build was reproducing it faithfully.
+
+### The model tapers to a spike where the reference stays blunt
+
+Row by row against the reference's SUBJECT silhouette:
+
+    h      ref half  model half   delta
+    0.90     0.2192      0.2269   +0.008
+    0.91     0.2096      0.2058   -0.004
+    0.93     0.1808      0.1385   -0.042
+    0.95     0.1423      0.0981   -0.044
+    0.97     0.1288      0.0500   -0.079
+    0.98     0.1077      0.0250   -0.083
+    0.99     0.0827      0.0096   -0.073
+
+Matched to h 0.91, then collapsed. `taper(u)` was not the cause — 134 of the
+292 depth stations reach z 0.96 or higher and their taper runs 0.69 to 1.00.
+
+### The reference's own mane mask loses its crown
+
+`measured_front_half_w` reads `views.front.mane_width`, which
+`measure_reference.width_profile` builds from the colour-segmented MANE mask.
+On the reference's own masks:
+
+    h      subject   mane     body    mane/subject
+    0.95    0.1240  0.1221   0.1240      0.98
+    0.96    0.1221  0.1154   0.1221      0.95
+    0.97    0.1135  0.0240   0.1135      0.21
+    0.98    0.1010  0.0183   0.1010      0.18
+    0.99    0.0394  0.0019   0.0394      0.05
+
+**The body mask IS the subject mask up there and the mane mask collapses.** Not
+a thin-row artifact — a single-row read and a three-row read agree to 0.001, so
+it is the classifier, not the sampling. Sampling `front.png` at those rows gives
+rgb (176, 100, 49), and the crop is unmistakable: large brown mane locks, lit.
+The gold test takes them.
+
+Three layers, in order: the classifier hands the crown to the body -> the mane's
+width profile collapses above h 0.96 -> `fit_to_measured` normalises the built
+mane ONTO that profile, so the model reproduces the collapse exactly -> the
+silhouette QA, which grades against the SUBJECT, reports it as a crown that is
+too narrow. Every stage did what it was told.
+
+### The fix, and why it is not a re-measure
+
+Above `CROWN_H` the mane is the ONLY geometry the model has — the cage tops out
+at z 0.8504 and the ear tips at 0.876 — so whatever the reference's subject
+silhouette is up there, the mane has to carry it, whichever mask the reference's
+classifier put it in. So above h 0.90 the profile takes the SUBJECT half-width
+where it exceeds the mane's. 50 rows swap.
+
+Below CROWN_H nothing changes, deliberately: down there the body is legitimately
+wider than the mane and a `max` would balloon the hood to the width of the
+chest.
+
+Fixing `measure_reference`'s classifier instead would be the deeper repair and
+was not taken — it regenerates `reference_model.json`, which every builder in
+this pipeline reads, and would move values nothing here has measured. The swap
+is local, printed on every build, and reversible with `LION_CROWN_H`.
+
+### What it cost: nothing, and it fixed the last flagged band
+
+    front band     before   after
+    0.95-1.00      -0.071   -0.006
+    0.90-0.95      +0.015   +0.015
+    0.85-0.90      +0.012   +0.012
+
+**No front band is flagged now** — every one is within 0.015.
+
+    front IoU               0.9290 -> 0.9380
+    front h 0.9-1.0 subband  0.662 -> 0.857  (missing 2054 -> 479)
+    rear IoU                0.8109 -> 0.8158
+    three-quarter IoU       0.8029 -> 0.8040
+    side IoU                0.9036    unchanged
+    WEIGHTED_IOU            0.8780 -> 0.8820
+
+### State
+
+    silhouette  WEIGHTED_IOU 0.8820   front 0.9380 side 0.9036 3/4 0.8040
+                rear 0.8158   MEAN 0.8654 — no front band flagged
+    mane        WIDTH -0.6%, HEIGHT 0.8150 = the reference's real span,
+                DEPTH exact; lock band 8.12 (ref 19.46), elongation 1.96
+    coat        MAP_BUMP 2.87 dB (limit 6.0), NAP_PERIODIC=0
+    crease      CREASED_REGIONS=0
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    rig         reach 22.1/42.1 mm, planted paw 0.069 mm, slide 0.111 mm, 13 clips
+    glb         5923 KB against a 6144 cap, 4 meshes, both contracts pass
+    repo        typecheck 0, tests 29 failed / 765 passed (the baseline)
+
+`npm run lion:review` passes every stage.
+
+### Next, in order
+
+1. **The eyes** — they bulge and read white-dominant; the reference's iris nearly
+   fills the lid with a crescent of white. The largest remaining difference the
+   running app shows.
+2. **The three-quarter view** at 0.8040 with 13.41% missing, now the weakest
+   graded view, and the rear's 18.18% extra against a projection ceiling.
+3. `measure_reference`'s mane/body classifier, if the crown swap ever needs to
+   become a real re-measure.

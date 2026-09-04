@@ -97,6 +97,11 @@ SIDE_LEN = LM["side_length_H"]
 # frame underneath it is wrong.
 
 
+# Above this height the mane is the only geometry the model has — the cage
+# tops out at z 0.8504 and the ear tips at 0.876 — so the mane's width profile
+# has to carry the subject's silhouette there. See `measured_front_half_w`.
+CROWN_H = float(os.environ.get("LION_CROWN_H", "0.90"))
+
 NSEG = 24          # ring segments; the hood is a broad form and wants resolution
 NRING = 30         # stations along the mane's depth
 
@@ -395,6 +400,51 @@ def measured_front_half_w():
     raw = MODEL["views"]["front"]["mane_width"]
     hs = sorted(float(k) for k in raw)
     vals = [raw[f"{h:.3f}"]["half_w"] for h in hs]
+
+    # ABOVE THE CROWN THE MANE PROFILE IS SEGMENTED WRONG, so the SUBJECT's
+    # silhouette is used instead. This is the -0.071 in front band 0.95-1.00.
+    #
+    # `measure_reference.width_profile` reads the colour-segmented mane mask,
+    # and at the top of the reference's crown that segmentation hands the mane
+    # to the BODY. Measured on the reference's own masks:
+    #
+    #     h      subject   mane     body    mane/subject
+    #     0.95    0.1240  0.1221   0.1240      0.98
+    #     0.96    0.1221  0.1154   0.1221      0.95
+    #     0.97    0.1135  0.0240   0.1135      0.21
+    #     0.98    0.1010  0.0183   0.1010      0.18
+    #     0.99    0.0394  0.0019   0.0394      0.05
+    #
+    # The body mask IS the subject mask up there and the mane mask collapses.
+    # It is not a thin-row artifact — a single-row read and a three-row read
+    # agree to 0.001 — it is the classifier. Sampling `front.png` at those rows
+    # gives rgb (176, 100, 49): the crown's locks are brown, lit, and the gold
+    # test takes them. The crop is large mane locks and nothing else.
+    #
+    # The consequence ran three layers down. `fit_to_measured` normalises the
+    # built mane ONTO this profile, so the model reproduced the collapse
+    # faithfully — 0.0500 of half-width at h 0.97 against the reference
+    # subject's 0.1135 — and the silhouette QA, which grades against the
+    # SUBJECT, reported it as a build error in the crown.
+    #
+    # Above CROWN_H the mane is the ONLY geometry the model has: the cage tops
+    # out at z 0.8504 and the ear tips at 0.876. So whatever the reference's
+    # subject silhouette is up there, the mane has to carry it, whichever mask
+    # the reference's classifier put it in. Below CROWN_H the mane's own
+    # profile is used unchanged, because down there the body is legitimately
+    # wider than the mane and `max` would balloon it.
+    sub = MODEL["views"]["front"].get("subject_width", {})
+    swapped = 0
+    for i, h in enumerate(hs):
+        if h < CROWN_H:
+            continue
+        e = sub.get(f"{h:.3f}")
+        if e and e["half_w"] > vals[i]:
+            vals[i] = e["half_w"]
+            swapped += 1
+    if swapped:
+        print(f"[mane] crown: {swapped} rows above h {CROWN_H} took the "
+              f"SUBJECT half-width — the mane mask is mis-segmented there")
 
     # MEDIAN, not mean. This is why the mane's crown was too narrow.
     #
