@@ -187,7 +187,11 @@ export default function World3DProofPage() {
               <div>materials  : {stats.materials ?? '—'}</div>
               <div>camera fov : {stats.cameraFov?.toFixed(2) ?? '—'}</div>
               <div>
-                camera pos : {stats.cameraPos
+                {/* The AUTHORED position, reported once. The live camera is
+                    this plus `cam track` below, and calling this "camera pos"
+                    while the camera was two metres away was a small lie in a
+                    panel whose whole job is browser truth. */}
+                camera base: {stats.cameraPos
                   ? `${stats.cameraPos.x.toFixed(2)}, ${stats.cameraPos.y.toFixed(2)}, ${stats.cameraPos.z.toFixed(2)}`
                   : '—'}
               </div>
@@ -215,6 +219,7 @@ export default function World3DProofPage() {
                       + `  at ${stats.lionBridge.x.toFixed(2)}, ${stats.lionBridge.z.toFixed(2)}`
                       + (stats.lionBridge.crossed ? '  CROSSED' : '')}
               </div>
+              <div>cam track  : {stats.cameraTrack !== undefined ? `${stats.cameraTrack.toFixed(2)} m` : '—'}</div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>
               {markerRows.length === 0 && <div>none found</div>}
               {markerRows.map(([name, v]) => (

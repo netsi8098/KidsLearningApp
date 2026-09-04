@@ -97,6 +97,10 @@ export interface WorldStats {
      shipped no MARK_BridgeNear/Far pair, which is what an islanded world looks
      like — not an error. */
   lionBridge?: { has: boolean; progress: number; crossed: boolean; x: number; z: number };
+  /* How far the camera has tracked from its authored position, in metres.
+     0 while the lion is home — the deadzone — and the only figure that says
+     whether the follow is actually wired rather than merely written. */
+  cameraTrack?: number;
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -719,7 +723,7 @@ function Lion({
 
 /* ── Camera adopted from the GLB ─────────────────────────────────────────── */
 
-function AdoptedCamera({ source, target, dolly = 1 }: {
+function AdoptedCamera({ source, target, dolly = 1, follow, home, deadzone = 1.55, onTrack }: {
   source: THREE.PerspectiveCamera | null;
   target: THREE.Vector3 | null;
   /**
@@ -730,8 +734,30 @@ function AdoptedCamera({ source, target, dolly = 1 }: {
    * distance changes.
    */
   dolly?: number;
+  /** The brain, whose `x`/`z` are the lion's ground position. Null = no track. */
+  follow?: React.RefObject<{ x: number; z: number } | null>;
+  /** Where the lion belongs. Inside `deadzone` of this, the camera does not move. */
+  home?: THREE.Vector3 | null;
+  /**
+   * How far the lion may stray before the camera starts tracking, in metres.
+   *
+   * 1.55 is just outside the island's walk radius of 1.35, and that is the
+   * whole design: ordinary wandering can never move the camera, so the approved
+   * hero framing is preserved BY CONSTRUCTION rather than by a flag someone has
+   * to remember to clear.
+   */
+  deadzone?: number;
+  /** Reports how far the camera has tracked, so the follow is observable. */
+  onTrack?: (metres: number) => void;
 }) {
   const { camera, size } = useThree();
+  /* The authored, dollied position — the framing the reference approved. Kept
+     so the track is an OFFSET from it and the rest state is exactly what it
+     was before this component learned to follow anything. */
+  const base = useMemo(() => new THREE.Vector3(), []);
+  const offset = useRef({ x: 0, z: 0 });
+  const reportedTrack = useRef(-1);
+  const ready = useRef(false);
 
   useEffect(() => {
     if (!source) return;
@@ -747,7 +773,59 @@ function AdoptedCamera({ source, target, dolly = 1 }: {
     cam.far = 300;
     cam.aspect = size.width / size.height;
     cam.updateProjectionMatrix();
-  }, [source, camera, size, target, dolly]);
+    base.copy(cam.position);
+    ready.current = true;
+  }, [source, camera, size, target, dolly, base]);
+
+  /**
+   * TRACK, don't orbit.
+   *
+   * The camera follows by TRANSLATING and keeps the authored orientation and
+   * lens untouched. Rotating it to look at the lion would re-aim a view that
+   * was approved against the reference turnaround, and dollying out to keep
+   * the lion in shot would shrink the character over the length of the
+   * crossing. A pure translation keeps the lion the same size at the same
+   * place on screen and slides the world past it, which is what watching
+   * something cross a bridge in profile should look like.
+   *
+   * Driven by DISPLACEMENT FROM HOME rather than by the bridge, so it knows
+   * nothing about crossings: it follows the lion out, follows it back, and
+   * would follow it into any future world without another line of code. The
+   * deadzone is what keeps it still while the lion mills about at home.
+   */
+  useFrame((_, dt) => {
+    if (!ready.current || !follow?.current || !home) return;
+    const at = follow.current;
+    const dx = at.x - home.x;
+    const dz = at.z - home.z;
+    const d = Math.hypot(dx, dz);
+    // Only the part of the excursion that leaves the deadzone.
+    const beyond = Math.max(0, d - deadzone);
+    const wantX = d > 1e-6 ? (dx / d) * beyond : 0;
+    const wantZ = d > 1e-6 ? (dz / d) * beyond : 0;
+    /* Smoothed hard — 1.8 is about a second to close the gap. A camera that
+       snaps to the character reads as the character being dragged, and one
+       that lags a long way behind reads as a broken follow; this is slow
+       enough that the lion leads the shot and fast enough that it never
+       leaves it. Frame-rate independent, so a 30 Hz tablet and a 120 Hz
+       laptop settle at the same speed. */
+    const k = 1 - Math.exp(-Math.min(dt, 0.1) * 1.8);
+    offset.current.x += (wantX - offset.current.x) * k;
+    offset.current.z += (wantZ - offset.current.z) * k;
+    camera.position.set(
+      base.x + offset.current.x,
+      base.y,
+      base.z + offset.current.z,
+    );
+    /* Reported on a whole-centimetre key, for the same reason every other
+       report in this file is throttled: `onTrack` sets React state. */
+    const moved = Math.hypot(offset.current.x, offset.current.z);
+    const key = Math.round(moved * 100);
+    if (key !== reportedTrack.current) {
+      reportedTrack.current = key;
+      onTrack?.(moved);
+    }
+  });
 
   return null;
 }
@@ -983,6 +1061,15 @@ export default function HomeWorld3D({
      environment was authored with, so re-tuning the island in Blender moves the
      lion's range automatically instead of silently leaving it walking off the
      edge or pacing a strip in the middle. */
+  /* One ref for the brain, whether or not the caller wanted one.
+     `AdoptedCamera` reads the lion's position through it to track the character
+     — through the brain rather than through a second per-frame ref write,
+     because assigning to a hook-provided ref trips `react-hooks/immutability`
+     and this file already carries five of those. The brain publishes `x`/`z`
+     as plain fields, so the camera needs nothing new. */
+  const ownBrain = useRef<LionBrain | null>(null);
+  const activeBrain = brainRef ?? ownBrain;
+
   const walkBounds = useMemo(() => {
     const l = markers.MARK_WalkLeft;
     const r = markers.MARK_WalkRight;
@@ -1020,7 +1107,7 @@ export default function HomeWorld3D({
               clipOverride={lionClip}
               wander={wander}
               stageRadius={stageRadius}
-              brainRef={brainRef}
+              brainRef={activeBrain}
               lionUrl={lionUrl}
               onMeasured={handleLionMeasured}
               onBrainClip={handleBrainClip}
@@ -1032,7 +1119,17 @@ export default function HomeWorld3D({
           <Preload all />
         </Suspense>
         {effects && <LookPass focusZ={0.62} />}
-        <AdoptedCamera source={glbCamera} target={markers.MARK_CameraTarget ?? null} dolly={cameraDolly} />
+        <AdoptedCamera
+          source={glbCamera}
+          target={markers.MARK_CameraTarget ?? null}
+          dolly={cameraDolly}
+          follow={activeBrain}
+          home={markers.MARK_LionSpawn ?? null}
+          onTrack={(m) => {
+            stats.current = { ...stats.current, cameraTrack: m };
+            onStats?.(stats.current as WorldStats);
+          }}
+        />
         <AnchorProjector markers={markers} onAnchors={onAnchors} />
         <PerfProbe onSample={(calls, tris) => {
           stats.current = { ...stats.current, drawCalls: calls, triangles: tris };

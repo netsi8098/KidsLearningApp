@@ -4,6 +4,25 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  /* KEEP THE WATCHER OUT OF NESTED CHECKOUTS.
+     Subagent worktrees live at `.claude/worktrees/<id>/`, each a full checkout
+     of this repo, and `art/blender/` holds the .blend outputs the build scripts
+     rewrite. Both are inside the project root, so vite watched them by default:
+     an agent editing a file in its own worktree hot-reloaded THIS dev server,
+     and a Blender rebuild fired a reload per .blend write.
+     The symptom was not a slow reload, it was a REMOUNT — which resets the
+     mascot to its spawn and the page's wander flag to its default. A lion
+     halfway across the bridge would snap home, and the obvious reading was a
+     bug in the crossing rather than a file watcher three directories away. */
+  server: {
+    watch: {
+      ignored: [
+        '**/.claude/worktrees/**',
+        '**/art/blender/**',
+        '**/docs/assets/**',
+      ],
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
