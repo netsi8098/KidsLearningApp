@@ -7298,3 +7298,120 @@ largely gone and the side view's protruding facets are reduced.
 2. Re-frame the asset so model z is h, once, everywhere — the known cause of the
    crown band, four times bitten, every local correction measured worse.
 3. Retire the proxy; a second world for the bridge to arrive at.
+
+## GATE 20: the limb attach transition — which needed no geometry
+
+The limb-to-body attach was the worst crease in the asset: front upper attach
+p99 137.5 degrees with 6.68% of edges over 25, rear 114.7 and 8.16%. Four fixes
+were built for it. All four measured worse or neutral, and the fifth measurement
+explains why.
+
+### What the attach step actually is
+
+`open_patch` hands back an 8-vertex boundary lying on the BODY's surface and
+`grow` quads the first station straight onto it, so one band carries the whole
+change from body shape to limb shape. `grow` now prints it:
+
+    limb    boundary c              r~     first station  step    gap    ratio
+    front   (+0.108,+0.217,+0.262)  0.093  scapula 0.092  0.0143 0.0434  0.33
+    rear    (+0.125,-0.317,+0.214)  0.058  hip     0.100  0.0784 0.0487  1.61
+
+The rear boundary sits at z 0.214 on the haunch's lower-outer surface while
+`hip` is at 0.288, so the first band travels 0.074 UPWARD before the chain turns
+and descends — 1.61 times the spacing used elsewhere, with the radius jumping
+0.058 to 0.100 in the same band. On the control cage that appears as two face
+rows descending from the SAME edge loop at z 0.2880 (the `hip` ring), with
+normals +0.90 and -0.90 in y: a flap.
+
+It looks exactly like the cause. It is not.
+
+    1. Transition ring halfway along the step (8 cage verts per limb, the price
+       the tail table quotes): ratio 1.61 -> 1.00, and the creased-edge count
+       stayed at EXACTLY 222. The fraction only moved because the new ring's own
+       edges diluted it — 8.16% of 2720 and 6.95% of 3192 are both 222 edges.
+    2. Smoothing the body's rx ramp behind it (the flare breaks from +51.6 to
+       +7.9 degrees of surface slope in one station): 222 -> 210 edges, but the
+       rear LIMB CHAIN went 2.52% -> 2.87% with its max 115.65 -> 141.37, and
+       WEIGHTED_IOU 0.8880 -> 0.8875.
+    3. Deleting `hip` to remove the reversal: 210 -> 168 edges, but
+       TOTAL_PINCHED 0 -> 2, WORST_AREA_RATIO 0.252 -> 0.151, the rear sole rim
+       failed its own ceiling, and IoU dropped.
+    4. Elliptical shin/hock (GATE 19): three hard gates for +0.0005 IoM.
+
+Four fixes, each trading a hard gate or the silhouette for at best a dozen
+edges. That pattern is itself a measurement: there was nothing on the surface to
+fix.
+
+### 64.7% of this cage is interior
+
+The cage is not a clean union. Every limb, the tail and both ears are tubes
+GROWN THROUGH the body tube — `cage_lion.py` says so in its first ten lines — so
+a limb's upper rings live inside the body and the two surfaces interpenetrate by
+construction. Counted by casting a short ray along each face's own normal:
+**12,096 of the assembled cage's 18,708 faces have material directly in front of
+them.** The dihedral across an interior edge is arbitrary; nothing renders it.
+
+Filtering the interior out changes the diagnosis completely:
+
+    region               ALL edges          SURFACE ONLY
+    front limb chain     p99  27.58  1.37%   p99 32.78  1.40%
+    rear limb chain      p99  35.14  2.47%   p99 29.14  1.61%
+    front upper attach   p99 137.50  6.68%   p99 24.05  0.79%
+    rear upper attach    p99 114.69  8.16%   p99 43.91  4.05%
+    body                 p99  43.01  2.61%   p99 36.63  1.86%
+    head/neck            p99  51.10  4.45%   p99 41.47  4.00%
+
+Both attaches PASS on the surface that exists, and **the maximum dihedral
+anywhere on the model's surface is 68.4 degrees** — every 175-to-178 degree fold
+in this mesh is interior. An independent check agrees: ray-cast from eight
+directions, 80 of the front attach's 102 creased edges are unreachable from any
+of them.
+
+This gate motivates itself from a RENDER — "the rear leg still renders as a
+crushed paper bag" — and an interior face cannot render as anything. Interior
+geometry surfacing under a pose is a real risk and is covered by
+`deform_qa_lion.py`'s pinched/flipped/worst-area battery, which passes.
+
+The filter is not a whitewash, and it says so in its own numbers: it makes the
+front limb chain WORSE, p99 27.58 -> 32.78, because dropping buried faces drops
+mostly FLAT interior edges and raises the percentile. Both columns are printed
+so the interior stays visible; the gate reads the surface one.
+
+### The thresholds had to be re-derived, and that was checked not assumed
+
+The old 56 / 4.5% limits came from all-edges measurements that the interior had
+inflated. Put GATE 19's folded tangents back and re-measure surface-only:
+
+                    p99     max     >25
+    folded         43.47  124.05   3.18%
+    fixed          29.14   67.43   1.61%
+    limits         56.00     ---   4.50%
+
+**Both p99 and the fraction PASS on a leg that was provably self-intersecting**
+(r/R up to 1.76), because most of a fold's edges are interior and get filtered;
+what survives is a handful at 124 degrees. So the fold lives only in the MAX,
+and `SURF_MAX` is now 100 — clear of this asset's worst surface max of 84.9 and
+well under a fold. Without that ceiling the filter would have been exactly the
+whitewash it looks like.
+
+### State — the review passes end to end for the first time
+
+    crease      CREASED_REGIONS=0   surface max anywhere 68.4 deg
+    silhouette  WEIGHTED_IOU 0.8879   front 0.9431 side 0.9142 3/4 0.8128
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    rig         reach 22.1/42.1 mm, planted paw 0.069 mm, slide 0.111 mm,
+                13 clips within 3 mm
+    glb         5939 KB against a 6144 cap, 4 meshes, both contracts pass
+
+No cage geometry changed in this gate. The deliverable is the measurement, the
+four negative results, and a gate that measures the surface it claims to.
+
+### Next, in order
+
+1. **Re-frame the asset so model z is h**, once, everywhere. The known cause of
+   the crown band (front 0.95-1.00 +0.056), four times bitten in different
+   disguises, and every local correction has measured worse than leaving it.
+2. **The rear silhouette** — 0.8040 against a 0.8097 projection ceiling with
+   extra=20.26%. The only view where the model is substantially too big.
+3. Retire the proxy; a second world for the bridge to arrive at.

@@ -297,6 +297,32 @@ BODY = [
     # Stations under the mane (rib_front forward) are not measurable from any
     # view and keep their previous values.
     ("rump_cap",   (0.000, -0.400, 0.226), (0, 1, 0.10), 0.086, 0.048),
+    # SMOOTHING THE rx RAMP HERE MEASURED WORSE. Recorded, not applied.
+    #
+    # rx is front-loaded. As a flare rate (d_rx per unit of arc between
+    # stations) it runs
+    #
+    #     rump_cap -> rump          +1.720   (+59.8 deg of surface slope)
+    #     rump -> haunch_back       +1.263   (+51.6)
+    #     haunch_back -> haunch     +0.138   (+ 7.9)
+    #     haunch -> hip             -0.051   (- 2.9)
+    #
+    # so the body flares at 51.6 degrees and then, in one station, at 7.9 — a
+    # 43.7 degree break in surface slope, as a ring where the rump meets the
+    # haunch. A ramp decaying 1.40 / 0.95 / 0.50 / 0.15 keeps rump_cap and hip
+    # exactly where they are (the total d_rx is 0.1020 either way) and takes the
+    # worst break to 18.1 degrees: rump 0.132, haunch_back 0.164, haunch 0.182.
+    #
+    # Built and measured, it moved the target barely and cost elsewhere: the
+    # rear attach's creased edges went 222 -> 210, the rear LIMB CHAIN went
+    # 2.52% -> 2.87% with its max 115.65 -> 141.37, and WEIGHTED_IOU 0.8880 ->
+    # 0.8875. Any smooth ramp with these endpoints must narrow the middle of the
+    # haunch, and the haunch is where the rear silhouette's mass reads from.
+    #
+    # The reason it barely helped is in `crease_qa_lion.py`: those edges are
+    # mostly INTERIOR. 64.7% of this cage's faces have material in front of
+    # them, and the attach's crease was almost entirely faces where the limb
+    # tube passes through the body.
     ("rump",       (0.000, -0.378, 0.250), (0, 1, 0.06), 0.142, 0.070),
     # Haunch: three rings carrying real mass. The rear silhouette needs a
     # pelvis -> glute -> thigh flow, and jump take-off reads off this shape.
@@ -462,6 +488,48 @@ def front_limb(sx):
 
 def rear_limb(sx):
     return [
+        # THE LIMB ATTACH: FOUR FIXES BUILT, FOUR MEASURED WORSE OR NEUTRAL.
+        #
+        # `open_patch` hands back an 8-vertex boundary lying on the body's
+        # surface and `grow` quads the first station straight onto it, so one
+        # band carries the whole change from body shape to limb shape. The
+        # `attach step` line `grow` prints measures it:
+        #
+        #     limb    boundary c              r~     first station  step    gap    ratio
+        #     front   (+0.108,+0.217,+0.262)  0.093  scapula 0.092  0.0143 0.0434  0.33
+        #     rear    (+0.125,-0.317,+0.214)  0.058  hip     0.100  0.0784 0.0487  1.61
+        #
+        # The rear boundary sits at z 0.214 on the haunch's lower-outer surface
+        # while `hip` is at 0.288, so the first band travels 0.074 UPWARD before
+        # the chain turns and descends — 1.61 times the spacing used elsewhere,
+        # with the radius jumping 0.058 -> 0.100 in the same band. On the control
+        # cage that shows as two face rows descending from the SAME edge loop at
+        # z 0.2880 (the `hip` ring), normals +0.90 and -0.90 in y: a flap.
+        #
+        # It looks like the cause of the worst crease in the asset. It is not.
+        #
+        #   1. A transition ring halfway along the step (8 cage verts per limb,
+        #      the price the tail table quotes) took the ratio 1.61 -> 1.00 and
+        #      left the creased-edge count at EXACTLY 222. The fraction only
+        #      moved because the ring's own edges diluted it.
+        #   2. Smoothing the body's rx ramp behind it: 222 -> 210 edges, rear
+        #      limb chain 2.52% -> 2.87%, IoU down. See the BODY table.
+        #   3. Deleting `hip` to remove the reversal: 210 -> 168 edges, but
+        #      TOTAL_PINCHED 0 -> 2, WORST_AREA_RATIO 0.252 -> 0.151, the rear
+        #      sole rim failed, and IoU dropped.
+        #   4. Elliptical shin/hock (recorded at `shin` below): three hard gates.
+        #
+        # Why: those edges are not surface. `crease_qa_lion.py` now measures it —
+        # 64.7% of this cage's faces have material directly in front of them,
+        # because every limb is a tube GROWN THROUGH the body tube and its upper
+        # rings live inside the body. Filtering the interior out, the front
+        # attach reads p99 24.05 / 0.79% against 137.50 / 6.68%, and the rear
+        # 43.91 / 4.05% against 114.69 / 8.16%. Both PASS. The flap above is real
+        # geometry and it is inside the haunch, where nothing can see it.
+        #
+        # `hip` therefore stays. It carries haunch mass the rear silhouette reads
+        # from, and the deformation battery — which is the gate that would catch
+        # interior geometry surfacing under a pose — passes on it.
         ("hip",      (sx * 0.124, -0.292, 0.288), (0, 0, -1), 0.100),
         ("thigh_02", (sx * 0.126, -0.284, 0.240), (0, 0.10, -1), 0.098),
         ("thigh_01", (sx * 0.128, -0.268, 0.199), (0, 0.22, -1), 0.092),
@@ -1084,6 +1152,28 @@ class Cage:
         prev_c = sum((v.co for v in prev), Vector()) / len(prev)
         rings = [boundary]
         self.rings.append((f"{prefix}:attach", list(boundary)))
+
+        # THE ATTACH STEP, reported because it is the quantity that governs the
+        # worst crease in the asset.
+        #
+        # `open_patch` hands back an 8-vertex boundary lying on the BODY's
+        # surface, and the first station's ring is quadded straight onto it. One
+        # band therefore has to carry the whole change from the body's shape to
+        # the limb's — and where that step is long compared with the ring
+        # spacing further down, it creases. `crease_qa_lion.py` measures the
+        # result at a p99 of 137.5 degrees on the front limb and 114.7 on the
+        # rear, the two worst regions on the model.
+        if stations:
+            b_r = sum((v.co - prev_c).length for v in prev) / len(prev)
+            s0 = Vector(stations[0][1])
+            s_r = stations[0][3]
+            step = (s0 - prev_c).length
+            nxt = ((Vector(stations[1][1]) - s0).length
+                   if len(stations) > 1 else float("nan"))
+            print(f"[cage] {prefix} attach step: boundary c="
+                  f"({prev_c.x:+.3f},{prev_c.y:+.3f},{prev_c.z:+.3f}) r~{b_r:.3f}"
+                  f" -> {stations[0][0]} r={s_r:.3f}   step={step:.4f}"
+                  f"  next station gap={nxt:.4f}  ratio={step / nxt:.2f}")
 
         for station in stations:
             # A station is (name, centre, tangent, radius) for a circular ring, or

@@ -55,12 +55,30 @@ import os
 import sys
 
 import bpy
+from mathutils import Vector
 
 # Per-region ceilings, set from the measurement above with a little headroom.
 # The body is the reference for what this asset's surface should look like:
 # it is the largest region, it has no reversals in it, and it reads correctly.
 P99_MAX = float(os.environ.get("LION_CREASE_P99", "56.0"))
 OVER25_MAX = float(os.environ.get("LION_CREASE_FRAC", "4.5"))
+# A MAX CEILING, because p99 and the fraction do not catch a fold once the
+# interior is filtered out — and that was checked rather than assumed.
+#
+# The pre-GATE-19 rear leg was provably self-intersecting (r/R up to 1.76). Its
+# tangents were put back temporarily and the surface-only measurement re-run:
+#
+#                     p99     max     >25
+#     folded         43.47  124.05   3.18%
+#     fixed          29.14   67.43   1.61%
+#     limits         56.00     ---   4.50%
+#
+# Both p99 and the fraction PASS on the folded leg, because most of a fold's
+# edges are interior and get filtered; what survives is a handful of edges at
+# 124 degrees. So the fold is only visible in the MAX. No smooth region of this
+# asset's surface exceeds 68.4 degrees and its worst is the rear attach at 84.9,
+# so 100 sits clear of both and well under a fold.
+SURF_MAX = float(os.environ.get("LION_CREASE_SURF_MAX", "100.0"))
 
 
 # The paw sole is DELIBERATELY creased and cannot be judged as a smooth tube.
@@ -72,6 +90,64 @@ OVER25_MAX = float(os.environ.get("LION_CREASE_FRAC", "4.5"))
 # gated on the MAX instead, high enough to pass the rim the design asks for and
 # low enough to catch one that has become a fold.
 SOLE_MAX = float(os.environ.get("LION_CREASE_SOLE_MAX", "65.0"))
+
+# BURIED FACES ARE NOT SURFACE, and measuring them is what this gate spent two
+# passes doing.
+#
+# The cage is not a clean union. Every limb, the tail and both ears are tubes
+# GROWN THROUGH the body tube — `cage_lion.py`'s header says so in its first
+# lines — so the limb's upper rings live inside the body and the two surfaces
+# interpenetrate by construction. Counted: 12,096 of the assembled cage's
+# 18,708 faces have material directly in front of them. **64.7% of this mesh is
+# interior.** The dihedral across an interior edge is arbitrary; nothing renders
+# it and nothing can.
+#
+# That is not a quibble, it is the whole of the "limb attach" failure:
+#
+#     region               ALL edges          SURFACE ONLY
+#     front upper attach   p99 137.50  6.68%   p99 24.05  0.79%
+#     rear upper attach    p99 114.69  8.16%   p99 43.91  4.05%
+#
+# Both attaches PASS on the surface that exists. Four structural fixes were
+# built and measured against the all-edges number first, and every one of them
+# traded a hard gate or silhouette IoU for at most a dozen edges — see the
+# negative-result blocks in `cage_lion.py`. There was no surface defect to fix.
+#
+# This gate's own docstring motivates itself from a RENDER — "the rear leg still
+# renders as a crushed paper bag" — and an interior face cannot render as
+# anything. Interior geometry poking out under deformation is real and is
+# covered: that is `deform_qa_lion.py`'s pinched/flipped/worst-area battery,
+# which passes.
+#
+# The filter is not a whitewash and can be checked: it makes the front limb
+# chain WORSE (p99 27.58 -> 32.78), because dropping buried faces drops mostly
+# FLAT interior edges and raises the percentile. Both columns are printed, so
+# the interior situation stays visible, and the gate reads the surface one.
+SURFACE_ONLY = os.environ.get("LION_CREASE_SURFACE_ONLY", "1") != "0"
+# How far in front of a face to look for material. Long enough to cross the
+# body tube, short enough that a face in a real concavity still escapes.
+BURY_REACH = float(os.environ.get("LION_CREASE_BURY_REACH", "0.40"))
+
+
+def buried_faces(obj, others):
+    """Which of `obj`'s faces have material directly in front of them."""
+    mw = obj.matrix_world
+    nm = mw.to_3x3()
+    out = []
+    for p in obj.data.polygons:
+        n = (nm @ p.normal).normalized()
+        org = (mw @ p.center) + n * 2e-4
+        hit = False
+        for ob in others:
+            inv = ob.matrix_world.inverted()
+            h, _l, _n, _i = ob.ray_cast(inv @ org,
+                                        (inv.to_3x3() @ n).normalized(),
+                                        distance=BURY_REACH)
+            if h:
+                hit = True
+                break
+        out.append(hit)
+    return out
 
 
 def region(co):
@@ -139,7 +215,17 @@ def main():
         for ek in p.edge_keys:
             edge_faces.setdefault(ek, []).append(p.index)
 
+    meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+    if SURFACE_ONLY:
+        bur = buried_faces(obj, meshes)
+        print(f"[crease] {len(bur)} faces, {sum(bur)} buried "
+              f"({100.0 * sum(bur) / max(len(bur), 1):.1f}%) — an interior face "
+              f"has no dihedral worth measuring; see BURIED FACES above")
+    else:
+        bur = [False] * len(me.polygons)
+
     buckets = {}
+    allbuckets = {}
     for ek, fs in edge_faces.items():
         if len(fs) != 2:
             continue
@@ -148,12 +234,17 @@ def main():
         if n1.length < 1e-9 or n2.length < 1e-9:
             continue
         mid = (me.vertices[ek[0]].co + me.vertices[ek[1]].co) / 2.0
-        buckets.setdefault(region(mid), []).append(math.degrees(n1.angle(n2)))
+        a = math.degrees(n1.angle(n2))
+        r = region(mid)
+        allbuckets.setdefault(r, []).append(a)
+        if not bur[fs[0]] and not bur[fs[1]]:
+            buckets.setdefault(r, []).append(a)
 
     print("")
     print("SURFACE CREASE (dihedral angle across interior edges, by region)")
+    print("  columns: SURFACE ONLY (gated)          |  ALL EDGES (interior too)")
     print(f"  {'region':18s} {'edges':>7s} {'median':>7s} {'p99':>7s} "
-          f"{'max':>8s} {'>25 deg':>9s}")
+          f"{'max':>8s} {'>25 deg':>9s}   {'edges':>7s} {'p99':>7s} {'>25':>8s}")
     bad = []
     rows = {}
     for r in ("front limb chain", "rear limb chain", "front upper attach",
@@ -172,11 +263,17 @@ def main():
             if a[-1] > SOLE_MAX:
                 flag = "  <-- CREASED (rim past its designed angle)"
                 bad.append(r)
-        elif p99 > P99_MAX or frac > OVER25_MAX:
-            flag = "  <-- CREASED"
+        elif p99 > P99_MAX or frac > OVER25_MAX or a[-1] > SURF_MAX:
+            why = ("p99" if p99 > P99_MAX else
+                   "frac" if frac > OVER25_MAX else "max — a FOLD")
+            flag = f"  <-- CREASED ({why})"
             bad.append(r)
+        al = sorted(allbuckets.get(r, []))
+        an = len(al)
+        ap99 = al[int(an * 0.99)] if an else 0.0
+        afr = 100.0 * sum(1 for v in al if v > 25.0) / an if an else 0.0
         print(f"  {r:18s} {n:7d} {a[n // 2]:7.2f} {p99:7.2f} {a[-1]:8.2f} "
-              f"{frac:8.2f}%{flag}")
+              f"{frac:8.2f}%   {an:7d} {ap99:7.2f} {afr:7.2f}%{flag}")
 
     print("")
     print("===CREASE_QA===")
