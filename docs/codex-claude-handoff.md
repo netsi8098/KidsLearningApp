@@ -7528,3 +7528,149 @@ detail", it was "detail with the reference's spectrum".
    FFT peak-to-mean against the reference, not on HF energy.
 2. **The mane's normal map** — anisotropic along the lock direction.
 3. The crown tip's -0.071, now the only failing band.
+
+## GATE 22: the body nap map — which was not the body nap map
+
+The dimples down the flank were the largest visible defect in the running app.
+They were not the nap map. They were a domain mismatch in the AO bake, and
+finding that took eliminating three other suspects by experiment.
+
+### The AO bake indexed a POINT attribute with CORNER indices
+
+```
+col = me.color_attributes.get(COLOR_ATTR)   # 'Col' — POINT domain, 18,547
+ao  = me.color_attributes["AO"]             # CORNER domain, 39,278
+for i, d in enumerate(col.data):            # i indexes VERTICES
+    a = ao.data[i].color[0]                 # ...but indexes AO as CORNERS
+```
+
+Vertex *i* was multiplied by the occlusion of **loop** *i* — a real, converged
+occlusion value from an unrelated place on the mesh. The comment that sat there
+said the lookup existed "so the per-vertex curvature lands on the corner-domain
+colour attribute"; `face_lion.paint()` has always created `Col` with
+`domain="POINT"`. The mistake was written down next to the code doing it.
+
+Measured on a patch of flank, where the coat is ONE uniform colour region so
+every variation is this bake:
+
+    Col luminance   mean     sd      range   roughness
+    before          0.5083  0.0539   0.2604    0.831
+    after           0.5401  0.0068   0.0203    0.356
+
+Roughness is the mean adjacent-vertex difference over the patch's own standard
+deviation: a cavity field varies smoothly so neighbours agree and it sits well
+under 1; a field applied to the wrong vertices is uncorrelated and approaches
+1.4. Plus or minus 25% brightness on a smooth convex flank is the dimples.
+
+It also explains the one measurement that made no sense: **raising AO_SAMPLES
+from 16 to 256 changed the render not at all.** Every value was already
+converged. It was being applied to the wrong vertex.
+
+`bake_ao_into_coat` now reports the roughness per mesh — LionCage 0.181,
+LionMane 0.189, the face parts 0.296 and 0.342 — so the next occurrence is a
+number rather than a squint.
+
+### Three suspects eliminated first, by disabling them one at a time
+
+    LION_BODY_NRM=0                              -> pattern still there
+    LION_BODY_NRM=0 CURV_GAIN=0 CURV_LIFT=0      -> pattern still there
+    ... + LION_AO_FLOOR=1.0                      -> flank completely smooth
+    LION_AO_SAMPLES=256, everything on            -> pattern still there
+
+The mesh carries no normal map, no custom split normals and one modifier
+(Armature), so once vertex colour was the only channel left the search was
+narrow. The order matters: the nap map was the obvious suspect and the wrong
+one, and it took three renders to say so.
+
+### The nap map WAS also periodic, and that is a separate real fix
+
+`_tiling_nap` shaped its noise with a Gaussian band-pass centred on
+`res / feature_px` — one dominant wavelength. Band-passed noise is not
+irregular: with a single preferred spacing its blobs pack at that spacing, which
+is a hexagonal cellular field. Its own docstring asked for "ISOTROPIC AND
+SCALE-FREE" and a band-pass imposes a scale by construction.
+
+It is now `1 / r**NAP_BETA` with a soft quartic rolloff, and `feature_px`
+survives only as that rolloff. **NAP_BETA is 1.2, not 0.8**, because the PNG
+stores the height's GRADIENT: differentiation multiplies a spectrum by r, so a
+height field at 1/r**0.8 hands the normal map a rising spectrum and the rolloff
+turns the rise into a peak at r=17 of 64 — the dimples again, one derivative
+later. 1.2 puts the gradient at 1/r**0.2, near-white, no preferred scale.
+
+    generator             map bump
+    band-pass (shipped)   28.53 dB at r=32
+    power law beta 0.8     5.38 dB at r=13
+    power law beta 1.2     2.87 dB at r= 7   (shipped)
+
+At `BODY_SCALE` 0.12 this was too faint to see under the AO noise, which is why
+it never showed as the defect. With the AO fixed it is the visible texture, so
+it had to be right.
+
+### The metric took four tries, and three of them are recorded as wrong
+
+`tools/cad/nap_qa.py` compares a patch of plain gold coat — the densest gold
+window, chosen by the image rather than by an author — against the same patch of
+the reference artwork, after subtracting a blur to remove the shading gradient.
+
+    - High-frequency ENERGY cannot see periodicity at all. The detail pass drove
+      it 1.97 -> 3.86 while shipping the dimples.
+    - 2D peak-over-mean is actively misleading: on the generators, the band-pass
+      that CAUSED the hexagons scores 29.2 and a scale-free power law scores 106
+      to 417, because a power law concentrates power in the lowest bins and that
+      is concentration too.
+    - Excess over a best-fit power law is fooled by the high-frequency ROLLOFF:
+      fitting one line across a hard cutoff returns a slope of -7 to -8.8 and
+      calls the whole pre-cutoff region a 24 dB excess, for every candidate
+      equally.
+    - What works: the prominence in dB of the largest INTERIOR maximum in the
+      radial power spectrum. A preferred cell size has one; scale-free noise
+      does not, because its radial spectrum falls monotonically.
+
+Gated on the MAP, where there is no shading and no projection, at 6 dB — an
+order of magnitude clear of the 28.5 dB defect and well above the 1.4-2.9 dB
+noise floor of a radial average over a few low-r bins.
+
+### One behaviour change, from GATE 21 rather than this gate
+
+`lionGazeAim` had `MARK_CardShelfZoneHero` pruned from the ambient gaze. It is
+now reachable, and the test's own docstring predicted the mechanism: pruning on
+geometry means "re-framing the island can bring one back into play". What moved
+was the lion. `rigAt` scales by `LION_TARGET_HEIGHT / size.y`, the re-frame made
+the model 1.3% taller in its own units, so the runtime scales it 1.3% smaller
+and the eye sits 1.3% lower — and a lower eye needs LESS downward pitch for a
+marker below it.
+
+The table in that test is now the smallest margin at which each marker is
+reachable, found by bisection, instead of a pitch and a yes/no:
+
+    CardShelfZone      0.4752   REACHABLE      TitleZone      0.9828  pruned
+    CardShelfZoneHero  0.8382   REACHABLE      LionGreeting   1.7382  pruned
+                                               TitleZoneHero  2.0000  pruned
+
+Two ambient targets now, both in the card row, so the gaze stays in one
+direction. It is the closest call in the table — 0.8382 against 0.85 — and a
+further 1.4% change in the lion's height moves it again. That is the design
+working as described, not something to pin down with a hand-picked margin.
+
+### State
+
+    coat        MAP_BUMP 2.87 dB (limit 6.0), NAP_PERIODIC=0
+                rendered coat within 0.40 dB of the reference's own bump
+    ao          roughness 0.181-0.342 across four meshes (noise ~1.4)
+    silhouette  WEIGHTED_IOU 0.8780, front 0.9290 side 0.9036 3/4 0.8029
+    crease      CREASED_REGIONS=0
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    rig         reach 22.1/42.1 mm, planted paw 0.069 mm, slide 0.111 mm, 13 clips
+    glb         5916 KB against a 6144 cap, 4 meshes, both contracts pass
+    repo        typecheck 0, tests 29 failed / 765 passed (the baseline)
+
+`npm run lion:review` passes every stage.
+
+### Next, in order
+
+1. **The mane's normal map** — isotropic noise where hair needs anisotropy along
+   the lock direction. It is the remaining texture gap and it now has a metric.
+2. **The crown tip** — front 0.95-1.00 at -0.071, the only failing band.
+3. **The eyes** — they bulge and read white-dominant; the reference's iris
+   nearly fills the lid with a crescent of white.

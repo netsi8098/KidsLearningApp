@@ -107,6 +107,20 @@ BODY_ENABLED = os.environ.get("LION_BODY_NRM", "1") != "0"
 # feature is in map pixels. Together these set the real-world grain.
 BODY_TILES = float(os.environ.get("LION_BODY_TILES", "9.0"))
 BODY_FEATURE_PX = float(os.environ.get("LION_BODY_FEATURE_PX", "4.0"))
+# Spectral slope of the body nap HEIGHT field: amplitude ~ 1/r**NAP_BETA.
+#
+# 1.2, not 0.8, and the reason is that the PNG stores the height's GRADIENT.
+# Differentiation multiplies a spectrum by r, so a height field at 1/r**0.8
+# hands the normal map 1/r**-0.2 — rising with frequency — and the quartic
+# rolloff then turns that rise into a peak. Measured on the generator, the
+# gradient's radial power peaks at r=17 of 64 for beta 0.8, which is a preferred
+# cell size and therefore the dimples again, one derivative later.
+#
+# beta 1.2 puts the gradient at 1/r**0.2 — near-white, no preferred scale, which
+# is what "a fine even pile with no direction" asks for. The radial peak moves
+# to r=3, i.e. monotone. Steeper is worse in the other direction: beta 2.0 gives
+# pink NORMALS, which read as large soft blotches rather than nap.
+NAP_BETA = float(os.environ.get("LION_NAP_BETA", "1.2"))
 # The eye centres, from `lion_skeleton`'s own eye bones, and how far the
 # nap is held off them. See the mask in `nap_map`.
 EYE_X, EYE_Y, EYE_Z = 0.095, 0.580, 0.6564
@@ -339,10 +353,36 @@ def _tiling_nap(res, feature_px, strength):
     have to follow the locks.
 
     Periodic by construction. The field is built in the FREQUENCY domain: white
-    noise, a radial band-pass around `feature_px`, inverse FFT. An inverse FFT
-    is periodic in both axes by definition, so the map tiles with no seam — the
-    thing a spatial-domain noise cannot promise. The gradient is then taken with
+    noise shaped by a radial spectrum, inverse FFT. An inverse FFT is periodic in
+    both axes by definition, so the map tiles with no seam — the thing a
+    spatial-domain noise cannot promise. The gradient is then taken with
     `np.roll`, which wraps, so even the normals match across the join.
+
+    A POWER LAW, NOT A BAND-PASS, and the difference is the hexagons.
+
+    This used to shape the noise with a Gaussian band-pass centred on
+    `res / feature_px` — one dominant wavelength. Band-passed noise is not
+    irregular: with a single preferred spacing its blobs pack against each other
+    at that spacing, which is a hexagonal cellular field. It is the standard
+    Turing/labyrinth spectrum, and it shipped as golf-ball dimples down the
+    lion's flank, plainly visible in the running app.
+
+    The paragraph above this one already said what was wanted — "ISOTROPIC AND
+    SCALE-FREE" — and a band-pass imposes a scale by construction. So the
+    spectrum is now `1 / r**NAP_BETA`, which is scale-free: no wavelength is
+    preferred, so nothing packs, and the field is irregular at every scale the
+    map can carry. `feature_px` survives only as the high-frequency rolloff, a
+    soft quartic cutoff that keeps the finest features a few pixels across
+    instead of aliasing at one.
+
+    Measured by `tools/cad/nap_qa.py`, which compares a patch of plain gold coat
+    against the same patch of the reference artwork after removing the shading
+    gradient:
+
+        image                sd     peak/mean
+        REFERENCE          25.20        82.2
+        band-pass          12.78       130.0    x1.58 as periodic
+        power law           (see the gate output)
     """
     import numpy as np
 
@@ -351,10 +391,14 @@ def _tiling_nap(res, feature_px, strength):
     fy = np.fft.fftfreq(res)[:, None] * res
     fx = np.fft.fftfreq(res)[None, :] * res
     r = np.hypot(fx, fy)
-    peak = res / max(2.0, feature_px)
-    band = np.exp(-((r - peak) ** 2) / (2.0 * (peak * 0.55) ** 2))
-    band[0, 0] = 0.0
-    h = np.real(np.fft.ifft2(np.fft.fft2(w) * band))
+    r[0, 0] = 1.0
+    amp = r ** (-NAP_BETA)
+    # Soft quartic rolloff so the finest features stay a few pixels across.
+    # `feature_px` is a rolloff scale now, not a resonance.
+    cut = res / max(2.0, feature_px)
+    amp = amp * np.exp(-((r / cut) ** 4))
+    amp[0, 0] = 0.0
+    h = np.real(np.fft.ifft2(np.fft.fft2(w) * amp))
     h /= (h.std() or 1.0)
 
     gx = (np.roll(h, -1, axis=1) - np.roll(h, 1, axis=1)) * 0.5

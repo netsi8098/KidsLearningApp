@@ -293,7 +293,7 @@ describe('lion gaze aim, measured off the shipped GLB', () => {
   const MARKERS = [
     ['TitleZone', { x: 0, y: -0.30, z: 2.05 }, false],
     ['CardShelfZone', { x: 0, y: -0.32, z: 4.60 }, true],
-    ['CardShelfZoneHero', { x: 0, y: 0.40, z: 1.55 }, false],
+    ['CardShelfZoneHero', { x: 0, y: 0.40, z: 1.55 }, true],
     ['LionGreeting', { x: 0, y: 0.44, z: 0.55 }, false],
     ['TitleZoneHero', { x: 0, y: 2.58, z: 0.30 }, false],
   ] as const;
@@ -316,18 +316,34 @@ describe('lion gaze aim, measured off the shipped GLB', () => {
      prunes them on GEOMETRY rather than by name, so re-framing the island can
      bring one back into play without an edit here.
 
-     |                   | pitch | in range | within the 0.85 comfort margin |
-     |-------------------|-------|----------|--------------------------------|
-     | TitleZone         | -43.6 | yes, 99% | no                             |
-     | CardShelfZone     | -21.1 | yes      | YES — the storyboard's beat    |
-     | CardShelfZoneHero | -37.5 | yes, 85% | no                             |
-     | LionGreeting      | -77.4 | no       | no                             |
-     | TitleZoneHero     | +87.6 | no       | no                             |
+     The table is the SMALLEST comfort margin at which each marker is still
+     reachable, found by bisecting `canLook`'s margin, rather than a pitch and a
+     yes/no — because two of these sit close enough to 0.85 that a yes/no hides
+     how close:
 
-     Which leaves the card shelf as the one ambient target, and that is the
-     right answer rather than a shortfall: it is the only one of the five that
-     is both a place in the world and a place the lion can look without
-     cranking its neck to the stop. */
+     | marker            | needs margin >= | at 0.85  |
+     |-------------------|-----------------|----------|
+     | CardShelfZone     |          0.4752 | REACHABLE|
+     | CardShelfZoneHero |          0.8382 | REACHABLE|
+     | TitleZone         |          0.9828 | pruned   |
+     | LionGreeting      |          1.7382 | pruned   |
+     | TitleZoneHero     |          2.0000 | pruned   |
+
+     CARDSHELFZONEHERO CAME INTO PLAY WITH THE RE-FRAME, and the paragraph above
+     predicted it would: pruning on geometry means "re-framing the island can
+     bring one back into play without an edit here". What moved was the lion,
+     not the island. `rigAt` scales by LION_TARGET_HEIGHT / size.y, and the
+     re-frame corrected the mane's height target from the >=10px band (0.7910)
+     to the reference's real span (0.8150), so the model got 1.3% taller in its
+     own units, the runtime scales it 1.3% smaller, and the eye sits 1.3% lower.
+     A lower eye needs LESS downward pitch for a marker below it, which took
+     this one from just outside 0.85 to 0.0118 inside.
+
+     So there are two ambient targets now, both in the card row, and the gaze
+     stays in one direction. Worth knowing that it is the closest call in the
+     table: 0.8382 against 0.85. A further 1.4% change in the lion's height in
+     either direction moves it again, which is the design working as described
+     and not something to pin down with a hand-picked margin. */
   it.each(MARKERS)('MARK_%s: ambient = %o -> %s', (_name, t, ambient) => {
     const brain = brainAt(0, -0.42, 0);
     expect(brain.canLook(t)).toBe(ambient);

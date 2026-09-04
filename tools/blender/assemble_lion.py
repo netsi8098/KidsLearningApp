@@ -622,17 +622,52 @@ def bake_ao_into_coat(objs):
             me.color_attributes.remove(ao)
             continue
         curv = curvature_shade(o)
-        # Corner -> vertex lookup, so the per-vertex curvature lands on the
-        # corner-domain colour attribute glTF exports.
+        # THE DOMAINS DID NOT MATCH, and that is the dimples.
+        #
+        # `Col` is POINT domain — `face_lion.paint()` creates it with
+        # `domain="POINT"` — and the bake target here is CORNER. On the shipped
+        # cage that is 18,547 entries against 39,278. This loop indexed BOTH
+        # with the same `i`, so vertex i was multiplied by the occlusion of
+        # LOOP i: a real occlusion value from an unrelated place on the mesh.
+        # The comment that used to sit here said the lookup existed "so the
+        # per-vertex curvature lands on the corner-domain colour attribute",
+        # which is the mistake written down — `Col` was never corner-domain.
+        #
+        # The result is per-vertex noise uncorrelated with position. Measured on
+        # a patch of flank, where the coat is ONE uniform colour region so every
+        # variation is this bake: luminance range 0.26 on a mean of 0.51 — plus
+        # or minus 25% — and a roughness (mean adjacent-vertex difference over
+        # the patch's own standard deviation) of 0.831, where a smooth field
+        # gives much less than 1 and uncorrelated noise gives about 1.4.
+        #
+        # It renders as golf-ball dimples down the flank and it is the largest
+        # visible defect in the running app. It also explains why raising
+        # `AO_SAMPLES` from 16 to 256 changed nothing: every value was already
+        # converged, it was just being applied to the wrong vertex.
+        #
+        # So the corner-domain bake is averaged per vertex when the target is
+        # POINT, and read straight through when it is CORNER.
         corner_vert = [lp.vertex_index for lp in me.loops]
+        if col.domain == "POINT":
+            acc = [0.0] * len(me.vertices)
+            cnt = [0] * len(me.vertices)
+            for li, vi in enumerate(corner_vert):
+                acc[vi] += ao.data[li].color[0]
+                cnt[vi] += 1
+            per_i = [(acc[j] / cnt[j]) if cnt[j] else 1.0
+                     for j in range(len(me.vertices))]
+            curv_of = lambda j: curv.get(j, 1.0)
+        else:
+            per_i = [ao.data[j].color[0] for j in range(len(ao.data))]
+            curv_of = lambda j: curv.get(corner_vert[j], 1.0) \
+                if j < len(corner_vert) else 1.0
         for i, d in enumerate(col.data):
             # The bake writes greyscale occlusion; take one channel and lift it
             # off the floor so shadows stay OPEN. Children's art does not have
             # black in it, and a cavity pass that closes up reads as dirt.
-            a = ao.data[i].color[0]
+            a = per_i[i] if i < len(per_i) else 1.0
             k = AO_FLOOR + (1.0 - AO_FLOOR) * a
-            if i < len(corner_vert):
-                k *= curv.get(corner_vert[i], 1.0)
+            k *= curv_of(i)
             k = max(0.35, min(1.25, k))
             darkest = min(darkest, k)
             hist[min(9, int(a * 10))] += 1
@@ -640,6 +675,25 @@ def bake_ao_into_coat(objs):
             total_n += 1
             c = d.color
             d.color = (c[0] * k, c[1] * k, c[2] * k, c[3])
+        # ROUGHNESS, reported because it is what would have caught the domain
+        # mismatch above. The mean absolute difference in the applied factor
+        # between edge-adjacent vertices, over that factor's own standard
+        # deviation. A cavity field varies smoothly across a surface, so
+        # neighbours agree and this is well under 1; a field applied to the
+        # wrong vertices is uncorrelated noise and approaches 1.4. Measured on
+        # the flank, the mismatch scored 0.831 and the fix 0.356.
+        if col.domain == "POINT" and len(per_i) == len(me.vertices):
+            kk = [max(0.35, min(1.25, (AO_FLOOR + (1.0 - AO_FLOOR) * per_i[j])
+                                * curv_of(j))) for j in range(len(me.vertices))]
+            mean = sum(kk) / len(kk)
+            var = sum((v - mean) ** 2 for v in kk) / len(kk)
+            sd = var ** 0.5
+            dif = [abs(kk[e.vertices[0]] - kk[e.vertices[1]]) for e in me.edges]
+            if dif and sd > 1e-9:
+                rough = (sum(dif) / len(dif)) / sd
+                print(f"[ao] {o.name}: factor mean {mean:.3f} sd {sd:.3f}, "
+                      f"roughness {rough:.3f} (noise ~1.4)"
+                      f"{'   <-- NOISY' if rough > 0.9 else ''}")
         me.color_attributes.remove(ao)
         me.color_attributes.active_color = me.color_attributes[face_lion.COLOR_ATTR]
 

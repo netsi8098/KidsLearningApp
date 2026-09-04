@@ -126,6 +126,11 @@ step "review sheets — FRONT-LIT and isolated (tools/blender/review_render.py)"
   --python tools/blender/review_render.py 2>&1 \
   | grep -E "^\[review\]|^SHEETS=|^MESHES=|^BONES=" || note_fail review_render
 
+step "coat texture — is it the REFERENCE's kind of texture (tools/cad/nap_qa.py)"
+# High-frequency ENERGY was the old target and it cannot see a preferred cell
+# size: the detail pass drove it 1.97 -> 3.86 while shipping golf-ball dimples.
+python3 tools/cad/nap_qa.py || note_fail nap_qa
+
 if [ "$SHEET" = "1" ]; then
   step "contact sheet"
   python3 scripts/lion-contact-sheet.py || note_fail contact_sheet
