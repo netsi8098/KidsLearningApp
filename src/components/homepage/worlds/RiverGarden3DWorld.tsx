@@ -63,6 +63,13 @@ export default function RiverGarden3DWorld({ mascot, mascotInScene, title, child
   const [effects] = useState(() => {
     if (typeof navigator === 'undefined') return false;
     const cores = navigator.hardwareConcurrency ?? 4;
+    /* `?nofx` forces the chain off, and it earned its place immediately.
+       The proof route has NEVER enabled post-processing, so the production
+       cage lion had never been seen through it — and the first look showed its
+       eyes washed out to blank ovals. With `?nofx` the same asset in the same
+       frame has clear dark irises, which isolates the cause to the chain
+       rather than to the asset, in one reload instead of an afternoon. */
+    if (new URLSearchParams(window.location.search).has('nofx')) return false;
     return cores >= 6 && window.innerWidth >= 700;
   });
   useEffect(() => {

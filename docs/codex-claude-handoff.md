@@ -6736,3 +6736,121 @@ Unchanged, since nothing was rebuilt:
 4. The front leg's fore-aft depth, one band above the sole work.
 5. Optional behaviour question: should the lion TURN toward something out of the
    gaze's reach? `turnTo` exists and nothing calls it for attention.
+
+## 2026-09-04 (thirty-first pass) — the world, in parallel, and a gap at the end of it
+
+Four tracks ran at once: the world's scale hierarchy, its runtime life, the
+bridge, and the lion's tail. Three landed. What follows is the world work and
+one finding that outranks all of it.
+
+### THE HOMEPAGE DOES NOT RENDER THE PRODUCTION LION
+
+`RiverGarden3DWorld.tsx` — the only production caller of `HomeWorld3D` —
+passes no `lionUrl`, so it falls back to `LION_URL`, which is
+`/assets/lion/rigged/lion_v2.glb`: **the proxy, dated 21 August.** Everything
+built for the cage lion since then reaches the `/world3d?mesh=assembled` debug
+route and nowhere else. The 40-bone rig, the 13 clips, the 16 morphs, the eye
+bones and gaze, the mane follow-through, the head-turn assist, the flat paw
+soles, the whole silhouette QA — none of it ships.
+
+This is not undocumented drift. Earlier entries say "the proxy is due to
+retire", "the proxy is retiring", and "at proxy retirement: rename the cage rig
+to one scheme and collapse the two contracts". The step was planned and never
+taken, and in the meantime every visual judgement about the mascot on the
+homepage has been a judgement about the wrong asset.
+
+**Pointing `LION_URL` at the cage lion works** — verified, it loads and
+animates in the production frame — **and it exposes a second thing.** The proof
+route has never enabled post-processing (`effects` defaults false, and nothing
+passes it), so the cage lion had never been seen through the homepage's own
+chain. Through it, its eyes wash out to blank ovals. `Bloom` runs at
+`luminanceThreshold={0.86}` and the sclera is bright white, so the bloom
+swallows the iris.
+
+Isolated in one reload rather than an afternoon: `?nofx` now forces the chain
+off, and the same asset in the same frame has clear dark irises. That flag is
+the only code change from this investigation — the asset swap is reverted,
+because silently changing the shipped mascot for one with a visible regression
+is not a decision to take on the way past.
+
+### The world had no measurement layer, and it showed
+
+`npm run world:review [-- --rebuild --sheet]`, 17 seconds: build, export,
+validate the marker contract, dump the facts to JSON, gate them, render five
+shots, stitch a sheet. Blender measures and `tools/cad/world_audit.py` judges,
+the same split as `silhouette_render` and `silhouette_qa`.
+
+Three of the five renders carry a featureless grey box at the lion's exact
+1.30 m standing on `MARK_LionSpawn`, because scale is a relationship and a
+render of an empty landscape cannot show one. In the first one, the box was
+taller than the tree trunks.
+
+What it said about the shipped world:
+
+    tree_tall     4   0.96x lion    want 4.00-7.00   TOO SMALL
+    tree_mid     10   0.64-1.40x    want 3.00-5.00   TOO SMALL
+    reed         24   1.00-1.62x    want 0.35-0.75   TOO BIG
+    flower      114   median 0.10   want 0.12-0.34   TOO SMALL
+    stone_small   0   absent        want 0.04-0.20   MISSING
+
+Inverted, not merely off: the reeds were taller than the character and the
+tallest thing it could walk up to was 1.4 times its own height. And 232 objects
+that the eye expects to move — water, waterfall, foam, bubbles, clouds, reeds,
+blossom, lily pads — were touched by no frame callback at all.
+
+All five now pass, and the world moves. `WorldLife.tsx` animates it at **zero
+added draw calls**: an analytic heightfield swell plus a per-pixel shader
+ripple for the river, node drift for all 54 clouds in one `position.set()`, and
+vertex sway for reeds, blossom and pads.
+
+### Three things worth carrying forward
+
+**The GLB is merged by material.** 543 blend objects arrive as 29 meshes across
+40 nodes, so `getObjectByName('ENV_RiverSurface')` returns undefined and the
+lily pads share a mesh with every tree canopy. Any runtime work on the
+environment has to recover connected-component vertex islands, not look objects
+up by name.
+
+**A mesh cannot carry detail below its own Nyquist.** The river grid is 1.417 m
+between vertices; the first ripple pass put 2.6 / 1.35 / 0.85 m waves on it and
+rendered aliased noise. Swell on the vertices, ripple in the fragment shader.
+
+**A scale gate cannot see composition.** Making the trees correct turned the
+frame's top third into 64.6% foliage, took the sky away and chopped the rainbow
+into fragments — with every height in range while it happened. `dump_world.py`
+now ray-casts from the production camera and reports marker occlusion, foliage
+coverage, and the rainbow's visible arc split by whether a cloud, a hill or a
+tree is in the way, because a rainbow behind a cloud is the look and a rainbow
+behind a crown is the defect. Coverage is down to 43.1% and the arc from 38% to
+54% visible.
+
+And one target had to be derived rather than chosen. "Foliage under 35% of the
+top third" was a number picked before anything had been measured at any value;
+three passes of narrowing reached 43.1%, the render plainly read, and the
+number still said fail. `CAM_Home_Main` points 17.0 degrees below horizontal
+with a 28.4 degree vertical FOV, so the top of frame is 2.8 degrees BELOW
+horizontal and the highest visible point at the rainbow's distance is z 2.67 m
+against an apex at z 9.0. **No radius or centre puts a rainbow's apex in this
+frame.** In this framing a rainbow is necessarily two legs crossing the tree
+band. Re-staging it, or widening the camera, is a design decision and is left
+open.
+
+### State
+
+    world     727 objects, 82,956 tris, 31 materials, 59/59 contract checks
+              SCALE_FAILS=0, composition gate passing
+    runtime   53 draw calls, 246,184 tris, 13,346 animated verts/frame
+    bridge    crossing verified 9% -> 99% CROSSED, camera tracks 0 -> 7.31 m
+    repo      typecheck 52, lint 5 pre-existing, tests 29 failed / 765 passed
+
+### Next, in order
+
+1. **Retire the proxy** — point the homepage at the cage lion, and fix the
+   bloom washing out its eyes first. Nothing else on the mascot matters until
+   the mascot on screen is the one being worked on.
+2. The lion's tail (in flight), then the mane's rear edge and front-facing
+   locks, then the paws' lateral spacing.
+3. A second world for the bridge to arrive at. The crossing works and has
+   nowhere to go.
+4. Two open design questions: re-stage the rainbow or widen the camera; and
+   should the lion TURN toward something out of its gaze's reach.
