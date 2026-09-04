@@ -101,3 +101,62 @@ describe('LionBrain gaze split', () => {
     expect(s.head.yaw).toBe(0);
   });
 });
+
+describe('LionBrain.canLook', () => {
+  const brain = () => {
+    const b = new LionBrain(bounds);
+    b.x = 0; b.z = 0; b.yaw = 0;
+    b.setEyeHeight(0.85);
+    b.setGroundY(0);
+    return b;
+  };
+
+  it('accepts a target inside the rig reach', () => {
+    expect(brain().canLook({ x: 0, y: 0.85, z: 4 })).toBe(true);
+    expect(brain().canLook({ x: 2, y: 0.4, z: 4 })).toBe(true);
+  });
+
+  it('rejects a target directly overhead — the TitleZoneHero case', () => {
+    // 2.58 m up, 0.30 m out. This is what pinned the rig at full deflection.
+    expect(brain().canLook({ x: 0, y: 2.58, z: 0.3 })).toBe(false);
+  });
+
+  it('rejects a target behind the lion', () => {
+    expect(brain().canLook({ x: 0, y: 0.85, z: -4 })).toBe(false);
+  });
+
+  it('leaves a margin rather than accepting a full-crank glance', () => {
+    // Right on the rig's yaw reach: reachable, but only at full deflection,
+    // which reads as a stare rather than a glance.
+    const reach = GAZE_LIMIT + HEAD_ASSIST_YAW;
+    const b = brain();
+    expect(b.canLook({ x: Math.sin(reach) * 4, y: 0.85, z: Math.cos(reach) * 4 })).toBe(false);
+    const easy = reach * 0.7;
+    expect(b.canLook({ x: Math.sin(easy) * 4, y: 0.85, z: Math.cos(easy) * 4 })).toBe(true);
+  });
+});
+
+describe('a gaze target that goes out of reach', () => {
+  it('is dropped when the lion turns away, rather than held at full crank', () => {
+    const b = new LionBrain(bounds);
+    b.x = 0; b.z = 0; b.yaw = 0;
+    b.setEyeHeight(0.85);
+    b.setGroundY(0);
+    b.lookAt(0, 4, 0.85);
+    expect(b.gazeAt).not.toBeNull();
+    // The lion strolls round to face the other way. `step` runs the scheduler.
+    b.yaw = Math.PI;
+    b.step(0.016);
+    expect(b.gazeAt).toBeNull();
+  });
+
+  it('keeps a target the lion is still facing', () => {
+    const b = new LionBrain(bounds);
+    b.x = 0; b.z = 0; b.yaw = 0;
+    b.setEyeHeight(0.85);
+    b.setGroundY(0);
+    b.lookAt(0, 4, 0.85);
+    b.step(0.016);
+    expect(b.gazeAt).not.toBeNull();
+  });
+});

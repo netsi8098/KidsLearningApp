@@ -6310,3 +6310,107 @@ rebuilt; this pass is runtime only.
 2. The paw's rounded sole, with the walk QA in the loop.
 3. The mane still reads as a smooth hood from the FRONT — its locks run
    front-to-back, so the hero angle sees them end-on.
+
+## 2026-09-04 (twenty-eighth pass) — the assist seen in a browser, and what it showed
+
+The pane got its GPU back, so the previous pass's head-turn assist could finally
+be watched rather than inferred. It works, and it immediately exposed a
+behaviour problem upstream of it.
+
+### Confirmed on screen
+
+    lookAt card       gaze : 0.00,4.60   eye  -0.1 + head   0.0 pitch -12.2  aim err  1.8
+    lookAt far-left   gaze : -3.40,-1.20 eye -28.0 + head -30.0 pitch  -6.2  aim err 54.5
+
+The card is hit to 1.8°, matching the test's bound. The far-left target wants
+114.4° and the rig delivers 58.0, so the 54.5° error is the overshoot — the
+assist is applied and the shortfall is the rig's reach, exactly as measured.
+
+### The lion was staring at a point in the sky
+
+Left to the ambient scheduler, the HUD read this and held it:
+
+    gaze : 0.00,0.30  yaw: eye 28.0 + head 30.0 = 58.0 of 152.4  pitch 28.0  aim err 39.3
+
+Everything pinned at its stop. The target was `MARK_TitleZoneHero`, and
+`build_home_environment.py` says exactly what these markers are: **"DOM zones:
+not rendered, but they keep the 3D composition honest about where React will
+place the title and the card row"**, with the hero pair authored as "title in
+the sky above the lion, cards on the near slope". Their heights are screen
+composition. The title zone sits 0.30 **below** the island top, the card shelf
+0.30 above the **water**, and the hero title 2.12 m up in the air.
+
+`setInterest` was handing all four to the gaze as world points. The proof page's
+own `lookAt card` button never did — it passes `y = 0.4` rather than the
+marker's −0.32 — so the mismatch was already visible in the codebase.
+
+### `canLook`, and why it prunes on geometry rather than by name
+
+The brain now answers whether it can look at a point from where it is standing,
+and the ambient scheduler picks only from the ones that pass. The margin is 0.85
+of the rig's reach, because a glance that lands only at FULL crank is the same
+dead-eyed pose as one a degree short of unreachable.
+
+Measured at the spawn, off the shipped GLB:
+
+| marker | pitch | in range | inside the 0.85 margin |
+|---|---|---|---|
+| `TitleZone` | −43.6° | yes, at 99% | no |
+| `CardShelfZone` | −21.1° | yes | **yes** |
+| `CardShelfZoneHero` | −37.5° | yes, at 85% | no |
+| `LionGreeting` | −77.4° | no | no |
+| `TitleZoneHero` | +87.6°, yaw 180° | no | no |
+
+Which leaves the card shelf as the single ambient target — and that is the right
+answer rather than a shortfall. It is the only one of the five that is both a
+place in the world and a place the lion can look at without cranking to the
+stop, and it is the storyboard's own beat. Filtering on geometry rather than by
+name means re-framing the island can bring another back into play without an
+edit in the runtime.
+
+A deliberate `lookAt` is **not** filtered. A caller asking for a specific point
+gets the best the rig can do, and the aim error says how far short that is.
+
+### A target can also go out of reach after it is chosen
+
+Reach depends on which way the lion is facing, and it wanders. A glance at the
+card shelf is fine until the lion strolls round 125° away from it, at which
+point the clamp pins the rig and holds that stare for the rest of the 2.2 s
+hold. `stepGaze` now drops a target that has left the rig's FULL range —
+full, not the comfort margin, so one hovering near 0.85 does not flicker.
+
+With wander off the rotation is clean: `ahead` → card shelf at `aim err 1.5` →
+`ahead`. With wander on the lion glances less, because half the time the shelf
+genuinely is behind its shoulder. Turning the body toward something worth
+looking at is a locomotion decision and is not built here.
+
+### PerfProbe was racing the asset load
+
+While verifying the above the HUD reported **29 draw calls / 85,000 triangles**
+for a scene that costs 51 and 251,160, with the lion plainly on screen. The
+probe sampled `gl.info.render` exactly once, at frame 30 — about half a second
+in, before the lion's 4.3 MB had arrived. The earlier correct readings only
+happened because the GLB was already in the loader cache from a previous load in
+that tab.
+
+A perf number that depends on whether the browser had the asset cached is worse
+than no perf number, because it looks authoritative. The probe now samples every
+20 frames, reports only on change, and stops once three consecutive samples
+agree — converging in about a second and then costing nothing. Cold-cache
+reading is now 51 / 251,160.
+
+### State
+
+Repo baseline unmoved: typecheck 52, lint 5 pre-existing `react-hooks/
+immutability` in `HomeWorld3D` and none added, `npm test` 29 failed / **756**
+passed (727 before the gaze work; +29 across the three gaze test files). No
+asset rebuilt — runtime only.
+
+### Next, in order
+
+1. The paw's rounded sole, with the walk QA in the loop.
+2. The mane still reads as a smooth hood from the FRONT — its locks run
+   front-to-back, so the hero angle sees them end-on.
+3. Optional, and a behaviour question rather than a rig one: should the lion
+   TURN toward something worth looking at when it is out of the gaze's reach?
+   `turnTo` already exists; nothing calls it for attention.

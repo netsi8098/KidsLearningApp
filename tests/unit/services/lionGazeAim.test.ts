@@ -99,6 +99,24 @@ function rigAt(x: number, z: number, yaw: number) {
   return { group, model, scale, minY: box.min.y * scale, eyes, neck };
 }
 
+/** A brain told where its eyes are, the way the runtime tells it. */
+function brainAt(x: number, z: number, yaw: number) {
+  const rig = rigAt(x, z, yaw);
+  const brain = new LionBrain({ cx: 0, cz: 0, r: 4 });
+  brain.x = x;
+  brain.z = z;
+  brain.yaw = yaw;
+  const mid = new THREE.Vector3()
+    .setFromMatrixPosition(rig.eyes[0].bone.matrixWorld)
+    .add(new THREE.Vector3().setFromMatrixPosition(rig.eyes[1].bone.matrixWorld))
+    .multiplyScalar(0.5);
+  brain.setEyeHeight(mid.y - GROUND_Y);
+  brain.setGroundY(GROUND_Y);
+  brain.setEyeOffset(mid.clone().sub(rig.group.position)
+    .dot(new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw))));
+  return brain;
+}
+
 /** Aim the rig with the brain, exactly as `HomeWorld3D` does each frame. */
 function aim(target: { x: number; y: number; z: number }, x = 0, z = -0.42, yaw = 0) {
   const rig = rigAt(x, z, yaw);
@@ -213,6 +231,69 @@ describe('lion gaze aim, measured off the shipped GLB', () => {
     const turned = aim(t, 0, -0.42, 40 / DEG);
     expect(Math.abs(turned.wantYaw)).toBeLessThan(Math.abs(straight.wantYaw));
     expect(turned.errDeg).toBeLessThan(AIM_TOL);
+  });
+
+  const MARKERS = [
+    ['TitleZone', { x: 0, y: -0.30, z: 2.05 }, false],
+    ['CardShelfZone', { x: 0, y: -0.32, z: 4.60 }, true],
+    ['CardShelfZoneHero', { x: 0, y: 0.40, z: 1.55 }, false],
+    ['LionGreeting', { x: 0, y: 0.44, z: 0.55 }, false],
+    ['TitleZoneHero', { x: 0, y: 2.58, z: 0.30 }, false],
+  ] as const;
+
+  /* THE SCENE'S OWN MARKERS, at the spawn, as one table — because the numbers
+     are the argument.
+
+     `build_home_environment.py` calls MARK_TitleZone and MARK_CardShelfZone
+     "DOM zones: not rendered, but they keep the 3D composition honest about
+     where React will place the title and the card row", and the hero pair are
+     "title in the sky above the lion, cards on the near slope". Their heights
+     are SCREEN COMPOSITION, not places anything physically is: the title zone
+     sits 0.30 below the island top, the card shelf 0.30 above the WATER, and
+     the hero title 2.12 m up in the air. `MARK_LionGreeting` is a floor
+     position to walk to.
+
+     Feeding all of them to the gaze as world points is what put the lion in a
+     dead-eyed stare: TitleZoneHero needs 88 degrees of pitch and 180 of yaw,
+     so the rig pinned everything at full deflection and held it. `canLook`
+     prunes them on GEOMETRY rather than by name, so re-framing the island can
+     bring one back into play without an edit here.
+
+     |                   | pitch | in range | within the 0.85 comfort margin |
+     |-------------------|-------|----------|--------------------------------|
+     | TitleZone         | -43.6 | yes, 99% | no                             |
+     | CardShelfZone     | -21.1 | yes      | YES — the storyboard's beat    |
+     | CardShelfZoneHero | -37.5 | yes, 85% | no                             |
+     | LionGreeting      | -77.4 | no       | no                             |
+     | TitleZoneHero     | +87.6 | no       | no                             |
+
+     Which leaves the card shelf as the one ambient target, and that is the
+     right answer rather than a shortfall: it is the only one of the five that
+     is both a place in the world and a place the lion can look without
+     cranking its neck to the stop. */
+  it.each(MARKERS)('MARK_%s: ambient = %o -> %s', (_name, t, ambient) => {
+    const brain = brainAt(0, -0.42, 0);
+    expect(brain.canLook(t)).toBe(ambient);
+    if (ambient) {
+      // Picked, so it had better actually land.
+      expect(aim(t).errDeg).toBeLessThan(AIM_TOL);
+    }
+  });
+
+  /* Rejection has two different causes and they are worth keeping apart: a
+     target the rig physically cannot reach, and one it can only reach at full
+     crank. Asserting both stops the table above from going quietly vacuous. */
+  it.each([
+    ['TitleZone', { x: 0, y: -0.30, z: 2.05 }, true],
+    ['CardShelfZoneHero', { x: 0, y: 0.40, z: 1.55 }, true],
+    ['LionGreeting', { x: 0, y: 0.44, z: 0.55 }, false],
+    ['TitleZoneHero', { x: 0, y: 2.58, z: 0.30 }, false],
+  ] as const)('MARK_%s is in range at full crank: %o', (_name, t, inRange) => {
+    const brain = brainAt(0, -0.42, 0);
+    expect(brain.canLook(t, 1.0)).toBe(inRange);
+    // And when it IS in range, the aim lands — the clamp is what costs, not
+    // the arithmetic.
+    if (inRange) expect(aim(t).errDeg).toBeLessThan(AIM_TOL);
   });
 
   it('leaves the eyes on their rest aim when there is no target', () => {

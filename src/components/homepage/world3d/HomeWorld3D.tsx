@@ -692,15 +692,34 @@ function AdoptedCamera({ source, target, dolly = 1 }: {
   return null;
 }
 
-/** Reports real renderer counters, which are the only honest perf numbers. */
+/**
+ * Reports real renderer counters, which are the only honest perf numbers.
+ *
+ * Sampled repeatedly until they SETTLE, not once at frame 30. One sample is a
+ * race against the asset load, and on a cold cache the lion's 4.3 MB has not
+ * arrived by frame 30 — so the HUD read 29 draw calls and 85,000 triangles for
+ * a scene that actually costs 51 and 251,160, while the lion was plainly
+ * visible on screen. A perf number that depends on whether the browser had the
+ * GLB cached is worse than no perf number, because it looks authoritative.
+ *
+ * Every 20 frames, report only on change, and stop once three consecutive
+ * samples agree. That converges in about a second and then costs nothing.
+ */
 function PerfProbe({ onSample }: { onSample: (calls: number, tris: number) => void }) {
   const { gl } = useThree();
   const frame = useRef(0);
+  const last = useRef({ calls: -1, tris: -1, stable: 0 });
   useFrame(() => {
+    if (last.current.stable >= 3) return;
     frame.current += 1;
-    if (frame.current === 30) {
-      onSample(gl.info.render.calls, gl.info.render.triangles);
+    if (frame.current % 20 !== 0) return;
+    const { calls, triangles: tris } = gl.info.render;
+    if (calls === last.current.calls && tris === last.current.tris) {
+      last.current.stable += 1;
+      return;
     }
+    last.current = { calls, tris, stable: 0 };
+    onSample(calls, tris);
   });
   return null;
 }

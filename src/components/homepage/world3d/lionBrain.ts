@@ -248,6 +248,35 @@ export class LionBrain {
   }
 
   /**
+   * Can the lion actually look at this point from where it is standing?
+   *
+   * The ambient scheduler needs this because the environment's markers are not
+   * all gaze targets. `MARK_TitleZoneHero` sits 2.58 m up and 0.30 m out — the
+   * title's place in the HERO framing, which is directly above the lion's head
+   * in the island layout. Glancing at it asked for 157 degrees of yaw and 70
+   * of pitch, so the rig pinned both eyes and the head at full deflection and
+   * stayed there: a lion cranked to its limits, staring at nothing, for as
+   * long as the scheduler left it.
+   *
+   * Clamping produced that pose. Refusing to pick the target avoids it. The
+   * margin is 0.85 of the rig's reach, because a glance that only lands at
+   * FULL crank is the same dead-eyed pose one degree short of unreachable.
+   *
+   * A deliberate `lookAt` is not filtered — a caller asking for a specific
+   * point gets the best the rig can do, and the aim error on the HUD says how
+   * far short that is.
+   */
+  canLook(p: { x: number; y: number; z: number }, margin = 0.85): boolean {
+    const dx = p.x - this.eyeOriginX;
+    const dz = p.z - this.eyeOriginZ;
+    const flat = Math.hypot(dx, dz);
+    const yaw = Math.abs(shortestAngle(this.yaw, Math.atan2(dx, dz)));
+    const pitch = Math.abs(Math.atan2(p.y - this.eyeWorldY, flat || 1e-3));
+    return yaw <= (GAZE_LIMIT + HEAD_ASSIST_YAW) * margin
+      && pitch <= (GAZE_LIMIT + HEAD_ASSIST_PITCH) * margin;
+  }
+
+  /**
    * Rotate the gaze between the viewer and the scene's points of interest.
    *
    * A mascot that stares dead ahead forever reads as a prop. A mascot whose
@@ -258,6 +287,17 @@ export class LionBrain {
    * yields immediately to any explicit `lookAt`.
    */
   private stepGaze(dt: number) {
+    /* DROP A TARGET THAT HAS GONE OUT OF REACH, hold or no hold.
+       Reach depends on where the lion is facing, and it wanders. A glance at
+       the card shelf is fine until the lion turns 125 degrees away from it
+       mid-stroll, at which point the clamp pins eyes and head at their stops
+       and holds that stare for the rest of the 2.2 s. Dropped against the FULL
+       range rather than the comfort margin `canLook` defaults to, so a target
+       hovering near the margin does not flicker in and out. */
+    if (this.gazeTarget && !this.canLook(this.gazeTarget, 1.0)) {
+      this.gazeTarget = null;
+      this.gazeHold = 0;
+    }
     if (this.gazeHold > 0) {
       this.gazeHold -= dt;
       return;
@@ -267,11 +307,15 @@ export class LionBrain {
     // Uneven on purpose: mostly at the child, sometimes at the cards. A even
     // split reads as a metronome.
     this.gazeSwitch = 1.8 + Math.random() * 2.6;
-    if (!this.interest.length || Math.random() < 0.55) {
+    /* Only the points the rig can actually reach from here. Filtered at pick
+       time rather than in `setInterest`, because reach depends on where the
+       lion is standing and which way it is facing, and it wanders. */
+    const reachable = this.interest.filter((q) => this.canLook(q));
+    if (!reachable.length || Math.random() < 0.55) {
       this.gazeTarget = null;   // back to the viewer / straight ahead
       return;
     }
-    const p = this.interest[Math.floor(Math.random() * this.interest.length)];
+    const p = reachable[Math.floor(Math.random() * reachable.length)];
     this.gazeTarget = { x: p.x, y: p.y, z: p.z };
   }
 
@@ -438,7 +482,7 @@ export class LionBrain {
        the child's choice rather than about the lion, so it is part of `greet`
        and not left to the ambient scheduler. It holds through the approach and
        the scheduler takes over afterwards. */
-    if (this.interest.length) {
+    if (this.interest.length && this.canLook(this.interest[0])) {
       const p = this.interest[0];
       this.lookAt(p.x, p.z, p.y);
       this.gazeHold = 3.4;
