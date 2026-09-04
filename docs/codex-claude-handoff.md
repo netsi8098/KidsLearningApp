@@ -7077,3 +7077,105 @@ an azimuth-dependent front boundary plus the crown's depth profile, together.
 2. **The mane's crown depth profile** — the side bands' -0.062 at h 0.90-0.95
    and the hairline's missing arch are one change.
 3. Retire the proxy; a second world for the bridge to arrive at.
+
+## GATE 18: the crown depth profile — which was a broken harness
+
+The crown was never short. The measurement that said so was wrong.
+
+### `fit()` scaled one object out of four
+
+`silhouette_render.fit` scales the model to 1 H and seats it on the ground, and
+it did that by re-parenting to a holder under `if o.parent is None`. The
+assembler parents `LionMane`, `LionFace_Gloss` and `LionFace_Ink` to `LionRig`;
+only `LionCage` has no parent. So the cage was scaled by 1.0235 and the mane was
+not, while the line below printed **"fit 4 objects"**. Every silhouette this
+harness ever rendered showed a lion whose body was 2.35% larger than its own
+mane, graded against a reference where they match.
+
+It is visible in the output once you look. The reference norms fill rows
+100-620 exactly — h 1.0000 to 0.0000 — and the model rendered rows **109-620**,
+h 0.9827: the bottom is the scaled cage's feet landing correctly on the ground,
+the top is the UNSCALED mane's crown, 9 px short. Fixed by walking each target
+to its root and parenting those, which brings the armature along so mesh and rig
+scale together.
+
+That 1.7% is a systematic "the mane is too small" bias in every band table:
+
+    side band    before fix   after fix
+    0.95-1.00      -0.046      +0.010
+    0.90-0.95      -0.062      -0.004
+    0.85-0.90      -0.025      -0.006
+    0.80-0.85      -0.015      +0.000
+
+**The -0.062 that this task was named after was the harness.** The crown's depth
+is within 0.010 of the reference across h 0.80-1.00 and needed no change. The
+fix alone moved the headline: WEIGHTED_IOU 0.8831 -> 0.8892, front 0.9346 ->
+0.9420, side 0.9072 -> 0.9176, and `missing` fell from 5.48% to 3.80% on the
+front and 6.93% to 5.36% on the side.
+
+This is the fourth "measured against the wrong frame" defect on this asset, after
+the eye height applied in world y, the head assist about an inclined local axis,
+and the ear table. And the second harness bug found in the silhouette renderer
+after the posed-silhouette one — whose docstring says "this is the third time the
+same trap has been found in a different script".
+
+### What the fix REVEALED, and a negative result on it
+
+With registration correct, one front band fails: `0.95-1.00 ref 0.248 mod 0.304
++0.056`. Previously it read -0.038, so the bug had been masking a real defect
+with its own opposite sign. Row by row the model is ~0.018 too wide from h 0.89
+to 0.97 and too narrow at 0.98-0.99 — the crown reads blunt.
+
+The cause is the same frame mismatch one level down: `build_hood` and
+`fit_to_measured` both index the measured profile by model z as if it were h, so
+the rendered profile is the reference's stretched 2.35% upward. Harmless where
+the profile is flat; the crown falls from 0.221 to 0.067 over h 0.89-0.99.
+
+Correcting the lookup is right in isolation and made the asset WORSE:
+
+    variant                    crown band   front IoU   weighted IoU
+    as shipped (no convert)       +0.056      0.9431       0.8897
+    convert in build_hood only    +0.023      0.9378       0.8877
+    convert in both               -0.060      0.9325       0.8868
+
+Converting in `build_hood` alone sets the build fighting the fit — the per-band
+factor runs to 1.645 undoing it. Converting both overshoots to -0.060. The
+reason is that the REST of the mane is expressed in the unconverted frame: ring
+heights from `prof_side` as z, placement and height from `mane_band` as z, the
+global fit from the bbox. Correcting only the width pairs corrected widths with
+uncorrected heights. Doing it properly means re-framing the asset so model z IS
+h — which changes the total height and therefore the 1.0235 itself, across the
+cage, rig, clips and runtime scale. Left alone deliberately, numbers recorded in
+place.
+
+### One change that did stand on its own
+
+`fit_to_measured` smoothed its per-band factor over +/-2 bands. 32 bands over
+0.791 of height makes a band 0.0247 tall, so the window spans 0.099 — across the
+crown the reference's half-width changes by more than the window is wide, so the
+crown's own factor was averaged away with its neighbours'. Narrowed to +/-1
+(`LION_MANE_FIT_SMOOTH`): WEIGHTED_IOU 0.8892 -> 0.8897, front 0.9420 -> 0.9431.
+Same filter-wider-than-the-feature error as the mane's `nh`, the river's
+ripples and the ear's ring sampling.
+
+### State
+
+    silhouette  WEIGHTED_IOU 0.8831 -> 0.8897   front 0.9431  side 0.9176
+                3/4 0.8159  rear 0.8040   MEAN 0.8701
+    registration model rows 100-620, h_top 1.0000 — matches the reference exactly
+    side bands  every band h 0.80-1.00 within 0.010
+    front bands 0.95-1.00 +0.056 is the one failure (crown blunt, diagnosed above)
+    mane        WIDTH -0.6%, HEIGHT exact, DEPTH exact
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    crease      CREASED_REGIONS=1 ['rear leg'] — pre-existing
+    glb         5936 KB against a 6144 cap, 4 meshes, both contracts pass
+
+### Next, in order
+
+1. **The rear limb rebuild** — still the only crease failure, 71.9 p99, 6.10%
+   over 25, station chain reversing twice.
+2. **Re-frame the asset so model z is h**, once, everywhere. It is now the known
+   cause of the crown band, it has bitten four times in different disguises, and
+   every local correction for it has measured worse than leaving it.
+3. Retire the proxy; a second world for the bridge to arrive at.

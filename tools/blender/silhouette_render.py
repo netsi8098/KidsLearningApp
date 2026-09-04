@@ -95,15 +95,43 @@ def fit(objs):
     k = 1.0 / h if h > 1e-6 else 1.0
     holder = bpy.data.objects.new("FitHolder", None)
     bpy.context.scene.collection.objects.link(holder)
+    # PARENT THE ROOTS, NOT THE OBJECTS. `if o.parent is None` scaled ONE of
+    # the four.
+    #
+    # The assembler parents `LionMane`, `LionFace_Gloss` and `LionFace_Ink` to
+    # `LionRig`; only `LionCage` has no parent. So this loop re-parented the
+    # cage and silently skipped the other three, while the line below printed
+    # "fit 4 objects". The cage was then scaled by 1.0235 and the mane was not:
+    # every silhouette this harness has ever rendered showed a lion whose body
+    # was 2.35% larger than its own mane, against a reference where they match.
+    #
+    # It is visible in the output if you look for it. The reference norms fill
+    # rows 100-620 exactly — h 1.0000 to 0.0000 — and the model rendered rows
+    # 109-620, h 0.9827: the bottom is the scaled cage's feet landing correctly
+    # on the ground, and the top is the UNSCALED mane's crown, 9 px short. That
+    # 1.7% is a systematic "the mane is too small" bias in every band table,
+    # and it is most of the -0.046 and -0.062 at side h 0.90-1.00 that nearly
+    # sent a crown-depth rebuild after a harness bug.
+    #
+    # Walking to the root also brings the armature along, so the mesh and the
+    # rig it is deformed by are scaled together and the deformation stays
+    # consistent.
+    roots = []
     for o in objs:
-        if o.parent is None:
-            o.parent = holder
-            o.matrix_parent_inverse = holder.matrix_world.inverted()
+        r = o
+        while r.parent is not None:
+            r = r.parent
+        if r not in roots:
+            roots.append(r)
+    for r in roots:
+        r.parent = holder
+        r.matrix_parent_inverse = holder.matrix_world.inverted()
     holder.scale = (k, k, k)
     ctr = (mn + mx) / 2
     holder.location = (-ctr.x * k, -ctr.y * k, -mn.z * k)
     bpy.context.view_layer.update()
-    print(f"[sil] fit {len(objs)} objects: raw h={h:.4f} scale={k:.4f}")
+    print(f"[sil] fit {len(objs)} objects via {len(roots)} root(s) "
+          f"({', '.join(r.name for r in roots)}): raw h={h:.4f} scale={k:.4f}")
     return holder
 
 

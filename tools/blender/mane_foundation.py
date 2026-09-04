@@ -50,6 +50,46 @@ MODEL = json.load(open(os.path.join(VIEWS, "reference_model.json")))
 LM = MODEL["landmarks"]
 SIDE_LEN = LM["side_length_H"]
 
+# THE SILHOUETTE FRAME, and a MEASURED NEGATIVE RESULT about correcting it here.
+#
+# A measured h is not a model z. `silhouette_render.fit` scales the model so its
+# height is exactly 1 H before rendering, and the reference norms fill h 0.0000
+# to 1.0000, but the assembled model is 0.9770 tall in its own units — so the
+# render maps model z to graded h as h = (z - 0.0040) * 1.0235, and widths by
+# the same factor. Every builder in this project reads measured h values and
+# uses them directly as model z, which puts features 2.35% high in the frame
+# the QA grades in.
+#
+# Where the measured profile is FLAT that costs nothing, which is why the front
+# bands from h 0.65 to 0.90 all sit within 0.019 of the reference. The crown is
+# where it bites: the reference's mane half-width falls from 0.221 at h 0.89 to
+# 0.067 at h 0.99, so stretching that profile 2.35% upward leaves the model
+# systematically ~0.018 too wide from h 0.89 to 0.97. The band table reports it
+# as `0.95-1.00  +0.056  <-- width`, and it is the crown reading blunt.
+#
+# CORRECTING THE LOOKUP ALONE MADE IT WORSE. Building at
+# `ref_at(sil_h(z)) / S` is right in isolation — the arithmetic checks — and
+# three variants were measured:
+#
+#     variant                    crown band   front IoU   weighted IoU
+#     as shipped (no convert)       +0.056      0.9431       0.8897
+#     convert in build_hood only    +0.023      0.9378       0.8877
+#     convert in both               -0.060      0.9325       0.8868
+#
+# Every variant lowers the headline metric, and converting in `build_hood` alone
+# sets the build fighting the fit — the per-band factor goes to 1.645 undoing it.
+# The reason is that the rest of the mane's construction is expressed in the
+# UNCONVERTED frame: the ring heights come from `prof_side` as z, the placement
+# and height from `mane_band` as z, and the global fit from the bbox. Converting
+# only the width pairs corrected widths with uncorrected heights.
+#
+# Doing it properly means re-framing the whole asset so model z IS h, which
+# changes the model's total height and therefore the 1.0235 itself — a
+# self-referential change across the cage, the rig, the clips and the runtime
+# scale, not a local patch to this file. Left alone deliberately, with the
+# numbers above so the next attempt starts from them.
+
+
 NSEG = 24          # ring segments; the hood is a broad form and wants resolution
 NRING = 30         # stations along the mane's depth
 
@@ -646,8 +686,18 @@ def fit_to_measured(obj):
             # Clamped. An unbounded ratio lets one stray vertex in a nearly-empty
             # band throw a spike into the surface.
             fac[b] = min(2.10, max(0.55, want_w[b] / cur[b]))
-    sm = [sum(fac[max(0, b - 2):min(NB, b + 3)]) / len(fac[max(0, b - 2):min(NB, b + 3)])
-          for b in range(NB)]
+    # SMOOTHED OVER +/-1 BAND, NOT +/-2, and the crown is why.
+    #
+    # 32 bands over the mane's 0.791 of height makes a band 0.0247 tall, so a
+    # +/-2 window averages the factor over 0.099 of height. Across the crown the
+    # reference's half-width falls from 0.221 to 0.067, which is more change than
+    # the window is wide — so the crown's own factor was averaged away with its
+    # neighbours' and the fit could never reach the target there. That is the
+    # same filter-wider-than-the-feature error as the mane's `nh`, the river's
+    # ripples and the ear's ring sampling.
+    H = int(os.environ.get("LION_MANE_FIT_SMOOTH", "1"))
+    sm = [sum(fac[max(0, b - H):min(NB, b + H + 1)])
+          / len(fac[max(0, b - H):min(NB, b + H + 1)]) for b in range(NB)]
 
     # INTERPOLATE THE FACTOR, do not index it.
     #
