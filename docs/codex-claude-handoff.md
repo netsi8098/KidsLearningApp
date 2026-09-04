@@ -6979,3 +6979,101 @@ Worth knowing before the next change to the head.
 2. **The mane's front edge** — the band across the forehead, and the hairline
    crowding the brows the reference gives an open forehead.
 3. Retire the proxy; a second world for the bridge to arrive at.
+
+## GATE 17: the mane's front edge
+
+The dark hard-edged band across the forehead, flagged as pre-existing in GATE 16.
+
+### It was a visor with a cavity under it
+
+`build_hood` builds the mane as a shell: an outer surface shaped by the measured
+front silhouette, and an inner surface that is a **circle** of radius
+`face_r` = 0.2446 about `(0, y, 0.60415)`. A circle is not a head. The skull
+domes over and falls away — probing the assembled cage at the midline puts its
+skin at y 0.5547 by z 0.78 and gone by z 0.81 — while the circle carries
+straight on to z 0.8487 at the front cap's own depth of y 0.5663. So over the
+forehead the mane's inner surface stood in FRONT of the skull instead of behind
+it, and the shell became a visor with an open cavity underneath.
+
+Measured on the shipped asset: **650 downward-facing mane faces over the
+forehead, the worst 52.4 mm proud of the skin below it.** Lit from the front,
+that cavity is in shadow, which is the band.
+
+This is the THIRD defect traced to this one inner shell. `build_hood` already
+records the other two: a fixed unit passed as an x-extent that made it a
+rectangular tube, and the same slab "twice blamed on the outer hood".
+
+### A clamp, not a conform
+
+The shell only reads wrong where the inner surface is OUTSIDE the skull. Where
+it is already inside — most of the mane — it is invisible and its shape does not
+matter. So `hug_head` takes the radius down to the skull's, and only down:
+`min(r, skull_r - inset)`. Nothing already buried moves, so no region boundary
+is introduced and nothing that currently passes a gate is touched. The outer
+surface is excluded by an inward-facing normal test, blended so the front lip
+is not stepped.
+
+Three things it needed:
+
+**It has to run after the fit.** `fit_to_measured` is a global per-axis scale —
+x by 0.629 — followed by a per-band x correction whose factors run 0.954 to
+1.165. Conforming before it comes back off the skull.
+
+**It has to probe the SUBDIVIDED cage.** The donor is the 969-vert control cage
+with its modifiers stripped, but what ships is that cage subdivided twice, and
+Catmull-Clark pulls the surface in. At z 0.78 the control cage's skin is at
+y 0.5690 and the limit surface at y 0.5547 — 14.3 mm apart, against a 4 mm
+inset. Probing the control cage would under-correct by more than the correction.
+`Object.ray_cast` ignores modifiers, so the evaluated mesh is realised into a
+temporary object; and it must not be `hide_viewport`, which drops it from the
+depsgraph and fails with "has no evaluated mesh data".
+
+**It only works over the crown.** The head is roughly spherical about the face
+centre, so a ray from there is the right probe over the forehead. It is the
+wrong probe anywhere the mane is not wrapping the skull: cast downward from the
+face centre it hits the chin at r 0.15 while the ruff below the chin
+legitimately sits at r 0.42, so the first version yanked the mane's lower front
+up by **283 mm**. Gated to upward radial directions with a smooth falloff, plus
+a 120 mm guard that leaves a vertex alone rather than flinging it.
+
+### What it cost: nothing measurable
+
+    overhang     worst 52.4 mm proud -> 14.1 mm, 650 faces -> 591
+    silhouette   WEIGHTED_IOU 0.8831 -> 0.8831, all four views identical
+    mane         WIDTH 0.7040 / HEIGHT 0.7910 / DEPTH 0.5577 — unchanged
+    integrity    slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform       worst area 0.252, pinched 0, flipped 0
+    crease       CREASED_REGIONS=1 ['rear leg'] — pre-existing only
+    glb          5930 KB against a 6144 cap, 4 meshes, both contracts pass
+
+The extents cannot move by construction: the mane's width, height and depth
+extremes are all on the outer shell or on the front cap, and the pass only
+changes x and z radially. 598 verts moved, worst correction 118.6 mm.
+
+### The hairline is still low, and it is not this defect
+
+Measured off `front.png`, calibrated against the mask, the reference's hairline
+is an ARCH — it peaks at |x| 0.06-0.08 at h 0.804 and dips to 0.784 at the
+midline, a slight widow's peak, falling to 0.754 by |x| 0.16. The model's falls
+monotonically from the midline:
+
+    |x|      0.00   0.04   0.08   0.12   0.16
+    ref     0.784  0.800  0.804  0.792  0.754
+    model   0.772  0.768  0.764  0.752  0.716
+
+So the model is ~0.035 low with no arch. That is **coupled to the cavity and
+cannot be fixed with it**: the hairline sits at `0.604 + r_inner`, so putting it
+at 0.790 means either r_inner 0.186 against a skull at 0.166 — reopening a 20 mm
+gap — or pulling the crown's front boundary back 0.042 in y, and the side bands
+already show the crown 0.025 to 0.062 SHORT fore-aft at h 0.85-0.95. The mane's
+front boundary is a single measured `front_u` for every azimuth, so the forehead's
+mane starts as far forward as the chin ruff. Fixing the hairline properly means
+an azimuth-dependent front boundary plus the crown's depth profile, together.
+
+### Next, in order
+
+1. **The rear limb rebuild** — still the only region failing the crease gate,
+   71.9 degrees p99 and 6.10% over 25, station chain reversing twice.
+2. **The mane's crown depth profile** — the side bands' -0.062 at h 0.90-0.95
+   and the hairline's missing arch are one change.
+3. Retire the proxy; a second world for the bridge to arrive at.

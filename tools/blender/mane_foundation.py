@@ -742,6 +742,136 @@ def smooth_and_subdivide(obj):
           f"{len(obj.data.polygons)} faces")
 
 
+def skull_probe(cage, levels=2):
+    """A ray-castable copy of the cage at its SUBDIVIDED size.
+
+    The donor is the control cage — 969 verts, and `import_donor_body` strips
+    its modifiers — but what ships is that cage subdivided twice, and
+    Catmull-Clark pulls the surface inward. Measured on the forehead at z 0.78
+    the control cage's skin sits at y 0.5690 and the limit surface at y 0.5547:
+    14.3 mm apart, against the 4 mm inset this file is about to ask for. Probing
+    the control cage would therefore under-correct by more than the correction.
+
+    `Object.ray_cast` reads the object's own mesh and ignores modifiers, so the
+    evaluated mesh has to be realised into a temporary object to be cast at.
+    """
+    mod = cage.modifiers.new("SkullProbeSubsurf", "SUBSURF")
+    mod.levels = mod.render_levels = levels
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(cage.evaluated_get(dg))
+    cage.modifiers.remove(mod)
+    probe = bpy.data.objects.new("SkullProbe", me)
+    bpy.context.scene.collection.objects.link(probe)
+    probe.matrix_world = cage.matrix_world.copy()
+    # NOT hide_viewport: that drops the object from the depsgraph, and
+    # `ray_cast` then fails with "has no evaluated mesh data". The update is
+    # needed for the same reason — a freshly linked object has not been
+    # evaluated yet.
+    probe.hide_render = True
+    bpy.context.view_layer.update()
+    print(f"[mane] skull probe: {len(me.vertices)} verts (cage L{levels})")
+    return probe
+
+
+def hug_head(obj, probe, inset=0.004, max_pull=0.120, face_h=None):
+    """Pull the hood's INNER surface inside the skull wherever it floats outside.
+
+    THE DARK BAND ACROSS THE FOREHEAD.
+
+    `build_hood` builds the hood as a shell: an outer surface shaped by the
+    measured front silhouette, and an inner surface that is a CIRCLE of radius
+    `face_r` = 0.2446 about (0, y, 0.60415). A circle is not a head. The skull
+    domes over and falls away — its surface at the midline is at y 0.5547 by
+    z 0.78 and gone by z 0.81 — while the circle carries straight on to
+    z 0.8487 at the front cap's own depth of y 0.5663. So over the forehead the
+    mane's inner surface stands in FRONT of the skull instead of behind it, and
+    the shell becomes a visor with a cavity under it. Measured on the shipped
+    asset: 650 downward-facing mane faces over the forehead, the worst of them
+    52.4 mm proud of the skin below it. That cavity, lit from the front and
+    therefore in shadow, is the hard-edged dark band across the forehead in
+    every front and three-quarter render.
+
+    This is the THIRD defect traced to this inner shell. The other two are
+    recorded in `build_hood`: a fixed unit passed as an x-extent that made it a
+    rectangular tube, and the same slab "twice blamed on the outer hood".
+
+    WHY A CLAMP AND NOT A CONFORM
+
+    The shell only reads wrong where the inner surface is OUTSIDE the skull. Where
+    it is already inside — most of the mane — it is invisible and its shape does
+    not matter. So this takes the radius down to the skull's, and only down:
+    `min(r, skull_r - inset)`. Everything already buried is untouched, so no
+    region boundary is introduced and nothing that currently passes a gate moves.
+
+    WHY IT RUNS AFTER THE FIT
+
+    `fit_to_measured` is a global per-axis scale followed by a per-band x
+    correction whose factors run 0.630 to 1.001. Conforming before it would be
+    scaled by up to a third and land back off the skull.
+
+    The outer surface is left alone by an inward-facing test, blended so the
+    front lip — where the two surfaces meet and the normal is perpendicular to
+    the radius — is not stepped. The mane's measured extents cannot move: its
+    width, height and depth extremes are all on the outer shell or on the front
+    cap, and this only changes x and z radially.
+    """
+    face_h = LM["face_centre_front"]["h"] if face_h is None else face_h
+    me = obj.data
+    moved = capped = 0
+    worst = 0.0
+    for v in me.vertices:
+        p = v.co
+        axis = Vector((0.0, p.y, face_h))
+        d = Vector((p.x - axis.x, 0.0, p.z - axis.z))
+        r = d.length
+        if r < 1e-5:
+            continue
+        dn = d / r
+        # How much this vertex faces the head rather than away from it. The lip
+        # sits near 0 and keeps its place; the inner surface is near 1.
+        w = (-(v.normal.x * dn.x + v.normal.z * dn.z) - 0.10) / 0.35
+        w = 0.0 if w <= 0.0 else (1.0 if w >= 1.0 else w * w * (3.0 - 2.0 * w))
+        # AND ONLY OVER THE CROWN, because a single radial axis is not a good
+        # parametrisation of the whole mane.
+        #
+        # The head is roughly spherical about the face centre, so a ray from
+        # there is the right probe over the forehead and crown. It is the wrong
+        # probe anywhere the mane is not wrapping the skull: cast DOWNWARD from
+        # the face centre it hits the chin at r 0.15, while the ruff hanging
+        # below the chin legitimately sits at r 0.42 — so the first version of
+        # this pass yanked the lower front of the mane up by 283 mm. Whether
+        # that ruff also stands off the chest is a separate question about a
+        # different part of the mane, and it is not answered by this axis.
+        wz = (dn.z - 0.30) / 0.25
+        wz = 0.0 if wz <= 0.0 else (1.0 if wz >= 1.0 else wz * wz * (3.0 - 2.0 * wz))
+        w *= wz
+        if w <= 0.0:
+            continue
+        hit, loc, _n, _i = probe.ray_cast(axis, dn)
+        if not hit:
+            continue
+        limit = (loc - axis).length - inset
+        if r <= limit:
+            continue
+        target = r + (limit - r) * w
+        # A guard, not a tuning knob. The measured defect is 83 mm at its worst
+        # (the front cap's inner top, r 0.2446 against a forehead at r 0.166),
+        # so anything past 120 mm means the probe found something it should not
+        # have and the vertex is left alone rather than flung across the model.
+        if r - target > max_pull:
+            capped += 1
+            continue
+        worst = max(worst, r - target)
+        v.co = Vector((axis.x + dn.x * target, p.y, axis.z + dn.z * target))
+        moved += 1
+    me.update()
+    print(f"[mane] hug_head: {moved} inner-surface verts pulled inside the "
+          f"skull, worst correction {worst * 1000:.1f} mm (inset "
+          f"{inset * 1000:.0f} mm), {capped} left alone by the "
+          f"{max_pull * 1000:.0f} mm guard")
+    return {"moved": moved, "worst": worst, "capped": capped}
+
+
 def import_donor_body():
     """Bring in the proven cage so the hood is judged against a real head."""
     donor = os.path.join(REPO, "art", "blender", "lion_cage.blend")
@@ -900,6 +1030,14 @@ def main():
     # would squash the scallop straight back out.
     scallop_rim(mane, count=SCALLOP_COUNT, amp=SCALLOP_AMP)
     body = import_donor_body()
+    # After the fit, for the reason in `hug_head`: the fit's per-band x factors
+    # reach 0.630, so anything conformed before it comes back out again.
+    cage = next((o for o in body if o.name.split(".")[0] == "LionCage"), None)
+    if cage is None:
+        raise SystemExit("[mane] no donor LionCage to hug the head against")
+    probe = skull_probe(cage)
+    hug_head(mane, probe)
+    bpy.data.objects.remove(probe, do_unlink=True)
 
     pts = [v.co for v in mane.data.vertices]
     mw = max(p.x for p in pts) - min(p.x for p in pts)
