@@ -333,111 +333,198 @@ def build_lily_pads(col):
 
 
 # ── Layer 3 — foliage ───────────────────────────────────────────────────────
-def build_tree(name, loc, scale, col, blossom=True, tone=0.0):
-    """Stylised tree with a two-tone canopy and a flared trunk.
+# Canopy schema, in NORMALISED units so ONE table serves every tree size.
+#   dx, dy — lobe centre offset, in crown radii
+#   dz     — lobe centre height, as a fraction of TRUNK height
+#   r      — lobe radius, as a fraction of the crown radius
+#   tone   — which of the three foliage greens
+#
+# Trunk height is the tree's single driver, and that is deliberate: it is the
+# number `world_audit` measures (its patterns match the `*_Trunk` object, not
+# the canopy), and it is also the number the target's REASON is about — "the
+# canopy must clear its head" is a statement about how much bare trunk there
+# is. Deriving the crown from it keeps the measurement and the intent the same
+# quantity instead of two that drift apart.
+CANOPY_LOBES = [
+    (0.00, 0.00, 0.86, 1.00, "mid"),      # the main mass
+    (-0.60, -0.32, 0.74, 0.74, "dark"),   # shadow lobe, low and away from sun
+    (0.50, 0.38, 0.92, 0.78, "lit"),      # lit lobe, sun side and higher
+    (-0.32, 0.50, 0.97, 0.58, "mid"),
+    (0.56, -0.44, 0.80, 0.60, "mid"),
+    (0.22, 0.26, 1.02, 0.46, "lit"),      # crown tip
+    (-0.66, 0.16, 0.68, 0.50, "dark"),
+    (0.04, -0.60, 0.88, 0.52, "mid"),
+]
+CROWN_R_FRAC = 0.30       # default crown radius, as a fraction of trunk height
+LOBE_SQUASH = 0.80        # lobes are flattened, not spherical
 
-    The blockout version was three same-size spheres on a cylinder, which reads
-    as a lollipop. What makes a stylised canopy read as foliage is asymmetry and
-    a lit/shaded split: a shadow mass low and away from the sun, lit masses on
-    the sun side, and a few small clumps breaking the outer silhouette.
+# Two facts fall out of the table, and the framing depends on both. At the
+# default crown ratio a tree is 1.13 x its trunk tall, and its canopy floor —
+# the height the character walks under — is 0.56 x. `build_tree` recomputes
+# them from the crown ratio it is actually given.
+
+
+def build_tree(name, loc, col, trunk_h, blossom=True, crown_r=None, twist=0.0):
+    """Stylised tree, authored in METRES from its trunk height.
+
+    `loc` is the point on the ground the trunk grows out of; the trunk's
+    bounding box is exactly `trunk_h` tall, so what the scale gate measures is
+    what this argument says.
+
+    WHY IT IS NO LONGER A `scale` MULTIPLIER
+    The previous version built a fixed 2.57 m tree and multiplied every part by
+    a scale factor, which meant the only way to find out how tall a tree was
+    was to multiply two numbers in your head — and nobody did. The world shipped
+    with its tallest trunk at 1.82 m against a 1.30 m character.
+
+    WHY THE CANOPY IS LOBES AND NOT A BALL
+    Asymmetry and a lit/shaded split are what make a stylised canopy read as
+    foliage: a shadow mass low and away from the sun, lit masses on the sun
+    side and higher, a tip that is not the centre of anything, and small clumps
+    breaking the outer silhouette. Eight overlapping lobes at five radii cost
+    the same as eight identical ones.
     """
     parts = []
-    sun_x, sun_y = 0.62, 0.78          # matches LIGHT_KeySun's azimuth
+    crown_r = crown_r or trunk_h * CROWN_R_FRAC
+    bx, by, bz = loc
+    sun = (0.62, 0.78)                 # matches LIGHT_KeySun's azimuth
+    drop = LOBE_SQUASH * crown_r / trunk_h
+    floor_frac = min(dz - drop * rf for _, _, dz, rf, _ in CANOPY_LOBES)
 
-    # Trunk: tapered, with a root flare so it grows out of the ground.
-    bpy.ops.mesh.primitive_cone_add(vertices=14, radius1=0.26, radius2=0.145,
-                                    depth=1.35, location=(loc[0], loc[1], loc[2] + 0.66))
+    # Foliage lobes get more segments when the tree is big on screen and fewer
+    # when it is a distant silhouette. A 6 m tree at the far bank is ~40% of the
+    # frame height; a 1 m bank shrub is 30 px.
+    seg, ring = (18, 11) if crown_r >= 1.05 else (14, 9)
+
+    def lobe(nm, x, y, z, r, mat, s=None, segs=None):
+        sg, rg = segs or (seg, ring)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=sg, ring_count=rg, radius=r,
+                                             location=(x, y, z))
+        o = bpy.context.object
+        o.name = nm
+        o.scale = s or (1.0, 1.0, LOBE_SQUASH)
+        assign(o, mat)
+        parts.append(o)
+        return o
+
+    # Trunk: one tapered cone whose bbox height IS trunk_h. Radius scales with
+    # height so a 5 m tree is not a 5 m broomstick.
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=12, radius1=trunk_h * 0.056, radius2=trunk_h * 0.030,
+        depth=trunk_h, location=(bx, by, bz + trunk_h * 0.5))
     trunk = bpy.context.object
     trunk.name = f"{name}_Trunk"
     assign(trunk, MAT["bark"])
     parts.append(trunk)
 
-    bpy.ops.mesh.primitive_cone_add(vertices=14, radius1=0.40, radius2=0.24,
-                                    depth=0.34, location=(loc[0], loc[1], loc[2] + 0.15))
+    # Root flare, so it grows out of the ground rather than being pushed into it.
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=12, radius1=trunk_h * 0.098, radius2=trunk_h * 0.058,
+        depth=trunk_h * 0.11, location=(bx, by, bz + trunk_h * 0.055))
     flare = bpy.context.object
     flare.name = f"{name}_RootFlare"
     assign(flare, MAT["bark"])
     parts.append(flare)
 
-    # A short fork so the canopy has something to sit on.
-    for i, (bx, by) in enumerate(((-0.34, 0.10), (0.32, -0.12))):
+    # Three limbs leaving the trunk below the canopy floor, so the structure is
+    # visible in the gap the character walks through rather than hidden inside
+    # the leaves.
+    for i in range(3):
+        a = twist + i * math.tau / 3.0
+        limb_l = trunk_h * 0.26
+        cz = bz + trunk_h * (floor_frac + 0.10)
+        tilt = math.radians(38.0)
         bpy.ops.mesh.primitive_cone_add(
-            vertices=8, radius1=0.10, radius2=0.05, depth=0.62,
-            location=(loc[0] + bx * 0.6, loc[1] + by * 0.6, loc[2] + 1.28))
+            vertices=6, radius1=trunk_h * 0.026, radius2=trunk_h * 0.011,
+            depth=limb_l,
+            location=(bx + math.cos(a) * limb_l * 0.42,
+                      by + math.sin(a) * limb_l * 0.42,
+                      cz + limb_l * 0.38))
         b = bpy.context.object
         b.name = f"{name}_Branch_{i}"
-        b.rotation_euler = (math.radians(by * 90), math.radians(-bx * 90), 0)
+        b.rotation_euler = (0.0, tilt, a)
         assign(b, MAT["bark"])
         parts.append(b)
 
-    # Canopy: shadow mass first, then lit masses biased toward the sun.
-    canopy = [
-        (-0.42, -0.30, 1.52, 0.78, "dark"),
-        (0.30, 0.26, 1.60, 0.74, "mid"),
-        (sun_x * 0.55, sun_y * 0.42, 1.86, 0.70, "lit"),
-        (-0.20, 0.44, 1.94, 0.58, "mid"),
-        (0.46, -0.34, 1.78, 0.56, "mid"),
-        (sun_x * 0.34, sun_y * 0.30, 2.18, 0.46, "lit"),
-        (-0.52, 0.14, 1.30, 0.50, "dark"),
-    ]
     tone_map = {"dark": MAT["leaf_dark"], "mid": MAT["leaf"], "lit": MAT["leaf_lit"]}
-    for i, (dx, dy, dz, r, key) in enumerate(canopy):
-        bpy.ops.mesh.primitive_uv_sphere_add(
-            segments=18, ring_count=11, radius=r,
-            location=(loc[0] + dx, loc[1] + dy, loc[2] + dz))
-        c = bpy.context.object
-        c.name = f"{name}_Canopy_{i}"
-        c.scale = (1.0, 1.0, 0.84)
-        assign(c, tone_map[key])
-        parts.append(c)
+    for i, (dx, dy, dz, rf, key) in enumerate(CANOPY_LOBES):
+        lobe(f"{name}_Canopy_{i}",
+             bx + dx * crown_r, by + dy * crown_r, bz + dz * trunk_h,
+             rf * crown_r, tone_map[key])
 
     # Small clumps break the outer silhouette so it is not a smooth blob.
     for i in range(6):
-        a = (i / 6) * math.tau + 0.4
-        rr = 0.80
-        bpy.ops.mesh.primitive_uv_sphere_add(
-            segments=10, ring_count=7, radius=0.24,
-            location=(loc[0] + math.cos(a) * rr,
-                      loc[1] + math.sin(a) * rr * 0.85,
-                      loc[2] + 1.62 + math.sin(a * 1.7) * 0.34))
-        cl = bpy.context.object
-        cl.name = f"{name}_Clump_{i}"
-        assign(cl, MAT["leaf_lit"] if i % 2 else MAT["leaf"])
-        parts.append(cl)
+        a = twist + (i / 6.0) * math.tau + 0.4
+        rr = crown_r * 0.92
+        lobe(f"{name}_Clump_{i}",
+             bx + math.cos(a) * rr, by + math.sin(a) * rr * 0.88,
+             bz + trunk_h * (0.86 + math.sin(a * 1.7) * 0.13),
+             crown_r * 0.26, MAT["leaf_lit"] if i % 2 else MAT["leaf"],
+             segs=(10, 6))
 
     if blossom:
         for i in range(11):
-            a = (i / 11) * math.tau
-            bpy.ops.mesh.primitive_uv_sphere_add(
-                segments=7, ring_count=5, radius=0.085,
-                location=(loc[0] + math.cos(a) * 0.80,
-                          loc[1] + math.sin(a) * 0.70,
-                          loc[2] + 1.72 + math.sin(a * 2.3) * 0.36))
+            a = twist + (i / 11.0) * math.tau
+            bpy.ops.mesh.primitive_ico_sphere_add(
+                subdivisions=1, radius=crown_r * 0.095,
+                location=(bx + math.cos(a) * crown_r * 0.97,
+                          by + math.sin(a) * crown_r * 0.86,
+                          bz + trunk_h * (0.90 + math.sin(a * 2.3) * 0.12)))
             b = bpy.context.object
             b.name = f"{name}_Blossom_{i}"
+            b.scale = (1.0, 1.0, 0.78)
             assign(b, MAT["blossom"] if i % 3 else MAT["petal_white"])
             parts.append(b)
 
+    # Sun-side lobes are nudged toward the key so the lit/shade split is not
+    # purely a material trick — the geometry leans into the light too.
     for pt in parts:
-        pt.scale = tuple(v * scale for v in pt.scale)
-        pt.location = (loc[0] + (pt.location.x - loc[0]) * scale,
-                       loc[1] + (pt.location.y - loc[1]) * scale,
-                       loc[2] + (pt.location.z - loc[2]) * scale)
+        if "_Canopy_" in pt.name or "_Clump_" in pt.name:
+            pt.location.x += sun[0] * crown_r * 0.04
+            pt.location.y += sun[1] * crown_r * 0.04
         link(pt, col)
     return parts
 
 
 def build_foliage(col):
-    # On-island trees sit off the lion's centre line so they never mask it.
-    build_tree("ENV_TreeIslandL", (-2.05, 1.35, island_surface_z(-2.05, 1.35) - 0.05), 0.72, col)
-    build_tree("ENV_TreeIslandR", (2.15, 1.05, island_surface_z(2.15, 1.05) - 0.05), 0.62, col)
-    # Bank trees frame the composition.
-    build_tree("ENV_TreeBankL", (-8.2, 5.0, WATER_Z + 0.55), 1.25, col)
-    build_tree("ENV_TreeBankR", (8.6, 4.2, WATER_Z + 0.55), 1.35, col)
-    build_tree("ENV_TreeBankFarL", (-12.0, 8.5, WATER_Z + 0.9), 1.0, col, blossom=False)
-    build_tree("ENV_TreeBankFarR", (12.4, 9.2, WATER_Z + 0.9), 1.1, col, blossom=False)
+    """The trees, sized against the character rather than against each other.
 
-    # Bushes soften the island rim.
+    The island pair is the load-bearing change. At trunk 4.20 m the canopy
+    floor (0.56 x trunk) sits at 2.35 m, so a 1.30 m lion walks under it with a
+    metre of daylight — which is the whole point of the `tree_mid` target and
+    was not true of the 1.86 m trees that used to stand here.
+
+    They also MOVED INWARD. The old pair stood at r = 2.46 and r = 2.39, i.e.
+    OUTSIDE `ISLAND_R`, where `island_surface_z` falls back to the flat dome
+    centre height. At 1.9 m tall that was invisible; at 4.7 m a trunk rooted in
+    the rim stones over open water is the first thing you see. They now sit at
+    r ~ 1.9, on real dome surface, still well off the lion's centre line and
+    BEHIND it in y so they cannot mask the character.
+
+    Their crowns are NARROWER than the default 0.30 x trunk. The first pass at
+    this size filled the top 45% of the production frame with leaves and put out
+    the rainbow; a crown at 0.265 x trunk is 2.1 m across instead of 2.5 m,
+    which is the difference between framing the sky and being it.
+    """
+    for name, x, y, trunk_h, twist in (
+        ("ENV_TreeIslandL", -1.58, 1.20, 4.05, 0.0),
+        ("ENV_TreeIslandR", 1.72, 0.92, 3.95, 1.1),
+    ):
+        build_tree(name, (x, y, island_surface_z(x, y) - 0.05), col, trunk_h,
+                   crown_r=trunk_h * 0.265, twist=twist)
+
+    # Bank trees frame the composition; they sit at or just past the frame edge
+    # so their trunks are vertical bookends rather than subjects.
+    build_tree("ENV_TreeBankL", (-8.2, 5.0, WATER_Z + 0.55), col, 4.40, twist=0.6)
+    build_tree("ENV_TreeBankR", (8.6, 4.2, WATER_Z + 0.55), col, 4.65, twist=2.2)
+    build_tree("ENV_TreeBankFarL", (-12.0, 8.5, WATER_Z + 0.90), col, 4.20,
+               blossom=False, twist=1.7)
+    build_tree("ENV_TreeBankFarR", (12.4, 9.2, WATER_Z + 0.90), col, 4.55,
+               blossom=False, twist=0.3)
+
+    # Bushes soften the island rim. Kept at waist-to-shoulder on the character
+    # deliberately — with the trees now four times the lion's height, the bushes
+    # are the rung of the ladder that says the island is small.
     for i, (x, y, s) in enumerate([
         (-1.5, -1.9, 0.62), (1.8, -1.7, 0.54), (-2.6, -0.4, 0.46), (2.7, 0.1, 0.50),
     ]):
@@ -450,33 +537,80 @@ def build_foliage(col):
         link(b, col)
 
 
+def flower_clump(name, x, y, z, col, height, mat, petals=5, phase=0.0):
+    """One flower: a stem, a ring of leaning petals, a centre.
+
+    WHY IT IS NOT A RING OF BALLS ANY MORE
+    Two separate problems, one fix.
+
+    It did not READ. Five equal spheres flat on the grass plus a sixth in the
+    middle is a bead cluster; at the production camera a flower is ~30 px tall
+    and a lozenge leaning off a stem is the only thing that says "petal" at
+    that size.
+
+    And it did not MEASURE. `world_audit` judges the flower scatter on the
+    MEDIAN HEIGHT of the objects named Flower/Petal/Bloom, and a bloom built
+    from six 0.11 m balls scores 0.08 x the character however wide the clump
+    gets. Height has to live in the geometry rather than in the footprint, so
+    the petals stand up: an upright lozenge tilted 26 degrees outward is
+    0.87 x the flower's height in its own bounding box, and the stem is 0.56 x.
+    """
+    H = height
+    stem_h = H * 0.56
+    pl, pw, pt = H * 0.40, H * 0.17, H * 0.10      # petal half length/width/thickness
+    tilt = math.radians(26.5)
+
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=6, radius1=H * 0.055, radius2=H * 0.032, depth=stem_h,
+        location=(x, y, z + stem_h * 0.5))
+    st = bpy.context.object
+    st.name = f"{name}_Stem"
+    assign(st, MAT["grass_dark"])
+    link(st, col)
+
+    for k in range(petals):
+        a = phase + (k / float(petals)) * math.tau
+        bpy.ops.mesh.primitive_ico_sphere_add(
+            subdivisions=1, radius=pl,
+            location=(x + math.cos(a) * H * 0.20,
+                      y + math.sin(a) * H * 0.20,
+                      z + stem_h - H * 0.05))
+        p = bpy.context.object
+        p.name = f"{name}_Petal_{k}"
+        p.scale = (pw / pl, pt / pl, 1.0)
+        p.rotation_euler = (0.0, tilt, a)
+        assign(p, mat)
+        link(p, col)
+
+    bpy.ops.mesh.primitive_ico_sphere_add(
+        subdivisions=1, radius=H * 0.20,
+        location=(x, y, z + stem_h + H * 0.02))
+    c = bpy.context.object
+    c.name = f"{name}_Core"
+    c.scale = (1.0, 1.0, 0.85)
+    assign(c, MAT["petal_gold"])
+    link(c, col)
+
+
 def build_flowers(col):
-    """Scattered blooms at three sizes — repetition at one size reads stamped."""
+    """The island's blooms — three sizes, because one size reads stamped.
+
+    Everything stays at r >= 1.4 and clear of the walk line between
+    MARK_WalkLeft and MARK_WalkRight: a 0.3 m flower is knee-high on the
+    character now, so a bloom under its feet would read as trampled rather
+    than as ground cover.
+    """
     spec = [
-        (-1.15, -0.55, 0.085, MAT["petal_white"]), (0.95, -0.95, 0.075, MAT["petal_gold"]),
-        (-0.55, 1.35, 0.090, MAT["petal_violet"]), (1.55, 0.65, 0.070, MAT["petal_white"]),
-        (-1.85, 0.35, 0.080, MAT["petal_gold"]), (0.35, -1.55, 0.085, MAT["petal_violet"]),
-        (2.05, -0.85, 0.065, MAT["petal_white"]), (-2.25, -1.15, 0.070, MAT["petal_gold"]),
+        (-1.42, -0.62, 0.38, MAT["petal_white"]), (1.16, -1.08, 0.32, MAT["petal_gold"]),
+        (-0.66, 1.52, 0.40, MAT["petal_violet"]), (1.64, 0.74, 0.31, MAT["petal_white"]),
+        (-1.90, 0.42, 0.36, MAT["petal_gold"]), (0.42, -1.64, 0.37, MAT["petal_violet"]),
+        (1.88, -0.68, 0.30, MAT["petal_white"]), (-1.62, -1.14, 0.34, MAT["petal_gold"]),
+        (0.94, 1.60, 0.32, MAT["petal_white"]), (-0.22, -1.94, 0.35, MAT["petal_violet"]),
+        (-1.20, 1.68, 0.30, MAT["petal_gold"]),
     ]
-    for i, (x, y, r, mat) in enumerate(spec):
-        for k in range(5):
-            a = (k / 5) * math.tau
-            bpy.ops.mesh.primitive_uv_sphere_add(
-                segments=8, ring_count=6, radius=r,
-                location=(x + math.cos(a) * r * 1.5, y + math.sin(a) * r * 1.5,
-                          island_surface_z(x, y) + 0.05))
-            p = bpy.context.object
-            p.name = f"ENV_Flower_{i}_P{k}"
-            assign(p, mat)
-            link(p, col)
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=r * 0.7,
-                                             location=(x, y, island_surface_z(x, y) + 0.07))
-        c = bpy.context.object
-        c.name = f"ENV_Flower_{i}_Core"
-        assign(c, MAT["petal_gold"])
-        link(c, col)
-
-
+    for i, (x, y, h, mat) in enumerate(spec):
+        flower_clump(f"ENV_Flower_{i}", x, y, island_surface_z(x, y) - 0.02, col,
+                     height=h, mat=mat, phase=i * 0.7)
 
 
 def build_island_detail(col):
@@ -485,6 +619,14 @@ def build_island_detail(col):
     Everything here stays OUTSIDE a clear radius around the centre: that is
     where the lion stands, and props competing with the character is exactly
     what the brief warns against. Detail rings the stage rather than filling it.
+
+    THE PEBBLES ARE NOT DECORATION. `world_audit`'s `stone_small` row exists
+    because scale is read from the smallest legible thing in frame as much as
+    from the tallest: with the trees at 4.7 m and the flowers at 0.3 m there was
+    nothing between 0.3 m and nothing, so the eye had no bottom rung. It was
+    reported MISSING, and it was — the five bedded rocks that were here were
+    named `ENV_IslandRock_*`, which collided with the island's own rock
+    underside and matched no category.
     """
     clear_r = 1.05          # keep the lion's footprint free
 
@@ -493,45 +635,61 @@ def build_island_detail(col):
     # reference island is smooth grass carrying flowers, not visible blades.
     # Surface interest comes from blooms and bedded rocks instead.
 
-    # Small rocks bedded into the grass give the surface scale.
+    # Bedded rocks — the big end of the stone scatter, half-sunk in the grass.
     for i, (x, y, r) in enumerate([
         (-1.62, 0.92, 0.15), (1.78, -0.62, 0.12), (0.42, 1.72, 0.10),
-        (-0.95, -1.68, 0.13), (2.05, 1.15, 0.11),
+        (-0.95, -1.68, 0.13), (0.86, -1.84, 0.11),
     ]):
         z = island_surface_z(x, y)
         bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=r,
                                              location=(x, y, z - r * 0.35))
         o = bpy.context.object
-        o.name = f"ENV_IslandRock_{i}"
+        o.name = f"ENV_SmallRock_{i}"
         o.scale = (1.25, 1.0, 0.66)
         assign(o, MAT["rock"])
         link(o, col)
 
-    # A second ring of blooms further out, at mixed scale.
-    ring = [
-        (-2.25, 0.35, 0.070, MAT["petal_white"]), (2.30, 0.55, 0.062, MAT["petal_violet"]),
-        (-1.35, 1.95, 0.058, MAT["petal_gold"]), (1.55, 1.85, 0.066, MAT["petal_white"]),
-        (-2.05, -1.35, 0.060, MAT["petal_violet"]), (2.10, -1.45, 0.055, MAT["petal_gold"]),
-        (0.15, 2.25, 0.064, MAT["petal_white"]), (-0.35, -2.15, 0.058, MAT["petal_violet"]),
+    # Pebble scatter. An icosphere at one subdivision is 20 triangles, which is
+    # what a 9 cm stone 13 m from camera is worth; a UV sphere here would cost
+    # four times that for pixels nobody can resolve.
+    # Every one of these is inside ISLAND_R with room to spare. Six of the first
+    # draft's were not, and `island_surface_z` answers the flat dome-centre
+    # height outside the rim — so they bedded themselves into the stone band
+    # instead of the grass.
+    pebbles = [
+        (-1.28, 1.36, 0.085), (1.44, 1.22, 0.070), (-1.86, -0.34, 0.075),
+        (1.92, -0.18, 0.065), (0.62, -1.42, 0.080), (-0.58, -1.36, 0.062),
+        (1.18, 1.62, 0.058), (-1.05, -1.72, 0.072), (1.68, -1.24, 0.068),
+        (-1.88, 0.60, 0.060), (0.24, 1.98, 0.066), (-0.86, 1.82, 0.055),
+        (2.02, 0.34, 0.062), (-1.70, 1.10, 0.052), (0.90, -1.72, 0.058),
+        (-0.30, -1.20, 0.050), (1.34, 0.42, 0.048), (-1.32, 0.34, 0.054),
+        (0.76, 1.18, 0.046), (-0.48, 1.24, 0.050), (1.44, -1.48, 0.056),
+        (-1.80, -0.94, 0.064),
     ]
-    for i, (x, y, r, mat) in enumerate(ring):
+    for i, (x, y, r) in enumerate(pebbles):
+        if math.hypot(x, y) < clear_r:
+            continue
         z = island_surface_z(x, y)
-        for k in range(5):
-            a = (k / 5) * math.tau
-            bpy.ops.mesh.primitive_uv_sphere_add(
-                segments=8, ring_count=6, radius=r,
-                location=(x + math.cos(a) * r * 1.5, y + math.sin(a) * r * 1.5, z + 0.05))
-            pt = bpy.context.object
-            pt.name = f"ENV_RingFlower_{i}_{k}"
-            assign(pt, mat)
-            link(pt, col)
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=r * 0.7,
-                                             location=(x, y, z + 0.07))
-        c = bpy.context.object
-        c.name = f"ENV_RingFlower_{i}_Core"
-        assign(c, MAT["petal_gold"])
-        link(c, col)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=r,
+                                              location=(x, y, z - r * 0.30))
+        o = bpy.context.object
+        o.name = f"ENV_Pebble_{i:02d}"
+        o.scale = (1.30, 1.0, 0.62)
+        assign(o, MAT["soil"] if i % 4 == 0 else MAT["rock"])
+        link(o, col)
 
+    # A second ring of blooms further out, at mixed scale. Pulled inside
+    # ISLAND_R (they were at r = 2.2-2.3, where `island_surface_z` gives the
+    # flat fallback height and a flower floats above the rim slope).
+    ring = [
+        (-1.98, 0.30, 0.31, MAT["petal_white"]), (1.96, 0.48, 0.29, MAT["petal_violet"]),
+        (-1.24, 1.62, 0.30, MAT["petal_gold"]), (1.42, 1.50, 0.32, MAT["petal_white"]),
+        (-1.86, -0.86, 0.30, MAT["petal_violet"]), (1.82, -0.90, 0.31, MAT["petal_gold"]),
+        (0.14, 1.98, 0.33, MAT["petal_white"]), (-0.32, -1.94, 0.30, MAT["petal_violet"]),
+    ]
+    for i, (x, y, h, mat) in enumerate(ring):
+        flower_clump(f"ENV_RingFlower_{i}", x, y, island_surface_z(x, y) - 0.02, col,
+                     height=h, mat=mat, petals=5, phase=0.35 + i * 0.9)
 
 
 def build_island_edge(col):
@@ -630,44 +788,93 @@ def build_water_detail(col):
 
 
 def build_far_bank_detail(col):
-    """Break up the far bank, which read as one smooth green band."""
-    # Rolling mounds along the bank so its top edge is not a clean arc.
+    """The far bank's silhouette, and the world's skyline.
+
+    THREE BUGS WERE HIDING IN HERE, and the first two are why the bank still
+    "read as one smooth green band" after the pass that was meant to fix it:
+
+      1. The mounds were authored at angles 200-330 degrees and then gated on
+         `y >= 1.0`. Every one of those angles gives sin(a) < -0.3, so with
+         r ~ 11.5 the guard skipped ALL FOURTEEN. Same for the nine bushes at
+         `y >= 1.5`. The bank has never had either.
+      2. The four trees named `ENV_BankTree_*` — the objects `world_audit`
+         measures as the `tree_tall` category, "the far bank's skyline" —
+         landed at y = -6.0 to -9.6. That is the NEAR foreground, off both
+         sides of the production frame. Nothing was on the far bank at all.
+      3. They were seated at a constant `WATER_Z + 0.7`, which is not the far
+         bank's surface anywhere. `ENV_FarBank` is a torus, so its top is a
+         function of radius; `bank_z` below derives it instead of guessing.
+
+    The angles now stay inside 0-180 degrees, which is the half of the ring
+    that is actually behind the island and in shot.
+    """
+    bank_r, bank_tube = 11.5, 3.4       # must track ENV_FarBank in build_banks
+    bank_squash = 0.42
+
+    def bank_z(r):
+        """Top surface of the far-bank torus at radius r from the island."""
+        d = min(abs(r - bank_r) / bank_tube, 1.0)
+        return (WATER_Z - 0.30) + bank_tube * bank_squash * math.sqrt(1.0 - d * d)
+
+    # Rolling mounds so the bank's top edge is not a clean arc. The notch the
+    # waterfall runs through is a feature of this bank, so mounds that would
+    # bury it are skipped rather than nudged — the first pass parked a 4.6 x
+    # 3.7 m mound directly on top of it and the cascade vanished.
+    fall_x, fall_y = -9.4, 9.2
     for i in range(14):
-        a = math.radians(200 + i * 10)
-        r = 11.5 + (i % 3) * 0.9
-        x, y = math.cos(a) * r, math.sin(a) * r + 1.5
-        if y < 1.0:
+        a = math.radians(16.0 + i * 11.0)
+        r = 10.6 + (i % 3) * 0.85
+        x, y = math.cos(a) * r, math.sin(a) * r
+        rad = 1.25 + (i % 4) * 0.45
+        if math.hypot(x - fall_x, y - fall_y) < rad * 1.5 + 1.4:
             continue
         bpy.ops.mesh.primitive_uv_sphere_add(
-            segments=16, ring_count=9, radius=1.4 + (i % 4) * 0.55,
-            location=(x, y, WATER_Z + 0.35))
+            segments=16, ring_count=9, radius=rad,
+            location=(x, y, bank_z(r) + rad * 0.05))
         m = bpy.context.object
         m.name = f"ENV_BankMound_{i:02d}"
         m.scale = (1.5, 1.2, 0.44)
         assign(m, MAT["grass_dark"] if i % 2 else MAT["grass"])
         link(m, col)
 
-    # Bushes and small trees dotted along it.
+    # Low shrubs dotted along it. Deliberately capped under 1 m: `Bush` is a
+    # measured category ("waist-to-shoulder on the character"), and a bank
+    # thicket sized by eye at this distance would have failed it at 0.86 x.
     for i in range(9):
-        a = math.radians(196 + i * 16)
-        r = 12.6
-        x, y = math.cos(a) * r, math.sin(a) * r + 1.5
-        if y < 1.5:
-            continue
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8,
-                                             radius=0.72 + (i % 3) * 0.24,
-                                             location=(x, y, WATER_Z + 0.95))
+        a = math.radians(22.0 + i * 17.0)
+        r = 12.3
+        x, y = math.cos(a) * r, math.sin(a) * r
+        rad = 0.40 + (i % 3) * 0.11
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=rad,
+                                             location=(x, y, bank_z(r) + rad * 0.18))
         b = bpy.context.object
         b.name = f"ENV_BankBush_{i}"
         b.scale = (1.3, 1.1, 0.78)
         assign(b, MAT["leaf"] if i % 2 else MAT["leaf_dark"])
         link(b, col)
 
-    for i, ang in enumerate((214, 236, 300, 324)):
-        a = math.radians(ang)
-        r = 13.4
-        build_tree(f"ENV_BankTree_{i}", (math.cos(a) * r, math.sin(a) * r + 1.5, WATER_Z + 0.7),
-                   0.92, col, blossom=(i % 2 == 0))
+    # THE SKYLINE. Trunk 5.2-5.4 m = 4.0-4.15 x the character, which puts the
+    # crown top at 1.13 x that, ~5.9 m — and the production camera's top edge
+    # at this depth is 5.9 m. So these are the tallest trees the frame can
+    # hold, which is what "reads as distance, never walked under" should mean.
+    #
+    # POSITIONS ARE CHOSEN IN SCREEN SPACE, not as a tidy arc, and the first
+    # attempt at them is why: two of the four landed at frame x = 479 and 877,
+    # and the two island trees are at 480 and 815. Concentric crowns at two
+    # depths do not read as two trees, they read as one green ceiling, and the
+    # rainbow went out behind it. These four sit at roughly x = 215, 375, 985
+    # and 1155 of 1280, interleaved with the island pair and leaving the middle
+    # third of the frame — where the rainbow arcs and MARK_TitleZoneHero sits —
+    # open sky. All four stay clear of the waterfall notch at (-9.4, 9.2).
+    for i, (x, y, trunk_h, twist) in enumerate((
+        (-7.12, 10.90, 5.35, 0.0),
+        (-4.67, 12.15, 5.20, 1.3),
+        (5.94, 11.55, 5.25, 2.4),
+        (8.31, 10.00, 5.40, 0.8),
+    )):
+        r = math.hypot(x, y)
+        build_tree(f"ENV_BankTree_{i}", (x, y, bank_z(r) - 0.55), col, trunk_h,
+                   crown_r=trunk_h * 0.28, blossom=(i % 2 == 0), twist=twist)
 
 
 # ── Sky detail ──────────────────────────────────────────────────────────────
@@ -752,21 +959,75 @@ def build_bubbles(col):
 
 
 def build_reeds(col):
-    """Foreground reeds at the near bank — the depth cue closest to camera."""
-    for i, (x, y, h) in enumerate([
-        (-7.4, -5.6, 1.5), (-6.6, -6.2, 1.9), (-7.9, -6.8, 1.3),
-        (7.8, -5.2, 1.7), (8.5, -6.1, 2.1), (7.1, -6.6, 1.4),
-    ]):
-        for k in range(4):
+    """Reeds at the water's edge — the ladder rung between grass and tree.
+
+    TWO THINGS WERE WRONG, and they were the same thing twice.
+
+    The heights: 1.3-2.1 m, i.e. 1.0-1.6 x the character. `world_audit` calls
+    that a hedge and it is right — the reeds were the tallest thing in the world
+    relative to what they should be, which is how the scale hierarchy came out
+    INVERTED. They are now 0.52-0.92 m, ground cover the lion stands beside.
+
+    The places: (+-7 to 8.5, -5 to -6.6), described in the old docstring as "the
+    depth cue closest to camera". They are not in the production frame at all —
+    the bottom edge of that frame crosses the water at y = -2.9, and everything
+    here was 3 m below it and 4 m outside it. A depth cue nobody can see is not
+    a depth cue. They now ring the island's own waterline, where they double as
+    the join between the rim stones and the river, plus two clumps at the foot
+    of the far bank.
+    """
+    # Kept at r = 2.7-2.9, just outside the rim stones. The first pass had them
+    # at r = 3.7-3.8, far enough out that they read as reeds growing in open
+    # water rather than as the join between the island's stone rim and the
+    # river, which is the job.
+    clumps = [
+        (-2.35, -1.35, 0.78), (2.45, -1.15, 0.72),      # flanking the island front
+        (-2.80, 0.45, 0.86), (2.85, 0.30, 0.92),        # island sides
+        (-1.85, 2.05, 0.68), (1.95, 2.10, 0.74),        # behind the island
+        (-4.60, 7.30, 0.62), (5.10, 6.90, 0.58),        # foot of the far bank
+    ]
+    def _reed_tilt(k):
+        return math.radians(9.0 + (k % 3) * 4.0)
+
+    for i, (x, y, h) in enumerate(clumps):
+        splay = i * 0.9                                 # each clump leans its own way
+        blades = 5
+        for k in range(blades):
+            bh = h * (0.66 + 0.09 * k)                  # a clump is not a comb
+            bx = x + (k - (blades - 1) * 0.5) * 0.12
+            by = y + (k % 2) * 0.11
             bpy.ops.mesh.primitive_cone_add(
-                vertices=8, radius1=0.075, radius2=0.012, depth=h,
-                location=(x + (k - 1.5) * 0.20, y + (k % 2) * 0.16,
-                          WATER_Z + h * 0.5))
+                vertices=6, radius1=h * 0.055, radius2=h * 0.010, depth=bh,
+                location=(bx, by, WATER_Z + bh * 0.5))
             r = bpy.context.object
             r.name = f"ENV_Reed_{i}_{k}"
-            r.rotation_euler = (math.radians((k - 1.5) * 6), 0, math.radians(k * 22))
+            # Lean, then spin the lean around: four rigid verticals read as
+            # drinking straws, and the only thing that costs is two numbers.
+            r.rotation_euler = (_reed_tilt(k), 0.0, splay + k * 1.15)
             assign(r, MAT["leaf"] if k % 2 else MAT["grass_dark"])
             link(r, col)
+
+        # A seed head on two of the blades. Twenty triangles apiece, and they
+        # are what stops the clump reading as a bundle of green spikes.
+        # Placed at the blade's ACTUAL tip: a cone rotated about its own centre
+        # swings its top sideways by half its length times sin(tilt), and a head
+        # dropped at the untilted x/y floats off the end of the stalk.
+        for k in (2, 4):
+            bh = h * (0.66 + 0.09 * k)
+            tx, rz = _reed_tilt(k), splay + k * 1.15
+            reach = bh * 0.46                           # just short of the tip
+            bpy.ops.mesh.primitive_ico_sphere_add(
+                subdivisions=1, radius=h * 0.085,
+                location=(x + (k - (blades - 1) * 0.5) * 0.12
+                          + math.sin(rz) * math.sin(tx) * reach,
+                          y + (k % 2) * 0.11
+                          - math.cos(rz) * math.sin(tx) * reach,
+                          WATER_Z + bh * 0.5 + math.cos(tx) * reach))
+            s = bpy.context.object
+            s.name = f"ENV_ReedHead_{i}_{k}"
+            s.scale = (0.62, 0.62, 1.35)
+            assign(s, MAT["soil"] if k % 2 else MAT["grass_dark"])
+            link(s, col)
 
 
 # ── Camera, markers, lighting ───────────────────────────────────────────────
