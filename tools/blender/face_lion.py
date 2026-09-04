@@ -724,7 +724,14 @@ def build_eyes(cage, fm, parts, report):
 # number on this asset (the eye height measured above the feet and applied in
 # world y; the head assist expressed about the bone's inclined local axis), so
 # the conversion is written out here instead of folded into the constants.
-SIL_FIT_SCALE = 1.0235
+# 1.0 SINCE THE RE-FRAME. `silhouette_render.fit` no longer rescales the
+# model's height — the model is built in reference H units, so model z IS
+# silhouette h once the soles are seated on the ground. This was 1.0235, the
+# factor the harness used to apply, and the conversion below is now the identity
+# apart from the ground offset. It is kept as a named constant rather than
+# deleted because the frame is the thing that has gone wrong four times on this
+# asset, and a reader looking for it should find it stated.
+SIL_FIT_SCALE = 1.0
 SIL_GROUND_Z = 0.0040
 
 # The ear's cross-sections, bottom to top:

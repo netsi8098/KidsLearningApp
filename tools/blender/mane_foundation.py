@@ -52,13 +52,19 @@ SIDE_LEN = LM["side_length_H"]
 
 # THE SILHOUETTE FRAME, and a MEASURED NEGATIVE RESULT about correcting it here.
 #
-# A measured h is not a model z. `silhouette_render.fit` scales the model so its
-# height is exactly 1 H before rendering, and the reference norms fill h 0.0000
-# to 1.0000, but the assembled model is 0.9770 tall in its own units — so the
-# render maps model z to graded h as h = (z - 0.0040) * 1.0235, and widths by
-# the same factor. Every builder in this project reads measured h values and
-# uses them directly as model z, which puts features 2.35% high in the frame
-# the QA grades in.
+# THIS IS RESOLVED — see the re-frame in `silhouette_render.fit` and
+# `mane_mask_band` above. It is kept because three corrections were built for it
+# and all three measured worse, and the reason they did is the useful part.
+#
+# `silhouette_render.fit` used to scale the model so its height was exactly
+# 1 H before rendering. The reference norms fill h 0.0000 to 1.0000 and the
+# assembled model was 0.9770 tall, so the render mapped model z to graded h as
+# h = (z - 0.0040) * 1.0235 and widths by the same factor. Every builder reads
+# measured h values and uses them directly as model z, so that normalisation put
+# every feature 2.35% high in the frame the QA graded in — and the shortfall it
+# was normalising away came from ONE place: this file targeting the mane's
+# height at `LM["mane_band"]`, the >=10px-filtered band, instead of the mane's
+# real span. The scale is now 1 and the height target is the real span.
 #
 # Where the measured profile is FLAT that costs nothing, which is why the front
 # bands from h 0.65 to 0.90 all sit within 0.019 of the reference. The crown is
@@ -83,15 +89,50 @@ SIDE_LEN = LM["side_length_H"]
 # and height from `mane_band` as z, and the global fit from the bbox. Converting
 # only the width pairs corrected widths with uncorrected heights.
 #
-# Doing it properly means re-framing the whole asset so model z IS h, which
-# changes the model's total height and therefore the 1.0235 itself — a
-# self-referential change across the cage, the rig, the clips and the runtime
-# scale, not a local patch to this file. Left alone deliberately, with the
-# numbers above so the next attempt starts from them.
+# Doing it properly meant re-framing so model z IS h, which is what happened:
+# the height target here became the mane's real span and the harness stopped
+# normalising. The self-reference that made it look impossible — changing the
+# height changes the scale — dissolved once the height was simply CORRECT. The
+# numbers above are kept because they are what a local correction costs when the
+# frame underneath it is wrong.
 
 
 NSEG = 24          # ring segments; the hood is a broad form and wants resolution
 NRING = 30         # stations along the mane's depth
+
+
+def mane_mask_band():
+    """The mane's FULL h extent, measured off the mane masks themselves.
+
+    `LM["mane_band"]` is `measure_reference.band()`, which keeps only the rows
+    where the mane is at least 10 px wide. That is a deliberate noise filter and
+    the right thing for finding where the mane substantially IS — the face-centre
+    calculation uses it for exactly that. It is the wrong thing for the mane's
+    HEIGHT, because it discards the reference mane's tapered tip and base:
+
+        source                            h range          span
+        LM["mane_band"] (>=10px rows)     0.1900-0.9810   0.7910
+        views.front.mane_width (all rows) 0.1790-0.9940   0.8150
+        front-mane-norm.png mask          0.1788-0.9942   0.8154
+        side-mane-norm.png mask           0.1808-0.9962   0.8154
+
+    The per-row table, the front mask and the side mask agree independently, and
+    all three disagree with the landmark by 0.024. The table is used here rather
+    than the masks because it is already in `reference_model.json` and Blender
+    does not ship PIL. A mane built to 0.7910 puts the assembled model's crown
+    at z 0.9810 with its soles at 0.0040 — 0.9770 tall where the reference is
+    1.0000 — and `silhouette_render` used to absorb that by scaling the whole
+    model up 2.35%, which is the wrong-frame error documented there and in the
+    negative-result block below.
+
+    So the height target comes from the masks. The two views are averaged
+    because they measure the same thing and differ only by antialiasing.
+    """
+    d = MODEL["views"]["front"]["mane_width"]
+    ks = sorted(float(k) for k in d)
+    if not ks:
+        raise SystemExit("[mane] no mane_width rows to measure the band from")
+    return ks[0], ks[-1]
 
 
 def nearest(d, key):
@@ -635,9 +676,10 @@ def fit_to_measured(obj):
 
     u0 = LM["mane_span_side"]["front_u"]
     u1 = LM["mane_span_side"]["rear_u"]
+    band_lo, band_hi = mane_mask_band()
     want = Vector((LM["mane_widest"]["width"],
                    (u1 - u0) * SIDE_LEN,
-                   LM["mane_band"]["high"] - LM["mane_band"]["low"]))
+                   band_hi - band_lo))
     k = Vector((want.x / have.x if have.x > 1e-6 else 1.0,
                 want.y / have.y if have.y > 1e-6 else 1.0,
                 want.z / have.z if have.z > 1e-6 else 1.0))
@@ -648,7 +690,7 @@ def fit_to_measured(obj):
         v.co = Vector((
             (v.co.x - (mn.x + mx.x) / 2.0) * k.x,
             y_rear + (v.co.y - mn.y) * k.y,
-            LM["mane_band"]["low"] + (v.co.z - mn.z) * k.z,
+            band_lo + (v.co.z - mn.z) * k.z,
         ))
     # Per-band x correction against the measured profile.
     # The target is the COLOUR-SEGMENTED mane profile, deliberately, not the full
@@ -1102,8 +1144,9 @@ def main():
     print(f"VERTS={len(mane.data.vertices)} FACES={len(mane.data.polygons)}")
     print(f"MANE_WIDTH={mw:.4f}  reference {LM['mane_widest']['width']:.4f}  "
           f"err {100 * (mw - LM['mane_widest']['width']) / LM['mane_widest']['width']:+.1f}%")
-    print(f"MANE_HEIGHT={mh:.4f}  reference band "
-          f"{LM['mane_band']['high'] - LM['mane_band']['low']:.4f}")
+    _blo, _bhi = mane_mask_band()
+    print(f"MANE_HEIGHT={mh:.4f}  reference mask span {_bhi - _blo:.4f} "
+          f"(h {_blo:.4f}-{_bhi:.4f}; the >=10px band is {LM['mane_band']['high'] - LM['mane_band']['low']:.4f})")
     print(f"MANE_DEPTH={ml:.4f}  reference "
           f"{(LM['mane_span_side']['rear_u'] - LM['mane_span_side']['front_u']) * SIDE_LEN:.4f}")
     print(f"CLUMPS={len(CLUMPS)}")

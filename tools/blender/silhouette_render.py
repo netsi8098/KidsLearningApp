@@ -92,7 +92,32 @@ def fit(objs):
             mn = Vector(min(mn[i], p[i]) for i in range(3))
             mx = Vector(max(mx[i], p[i]) for i in range(3))
     h = mx.z - mn.z
-    k = 1.0 / h if h > 1e-6 else 1.0
+    # NO HEIGHT NORMALISATION. The model is already in the reference's frame.
+    #
+    # Every builder in this project reads measured reference values in H and
+    # uses them directly as model z — `surface_at(cage, x_H, h)` casts at z = h,
+    # the cage's station tables are h values, `fit_to_measured` places the mane
+    # at `mane_band` heights. So model z IS silhouette h by construction, and
+    # rescaling to make the height exactly 1 H does not correct anything: it
+    # takes a model that is SHORT at the crown and stretches every feature in it
+    # by the shortfall.
+    #
+    # Measured, the shortfall was 2.35%: the assembled model spans z 0.0040 to
+    # 0.9810 (0.9770 tall) because the mane's height target is `mane_band`,
+    # which `measure_reference.band()` filters to rows at least 10 px wide and
+    # therefore excludes the reference mane's tapered tip and base — 0.7910
+    # against the mane mask's own 0.8154, in both the front and side views.
+    # Normalising turned that one honest crown deficit into a 2.35% global
+    # vertical stretch, which is invisible where the measured profile is flat and
+    # brutal where it is steep. It is most of `front 0.95-1.00 +0.056`, and it
+    # is the fourth wrong-frame defect on this asset — see the negative-result
+    # block in `mane_foundation.py` for three local corrections that all
+    # measured worse because they were correcting for THIS.
+    #
+    # So the scale is 1. Centring and ground-seating stay, because registration
+    # still needs them. The height is reported instead of removed, so a genuine
+    # scale drift is visible rather than absorbed.
+    k = 1.0
     holder = bpy.data.objects.new("FitHolder", None)
     bpy.context.scene.collection.objects.link(holder)
     # PARENT THE ROOTS, NOT THE OBJECTS. `if o.parent is None` scaled ONE of
@@ -131,7 +156,8 @@ def fit(objs):
     holder.location = (-ctr.x * k, -ctr.y * k, -mn.z * k)
     bpy.context.view_layer.update()
     print(f"[sil] fit {len(objs)} objects via {len(roots)} root(s) "
-          f"({', '.join(r.name for r in roots)}): raw h={h:.4f} scale={k:.4f}")
+          f"({', '.join(r.name for r in roots)}): h={h:.4f} "
+          f"(reference is 1.0000 — deficit {1.0 - h:+.4f}), scale={k:.4f}")
     return holder
 
 

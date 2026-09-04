@@ -7415,3 +7415,116 @@ four negative results, and a gate that measures the surface it claims to.
 2. **The rear silhouette** — 0.8040 against a 0.8097 projection ceiling with
    extra=20.26%. The only view where the model is substantially too big.
 3. Retire the proxy; a second world for the bridge to arrive at.
+
+## GATE 21: the re-frame — model z IS h
+
+Four defects on this asset have been traced to the same mismatch. It is fixed at
+the root, and the root turned out to be one wrong measurement.
+
+### The harness was normalising away a real deficit
+
+`silhouette_render.fit` scaled the model so its height was exactly 1 H before
+rendering. But every builder here reads measured reference values in H and uses
+them directly as model z — `surface_at(cage, x_H, h)` casts at z = h, the cage's
+station tables are h values, `fit_to_measured` places the mane at `mane_band`
+heights. Model z IS silhouette h by construction, so rescaling corrects nothing:
+it takes a model that is SHORT at the crown and stretches every feature in it by
+the shortfall. Measured, 2.35%.
+
+**Where the shortfall came from.** The mane's height target was
+`LM["mane_band"]`, and `measure_reference.band()` keeps only rows where the mane
+is at least 10 px wide. That is a deliberate noise filter and the right thing for
+finding where the mane substantially is — the face-centre calculation uses it for
+exactly that. It is the wrong thing for a HEIGHT, because it discards the
+reference mane's tapered tip and base:
+
+    source                            h range          span
+    LM["mane_band"] (>=10px rows)     0.1900-0.9810   0.7910
+    views.front.mane_width (all rows) 0.1790-0.9940   0.8150
+    front-mane-norm.png mask          0.1788-0.9942   0.8154
+    side-mane-norm.png mask           0.1808-0.9962   0.8154
+
+The row table and both masks agree independently; all three disagree with the
+landmark by 0.024. So the mane was built 0.024 short, the model came out 0.9770
+tall against a reference of 1.0000, and the harness turned that one honest crown
+deficit into a global 2.35% vertical stretch — invisible where the measured
+profile is flat, brutal where it is steep.
+
+### What it fixes
+
+    scale                1.0235 -> 1.0000   (no normalisation; z IS h)
+    height deficit       0.0230 -> 0.0100
+    SIL_FIT_SCALE        1.0235 -> 1.0      (the ear conversion is now identity)
+
+    front band    before   after
+    0.85-0.90     +0.012   +0.012
+    0.90-0.95     +0.023   +0.015
+    0.80-0.85     +0.004   +0.006
+    0.95-1.00     +0.056   -0.071
+
+Every front band from h 0.65 to 0.95 is now within 0.015. The crown tip flips
+sign because the stretch was inflating it: it is genuinely NARROW, ref 0.248
+against 0.177, and that is now stated honestly instead of cancelled by an error.
+
+Making `SIL_FIT_SCALE` an identity in `face_lion.py` was worth three bands on its
+own — 0.85-0.90 went -0.062 to +0.012 and 0.90-0.95 -0.042 to +0.015 — because
+`EAR_PROFILE` was built against the old 1.0235 and the ears are what fills those
+bands.
+
+### The headline number goes DOWN, and that is the point
+
+    WEIGHTED_IOU  0.8879 -> 0.8780
+
+The 0.8879 was measured on a model stretched 2.35% taller than it is. 0.8780 is
+the same asset measured in its own frame. Nothing about the geometry got worse;
+a measurement that flattered it stopped. The remaining deficit is reported every
+run — `h=0.9900 (reference is 1.0000 — deficit +0.0100)` — instead of absorbed.
+
+Of that 0.0100: 0.0040 is the paw sole sitting at z 0.004 rather than 0, and
+0.0060 is the reference's own subject mask reaching above its mane mask. Moving
+the sole is a 4 mm change to the ground contact that the rig, the clips and the
+runtime's `setGroundY` all read, for 0.4% of registration — not taken.
+
+### State
+
+    frame       scale 1.0000, z IS h, height deficit +0.0100 reported per run
+    silhouette  WEIGHTED_IOU 0.8780   front 0.9290 side 0.9036 3/4 0.8029
+    front bands h 0.65-0.95 all within 0.015; 0.95-1.00 -0.071 (crown tip)
+    crease      CREASED_REGIONS=0
+    mane        WIDTH -0.6%, HEIGHT 0.8150 = the reference's real span, DEPTH exact
+    integrity   slivers 0, non-manifold 0, boundary 0, quads 1.0000
+    deform      worst area 0.252, pinched 0, flipped 0
+    rig         reach 22.1/42.1 mm, planted paw 0.069 mm, slide 0.111 mm, 13 clips
+    glb         5923 KB against a 6144 cap, 4 meshes, both contracts pass
+
+### What the running app shows that no gate does
+
+A screenshot from the homepage, compared against the reference, and the gaps are
+NOT silhouette gaps:
+
+1. **The body reads as hexagonal scales.** `detail_normals.build`'s body nap map
+   is a periodic FFT band-pass tiled 9x, and at `BODY_FEATURE_PX=4.0` it lands as
+   a regular cellular lattice — golf-ball dimples, not fur. Measured on
+   auto-located gold patches, FFT peak-to-mean is 38.8 (side) and 40.7 (front)
+   against the reference's 28.2: 38-44% more spectral concentration, i.e. a
+   periodic structure the reference does not have. **The reference's body has no
+   visible surface pattern at this scale at all.**
+2. **The mane reads as crumpled paper.** Its normal map is isotropic noise; hair
+   needs anisotropy elongated along the lock direction. In the app it shows as
+   hard vertical banding down the mane's slab.
+3. **The eyes bulge and read white-dominant.** The reference's iris nearly fills
+   the lid with only a crescent of white.
+4. The app's camera is very close and crops the crown — framing, not the asset.
+
+The surface-detail pass optimised high-frequency ENERGY (1.97 -> 3.86) and never
+checked whether the energy was periodic. That is the same extremum-versus-average
+family as the rest of this log, one level up: the right target was never "more
+detail", it was "detail with the reference's spectrum".
+
+### Next, in order
+
+1. **The body nap map** — the largest visible gap and a regression from the
+   detail pass. Either give it the reference's spectrum or remove it; gate on
+   FFT peak-to-mean against the reference, not on HF energy.
+2. **The mane's normal map** — anisotropic along the lock direction.
+3. The crown tip's -0.071, now the only failing band.
