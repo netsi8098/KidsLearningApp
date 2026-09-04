@@ -200,17 +200,34 @@ def skeleton():
     # DOCUMENTED RIG ADJUSTMENT — tail chain relocated, not distorted.
     #
     # The reference-driven cage moved the tail from a near-horizontal sweep at
-    # z 0.44-0.55 to a shaft that turns down into a tuft at z 0.18. The bone
-    # chain has to follow, or the skin stretches across a path the bones do not
-    # take. Bone COUNT and NAMES are unchanged — tail_01..tail_06 — so every
+    # z 0.44-0.55 to a shaft that dips to z 0.10 behind the rump and then rises
+    # into a tuft centred at z 0.153. The bone chain has to follow, or the skin
+    # stretches across a path the bones do not take — and the last two points
+    # carry the dip and the rise, so tail_05 runs DOWN and tail_06 runs UP, with
+    # tail_06's tip inside the bulb rather than at its rear face. Bone COUNT and NAMES are unchanged — tail_01..tail_06 — so every
     # consumer of the rig (the walk clip, the export filter, the runtime brain)
     # keeps working; only the rest positions move. That is the distinction the
     # brief asks for: adjust the landmark and record it, never let the mesh
     # silently drift away from the skeleton.
-    tail = [(0.0, -0.392, 0.348), (0.0, -0.402, 0.310),
-            (0.0, -0.410, 0.272), (0.0, -0.430, 0.238),
-            (0.0, -0.492, 0.202), (0.0, -0.572, 0.158),
-            (0.0, -0.616, 0.160)]
+    # THE CHAIN FOLLOWS THE LIMIT SURFACE, NOT THE STATION TABLE. Near the
+    # attach the two are 0.10 apart: the 3x3 patch boundary is ~0.09 across and
+    # root_02's ring is r 0.026, and Catmull-Clark cuts that cone's corner hard
+    # enough that the tail's realized tube at y -0.36 tops out at z 0.220 while
+    # its control ring sits at z 0.320. Placing joints on the ring centres put
+    # tail_01, tail_02 and the head of tail_03 in FREE SPACE, 10-23 mm outside
+    # the skin — measured, not guessed, by marching six rays in from 3 m and
+    # taking the crossing parity. The positions below are the most interior
+    # point at each y on that same measurement.
+    #
+    # Two tests that could not see this, for the next person who checks: a
+    # nearest-point-normal signed distance (it called a point 1 m behind the
+    # lion "inside"), and crossing parity with the ray STARTED at the joint —
+    # inside a thin near-vertical tube the first cast begins millimetres from a
+    # wall and the self-hit epsilon decides the answer.
+    tail = [(0.0, -0.338, 0.212), (0.0, -0.360, 0.194),
+            (0.0, -0.386, 0.172), (0.0, -0.430, 0.145),
+            (0.0, -0.488, 0.112), (0.0, -0.552, 0.126),
+            (0.0, -0.612, 0.158)]
     for i in range(len(tail) - 1):
         B.append((f"tail_{i + 1:02d}", "pelvis" if i == 0 else f"tail_{i:02d}",
                   tail[i], tail[i + 1]))
