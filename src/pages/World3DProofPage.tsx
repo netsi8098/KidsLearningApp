@@ -128,6 +128,16 @@ export default function World3DProofPage() {
           >
             lookAhead
           </button>
+          {/* The world-change gesture: the lion WALKS out rather than cutting.
+              Also the only way to exercise the walkable region's bridge
+              corridor, since wander never picks a point on the deck. */}
+          <button
+            onClick={() => { setWander(false); setClip(null); brain.current?.crossBridge(); }}
+            className="rounded-full px-3 py-2 text-xs font-bold"
+            style={{ background: 'rgba(255,190,120,0.95)', color: '#3A2412' }}
+          >
+            crossBridge
+          </button>
           <button
             onClick={() => { setClip(null); brain.current?.walkTo(-1.1, 0.5); }}
             className="rounded-full px-3 py-2 text-xs font-bold"
@@ -195,6 +205,15 @@ export default function World3DProofPage() {
                 gaze       : {stats.lionGaze
                   ? `${stats.lionGaze.at}  yaw: eye ${stats.lionGaze.yaw.toFixed(1)} + head ${stats.lionGaze.head.toFixed(1)} = ${(stats.lionGaze.yaw + stats.lionGaze.head).toFixed(1)} of ${stats.lionGaze.want.toFixed(1)}  pitch ${stats.lionGaze.pitch.toFixed(1)}  aim err ${stats.lionGaze.aimErr.toFixed(1)}`
                   : '—'}
+              </div>
+              <div>
+                bridge     : {!stats.lionBridge
+                  ? '—'
+                  : !stats.lionBridge.has
+                    ? 'none in this world'
+                    : `${(stats.lionBridge.progress * 100).toFixed(0)}% across`
+                      + `  at ${stats.lionBridge.x.toFixed(2)}, ${stats.lionBridge.z.toFixed(2)}`
+                      + (stats.lionBridge.crossed ? '  CROSSED' : '')}
               </div>
               <div className="mt-1 font-bold" style={{ color: '#8fe3ff' }}>MARKERS (from GLB)</div>
               {markerRows.length === 0 && <div>none found</div>}

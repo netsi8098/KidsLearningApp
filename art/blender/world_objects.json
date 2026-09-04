@@ -1261,6 +1261,734 @@
    "material": "ENV_Bark"
   },
   {
+   "name": "ENV_BridgeLanding",
+   "collection": "ENV_Props",
+   "height": 0.34,
+   "width": 2.3,
+   "base_z": -0.32,
+   "centre": [
+    8.9,
+    0.1,
+    -0.15
+   ],
+   "tris": 76,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BridgeLandingSoil",
+   "collection": "ENV_Props",
+   "height": 0.6,
+   "width": 2.254,
+   "base_z": -0.82,
+   "centre": [
+    8.9,
+    0.1,
+    -0.52
+   ],
+   "tris": 76,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_BridgePlank_00",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.2884,
+   "centre": [
+    1.61932,
+    0.1,
+    0.3234
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_01",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.29452,
+   "centre": [
+    1.95795,
+    0.1,
+    0.32952
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_02",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.30004,
+   "centre": [
+    2.29659,
+    0.1,
+    0.33504
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_03",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.30456,
+   "centre": [
+    2.63523,
+    0.1,
+    0.33956
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_04",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.30772,
+   "centre": [
+    2.97386,
+    0.1,
+    0.34272
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_05",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.30917,
+   "centre": [
+    3.3125,
+    0.1,
+    0.34417
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_06",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.3086,
+   "centre": [
+    3.65114,
+    0.1,
+    0.3436
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_07",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.30575,
+   "centre": [
+    3.98977,
+    0.1,
+    0.34075
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_08",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.30041,
+   "centre": [
+    4.32841,
+    0.1,
+    0.33541
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_09",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.29239,
+   "centre": [
+    4.66705,
+    0.1,
+    0.32739
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_10",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.28158,
+   "centre": [
+    5.00568,
+    0.1,
+    0.31658
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_11",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.26794,
+   "centre": [
+    5.34432,
+    0.1,
+    0.30294
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_12",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.25145,
+   "centre": [
+    5.68295,
+    0.1,
+    0.28645
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_13",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.23217,
+   "centre": [
+    6.02159,
+    0.1,
+    0.26717
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_14",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.21023,
+   "centre": [
+    6.36023,
+    0.1,
+    0.24523
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_15",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.18578,
+   "centre": [
+    6.69886,
+    0.1,
+    0.22078
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_16",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.15905,
+   "centre": [
+    7.0375,
+    0.1,
+    0.19405
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_17",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.13031,
+   "centre": [
+    7.37614,
+    0.1,
+    0.16531
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_18",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.09986,
+   "centre": [
+    7.71477,
+    0.1,
+    0.13486
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_19",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.06804,
+   "centre": [
+    8.05341,
+    0.1,
+    0.10304
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_20",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.03523,
+   "centre": [
+    8.39205,
+    0.1,
+    0.07023
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePlank_21",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 0.9,
+   "base_z": 0.00181,
+   "centre": [
+    8.73068,
+    0.1,
+    0.03681
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgePost_L_0",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.30023,
+   "centre": [
+    1.45,
+    -0.35,
+    0.51023
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_L_1",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.32019,
+   "centre": [
+    2.69167,
+    -0.35,
+    0.53019
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_L_2",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.3214,
+   "centre": [
+    3.93333,
+    -0.35,
+    0.5314
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_L_3",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.29012,
+   "centre": [
+    5.175,
+    -0.35,
+    0.50012
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_L_4",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.22132,
+   "centre": [
+    6.41667,
+    -0.35,
+    0.43132
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_L_5",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.12004,
+   "centre": [
+    7.65833,
+    -0.35,
+    0.33004
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_L_6",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.0,
+   "centre": [
+    8.9,
+    -0.35,
+    0.21
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_0",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.30023,
+   "centre": [
+    1.45,
+    0.55,
+    0.51023
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_1",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.32019,
+   "centre": [
+    2.69167,
+    0.55,
+    0.53019
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_2",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.3214,
+   "centre": [
+    3.93333,
+    0.55,
+    0.5314
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_3",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.29012,
+   "centre": [
+    5.175,
+    0.55,
+    0.50012
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_4",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.22132,
+   "centre": [
+    6.41667,
+    0.55,
+    0.43132
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_5",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.12004,
+   "centre": [
+    7.65833,
+    0.55,
+    0.33004
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgePost_R_6",
+   "collection": "ENV_Props",
+   "height": 0.42,
+   "width": 0.09,
+   "base_z": 0.0,
+   "centre": [
+    8.9,
+    0.55,
+    0.21
+   ],
+   "tris": 20,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgeRail_L_0",
+   "collection": "ENV_Props",
+   "height": 0.06995,
+   "width": 1.24247,
+   "base_z": 0.67523,
+   "centre": [
+    2.07083,
+    -0.35,
+    0.71021
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_L_1",
+   "collection": "ENV_Props",
+   "height": 0.0512,
+   "width": 1.24172,
+   "base_z": 0.69519,
+   "centre": [
+    3.3125,
+    -0.35,
+    0.7208
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_L_2",
+   "collection": "ENV_Props",
+   "height": 0.08127,
+   "width": 1.24293,
+   "base_z": 0.66512,
+   "centre": [
+    4.55417,
+    -0.35,
+    0.70576
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_L_3",
+   "collection": "ENV_Props",
+   "height": 0.11872,
+   "width": 1.24443,
+   "base_z": 0.59636,
+   "centre": [
+    5.79583,
+    -0.35,
+    0.65572
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_L_4",
+   "collection": "ENV_Props",
+   "height": 0.15112,
+   "width": 1.24573,
+   "base_z": 0.49512,
+   "centre": [
+    7.0375,
+    -0.35,
+    0.57068
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_L_5",
+   "collection": "ENV_Props",
+   "height": 0.16981,
+   "width": 1.24648,
+   "base_z": 0.37512,
+   "centre": [
+    8.27917,
+    -0.35,
+    0.46002
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_R_0",
+   "collection": "ENV_Props",
+   "height": 0.06995,
+   "width": 1.24247,
+   "base_z": 0.67523,
+   "centre": [
+    2.07083,
+    0.55,
+    0.71021
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_R_1",
+   "collection": "ENV_Props",
+   "height": 0.0512,
+   "width": 1.24172,
+   "base_z": 0.69519,
+   "centre": [
+    3.3125,
+    0.55,
+    0.7208
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_R_2",
+   "collection": "ENV_Props",
+   "height": 0.08127,
+   "width": 1.24293,
+   "base_z": 0.66512,
+   "centre": [
+    4.55417,
+    0.55,
+    0.70576
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_R_3",
+   "collection": "ENV_Props",
+   "height": 0.11872,
+   "width": 1.24443,
+   "base_z": 0.59636,
+   "centre": [
+    5.79583,
+    0.55,
+    0.65572
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_R_4",
+   "collection": "ENV_Props",
+   "height": 0.15112,
+   "width": 1.24573,
+   "base_z": 0.49512,
+   "centre": [
+    7.0375,
+    0.55,
+    0.57068
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeRail_R_5",
+   "collection": "ENV_Props",
+   "height": 0.16981,
+   "width": 1.24648,
+   "base_z": 0.37512,
+   "centre": [
+    8.27917,
+    0.55,
+    0.46002
+   ],
+   "tris": 12,
+   "material": "ENV_Plank"
+  },
+  {
+   "name": "ENV_BridgeStringer_L",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 7.45,
+   "base_z": 0.18512,
+   "centre": [
+    5.175,
+    -0.251,
+    0.22012
+   ],
+   "tris": 12,
+   "material": "ENV_PlankShade"
+  },
+  {
+   "name": "ENV_BridgeStringer_R",
+   "collection": "ENV_Props",
+   "height": 0.07,
+   "width": 7.45,
+   "base_z": 0.18512,
+   "centre": [
+    5.175,
+    0.451,
+    0.22012
+   ],
+   "tris": 12,
+   "material": "ENV_PlankShade"
+  },
+  {
    "name": "ENV_Bubble_0",
    "collection": "ENV_Sky",
    "height": 0.44,
@@ -7604,6 +8332,16 @@
   }
  ],
  "markers": {
+  "MARK_BridgeFar": [
+   8.9,
+   0.1,
+   0.02
+  ],
+  "MARK_BridgeNear": [
+   1.1,
+   0.1,
+   0.3827
+  ],
   "MARK_CameraTarget": [
    0.0,
    0.0,
@@ -7681,6 +8419,8 @@
   "ENV_PetalGold",
   "ENV_PetalViolet",
   "ENV_PetalWhite",
+  "ENV_Plank",
+  "ENV_PlankShade",
   "ENV_RainbowBlue",
   "ENV_RainbowCyan",
   "ENV_RainbowGreen",
@@ -7695,5 +8435,5 @@
   "ENV_WaterDeep",
   "ENV_WaterShallow"
  ],
- "tris": 85000
+ "tris": 85864
 }

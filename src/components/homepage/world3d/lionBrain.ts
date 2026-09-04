@@ -125,6 +125,11 @@ export class LionBrain {
   private eyeHeight = EYE_HEIGHT_FALLBACK;
   private eyeForward = 0;
   private groundY = 0;
+  private bridge: {
+    near: { x: number; z: number };
+    far: { x: number; z: number };
+    halfWidth: number;
+  } | null = null;
   private gazeTarget: { x: number; y: number; z: number } | null = null;
   private interest: { x: number; y: number; z: number }[] = [];
   private gazeSwitch = 2.0;
@@ -441,6 +446,78 @@ export class LionBrain {
     tasks.push({ kind: 'face', x, z });
     this.command(tasks);
   }
+  /**
+   * Walk off the island and across the bridge.
+   *
+   * This is the app's world-change gesture: the lion does not cut to the next
+   * world, it WALKS there, and the crossing is the transition. So it is built
+   * out of the same tasks as every other move rather than as a special mode —
+   * the walk clips, the face-before-move rule and the arrival tolerance all
+   * apply, and the bridge is walkable only because `setBridge` added it to the
+   * region (see `clampToWalkable`).
+   *
+   * Three legs, and the middle one is why this is not just `walkTo(far)`:
+   *
+   *   1. FACE the near end and walk onto it. Stepping onto a bridge diagonally
+   *      is how a character clips through a railing.
+   *   2. Walk the deck to the far end. `wander` is turned off for the duration
+   *      because a mascot that strolls off mid-crossing is standing in a river.
+   *   3. Face the way it was going, so the next world opens on a lion that is
+   *      looking into it rather than back the way it came.
+   *
+   * `wander` is NOT restored here. Whoever asked for the crossing owns what
+   * happens on the far side, and silently handing autonomy back would have the
+   * lion wander off a bank it has no bounds for.
+   */
+  crossBridge() {
+    if (!this.bridge) return false;
+    const { near, far } = this.bridge;
+    this.wander = false;
+    const tasks: Task[] = [];
+    tasks.push({ kind: 'face', x: near.x, z: near.z });
+    if (this.has('WalkStart')) tasks.push(this.clipTask('WalkStart', 0.6));
+    tasks.push({ kind: 'goto', x: near.x, z: near.z });
+    tasks.push({ kind: 'goto', x: far.x, z: far.z });
+    if (this.has('WalkStop')) tasks.push(this.clipTask('WalkStop', 0.7));
+    // Keep looking the way it walked, into the world it is arriving in.
+    tasks.push({
+      kind: 'face',
+      x: far.x + (far.x - near.x),
+      z: far.z + (far.z - near.z),
+    });
+    this.command(tasks);
+    // The eyes lead the body, as they do for the greeting.
+    this.lookAt(far.x, far.z, this.eyeWorldY);
+    this.gazeHold = 4.0;
+    return true;
+  }
+
+  /** Nothing queued and nothing running. */
+  get busy(): boolean {
+    return this.active !== null || this.queue.length > 0;
+  }
+
+  /**
+   * True once the lion has walked the whole deck and stopped. The transition's
+   * cue, and both halves are load-bearing.
+   *
+   * `!busy` is needed because reaching the far end is not finishing: a
+   * `WalkStop` clip and a final `face` are still queued when the position
+   * arrives.
+   *
+   * And the distance test is in METRES rather than a fraction of the deck,
+   * which the first version got wrong. `goto` stops within `ARRIVE_EPS` of its
+   * target, so on a 2.7 m deck the lion legitimately finishes at a progress of
+   * 0.981 and a `> 0.985` threshold could never be met. A fraction hides the
+   * arrival tolerance; a distance is comparable to it.
+   */
+  get hasCrossed(): boolean {
+    if (!this.bridge) return false;
+    const { far } = this.bridge;
+    const d = Math.hypot(this.x - far.x, this.z - far.z);
+    return d <= ARRIVE_EPS * 2 && !this.busy;
+  }
+
   wave() { this.command([{ kind: 'clip', clip: 'Wave', seconds: this.dur('Wave', 2.6) }]); }
   celebrate() { this.command([{ kind: 'clip', clip: 'Celebrate', seconds: this.dur('Celebrate', 2.3) }]); }
   nod() { this.command([{ kind: 'clip', clip: 'Nod', seconds: this.dur('Nod', 1.4) }]); }
@@ -489,11 +566,76 @@ export class LionBrain {
     }
   }
 
-  private clampToIsland(x: number, z: number) {
+  /**
+   * A BRIDGE OFF THE ISLAND, as a corridor added to the walkable region.
+   *
+   * The walkable area has always been a circle, because the island is one, and
+   * `clampToWalkable` pushes the lion back to its rim. A bridge is the first
+   * thing that asks the lion to LEAVE, and a circle cannot express "and also
+   * this strip". So the region becomes a circle union a capsule: inside the
+   * island, or within `halfWidth` of the segment from `near` to `far`.
+   *
+   * A capsule rather than a rectangle because the ends have to overlap the
+   * island's rim and the far bank cleanly. A rectangle leaves two corners the
+   * lion can be clamped into and stick on.
+   *
+   * `near` and `far` come from the environment's own `MARK_BridgeNear` and
+   * `MARK_BridgeFar`, so re-authoring the bridge in Blender moves where the
+   * lion may walk — the same argument the island bounds and the gaze targets
+   * already make.
+   */
+  setBridge(near: { x: number; z: number }, far: { x: number; z: number },
+            halfWidth = 0.34) {
+    this.bridge = { near, far, halfWidth };
+  }
+
+  clearBridge() { this.bridge = null; }
+
+  get hasBridge(): boolean { return this.bridge !== null; }
+
+  /** How far along the bridge the lion is: 0 at the island, 1 at the far bank. */
+  get bridgeProgress(): number {
+    if (!this.bridge) return 0;
+    const { near, far } = this.bridge;
+    const vx = far.x - near.x;
+    const vz = far.z - near.z;
+    const len2 = vx * vx + vz * vz;
+    if (len2 < 1e-9) return 0;
+    const t = ((this.x - near.x) * vx + (this.z - near.z) * vz) / len2;
+    return Math.max(0, Math.min(1, t));
+  }
+
+  /** Distance from the bridge's centre line, and the closest point on it. */
+  private onBridge(x: number, z: number) {
+    if (!this.bridge) return null;
+    const { near, far, halfWidth } = this.bridge;
+    const vx = far.x - near.x;
+    const vz = far.z - near.z;
+    const len2 = vx * vx + vz * vz;
+    const t = len2 < 1e-9 ? 0
+      : Math.max(0, Math.min(1, ((x - near.x) * vx + (z - near.z) * vz) / len2));
+    const px = near.x + vx * t;
+    const pz = near.z + vz * t;
+    return { d: Math.hypot(x - px, z - pz), px, pz, halfWidth };
+  }
+
+  private clampToWalkable(x: number, z: number) {
     const dx = x - this.bounds.cx;
     const dz = z - this.bounds.cz;
     const d = Math.hypot(dx, dz);
     if (d <= this.bounds.r) return { x, z };
+    /* Off the island — but the bridge is walkable too, and it is checked
+       SECOND so the island's own clamp stays exactly what it was for every
+       existing caller. */
+    const b = this.onBridge(x, z);
+    if (b) {
+      if (b.d <= b.halfWidth) return { x, z };
+      // On the bridge's line but off its edge: slide back onto the deck rather
+      // than being thrown to the island rim, which would teleport the lion
+      // backwards mid-crossing.
+      const k = b.halfWidth / (b.d || 1);
+      return { x: b.px + (x - b.px) * k, z: b.pz + (z - b.pz) * k };
+    }
     const k = this.bounds.r / (d || 1);
     return { x: this.bounds.cx + dx * k, z: this.bounds.cz + dz * k };
   }
@@ -525,7 +667,7 @@ export class LionBrain {
       // middle and the world reads smaller than it is.
       const a = Math.random() * Math.PI * 2;
       const r = Math.sqrt(Math.random()) * this.bounds.r * this.stageRadius;
-      const t = this.clampToIsland(this.bounds.cx + Math.cos(a) * r, this.bounds.cz + Math.sin(a) * r);
+      const t = this.clampToWalkable(this.bounds.cx + Math.cos(a) * r, this.bounds.cz + Math.sin(a) * r);
       return [
         { kind: 'goto', x: t.x, z: t.z },
         this.faceViewer(),
@@ -614,7 +756,7 @@ export class LionBrain {
     if (Math.abs(diff) > FACE_EPS) return;
 
     const travel = Math.min(this.walkSpeed * d, dist);
-    const next = this.clampToIsland(this.x + (dx / dist) * travel, this.z + (dz / dist) * travel);
+    const next = this.clampToWalkable(this.x + (dx / dist) * travel, this.z + (dz / dist) * travel);
     this.x = next.x;
     this.z = next.z;
   }

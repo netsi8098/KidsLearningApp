@@ -93,6 +93,10 @@ export interface WorldStats {
      the request — see the AIM ERROR block in `Lion`. It is the only figure
      here that can disagree with what the runtime intended. */
   lionGaze?: { yaw: number; pitch: number; head: number; want: number; aimErr: number; at: string };
+  /* The bridge, if this world has one. `has` false means the environment
+     shipped no MARK_BridgeNear/Far pair, which is what an islanded world looks
+     like — not an error. */
+  lionBridge?: { has: boolean; progress: number; crossed: boolean; x: number; z: number };
 }
 
 /* ── Environment ─────────────────────────────────────────────────────────── */
@@ -169,6 +173,7 @@ function Lion({
   onMeasured,
   onBrainClip,
   onGaze,
+  onBridge,
   interestMarkers,
 }: {
   spawn: THREE.Vector3 | null;
@@ -182,6 +187,7 @@ function Lion({
   onMeasured: (height: number, grounded: boolean, clips: string[], floorGap: number) => void;
   onBrainClip: (clip: LionClip) => void;
   onGaze: (g: { yaw: number; pitch: number; head: number; want: number; aimErr: number; at: string }) => void;
+  onBridge: (b: { has: boolean; progress: number; crossed: boolean; x: number; z: number }) => void;
   interestMarkers: WorldMarkers;
 }) {
   const group = useRef<THREE.Group>(null);
@@ -220,6 +226,21 @@ function Lion({
       .filter((p): p is THREE.Vector3 => Boolean(p))
       .map((p) => ({ x: p.x, y: p.y, z: p.z }));
     brain.setInterest(pts);
+  }, [brain, interestMarkers]);
+
+  /* THE BRIDGE, from the environment's own two markers.
+     `MARK_BridgeNear` sits INSIDE the island's walk circle on purpose — see
+     `build_bridge` in the environment script. The walkable region is the
+     island circle UNION this corridor, and a corridor that began where the
+     planks do would leave a ring belonging to neither, with the lion clamped
+     to the rim staring at a bridge it could not reach.
+     Absent markers simply leave the lion islanded, which is what every world
+     without a bridge should do. */
+  useEffect(() => {
+    const near = interestMarkers.MARK_BridgeNear;
+    const far = interestMarkers.MARK_BridgeFar;
+    if (near && far) brain.setBridge({ x: near.x, z: near.z }, { x: far.x, z: far.z });
+    else brain.clearBridge();
   }, [brain, interestMarkers]);
 
   // Real clip lengths, so a "play Wave then carry on" task ends when the wave
@@ -282,10 +303,27 @@ function Lion({
     // Seat the FEET on the marker rather than assuming the asset origin is at
     // ground level — that assumption is what makes characters hover or sink.
     footOffset.current = -scaledMinY;
-    brain.x = spawn.x;
-    brain.z = spawn.z;
     brain.setHome(spawn.x, spawn.z);
-    group.current.position.set(spawn.x, spawn.y + footOffset.current, spawn.z);
+
+    /* SEAT THE LION ONCE, and only once.
+       This effect measures the asset, and measuring is idempotent — but it also
+       used to move the character to the spawn, and that is not. Its dependency
+       list includes `names` from drei's `useAnimations`, which is not
+       reference-stable, so the effect re-runs on EVERY render of this
+       component. Every re-render therefore teleported the lion home.
+       It went unnoticed while the only thing that re-rendered mid-walk was a
+       gaze report keyed on the target, which changes every few seconds. Adding
+       a bridge-progress report keyed on whole percent made it fire while the
+       lion was walking, and the crossing became: step onto the deck, reach
+       2.08 m, snap back to the spawn, repeat. Exactly the sawtooth the HUD
+       showed.
+       The measurement below still re-runs freely. The position does not. */
+    if (!seated.current) {
+      seated.current = true;
+      brain.x = spawn.x;
+      brain.z = spawn.z;
+      group.current.position.set(spawn.x, spawn.y + footOffset.current, spawn.z);
+    }
 
     /* Match translation to the clip rather than to a constant. The rig script
        measures the walk stride off the authored action and writes it beside the
@@ -455,6 +493,9 @@ function Lion({
   const reportedClip = useRef<LionClip>('Idle');
   const reportedGaze = useRef<string>('');
   const gazeReport = useRef(0);
+  const reportedBridge = useRef<string>('');
+  /* Whether the lion has been placed at its spawn. See the measure effect. */
+  const seated = useRef(false);
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const down = useMemo(() => new THREE.Vector3(0, -1, 0), []);
   const from = useMemo(() => new THREE.Vector3(), []);
@@ -631,6 +672,25 @@ function Lion({
        page above; keying it on a value that jitters with the Idle head bob
        fired a setState every frame and the whole scene stopped arriving. The
        HUD only needs to be readable, so four updates a second is plenty. */
+    /* THE BRIDGE, reported on a coarse key for the same reason the gaze is:
+       `onBridge` sets React state on the page above, and a progress figure
+       that changes every frame while the lion walks would fire a setState per
+       frame. Whole percent is all the HUD can show anyway. */
+    const bkey = `${brain.hasBridge}|${Math.round(brain.bridgeProgress * 100)}|${brain.hasCrossed}`;
+    if (bkey !== reportedBridge.current) {
+      reportedBridge.current = bkey;
+      onBridge({
+        has: brain.hasBridge,
+        progress: brain.bridgeProgress,
+        crossed: brain.hasCrossed,
+        // The POSITION, because progress alone cannot say whether the lion is
+        // walking the deck or being dragged off it, and the first crossing in
+        // the browser did exactly the latter.
+        x: brain.x,
+        z: brain.z,
+      });
+    }
+
     gazeReport.current -= dt;
     const atKey = at ? `${at.x.toFixed(2)},${at.z.toFixed(2)}` : 'ahead';
     const key = `${atKey}|${aimErr.toFixed(0)}`;
@@ -909,6 +969,11 @@ export default function HomeWorld3D({
     onStats?.(stats.current as WorldStats);
   }, [onStats]);
 
+  const handleBridge = useMemo(() => (b: { has: boolean; progress: number; crossed: boolean; x: number; z: number }) => {
+    stats.current = { ...stats.current, lionBridge: b };
+    onStats?.(stats.current as WorldStats);
+  }, [onStats]);
+
   const handleLionMeasured = useMemo(() => (height: number, grounded: boolean, clips: string[], floorGap: number) => {
     stats.current = { ...stats.current, lionHeight: height, lionGrounded: grounded, lionClips: clips, lionFloorGap: floorGap };
     onStats?.(stats.current as WorldStats);
@@ -960,6 +1025,7 @@ export default function HomeWorld3D({
               onMeasured={handleLionMeasured}
               onBrainClip={handleBrainClip}
               onGaze={handleGaze}
+              onBridge={handleBridge}
               interestMarkers={markers}
             />
           )}

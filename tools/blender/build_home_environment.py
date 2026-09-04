@@ -134,6 +134,12 @@ def build_materials():
     MAT["grass"] = material("ENV_Grass", (0.310, 0.729, 0.216), 0.80)
     MAT["grass_dark"] = material("ENV_GrassShade", (0.161, 0.482, 0.129), 0.84)
     MAT["soil"] = material("ENV_Soil", (0.482, 0.353, 0.235), 0.90)
+    # Bridge planks. Warmer and lighter than `trunk`, because the approved
+    # reference art (`lion-treehouse-closeup.webp`) builds its architecture out
+    # of honey-coloured wood, and a bridge in tree-bark brown reads as a fallen
+    # log rather than as something someone built.
+    MAT["plank"] = material("ENV_Plank", (0.686, 0.478, 0.278), 0.74)
+    MAT["plank_dark"] = material("ENV_PlankShade", (0.529, 0.353, 0.196), 0.78)
     MAT["rock"] = material("ENV_Rock", (0.706, 0.612, 0.478), 0.82)
     MAT["water"] = material("ENV_Water", (0.106, 0.647, 0.722), 0.14)
     MAT["water_deep"] = material("ENV_WaterDeep", (0.055, 0.404, 0.522), 0.18)
@@ -770,6 +776,150 @@ def build_reeds(col):
 
 
 # ── Camera, markers, lighting ───────────────────────────────────────────────
+
+# ── Bridge ──────────────────────────────────────────────────────────────────
+# Where the bridge goes, and why it is on the +X side rather than straight back.
+#
+# The production camera sits at roughly y = -12.9 looking toward +y, so the far
+# bank, the waterfall and the hills are all BEHIND the island from the child's
+# point of view. A bridge running back that way would be crossed largely out of
+# sight behind the island's own dome — and the whole point of the crossing is
+# that the child WATCHES the lion leave. On the +X side the deck is in profile
+# to the camera, so the walk reads end to end.
+BRIDGE_Y = 0.10                 # a hair off centre, so it does not fight the tail
+BRIDGE_NEAR_X = 1.10            # the WALK-ON point; see the note below
+BRIDGE_DECK_X0 = 1.45           # where the planks actually start, on the grass
+BRIDGE_FAR_X = 8.90             # centre of the landing platform
+BRIDGE_HALF_W = 0.45            # deck half width; the brain's corridor matches
+BRIDGE_LANDING_R = 1.15
+BRIDGE_RISE = 0.14              # how much the deck arcs up at its middle
+BRIDGE_PLANKS = 22
+
+
+def bridge_deck_z(t):
+    """Deck height at fraction `t` along the span, 0 at the island end.
+
+    A shallow arc rather than a straight ramp: the island end has to meet the
+    dome at +0.255 and the landing sits near zero, and a straight line between
+    them reads as a plank leaning on a rock. The sine term lifts the middle so
+    it reads as a bridge.
+    """
+    a = island_surface_z(BRIDGE_DECK_X0, BRIDGE_Y)
+    b = 0.02
+    return a + (b - a) * t + BRIDGE_RISE * math.sin(math.pi * t)
+
+
+def build_bridge(col):
+    """Planks, railings and a landing, so the lion can walk out of this world.
+
+    THE NEAR MARKER IS DELIBERATELY INSIDE THE ISLAND'S WALK CIRCLE.
+
+    `MARK_BridgeNear` is at x 1.10 and the planks begin at x 1.66. That looks
+    like an error and is the opposite: the runtime's walkable region is the
+    island circle (radius 1.35, from MARK_WalkLeft/Right) UNION the bridge
+    corridor, and if the corridor started where the planks do there would be a
+    0.31 m ring belonging to neither. The lion would be clamped to the island
+    rim, unable to reach a bridge it can see.
+
+    So the marker names what the BRAIN needs — a corridor anchor that overlaps
+    the circle — while the geometry starts where a bridge should start. See
+    `LionBrain.setBridge` and `clampToWalkable`.
+    """
+    span = BRIDGE_FAR_X - BRIDGE_DECK_X0
+
+    # Landing platform first: it defines the far end's height, so the deck has
+    # something real to meet rather than a number someone picked.
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=20, radius=BRIDGE_LANDING_R, depth=0.34,
+        location=(BRIDGE_FAR_X, BRIDGE_Y, -0.15))
+    pad = bpy.context.object
+    pad.name = "ENV_BridgeLanding"
+    assign(pad, MAT["grass"])
+    link(pad, col)
+
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=20, radius=BRIDGE_LANDING_R * 0.98, depth=0.6,
+        location=(BRIDGE_FAR_X, BRIDGE_Y, -0.52))
+    skirt = pad and bpy.context.object
+    skirt.name = "ENV_BridgeLandingSoil"
+    assign(skirt, MAT["soil"])
+    link(skirt, col)
+
+    # Deck planks. Individual boxes rather than one long slab because the gaps
+    # between them are the only thing that says "planks" at this distance, and
+    # they cost 12 triangles each.
+    for i in range(BRIDGE_PLANKS):
+        t = (i + 0.5) / BRIDGE_PLANKS
+        x = BRIDGE_DECK_X0 + span * t
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(x, BRIDGE_Y, bridge_deck_z(t)))
+        pl = bpy.context.object
+        pl.name = f"ENV_BridgePlank_{i:02d}"
+        # SCALE IS THE FULL DIMENSION, not a half-extent. `primitive_cube_add`
+        # with size=1.0 makes a unit cube, so `scale` sets the box's actual
+        # width, and the first version of this treated it as a half-extent in
+        # three places at once: the deck came out 0.45 m wide instead of 0.90
+        # (a lion is 0.44 wide, so it barely fitted), the stringers spanned
+        # half the bridge, and every rail segment was half its own length —
+        # which is why the railing rendered as a row of floating bars.
+        #
+        # 0.82 of the plank pitch, so the gaps read as gaps. At 0.40 the gaps
+        # are wider than the planks and the deck renders as a LADDER.
+        pl.scale = (span / BRIDGE_PLANKS * 0.82, BRIDGE_HALF_W * 2.0, 0.07)
+        assign(pl, MAT["plank"], smooth=False)
+        link(pl, col)
+
+    # Two stringers under the planks, so the deck is not floating on air when
+    # seen from the eye-level review shot.
+    for side in (-1, 1):
+        bpy.ops.mesh.primitive_cube_add(
+            size=1.0, location=(BRIDGE_DECK_X0 + span * 0.5,
+                                BRIDGE_Y + side * BRIDGE_HALF_W * 0.78,
+                                bridge_deck_z(0.5) - 0.09))
+        st = bpy.context.object
+        st.name = f"ENV_BridgeStringer_{'R' if side > 0 else 'L'}"
+        st.scale = (span, 0.05, 0.07)
+        assign(st, MAT["plank_dark"], smooth=False)
+        link(st, col)
+
+    # Railings: posts plus a top rail, both sides. A bridge without a railing
+    # over water reads as a plank, and the rail is also what gives the crossing
+    # a sense of length as the lion passes each post.
+    posts = 7
+    for side in (-1, 1):
+        for i in range(posts):
+            t = i / (posts - 1)
+            x = BRIDGE_DECK_X0 + span * t
+            zb = bridge_deck_z(t)
+            bpy.ops.mesh.primitive_cylinder_add(
+                vertices=6, radius=0.045, depth=0.42,
+                location=(x, BRIDGE_Y + side * BRIDGE_HALF_W, zb + 0.19))
+            po = bpy.context.object
+            po.name = f"ENV_BridgePost_{'R' if side > 0 else 'L'}_{i}"
+            assign(po, MAT["plank_dark"], smooth=False)
+            link(po, col)
+
+        # The rail follows the deck's arc in a few straight segments rather
+        # than one long box, or it sinks into the deck at the middle.
+        segs = posts - 1
+        for i in range(segs):
+            t0, t1 = i / segs, (i + 1) / segs
+            x0 = BRIDGE_DECK_X0 + span * t0
+            x1 = BRIDGE_DECK_X0 + span * t1
+            z0 = bridge_deck_z(t0) + 0.38
+            z1 = bridge_deck_z(t1) + 0.38
+            bpy.ops.mesh.primitive_cube_add(
+                size=1.0, location=((x0 + x1) / 2, BRIDGE_Y + side * BRIDGE_HALF_W,
+                                    (z0 + z1) / 2))
+            ra = bpy.context.object
+            ra.name = f"ENV_BridgeRail_{'R' if side > 0 else 'L'}_{i}"
+            # The DIAGONAL length, not the horizontal run, or each segment
+            # falls short of the next post by 1/cos(slope) and the rail breaks
+            # into pieces at the arc's steepest point.
+            ra.scale = (math.hypot(x1 - x0, z1 - z0), 0.05, 0.05)
+            ra.rotation_euler = (0.0, -math.atan2(z1 - z0, x1 - x0), 0.0)
+            assign(ra, MAT["plank"], smooth=False)
+            link(ra, col)
+
 def build_camera(col):
     """CAM_Home_Main — locked production camera.
 
@@ -823,6 +973,17 @@ def build_markers(col):
                             (0.0, -0.30, island_surface_z(0, 0) + 2.12), col, "CUBE", 0.26)
     m["cards_hero"] = empty("MARK_CardShelfZoneHero",
                             (0.0, -1.55, island_surface_z(0.0, -1.55) + 0.10), col, "CUBE", 0.34)
+
+    # THE BRIDGE'S TWO ENDS, read by name by `HomeWorld3D` and handed to
+    # `LionBrain.setBridge`. The near one sits INSIDE the island's walk circle
+    # on purpose — see the note in `build_bridge` for why a corridor that
+    # started at the planks would leave the lion unable to reach them.
+    m["bridge_near"] = empty("MARK_BridgeNear",
+                             (BRIDGE_NEAR_X, BRIDGE_Y,
+                              island_surface_z(BRIDGE_NEAR_X, BRIDGE_Y)),
+                             col, "ARROWS", 0.20)
+    m["bridge_far"] = empty("MARK_BridgeFar",
+                            (BRIDGE_FAR_X, BRIDGE_Y, 0.02), col, "ARROWS", 0.20)
     return m
 
 
@@ -968,6 +1129,7 @@ def main():
     build_reeds(c_props)
     build_island_detail(c_props)
     build_island_edge(c_ground)
+    build_bridge(c_props)
     build_water_detail(c_water)
     build_far_bank_detail(c_foliage)
     c_sky = collection("ENV_Sky")
