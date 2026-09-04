@@ -1,225 +1,533 @@
 {
  "objects": [
   {
+   "name": "ENV_BankBush_0",
+   "collection": "ENV_Foliage",
+   "height": 0.624,
+   "width": 1.04,
+   "base_z": 0.22791,
+   "centre": [
+    11.40436,
+    4.60766,
+    0.53991
+   ],
+   "tris": 168,
+   "material": "ENV_LeafDark"
+  },
+  {
+   "name": "ENV_BankBush_1",
+   "collection": "ENV_Foliage",
+   "height": 0.7956,
+   "width": 1.326,
+   "base_z": 0.16191,
+   "centre": [
+    9.5589,
+    7.74064,
+    0.55971
+   ],
+   "tris": 168,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_BankBush_2",
+   "collection": "ENV_Foliage",
+   "height": 0.9672,
+   "width": 1.612,
+   "base_z": 0.09591,
+   "centre": [
+    6.87807,
+    10.19716,
+    0.57951
+   ],
+   "tris": 168,
+   "material": "ENV_LeafDark"
+  },
+  {
+   "name": "ENV_BankBush_3",
+   "collection": "ENV_Foliage",
+   "height": 0.624,
+   "width": 1.04,
+   "base_z": 0.22791,
+   "centre": [
+    3.59617,
+    11.76255,
+    0.53991
+   ],
+   "tris": 168,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_BankBush_4",
+   "collection": "ENV_Foliage",
+   "height": 0.7956,
+   "width": 1.326,
+   "base_z": 0.16191,
+   "centre": [
+    0.0,
+    12.3,
+    0.55971
+   ],
+   "tris": 168,
+   "material": "ENV_LeafDark"
+  },
+  {
+   "name": "ENV_BankBush_5",
+   "collection": "ENV_Foliage",
+   "height": 0.9672,
+   "width": 1.612,
+   "base_z": 0.09591,
+   "centre": [
+    -3.59617,
+    11.76255,
+    0.57951
+   ],
+   "tris": 168,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_BankBush_6",
+   "collection": "ENV_Foliage",
+   "height": 0.624,
+   "width": 1.04,
+   "base_z": 0.22791,
+   "centre": [
+    -6.87807,
+    10.19716,
+    0.53991
+   ],
+   "tris": 168,
+   "material": "ENV_LeafDark"
+  },
+  {
+   "name": "ENV_BankBush_7",
+   "collection": "ENV_Foliage",
+   "height": 0.7956,
+   "width": 1.326,
+   "base_z": 0.16191,
+   "centre": [
+    -9.5589,
+    7.74064,
+    0.55971
+   ],
+   "tris": 168,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_BankBush_8",
+   "collection": "ENV_Foliage",
+   "height": 0.9672,
+   "width": 1.612,
+   "base_z": 0.09591,
+   "centre": [
+    -11.40436,
+    4.60766,
+    0.57951
+   ],
+   "tris": 168,
+   "material": "ENV_LeafDark"
+  },
+  {
+   "name": "ENV_BankMound_00",
+   "collection": "ENV_Foliage",
+   "height": 1.1,
+   "width": 3.69303,
+   "base_z": -0.03044,
+   "centre": [
+    10.18937,
+    2.92176,
+    0.51956
+   ],
+   "tris": 256,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BankMound_01",
+   "collection": "ENV_Foliage",
+   "height": 1.496,
+   "width": 5.02252,
+   "base_z": -0.15515,
+   "centre": [
+    10.20202,
+    5.19819,
+    0.59285
+   ],
+   "tris": 256,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_BankMound_02",
+   "collection": "ENV_Foliage",
+   "height": 1.892,
+   "width": 6.35201,
+   "base_z": -0.37059,
+   "centre": [
+    9.69253,
+    7.57264,
+    0.57541
+   ],
+   "tris": 256,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BankMound_03",
+   "collection": "ENV_Foliage",
+   "height": 2.288,
+   "width": 7.6815,
+   "base_z": -0.55694,
+   "centre": [
+    6.95423,
+    7.99992,
+    0.58706
+   ],
+   "tris": 256,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_BankMound_04",
+   "collection": "ENV_Foliage",
+   "height": 1.1,
+   "width": 3.69303,
+   "base_z": 0.02035,
+   "centre": [
+    5.725,
+    9.91599,
+    0.57035
+   ],
+   "tris": 256,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BankMound_05",
+   "collection": "ENV_Foliage",
+   "height": 1.496,
+   "width": 5.02252,
+   "base_z": -0.19509,
+   "centre": [
+    4.00449,
+    11.62988,
+    0.55291
+   ],
+   "tris": 256,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_BankMound_06",
+   "collection": "ENV_Foliage",
+   "height": 1.892,
+   "width": 6.35201,
+   "base_z": -0.38144,
+   "centre": [
+    1.47524,
+    10.49684,
+    0.56456
+   ],
+   "tris": 256,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BankMound_07",
+   "collection": "ENV_Foliage",
+   "height": 2.288,
+   "width": 7.6815,
+   "base_z": -0.50615,
+   "centre": [
+    -0.59925,
+    11.43431,
+    0.63785
+   ],
+   "tris": 256,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_BankMound_08",
+   "collection": "ENV_Foliage",
+   "height": 1.1,
+   "width": 3.69303,
+   "base_z": -0.01959,
+   "centre": [
+    -2.97564,
+    11.93464,
+    0.53041
+   ],
+   "tris": 256,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BankMound_09",
+   "collection": "ENV_Foliage",
+   "height": 1.496,
+   "width": 5.02252,
+   "base_z": -0.20594,
+   "centre": [
+    -4.47975,
+    9.60686,
+    0.54206
+   ],
+   "tris": 256,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_BankMound_12",
+   "collection": "ENV_Foliage",
+   "height": 1.1,
+   "width": 3.69303,
+   "base_z": -0.03044,
+   "centre": [
+    -8.98931,
+    5.61714,
+    0.51956
+   ],
+   "tris": 256,
+   "material": "ENV_Grass"
+  },
+  {
+   "name": "ENV_BankMound_13",
+   "collection": "ENV_Foliage",
+   "height": 1.496,
+   "width": 5.02252,
+   "base_z": -0.15515,
+   "centre": [
+    -10.6895,
+    4.10331,
+    0.59285
+   ],
+   "tris": 256,
+   "material": "ENV_GrassShade"
+  },
+  {
    "name": "ENV_BankTree_0_Blossom_0",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.5842,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.51148,
    "centre": [
-    -10.3731,
-    -5.9895,
-    1.6624
+    -5.66694,
+    10.9,
+    4.62248
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_0_Blossom_1",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.90452,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 5.13239,
    "centre": [
-    -10.48994,
-    -5.64133,
-    1.98272
+    -5.89761,
+    11.5965,
+    5.24339
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_10",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.76326,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.85857,
    "centre": [
-    -10.48994,
-    -6.33768,
-    1.84146
+    -5.89761,
+    10.2035,
+    4.96957
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_2",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.74706,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.82717,
    "centre": [
-    -10.80336,
-    -5.4037,
-    1.82526
+    -6.51638,
+    12.07186,
+    4.93817
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_3",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.34669,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.05108,
    "centre": [
-    -11.21385,
-    -5.35206,
-    1.42489
+    -7.32679,
+    12.17517,
+    4.16208
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_0_Blossom_4",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.30058,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 3.9617,
    "centre": [
-    -11.59108,
-    -5.5028,
-    1.37878
+    -8.07155,
+    11.87362,
+    4.07271
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_5",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.67751,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.69235,
    "centre": [
-    -11.81529,
-    -5.80807,
-    1.75571
+    -8.5142,
+    11.26295,
+    4.80335
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_6",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.91526,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 5.15322,
    "centre": [
-    -11.81529,
-    -6.17094,
-    1.99346
+    -8.5142,
+    10.53705,
+    5.26422
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_0_Blossom_7",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.65922,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.65689,
    "centre": [
-    -11.59108,
-    -6.4762,
-    1.73742
+    -8.07155,
+    9.92638,
+    4.76789
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_8",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.29128,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 3.94367,
    "centre": [
-    -11.21385,
-    -6.62695,
-    1.36948
+    -7.32679,
+    9.62483,
+    4.05468
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_0_Blossom_9",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.36025,
+   "height": 0.222,
+   "width": 0.25457,
+   "base_z": 4.07738,
    "centre": [
-    -10.80336,
-    -6.5753,
-    1.43845
+    -6.51638,
+    9.72814,
+    4.18838
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_0_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.60336,
-   "width": 0.45981,
-   "base_z": 0.95592,
+   "height": 1.24445,
+   "width": 1.04624,
+   "base_z": 3.28763,
    "centre": [
-    -11.29678,
-    -5.93798,
-    1.2576
+    -6.53578,
+    10.9,
+    3.90986
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_0_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.60985,
-   "width": 0.44777,
-   "base_z": 0.95268,
+   "height": 1.24445,
+   "width": 1.04517,
+   "base_z": 3.28763,
    "centre": [
-    -10.93246,
-    -6.05942,
-    1.2576
+    -7.41211,
+    11.40595,
+    3.90986
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_BankTree_0_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.24445,
+   "width": 1.04517,
+   "base_z": 3.28763,
+   "centre": [
+    -7.41211,
+    10.39405,
+    3.90986
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_0_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.20557,
-   "width": 1.42059,
-   "base_z": 0.87562,
+   "height": 2.3968,
+   "width": 2.9655,
+   "base_z": 3.21008,
    "centre": [
-    -11.4955,
-    -6.26918,
-    1.4784
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_BankTree_0_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.14374,
-   "width": 1.34774,
-   "base_z": 0.98013,
-   "centre": [
-    -10.8331,
-    -5.75399,
-    1.552
+    -7.08285,
+    10.94674,
+    4.40848
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_BankTree_0_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.77363,
+   "width": 2.19447,
+   "base_z": 2.87967,
+   "centre": [
+    -7.98165,
+    10.46738,
+    3.76648
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_BankTree_0_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.08192,
-   "width": 1.27489,
-   "base_z": 1.25024,
+   "height": 1.8695,
+   "width": 2.31309,
+   "base_z": 3.79473,
    "centre": [
-    -10.79538,
-    -5.69179,
-    1.7912
+    -6.33385,
+    11.51598,
+    4.72948
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -227,13 +535,13 @@
   {
    "name": "ENV_BankTree_0_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.89645,
-   "width": 1.05634,
-   "base_z": 1.41658,
+   "height": 1.39014,
+   "width": 1.71999,
+   "base_z": 4.30191,
    "centre": [
-    -11.2931,
-    -5.58839,
-    1.8648
+    -7.56221,
+    11.69574,
+    4.99698
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -241,13 +549,13 @@
   {
    "name": "ENV_BankTree_0_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.86554,
-   "width": 1.01991,
-   "base_z": 1.28483,
+   "height": 1.43808,
+   "width": 1.7793,
+   "base_z": 3.36844,
    "centre": [
-    -10.6859,
-    -6.30598,
-    1.7176
+    -6.24397,
+    10.28762,
+    4.08748
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -255,13 +563,13 @@
   {
    "name": "ENV_BankTree_0_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.71098,
-   "width": 0.83778,
-   "base_z": 1.73011,
+   "height": 1.10253,
+   "width": 1.36413,
+   "base_z": 4.71322,
    "centre": [
-    -10.91517,
-    -5.7779,
-    2.0856
+    -6.75329,
+    11.33622,
+    5.26448
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -269,195 +577,223 @@
   {
    "name": "ENV_BankTree_0_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.7728,
-   "width": 0.91064,
-   "base_z": 0.8896,
+   "height": 1.1984,
+   "width": 1.48275,
+   "base_z": 2.84628,
    "centre": [
-    -11.5875,
-    -5.86438,
-    1.276
+    -8.07153,
+    11.18642,
+    3.44548
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_BankTree_0_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.24634,
+   "width": 1.54206,
+   "base_z": 3.89231,
+   "centre": [
+    -7.02293,
+    10.04794,
+    4.51548
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_BankTree_0_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54629,
+   "height": 0.62317,
+   "width": 0.77896,
+   "base_z": 4.53422,
    "centre": [
-    -10.4312,
-    -5.74957,
-    1.76709
+    -5.81348,
+    11.41902,
+    4.84581
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_0_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54662,
+   "height": 0.62317,
+   "width": 0.77896,
+   "base_z": 4.53496,
    "centre": [
-    -11.01837,
-    -5.37236,
-    1.76742
+    -6.91294,
+    12.15027,
+    4.84654
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_0_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.07099,
+   "height": 0.62317,
+   "width": 0.77896,
+   "base_z": 3.47742,
    "centre": [
-    -11.69627,
-    -5.61598,
-    1.29179
+    -8.18231,
+    11.67799,
+    3.789
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_0_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.26844,
+   "height": 0.62317,
+   "width": 0.77896,
+   "base_z": 3.91643,
    "centre": [
-    -11.787,
-    -6.2368,
-    1.48924
+    -8.35222,
+    10.47446,
+    4.22802
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_0_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.66196,
+   "height": 0.62317,
+   "width": 0.77896,
+   "base_z": 4.79142,
    "centre": [
-    -11.19984,
-    -6.61401,
-    1.88276
+    -7.25276,
+    9.74321,
+    5.103
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_0_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.30088,
+   "height": 0.62317,
+   "width": 0.77896,
+   "base_z": 3.98856,
    "centre": [
-    -10.52194,
-    -6.37039,
-    1.52168
+    -5.98339,
+    10.21549,
+    4.30015
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_0_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.3128,
-   "width": 0.736,
-   "base_z": 0.0616,
+   "height": 0.5885,
+   "width": 1.0486,
+   "base_z": -0.19252,
    "centre": [
-    -11.1091,
-    -5.99319,
-    0.218
+    -7.12,
+    10.9,
+    0.10173
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_0_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.242,
-   "width": 0.4784,
-   "base_z": 0.0662,
+   "height": 5.35,
+   "width": 0.5992,
+   "base_z": -0.19252,
    "centre": [
-    -11.1091,
-    -5.99319,
-    0.6872
+    -7.12,
+    10.9,
+    2.48248
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_1_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.60336,
-   "width": 0.45981,
-   "base_z": 0.95592,
+   "height": 1.20956,
+   "width": 1.05218,
+   "base_z": 3.19065,
    "centre": [
-    -7.68086,
-    -9.5539,
-    1.2576
+    -4.5181,
+    12.69715,
+    3.79543
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_1_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.60985,
-   "width": 0.44778,
-   "base_z": 0.95268,
+   "height": 1.20956,
+   "width": 1.05222,
+   "base_z": 3.19065,
    "centre": [
-    -7.31655,
-    -9.67534,
-    1.2576
+    -5.21979,
+    12.00797,
+    3.79543
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_BankTree_1_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.20956,
+   "width": 0.91497,
+   "base_z": 3.19065,
+   "centre": [
+    -4.27211,
+    11.74488,
+    3.79543
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_1_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.20557,
-   "width": 1.42059,
-   "base_z": 0.87562,
+   "height": 2.3296,
+   "width": 2.88236,
+   "base_z": 3.11527,
    "centre": [
-    -7.87959,
-    -9.8851,
-    1.4784
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_BankTree_1_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.14374,
-   "width": 1.34774,
-   "base_z": 0.98013,
-   "centre": [
-    -7.21719,
-    -9.3699,
-    1.552
+    -4.63389,
+    12.19543,
+    4.28007
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_BankTree_1_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.7239,
+   "width": 2.13295,
+   "base_z": 2.79412,
+   "centre": [
+    -5.50749,
+    11.72951,
+    3.65607
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_BankTree_1_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.08192,
-   "width": 1.27489,
-   "base_z": 1.25024,
+   "height": 1.81709,
+   "width": 2.24824,
+   "base_z": 3.68353,
    "centre": [
-    -7.17946,
-    -9.30771,
-    1.7912
+    -3.90589,
+    12.74871,
+    4.59207
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -465,13 +801,13 @@
   {
    "name": "ENV_BankTree_1_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.89645,
-   "width": 1.05634,
-   "base_z": 1.41658,
+   "height": 1.35117,
+   "width": 1.67177,
+   "base_z": 4.17649,
    "centre": [
-    -7.67719,
-    -9.2043,
-    1.8648
+    -5.09981,
+    12.92343,
+    4.85207
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -479,13 +815,13 @@
   {
    "name": "ENV_BankTree_1_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.86554,
-   "width": 1.01991,
-   "base_z": 1.28483,
+   "height": 1.39776,
+   "width": 1.72942,
+   "base_z": 3.26919,
    "centre": [
-    -7.06998,
-    -9.9219,
-    1.7176
+    -3.81853,
+    11.55479,
+    3.96807
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -493,13 +829,13 @@
   {
    "name": "ENV_BankTree_1_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.71098,
-   "width": 0.83779,
-   "base_z": 1.73011,
+   "height": 1.07162,
+   "width": 1.32589,
+   "base_z": 4.57626,
    "centre": [
-    -7.29925,
-    -9.39382,
-    2.0856
+    -4.31357,
+    12.57399,
+    5.11207
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -507,349 +843,377 @@
   {
    "name": "ENV_BankTree_1_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.7728,
-   "width": 0.91063,
-   "base_z": 0.8896,
+   "height": 1.1648,
+   "width": 1.44118,
+   "base_z": 2.76167,
    "centre": [
-    -7.97159,
-    -9.4803,
-    1.276
+    -5.59485,
+    12.42839,
+    3.34407
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_BankTree_1_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.21139,
+   "width": 1.49883,
+   "base_z": 3.77837,
+   "centre": [
+    -4.57565,
+    11.32183,
+    4.38407
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_BankTree_1_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54629,
+   "height": 0.6057,
+   "width": 0.75712,
+   "base_z": 4.14551,
    "centre": [
-    -6.81528,
-    -9.36548,
-    1.76709
+    -4.80648,
+    13.36438,
+    4.44836
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_1_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54662,
+   "height": 0.6057,
+   "width": 0.75712,
+   "base_z": 3.30182,
    "centre": [
-    -7.40245,
-    -8.98828,
-    1.76742
+    -5.87057,
+    12.64837,
+    3.60467
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_1_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.07099,
+   "height": 0.6057,
+   "width": 0.75712,
+   "base_z": 4.08978,
    "centre": [
-    -8.08035,
-    -9.2319,
-    1.29179
+    -5.69799,
+    11.47942,
+    4.39263
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_1_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.26844,
+   "height": 0.6057,
+   "width": 0.75712,
+   "base_z": 4.60582,
    "centre": [
-    -8.17109,
-    -9.85272,
-    1.48924
+    -4.4613,
+    11.02647,
+    4.90866
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_1_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.66196,
+   "height": 0.6057,
+   "width": 0.75712,
+   "base_z": 3.60328,
    "centre": [
-    -7.58392,
-    -10.22993,
-    1.88276
+    -3.39721,
+    11.74248,
+    3.90613
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_1_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.30088,
+   "height": 0.6057,
+   "width": 0.75712,
+   "base_z": 3.50412,
    "centre": [
-    -6.90602,
-    -9.98631,
-    1.52168
+    -3.5698,
+    12.91143,
+    3.80697
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_1_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.3128,
-   "width": 0.736,
-   "base_z": 0.0616,
+   "height": 0.572,
+   "width": 1.0192,
+   "base_z": -0.19193,
    "centre": [
-    -7.49319,
-    -9.6091,
-    0.218
+    -4.67,
+    12.15,
+    0.09407
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_1_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.242,
-   "width": 0.4784,
-   "base_z": 0.0662,
+   "height": 5.2,
+   "width": 0.5824,
+   "base_z": -0.19193,
    "centre": [
-    -7.49319,
-    -9.6091,
-    0.6872
+    -4.67,
+    12.15,
+    2.40807
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_2_Blossom_0",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.5842,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 3.9946,
    "centre": [
-    7.436,
-    -10.10106,
-    1.6624
+    4.88855,
+    12.40392,
+    4.10352
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_2_Blossom_1",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.90452,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.75967,
    "centre": [
-    7.31916,
-    -9.75289,
-    1.98272
+    4.53475,
+    11.76437,
+    4.8686
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_10",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.76326,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.30986,
    "centre": [
-    7.31916,
-    -10.44923,
-    1.84146
+    5.57618,
+    12.77236,
+    4.41879
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_2",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.74706,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 5.03312,
    "centre": [
-    7.00575,
-    -9.51525,
-    1.82526
+    4.62711,
+    11.05676,
+    5.14205
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_3",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.34669,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.40709,
    "centre": [
-    6.59526,
-    -9.46361,
-    1.42489
+    5.1363,
+    10.50575,
+    4.51601
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_2_Blossom_4",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.30058,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 3.81533,
    "centre": [
-    6.21802,
-    -9.61436,
-    1.37878
+    5.90066,
+    10.28628,
+    3.92426
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_5",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.67751,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.1405,
    "centre": [
-    5.99381,
-    -9.91962,
-    1.75571
+    6.67751,
+    10.46803,
+    4.24943
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_6",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.91526,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.89758,
    "centre": [
-    5.99381,
-    -10.28249,
-    1.99346
+    7.22021,
+    10.9933,
+    5.00651
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_2_Blossom_7",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.65922,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.95734,
    "centre": [
-    6.21802,
-    -10.58776,
-    1.73742
+    7.35645,
+    11.69532,
+    5.06627
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_8",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.29128,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 4.23064,
    "centre": [
-    6.59526,
-    -10.7385,
-    1.36948
+    7.04298,
+    12.3512,
+    4.33957
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_BankTree_2_Blossom_9",
    "collection": "ENV_Foliage",
-   "height": 0.1564,
-   "width": 0.14502,
-   "base_z": 1.36025,
+   "height": 0.21785,
+   "width": 0.24981,
+   "base_z": 3.8014,
    "centre": [
-    7.00575,
-    -10.68686,
-    1.43845
+    6.37932,
+    12.7527,
+    3.91033
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_BankTree_2_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.60336,
-   "width": 0.45981,
-   "base_z": 0.95592,
+   "height": 1.22119,
+   "width": 0.94147,
+   "base_z": 3.2291,
    "centre": [
-    6.51232,
-    -10.04954,
-    1.2576
+    5.51725,
+    11.93724,
+    3.8397
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_2_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.60985,
-   "width": 0.44778,
-   "base_z": 0.95268,
+   "height": 1.22119,
+   "width": 1.06143,
+   "base_z": 3.2291,
    "centre": [
-    6.87664,
-    -10.17098,
-    1.2576
+    5.81601,
+    10.99027,
+    3.8397
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_BankTree_2_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.22119,
+   "width": 1.06125,
+   "base_z": 3.2291,
+   "centre": [
+    6.48674,
+    11.72249,
+    3.8397
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_2_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.20557,
-   "width": 1.42059,
-   "base_z": 0.87562,
+   "height": 2.352,
+   "width": 2.91008,
+   "base_z": 3.153,
    "centre": [
-    6.3136,
-    -10.38074,
-    1.4784
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_BankTree_2_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.14374,
-   "width": 1.34774,
-   "base_z": 0.98013,
-   "centre": [
-    6.976,
-    -9.86554,
-    1.552
+    5.97646,
+    11.59586,
+    4.329
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_BankTree_2_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.74048,
+   "width": 2.15346,
+   "base_z": 2.82876,
+   "centre": [
+    5.09446,
+    11.12546,
+    3.699
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_BankTree_2_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.08192,
-   "width": 1.27489,
-   "base_z": 1.25024,
+   "height": 1.83456,
+   "width": 2.26986,
+   "base_z": 3.72672,
    "centre": [
-    7.01372,
-    -9.80335,
-    1.7912
+    6.71146,
+    12.15446,
+    4.644
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -857,13 +1221,13 @@
   {
    "name": "ENV_BankTree_2_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.89645,
-   "width": 1.05634,
-   "base_z": 1.41658,
+   "height": 1.36416,
+   "width": 1.68784,
+   "base_z": 4.22442,
    "centre": [
-    6.516,
-    -9.69994,
-    1.8648
+    5.50606,
+    12.33086,
+    4.9065
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -871,13 +1235,13 @@
   {
    "name": "ENV_BankTree_2_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.86554,
-   "width": 1.01991,
-   "base_z": 1.28483,
+   "height": 1.4112,
+   "width": 1.74604,
+   "base_z": 3.3084,
    "centre": [
-    7.1232,
-    -10.41754,
-    1.7176
+    6.79966,
+    10.94906,
+    4.014
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -885,13 +1249,13 @@
   {
    "name": "ENV_BankTree_2_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.71098,
-   "width": 0.83778,
-   "base_z": 1.73011,
+   "height": 1.08192,
+   "width": 1.33863,
+   "base_z": 4.62804,
    "centre": [
-    6.89394,
-    -9.88946,
-    2.0856
+    6.29986,
+    11.97806,
+    5.169
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -899,195 +1263,223 @@
   {
    "name": "ENV_BankTree_2_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.7728,
-   "width": 0.91063,
-   "base_z": 0.8896,
+   "height": 1.176,
+   "width": 1.45504,
+   "base_z": 2.796,
    "centre": [
-    6.2216,
-    -9.97594,
-    1.276
+    5.00626,
+    11.83106,
+    3.384
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_BankTree_2_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.22304,
+   "width": 1.51324,
+   "base_z": 3.82248,
+   "centre": [
+    6.03526,
+    10.71386,
+    4.434
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_BankTree_2_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54629,
+   "height": 0.61152,
+   "width": 0.7644,
+   "base_z": 3.34151,
    "centre": [
-    7.3779,
-    -9.86112,
-    1.76709
+    4.70219,
+    11.99454,
+    3.64727
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_2_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54662,
+   "height": 0.61152,
+   "width": 0.7644,
+   "base_z": 4.19675,
    "centre": [
-    6.79074,
-    -9.48391,
-    1.76742
+    4.94698,
+    10.82408,
+    4.50251
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_2_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.07099,
+   "height": 0.61152,
+   "width": 0.7644,
+   "base_z": 4.63281,
    "centre": [
-    6.11284,
-    -9.72753,
-    1.29179
+    6.22124,
+    10.42541,
+    4.93857
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_2_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.26844,
+   "height": 0.61152,
+   "width": 0.7644,
+   "base_z": 3.59625,
    "centre": [
-    6.0221,
-    -10.34836,
-    1.48924
+    7.25072,
+    11.19719,
+    3.90201
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_2_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.66196,
+   "height": 0.61152,
+   "width": 0.7644,
+   "base_z": 3.59121,
    "centre": [
-    6.60926,
-    -10.72557,
-    1.88276
+    7.00593,
+    12.36765,
+    3.89697
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_2_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.30088,
+   "height": 0.61152,
+   "width": 0.7644,
+   "base_z": 4.62987,
    "centre": [
-    7.28716,
-    -10.48195,
-    1.52168
+    5.73167,
+    12.76632,
+    4.93563
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_2_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.3128,
-   "width": 0.736,
-   "base_z": 0.0616,
+   "height": 0.5775,
+   "width": 1.029,
+   "base_z": -0.186,
    "centre": [
-    6.7,
-    -10.10474,
-    0.218
+    5.94,
+    11.55,
+    0.10275
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_2_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.242,
-   "width": 0.4784,
-   "base_z": 0.0662,
+   "height": 5.25,
+   "width": 0.588,
+   "base_z": -0.186,
    "centre": [
-    6.7,
-    -10.10474,
-    0.6872
+    5.94,
+    11.55,
+    2.439
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_3_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.60336,
-   "width": 0.45981,
-   "base_z": 0.95592,
+   "height": 1.25608,
+   "width": 0.95318,
+   "base_z": 3.32375,
    "centre": [
-    10.65315,
-    -6.32112,
-    1.2576
+    8.72083,
+    10.42301,
+    3.95179
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_3_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.60985,
-   "width": 0.44777,
-   "base_z": 0.95268,
+   "height": 1.25608,
+   "width": 1.09262,
+   "base_z": 3.32375,
    "centre": [
-    11.01747,
-    -6.44256,
-    1.2576
+    7.73825,
+    10.14429,
+    3.95179
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_BankTree_3_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.25608,
+   "width": 1.09256,
+   "base_z": 3.32375,
+   "centre": [
+    8.47092,
+    9.4327,
+    3.95179
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_3_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.20557,
-   "width": 1.42059,
-   "base_z": 0.87562,
+   "height": 2.4192,
+   "width": 2.99322,
+   "base_z": 3.24547,
    "centre": [
-    10.45443,
-    -6.65232,
-    1.4784
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_BankTree_3_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.14374,
-   "width": 1.34774,
-   "base_z": 0.98013,
-   "centre": [
-    11.11683,
-    -6.13712,
-    1.552
+    8.3475,
+    10.04717,
+    4.45507
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_BankTree_3_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.79021,
+   "width": 2.21498,
+   "base_z": 2.91197,
+   "centre": [
+    7.4403,
+    9.56333,
+    3.80707
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_BankTree_3_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.08192,
-   "width": 1.27489,
-   "base_z": 1.25024,
+   "height": 1.88698,
+   "width": 2.33471,
+   "base_z": 3.83558,
    "centre": [
-    11.15455,
-    -6.07493,
-    1.7912
+    9.1035,
+    10.62173,
+    4.77907
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -1095,13 +1487,13 @@
   {
    "name": "ENV_BankTree_3_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.89645,
-   "width": 1.05634,
-   "base_z": 1.41658,
+   "height": 1.40314,
+   "width": 1.73607,
+   "base_z": 4.3475,
    "centre": [
-    10.65683,
-    -5.97152,
-    1.8648
+    7.86366,
+    10.80317,
+    5.04907
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -1109,13 +1501,13 @@
   {
    "name": "ENV_BankTree_3_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.86554,
-   "width": 1.01991,
-   "base_z": 1.28483,
+   "height": 1.45152,
+   "width": 1.79593,
+   "base_z": 3.40531,
    "centre": [
-    11.26403,
-    -6.68912,
-    1.7176
+    9.19422,
+    9.38189,
+    4.13107
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -1123,13 +1515,13 @@
   {
    "name": "ENV_BankTree_3_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.71098,
-   "width": 0.83778,
-   "base_z": 1.73011,
+   "height": 1.11283,
+   "width": 1.37688,
+   "base_z": 4.76265,
    "centre": [
-    11.03476,
-    -6.16104,
-    2.0856
+    8.68014,
+    10.44029,
+    5.31907
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -1137,127 +1529,141 @@
   {
    "name": "ENV_BankTree_3_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.7728,
-   "width": 0.91064,
-   "base_z": 0.8896,
+   "height": 1.2096,
+   "width": 1.49661,
+   "base_z": 2.87827,
    "centre": [
-    10.36243,
-    -6.24752,
-    1.276
+    7.34958,
+    10.28909,
+    3.48307
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_BankTree_3_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.25798,
+   "width": 1.55647,
+   "base_z": 3.93408,
+   "centre": [
+    8.40798,
+    9.13997,
+    4.56307
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_BankTree_3_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54629,
+   "height": 0.62899,
+   "width": 0.78624,
+   "base_z": 4.76671,
    "centre": [
-    11.51873,
-    -6.1327,
-    1.76709
+    8.85155,
+    11.1881,
+    5.0812
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_3_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.54662,
+   "height": 0.62899,
+   "width": 0.78624,
+   "base_z": 3.6999,
    "centre": [
-    10.93157,
-    -5.7555,
-    1.76742
+    7.47672,
+    11.00178,
+    4.0144
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_3_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.07099,
+   "height": 0.62899,
+   "width": 0.78624,
+   "base_z": 3.69768,
    "centre": [
-    10.25366,
-    -5.99911,
-    1.29179
+    6.97267,
+    9.86085,
+    4.01218
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_3_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.26844,
+   "height": 0.62899,
+   "width": 0.78624,
+   "base_z": 4.76541,
    "centre": [
-    10.16293,
-    -6.61994,
-    1.48924
+    7.84344,
+    8.90625,
+    5.07991
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_3_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.66196,
+   "height": 0.62899,
+   "width": 0.78624,
+   "base_z": 4.32365,
    "centre": [
-    10.75009,
-    -6.99715,
-    1.88276
+    9.21828,
+    9.09257,
+    4.63814
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_BankTree_3_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.4416,
-   "width": 0.43053,
-   "base_z": 1.30088,
+   "height": 0.62899,
+   "width": 0.78624,
+   "base_z": 3.43961,
    "centre": [
-    11.42799,
-    -6.75353,
-    1.52168
+    9.72233,
+    10.23349,
+    3.75411
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_BankTree_3_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.3128,
-   "width": 0.736,
-   "base_z": 0.0616,
+   "height": 0.594,
+   "width": 1.0584,
+   "base_z": -0.18893,
    "centre": [
-    10.84083,
-    -6.37632,
-    0.218
+    8.31,
+    10.0,
+    0.10807
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_BankTree_3_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.242,
-   "width": 0.4784,
-   "base_z": 0.0662,
+   "height": 5.4,
+   "width": 0.6048,
+   "base_z": -0.18893,
    "centre": [
-    10.84083,
-    -6.37632,
-    0.6872
+    8.31,
+    10.0,
+    2.51107
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
@@ -3433,674 +3839,1080 @@
   {
    "name": "ENV_Flower_0_Core",
    "collection": "ENV_Props",
-   "height": 0.119,
-   "width": 0.119,
-   "base_z": 0.36602,
+   "height": 0.1292,
+   "width": 0.13595,
+   "base_z": 0.43353,
    "centre": [
-    -1.15,
-    -0.55,
-    0.42552
+    -1.42,
+    -0.62,
+    0.49813
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_0_P0",
+   "name": "ENV_Flower_0_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.32052,
+   "height": 0.32362,
+   "width": 0.23906,
+   "base_z": 0.30972,
    "centre": [
-    -1.0225,
-    -0.55,
-    0.40552
+    -1.344,
+    -0.62,
+    0.47153
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_0_P1",
+   "name": "ENV_Flower_0_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.32052,
+   "height": 0.32362,
+   "width": 0.24734,
+   "base_z": 0.30972,
    "centre": [
-    -1.1106,
-    -0.42874,
-    0.40552
+    -1.39651,
+    -0.54772,
+    0.47153
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_0_P2",
+   "name": "ENV_Flower_0_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.32052,
+   "height": 0.32362,
+   "width": 0.23141,
+   "base_z": 0.30972,
    "centre": [
-    -1.25315,
-    -0.47506,
-    0.40552
+    -1.48149,
+    -0.57533,
+    0.47153
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_0_P3",
+   "name": "ENV_Flower_0_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.32052,
+   "height": 0.32362,
+   "width": 0.23141,
+   "base_z": 0.30972,
    "centre": [
-    -1.25315,
-    -0.62494,
-    0.40552
+    -1.48149,
+    -0.66467,
+    0.47153
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_0_P4",
+   "name": "ENV_Flower_0_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.32052,
+   "height": 0.32362,
+   "width": 0.24734,
+   "base_z": 0.30972,
    "centre": [
-    -1.1106,
-    -0.67126,
-    0.40552
+    -1.39651,
+    -0.69228,
+    0.47153
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_0_Stem",
+   "collection": "ENV_Props",
+   "height": 0.2128,
+   "width": 0.0418,
+   "base_z": 0.27773,
+   "centre": [
+    -1.42,
+    -0.62,
+    0.38413
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Flower_10_Core",
+   "collection": "ENV_Props",
+   "height": 0.102,
+   "width": 0.10733,
+   "base_z": 0.18702,
+   "centre": [
+    -1.2,
+    1.68,
+    0.23802
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_10_Petal_0",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.17582,
+   "base_z": 0.08927,
+   "centre": [
+    -1.15477,
+    1.71942,
+    0.21702
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_10_Petal_1",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.19364,
+   "base_z": 0.08927,
+   "centre": [
+    -1.22351,
+    1.7352,
+    0.21702
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_10_Petal_2",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.19251,
+   "base_z": 0.08927,
+   "centre": [
+    -1.25977,
+    1.6747,
+    0.21702
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_10_Petal_3",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.19537,
+   "base_z": 0.08927,
+   "centre": [
+    -1.21343,
+    1.62152,
+    0.21702
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_10_Petal_4",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.18813,
+   "base_z": 0.08927,
+   "centre": [
+    -1.14853,
+    1.64916,
+    0.21702
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_10_Stem",
+   "collection": "ENV_Props",
+   "height": 0.168,
+   "width": 0.033,
+   "base_z": 0.06402,
+   "centre": [
+    -1.2,
+    1.68,
+    0.14802
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_1_Core",
    "collection": "ENV_Props",
-   "height": 0.105,
-   "width": 0.105,
-   "base_z": 0.36035,
+   "height": 0.1088,
+   "width": 0.11449,
+   "base_z": 0.39986,
    "centre": [
-    0.95,
-    -0.95,
-    0.41285
+    1.16,
+    -1.08,
+    0.45426
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_1_P0",
+   "name": "ENV_Flower_1_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.15,
-   "width": 0.15,
-   "base_z": 0.31785,
+   "height": 0.27252,
+   "width": 0.18905,
+   "base_z": 0.2956,
    "centre": [
-    1.0625,
-    -0.95,
-    0.39285
+    1.20895,
+    -1.03877,
+    0.43186
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_1_P1",
+   "name": "ENV_Flower_1_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.15,
-   "width": 0.15,
-   "base_z": 0.31785,
+   "height": 0.27252,
+   "width": 0.207,
+   "base_z": 0.2956,
    "centre": [
-    0.98476,
-    -0.84301,
-    0.39285
+    1.13591,
+    -1.02071,
+    0.43186
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_1_P2",
+   "name": "ENV_Flower_1_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.15,
-   "width": 0.15,
-   "base_z": 0.31785,
+   "height": 0.27252,
+   "width": 0.2047,
+   "base_z": 0.2956,
    "centre": [
-    0.85899,
-    -0.88387,
-    0.39285
+    1.09616,
+    -1.08458,
+    0.43186
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_1_P3",
+   "name": "ENV_Flower_1_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.15,
-   "width": 0.15,
-   "base_z": 0.31785,
+   "height": 0.27252,
+   "width": 0.2085,
+   "base_z": 0.2956,
    "centre": [
-    0.85899,
-    -1.01613,
-    0.39285
+    1.14463,
+    -1.14213,
+    0.43186
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_1_P4",
+   "name": "ENV_Flower_1_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.15,
-   "width": 0.15,
-   "base_z": 0.31785,
+   "height": 0.27252,
+   "width": 0.19969,
+   "base_z": 0.2956,
    "centre": [
-    0.98476,
-    -1.05699,
-    0.39285
+    1.21434,
+    -1.11381,
+    0.43186
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_1_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1792,
+   "width": 0.0352,
+   "base_z": 0.26866,
+   "centre": [
+    1.16,
+    -1.08,
+    0.35826
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_2_Core",
    "collection": "ENV_Props",
-   "height": 0.126,
-   "width": 0.126,
-   "base_z": 0.32628,
+   "height": 0.136,
+   "width": 0.14311,
+   "base_z": 0.41276,
    "centre": [
-    -0.55,
-    1.35,
-    0.38928
+    -0.66,
+    1.52,
+    0.48076
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_2_P0",
+   "name": "ENV_Flower_2_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.18,
-   "width": 0.18,
-   "base_z": 0.27928,
+   "height": 0.34066,
+   "width": 0.25955,
+   "base_z": 0.28244,
    "centre": [
-    -0.415,
-    1.35,
-    0.36928
+    -0.6464,
+    1.59884,
+    0.45276
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_2_P1",
+   "name": "ENV_Flower_2_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.18,
-   "width": 0.18,
-   "base_z": 0.27928,
+   "height": 0.34066,
+   "width": 0.25435,
+   "base_z": 0.28244,
    "centre": [
-    -0.50828,
-    1.47839,
-    0.36928
+    -0.73078,
+    1.55729,
+    0.45276
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_2_P2",
+   "name": "ENV_Flower_2_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.18,
-   "width": 0.18,
-   "base_z": 0.27928,
+   "height": 0.34066,
+   "width": 0.22782,
+   "base_z": 0.28244,
    "centre": [
-    -0.65922,
-    1.42935,
-    0.36928
+    -0.71734,
+    1.46421,
+    0.45276
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_2_P3",
+   "name": "ENV_Flower_2_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.18,
-   "width": 0.18,
-   "base_z": 0.27928,
+   "height": 0.34066,
+   "width": 0.25582,
+   "base_z": 0.28244,
    "centre": [
-    -0.65922,
-    1.27065,
-    0.36928
+    -0.62466,
+    1.44823,
+    0.45276
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_2_P4",
+   "name": "ENV_Flower_2_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.18,
-   "width": 0.18,
-   "base_z": 0.27928,
+   "height": 0.34066,
+   "width": 0.25879,
+   "base_z": 0.28244,
    "centre": [
-    -0.50828,
-    1.22161,
-    0.36928
+    -0.58082,
+    1.53143,
+    0.45276
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_2_Stem",
+   "collection": "ENV_Props",
+   "height": 0.224,
+   "width": 0.044,
+   "base_z": 0.24876,
+   "centre": [
+    -0.66,
+    1.52,
+    0.36076
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_3_Core",
    "collection": "ENV_Props",
-   "height": 0.098,
-   "width": 0.098,
-   "base_z": 0.28277,
+   "height": 0.1054,
+   "width": 0.11091,
+   "base_z": 0.32958,
    "centre": [
-    1.55,
-    0.65,
-    0.33177
+    1.64,
+    0.74,
+    0.38228
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_3_P0",
+   "name": "ENV_Flower_3_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": 0.24177,
+   "height": 0.26401,
+   "width": 0.19497,
+   "base_z": 0.22857,
    "centre": [
-    1.655,
-    0.65,
-    0.31177
+    1.6087,
+    0.79352,
+    0.36058
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_3_P1",
+   "name": "ENV_Flower_3_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": 0.24177,
+   "height": 0.26401,
+   "width": 0.20179,
+   "base_z": 0.22857,
    "centre": [
-    1.58245,
-    0.74986,
-    0.31177
+    1.57943,
+    0.72677,
+    0.36058
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_3_P2",
+   "name": "ENV_Flower_3_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": 0.24177,
+   "height": 0.26401,
+   "width": 0.19929,
+   "base_z": 0.22857,
    "centre": [
-    1.46505,
-    0.71172,
-    0.31177
+    1.63386,
+    0.6783,
+    0.36058
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_3_P3",
+   "name": "ENV_Flower_3_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": 0.24177,
+   "height": 0.26401,
+   "width": 0.19979,
+   "base_z": 0.22857,
    "centre": [
-    1.46505,
-    0.58828,
-    0.31177
+    1.69678,
+    0.7151,
+    0.36058
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_3_P4",
+   "name": "ENV_Flower_3_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": 0.24177,
+   "height": 0.26401,
+   "width": 0.18073,
+   "base_z": 0.22857,
    "centre": [
-    1.58245,
-    0.55014,
-    0.31177
+    1.68123,
+    0.78631,
+    0.36058
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_3_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1736,
+   "width": 0.0341,
+   "base_z": 0.20248,
+   "centre": [
+    1.64,
+    0.74,
+    0.28928
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_4_Core",
    "collection": "ENV_Props",
-   "height": 0.112,
-   "width": 0.112,
-   "base_z": 0.20313,
+   "height": 0.1224,
+   "width": 0.1288,
+   "base_z": 0.28705,
    "centre": [
-    -1.85,
-    0.35,
-    0.25913
+    -1.9,
+    0.42,
+    0.34825
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_4_P0",
+   "name": "ENV_Flower_4_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.16,
-   "width": 0.16,
-   "base_z": 0.15913,
+   "height": 0.30659,
+   "width": 0.23391,
+   "base_z": 0.16976,
    "centre": [
-    -1.73,
-    0.35,
-    0.23913
+    -1.96784,
+    0.44412,
+    0.32305
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_4_P1",
+   "name": "ENV_Flower_4_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.16,
-   "width": 0.16,
-   "base_z": 0.15913,
+   "height": 0.30659,
+   "width": 0.21685,
+   "base_z": 0.16976,
    "centre": [
-    -1.81292,
-    0.46413,
-    0.23913
+    -1.9439,
+    0.36293,
+    0.32305
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_4_P2",
+   "name": "ENV_Flower_4_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.16,
-   "width": 0.16,
-   "base_z": 0.15913,
+   "height": 0.30659,
+   "width": 0.22144,
+   "base_z": 0.16976,
    "centre": [
-    -1.94708,
-    0.42053,
-    0.23913
+    -1.85929,
+    0.36061,
+    0.32305
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_4_P3",
+   "name": "ENV_Flower_4_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.16,
-   "width": 0.16,
-   "base_z": 0.15913,
+   "height": 0.30659,
+   "width": 0.23456,
+   "base_z": 0.16976,
    "centre": [
-    -1.94708,
-    0.27947,
-    0.23913
+    -1.83094,
+    0.44036,
+    0.32305
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_4_P4",
+   "name": "ENV_Flower_4_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.16,
-   "width": 0.16,
-   "base_z": 0.15913,
+   "height": 0.30659,
+   "width": 0.22808,
+   "base_z": 0.16976,
    "centre": [
-    -1.81292,
-    0.23587,
-    0.23913
+    -1.89803,
+    0.49197,
+    0.32305
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_4_Stem",
+   "collection": "ENV_Props",
+   "height": 0.2016,
+   "width": 0.0396,
+   "base_z": 0.13945,
+   "centre": [
+    -1.9,
+    0.42,
+    0.24025
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_5_Core",
    "collection": "ENV_Props",
-   "height": 0.119,
-   "width": 0.119,
-   "base_z": 0.29809,
+   "height": 0.1258,
+   "width": 0.13237,
+   "base_z": 0.38978,
    "centre": [
-    0.35,
-    -1.55,
-    0.35759
+    0.42,
+    -1.64,
+    0.45268
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_5_P0",
+   "name": "ENV_Flower_5_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.25259,
+   "height": 0.31511,
+   "width": 0.24006,
+   "base_z": 0.26923,
    "centre": [
-    0.4775,
-    -1.55,
-    0.33759
+    0.3507,
+    -1.66596,
+    0.42678
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_5_P1",
+   "name": "ENV_Flower_5_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.25259,
+   "height": 0.31511,
+   "width": 0.23533,
+   "base_z": 0.26923,
    "centre": [
-    0.3894,
-    -1.42874,
-    0.33759
+    0.42327,
+    -1.71393,
+    0.42678
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_5_P2",
+   "name": "ENV_Flower_5_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.25259,
+   "height": 0.31511,
+   "width": 0.24113,
+   "base_z": 0.26923,
    "centre": [
-    0.24685,
-    -1.47506,
-    0.33759
+    0.49132,
+    -1.65973,
+    0.42678
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_5_P3",
+   "name": "ENV_Flower_5_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.25259,
+   "height": 0.31511,
+   "width": 0.22889,
+   "base_z": 0.26923,
    "centre": [
-    0.24685,
-    -1.62494,
-    0.33759
+    0.46081,
+    -1.57827,
+    0.42678
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_Flower_5_P4",
+   "name": "ENV_Flower_5_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.17,
-   "width": 0.17,
-   "base_z": 0.25259,
+   "height": 0.31511,
+   "width": 0.2213,
+   "base_z": 0.26923,
    "centre": [
-    0.3894,
-    -1.67126,
-    0.33759
+    0.3739,
+    -1.58212,
+    0.42678
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_5_Stem",
+   "collection": "ENV_Props",
+   "height": 0.2072,
+   "width": 0.0407,
+   "base_z": 0.23808,
+   "centre": [
+    0.42,
+    -1.64,
+    0.34168
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_6_Core",
    "collection": "ENV_Props",
-   "height": 0.091,
-   "width": 0.091,
-   "base_z": -0.0355,
+   "height": 0.102,
+   "width": 0.10733,
+   "base_z": 0.23284,
    "centre": [
-    2.05,
-    -0.85,
-    0.01
+    1.88,
+    -0.68,
+    0.28384
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_6_P0",
+   "name": "ENV_Flower_6_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.13,
-   "width": 0.13,
-   "base_z": -0.075,
+   "height": 0.25549,
+   "width": 0.18952,
+   "base_z": 0.1351,
    "centre": [
-    2.1475,
-    -0.85,
-    -0.01
+    1.85058,
+    -0.73229,
+    0.26284
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_6_P1",
+   "name": "ENV_Flower_6_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.13,
-   "width": 0.13,
-   "base_z": -0.075,
+   "height": 0.25549,
+   "width": 0.17341,
+   "base_z": 0.1351,
    "centre": [
-    2.08013,
-    -0.75727,
-    -0.01
+    1.92065,
+    -0.72414,
+    0.26284
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_6_P2",
+   "name": "ENV_Flower_6_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.13,
-   "width": 0.13,
-   "base_z": -0.075,
+   "height": 0.25549,
+   "width": 0.19283,
+   "base_z": 0.1351,
    "centre": [
-    1.97112,
-    -0.79269,
-    -0.01
+    1.93454,
+    -0.65498,
+    0.26284
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_6_P3",
+   "name": "ENV_Flower_6_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.13,
-   "width": 0.13,
-   "base_z": -0.075,
+   "height": 0.25549,
+   "width": 0.19337,
+   "base_z": 0.1351,
    "centre": [
-    1.97112,
-    -0.90731,
-    -0.01
+    1.87306,
+    -0.6204,
+    0.26284
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_Flower_6_P4",
+   "name": "ENV_Flower_6_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.13,
-   "width": 0.13,
-   "base_z": -0.075,
+   "height": 0.25549,
+   "width": 0.19509,
+   "base_z": 0.1351,
    "centre": [
-    2.08013,
-    -0.94273,
-    -0.01
+    1.82117,
+    -0.66818,
+    0.26284
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_6_Stem",
+   "collection": "ENV_Props",
+   "height": 0.168,
+   "width": 0.033,
+   "base_z": 0.10984,
+   "centre": [
+    1.88,
+    -0.68,
+    0.19384
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Flower_7_Core",
    "collection": "ENV_Props",
-   "height": 0.098,
-   "width": 0.098,
-   "base_z": -0.039,
+   "height": 0.1156,
+   "width": 0.12164,
+   "base_z": 0.25998,
    "centre": [
-    -2.25,
-    -1.15,
-    0.01
+    -1.62,
+    -1.14,
+    0.31778
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_7_P0",
+   "name": "ENV_Flower_7_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
+   "height": 0.28956,
+   "width": 0.22093,
+   "base_z": 0.1492,
    "centre": [
-    -2.145,
-    -1.15,
-    -0.01
+    -1.60732,
+    -1.20681,
+    0.29398
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_7_P1",
+   "name": "ENV_Flower_7_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
+   "height": 0.28956,
+   "width": 0.21949,
+   "base_z": 0.1492,
    "centre": [
-    -2.21755,
-    -1.05014,
-    -0.01
+    -1.55254,
+    -1.14858,
+    0.29398
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_7_P2",
+   "name": "ENV_Flower_7_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
+   "height": 0.28956,
+   "width": 0.21813,
+   "base_z": 0.1492,
    "centre": [
-    -2.33495,
-    -1.08828,
-    -0.01
+    -1.59099,
+    -1.0785,
+    0.29398
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_7_P3",
+   "name": "ENV_Flower_7_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
+   "height": 0.28956,
+   "width": 0.19543,
+   "base_z": 0.1492,
    "centre": [
-    -2.33495,
-    -1.21172,
-    -0.01
+    -1.66953,
+    -1.09341,
+    0.29398
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_Flower_7_P4",
+   "name": "ENV_Flower_7_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
+   "height": 0.28956,
+   "width": 0.21535,
+   "base_z": 0.1492,
    "centre": [
-    -2.21755,
-    -1.24986,
-    -0.01
+    -1.67962,
+    -1.17271,
+    0.29398
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_7_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1904,
+   "width": 0.0374,
+   "base_z": 0.12058,
+   "centre": [
+    -1.62,
+    -1.14,
+    0.21578
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Flower_8_Core",
+   "collection": "ENV_Props",
+   "height": 0.1088,
+   "width": 0.11449,
+   "base_z": 0.31179,
+   "centre": [
+    0.94,
+    1.6,
+    0.36619
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_8_Petal_0",
+   "collection": "ENV_Props",
+   "height": 0.27252,
+   "width": 0.1905,
+   "base_z": 0.20752,
+   "centre": [
+    0.98964,
+    1.5596,
+    0.34379
+   ],
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_8_Petal_1",
+   "collection": "ENV_Props",
+   "height": 0.27252,
+   "width": 0.19865,
+   "base_z": 0.20752,
+   "centre": [
+    0.99376,
+    1.63472,
+    0.34379
+   ],
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_8_Petal_2",
+   "collection": "ENV_Props",
+   "height": 0.27252,
+   "width": 0.20854,
+   "base_z": 0.20752,
+   "centre": [
+    0.92359,
+    1.66186,
+    0.34379
+   ],
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_8_Petal_3",
+   "collection": "ENV_Props",
+   "height": 0.27252,
+   "width": 0.204,
+   "base_z": 0.20752,
+   "centre": [
+    0.8761,
+    1.60351,
+    0.34379
+   ],
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_8_Petal_4",
+   "collection": "ENV_Props",
+   "height": 0.27252,
+   "width": 0.2074,
+   "base_z": 0.20752,
+   "centre": [
+    0.91691,
+    1.54031,
+    0.34379
+   ],
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_Flower_8_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1792,
+   "width": 0.0352,
+   "base_z": 0.18059,
+   "centre": [
+    0.94,
+    1.6,
+    0.27019
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Flower_9_Core",
+   "collection": "ENV_Props",
+   "height": 0.119,
+   "width": 0.12522,
+   "base_z": 0.27957,
+   "centre": [
+    -0.22,
+    -1.94,
+    0.33907
+   ],
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_Flower_9_Petal_0",
+   "collection": "ENV_Props",
+   "height": 0.29807,
+   "width": 0.22116,
+   "base_z": 0.16553,
+   "centre": [
+    -0.15001,
+    -1.93882,
+    0.31457
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_9_Petal_1",
+   "collection": "ENV_Props",
+   "height": 0.29807,
+   "width": 0.22797,
+   "base_z": 0.16553,
+   "centre": [
+    -0.19949,
+    -1.87307,
+    0.31457
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_9_Petal_2",
+   "collection": "ENV_Props",
+   "height": 0.29807,
+   "width": 0.21447,
+   "base_z": 0.16553,
+   "centre": [
+    -0.27731,
+    -1.89981,
+    0.31457
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_9_Petal_3",
+   "collection": "ENV_Props",
+   "height": 0.29807,
+   "width": 0.21174,
+   "base_z": 0.16553,
+   "centre": [
+    -0.27593,
+    -1.98209,
+    0.31457
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_9_Petal_4",
+   "collection": "ENV_Props",
+   "height": 0.29807,
+   "width": 0.22759,
+   "base_z": 0.16553,
+   "centre": [
+    -0.19725,
+    -2.0062,
+    0.31457
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_Flower_9_Stem",
+   "collection": "ENV_Props",
+   "height": 0.196,
+   "width": 0.0385,
+   "base_z": 0.13607,
+   "centre": [
+    -0.22,
+    -1.94,
+    0.23407
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_IslandGrass",
@@ -4143,76 +4955,6 @@
    ],
    "tris": 156,
    "material": "ENV_Soil"
-  },
-  {
-   "name": "ENV_IslandRock_0",
-   "collection": "ENV_Props",
-   "height": 0.198,
-   "width": 0.375,
-   "base_z": 0.04606,
-   "centre": [
-    -1.62,
-    0.92,
-    0.14506
-   ],
-   "tris": 168,
-   "material": "ENV_Rock"
-  },
-  {
-   "name": "ENV_IslandRock_1",
-   "collection": "ENV_Props",
-   "height": 0.1584,
-   "width": 0.3,
-   "base_z": 0.06702,
-   "centre": [
-    1.78,
-    -0.62,
-    0.14622
-   ],
-   "tris": 168,
-   "material": "ENV_Rock"
-  },
-  {
-   "name": "ENV_IslandRock_2",
-   "collection": "ENV_Props",
-   "height": 0.132,
-   "width": 0.25,
-   "base_z": 0.13173,
-   "centre": [
-    0.42,
-    1.72,
-    0.19773
-   ],
-   "tris": 168,
-   "material": "ENV_Rock"
-  },
-  {
-   "name": "ENV_IslandRock_3",
-   "collection": "ENV_Props",
-   "height": 0.1716,
-   "width": 0.325,
-   "base_z": 0.03608,
-   "centre": [
-    -0.95,
-    -1.68,
-    0.12188
-   ],
-   "tris": 168,
-   "material": "ENV_Rock"
-  },
-  {
-   "name": "ENV_IslandRock_4",
-   "collection": "ENV_Props",
-   "height": 0.1452,
-   "width": 0.275,
-   "base_z": -0.1711,
-   "centre": [
-    2.05,
-    1.15,
-    -0.0985
-   ],
-   "tris": 168,
-   "material": "ENV_Rock"
   },
   {
    "name": "ENV_IslandSoilBand",
@@ -4775,6 +5517,314 @@
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_Pebble_00",
+   "collection": "ENV_Props",
+   "height": 0.1054,
+   "width": 0.19767,
+   "base_z": 0.11743,
+   "centre": [
+    -1.28,
+    1.36,
+    0.17013
+   ],
+   "tris": 20,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_Pebble_01",
+   "collection": "ENV_Props",
+   "height": 0.0868,
+   "width": 0.16279,
+   "base_z": 0.12275,
+   "centre": [
+    1.44,
+    1.22,
+    0.16615
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_02",
+   "collection": "ENV_Props",
+   "height": 0.093,
+   "width": 0.17441,
+   "base_z": 0.11661,
+   "centre": [
+    -1.86,
+    -0.34,
+    0.16311
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_03",
+   "collection": "ENV_Props",
+   "height": 0.0806,
+   "width": 0.15116,
+   "base_z": 0.10835,
+   "centre": [
+    1.92,
+    -0.18,
+    0.14865
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_04",
+   "collection": "ENV_Props",
+   "height": 0.0992,
+   "width": 0.18604,
+   "base_z": 0.22413,
+   "centre": [
+    0.62,
+    -1.42,
+    0.27373
+   ],
+   "tris": 20,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_Pebble_05",
+   "collection": "ENV_Props",
+   "height": 0.07688,
+   "width": 0.14418,
+   "base_z": 0.25758,
+   "centre": [
+    -0.58,
+    -1.36,
+    0.29602
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_06",
+   "collection": "ENV_Props",
+   "height": 0.07192,
+   "width": 0.13488,
+   "base_z": 0.07342,
+   "centre": [
+    1.18,
+    1.62,
+    0.10938
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_07",
+   "collection": "ENV_Props",
+   "height": 0.08928,
+   "width": 0.16744,
+   "base_z": 0.05362,
+   "centre": [
+    -1.05,
+    -1.72,
+    0.09826
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_08",
+   "collection": "ENV_Props",
+   "height": 0.08432,
+   "width": 0.15813,
+   "base_z": 0.0004,
+   "centre": [
+    1.68,
+    -1.24,
+    0.04256
+   ],
+   "tris": 20,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_Pebble_09",
+   "collection": "ENV_Props",
+   "height": 0.0744,
+   "width": 0.13953,
+   "base_z": 0.08959,
+   "centre": [
+    -1.88,
+    0.6,
+    0.12679
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_10",
+   "collection": "ENV_Props",
+   "height": 0.08184,
+   "width": 0.15348,
+   "base_z": 0.07195,
+   "centre": [
+    0.24,
+    1.98,
+    0.11287
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_11",
+   "collection": "ENV_Props",
+   "height": 0.0682,
+   "width": 0.1279,
+   "base_z": 0.07068,
+   "centre": [
+    -0.86,
+    1.82,
+    0.10478
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_12",
+   "collection": "ENV_Props",
+   "height": 0.07688,
+   "width": 0.14418,
+   "base_z": 0.0397,
+   "centre": [
+    2.02,
+    0.34,
+    0.07814
+   ],
+   "tris": 20,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_Pebble_13",
+   "collection": "ENV_Props",
+   "height": 0.06448,
+   "width": 0.12093,
+   "base_z": 0.06564,
+   "centre": [
+    -1.7,
+    1.1,
+    0.09788
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_14",
+   "collection": "ENV_Props",
+   "height": 0.07192,
+   "width": 0.13488,
+   "base_z": 0.10844,
+   "centre": [
+    0.9,
+    -1.72,
+    0.1444
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_15",
+   "collection": "ENV_Props",
+   "height": 0.062,
+   "width": 0.11628,
+   "base_z": 0.31605,
+   "centre": [
+    -0.3,
+    -1.2,
+    0.34705
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_16",
+   "collection": "ENV_Props",
+   "height": 0.05952,
+   "width": 0.11162,
+   "base_z": 0.28657,
+   "centre": [
+    1.34,
+    0.42,
+    0.31633
+   ],
+   "tris": 20,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_Pebble_17",
+   "collection": "ENV_Props",
+   "height": 0.06696,
+   "width": 0.12558,
+   "base_z": 0.28936,
+   "centre": [
+    -1.32,
+    0.34,
+    0.32284
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_18",
+   "collection": "ENV_Props",
+   "height": 0.05704,
+   "width": 0.10697,
+   "base_z": 0.28856,
+   "centre": [
+    0.76,
+    1.18,
+    0.31708
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_19",
+   "collection": "ENV_Props",
+   "height": 0.062,
+   "width": 0.11628,
+   "base_z": 0.29949,
+   "centre": [
+    -0.48,
+    1.24,
+    0.33049
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_Pebble_20",
+   "collection": "ENV_Props",
+   "height": 0.06944,
+   "width": 0.13023,
+   "base_z": 0.03218,
+   "centre": [
+    1.44,
+    -1.48,
+    0.0669
+   ],
+   "tris": 20,
+   "material": "ENV_Soil"
+  },
+  {
+   "name": "ENV_Pebble_21",
+   "collection": "ENV_Props",
+   "height": 0.07936,
+   "width": 0.14883,
+   "base_z": 0.05064,
+   "centre": [
+    -1.8,
+    -0.94,
+    0.09032
+   ],
+   "tris": 20,
+   "material": "ENV_Rock"
+  },
+  {
    "name": "ENV_Rainbow_Blue",
    "collection": "ENV_Sky",
    "height": 23.12,
@@ -4875,338 +5925,786 @@
   {
    "name": "ENV_Reed_0_0",
    "collection": "ENV_Props",
-   "height": 1.505,
-   "width": 0.3828,
-   "base_z": -0.6225,
+   "height": 0.52188,
+   "width": 0.16528,
+   "base_z": -0.62354,
    "centre": [
-    -7.7,
-    -5.6,
-    0.13
+    -2.59,
+    -1.35,
+    -0.3626
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_0_1",
    "collection": "ENV_Props",
-   "height": 1.50579,
-   "width": 0.26787,
-   "base_z": -0.6229,
+   "height": 0.58931,
+   "width": 0.22678,
+   "base_z": -0.62215,
    "centre": [
-    -7.5,
-    -5.44,
-    0.13
+    -2.47,
+    -1.24,
+    -0.3275
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_Reed_0_2",
    "collection": "ENV_Props",
-   "height": 1.50579,
-   "width": 0.26842,
-   "base_z": -0.6229,
+   "height": 0.65166,
+   "width": 0.25354,
+   "base_z": -0.61823,
    "centre": [
-    -7.3,
-    -5.6,
-    0.13
+    -2.35,
+    -1.35,
+    -0.2924
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_0_3",
    "collection": "ENV_Props",
-   "height": 1.505,
-   "width": 0.41072,
-   "base_z": -0.6225,
+   "height": 0.72989,
+   "width": 0.21142,
+   "base_z": -0.62225,
    "centre": [
-    -7.1,
-    -5.44,
-    0.13
+    -2.23,
+    -1.24,
+    -0.2573
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_0_4",
+   "collection": "ENV_Props",
+   "height": 0.79451,
+   "width": 0.26925,
+   "base_z": -0.61945,
+   "centre": [
+    -2.11,
+    -1.35,
+    -0.2222
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_1_0",
    "collection": "ENV_Props",
-   "height": 1.90007,
-   "width": 0.44538,
-   "base_z": -0.62004,
+   "height": 0.48174,
+   "width": 0.16214,
+   "base_z": -0.62327,
    "centre": [
-    -6.9,
-    -6.2,
-    0.33
+    2.21,
+    -1.15,
+    -0.3824
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_1_1",
    "collection": "ENV_Props",
-   "height": 1.90525,
-   "width": 0.28728,
-   "base_z": -0.62262,
+   "height": 0.54398,
+   "width": 0.20789,
+   "base_z": -0.62199,
    "centre": [
-    -6.7,
-    -6.04,
-    0.33
+    2.33,
+    -1.04,
+    -0.35
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_Reed_1_2",
    "collection": "ENV_Props",
-   "height": 1.90525,
-   "width": 0.28348,
-   "base_z": -0.62262,
+   "height": 0.60153,
+   "width": 0.25614,
+   "base_z": -0.61836,
    "centre": [
-    -6.5,
-    -6.2,
-    0.33
+    2.45,
+    -1.15,
+    -0.3176
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_1_3",
    "collection": "ENV_Props",
-   "height": 1.90007,
-   "width": 0.46788,
-   "base_z": -0.62004,
+   "height": 0.67375,
+   "width": 0.19541,
+   "base_z": -0.62207,
    "centre": [
-    -6.3,
-    -6.04,
-    0.33
+    2.57,
+    -1.04,
+    -0.2852
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_1_4",
+   "collection": "ENV_Props",
+   "height": 0.73339,
+   "width": 0.22016,
+   "base_z": -0.6195,
+   "centre": [
+    2.69,
+    -1.15,
+    -0.2528
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_2_0",
    "collection": "ENV_Props",
-   "height": 1.30746,
-   "width": 0.35152,
-   "base_z": -0.62373,
+   "height": 0.57541,
+   "width": 0.19608,
+   "base_z": -0.62391,
    "centre": [
-    -8.2,
-    -6.8,
-    0.03
+    -3.04,
+    0.45,
+    -0.3362
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_2_1",
    "collection": "ENV_Props",
-   "height": 1.30607,
-   "width": 0.25816,
-   "base_z": -0.62303,
+   "height": 0.64975,
+   "width": 0.24853,
+   "base_z": -0.62237,
    "centre": [
-    -8.0,
-    -6.64,
-    0.03
+    -2.92,
+    0.56,
+    -0.2975
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_Reed_2_2",
    "collection": "ENV_Props",
-   "height": 1.30607,
-   "width": 0.26089,
-   "base_z": -0.62303,
+   "height": 0.71849,
+   "width": 0.29395,
+   "base_z": -0.61805,
    "centre": [
-    -7.8,
-    -6.8,
-    0.03
+    -2.8,
+    0.45,
+    -0.2588
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_2_3",
    "collection": "ENV_Props",
-   "height": 1.30746,
-   "width": 0.38214,
-   "base_z": -0.62373,
+   "height": 0.80475,
+   "width": 0.22967,
+   "base_z": -0.62248,
    "centre": [
-    -7.6,
-    -6.64,
-    0.03
+    -2.68,
+    0.56,
+    -0.2201
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_2_4",
+   "collection": "ENV_Props",
+   "height": 0.876,
+   "width": 0.29708,
+   "base_z": -0.6194,
+   "centre": [
+    -2.56,
+    0.45,
+    -0.1814
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_3_0",
    "collection": "ENV_Props",
-   "height": 1.70254,
-   "width": 0.41409,
-   "base_z": -0.62127,
+   "height": 0.61556,
+   "width": 0.2137,
+   "base_z": -0.62418,
    "centre": [
-    7.5,
-    -5.2,
-    0.23
+    2.61,
+    0.3,
+    -0.3164
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_3_1",
    "collection": "ENV_Props",
-   "height": 1.70552,
-   "width": 0.27757,
-   "base_z": -0.62276,
+   "height": 0.69508,
+   "width": 0.24977,
+   "base_z": -0.62254,
    "centre": [
-    7.7,
-    -5.04,
-    0.23
+    2.73,
+    0.41,
+    -0.275
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_Reed_3_2",
    "collection": "ENV_Props",
-   "height": 1.70552,
-   "width": 0.27595,
-   "base_z": -0.62276,
+   "height": 0.76862,
+   "width": 0.33433,
+   "base_z": -0.61791,
    "centre": [
-    7.9,
-    -5.2,
-    0.23
+    2.85,
+    0.3,
+    -0.2336
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_3_3",
    "collection": "ENV_Props",
-   "height": 1.70254,
-   "width": 0.4393,
-   "base_z": -0.62127,
+   "height": 0.8609,
+   "width": 0.24337,
+   "base_z": -0.62265,
    "centre": [
-    8.1,
-    -5.04,
-    0.23
+    2.97,
+    0.41,
+    -0.1922
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_3_4",
+   "collection": "ENV_Props",
+   "height": 0.93711,
+   "width": 0.30949,
+   "base_z": -0.61936,
+   "centre": [
+    3.09,
+    0.3,
+    -0.1508
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_4_0",
    "collection": "ENV_Props",
-   "height": 2.09761,
-   "width": 0.47667,
-   "base_z": -0.61881,
+   "height": 0.45498,
+   "width": 0.15788,
+   "base_z": -0.62309,
    "centre": [
-    8.2,
-    -6.1,
-    0.43
+    -2.09,
+    2.05,
+    -0.3956
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_4_1",
    "collection": "ENV_Props",
-   "height": 2.10497,
-   "width": 0.29698,
-   "base_z": -0.62249,
+   "height": 0.51376,
+   "width": 0.18991,
+   "base_z": -0.62188,
    "centre": [
-    8.4,
-    -5.94,
-    0.43
+    -1.97,
+    2.16,
+    -0.365
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_Reed_4_2",
    "collection": "ENV_Props",
-   "height": 2.10497,
-   "width": 0.29101,
-   "base_z": -0.62249,
+   "height": 0.56811,
+   "width": 0.24545,
+   "base_z": -0.61846,
    "centre": [
-    8.6,
-    -6.1,
-    0.43
+    -1.85,
+    2.05,
+    -0.3344
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_4_3",
    "collection": "ENV_Props",
-   "height": 2.09761,
-   "width": 0.49647,
-   "base_z": -0.61881,
+   "height": 0.63632,
+   "width": 0.16939,
+   "base_z": -0.62196,
    "centre": [
-    8.8,
-    -5.94,
-    0.43
+    -1.73,
+    2.16,
+    -0.3038
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_4_4",
+   "collection": "ENV_Props",
+   "height": 0.69265,
+   "width": 0.23731,
+   "base_z": -0.61952,
+   "centre": [
+    -1.61,
+    2.05,
+    -0.2732
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_5_0",
    "collection": "ENV_Props",
-   "height": 1.40623,
-   "width": 0.36716,
-   "base_z": -0.62311,
+   "height": 0.49512,
+   "width": 0.16814,
+   "base_z": -0.62336,
    "centre": [
-    6.8,
-    -6.6,
-    0.08
+    1.71,
+    2.1,
+    -0.3758
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_5_1",
    "collection": "ENV_Props",
-   "height": 1.40593,
-   "width": 0.26301,
-   "base_z": -0.62297,
+   "height": 0.55909,
+   "width": 0.2063,
+   "base_z": -0.62204,
    "centre": [
-    7.0,
-    -6.44,
-    0.08
+    1.83,
+    2.21,
+    -0.3425
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_Reed_5_2",
    "collection": "ENV_Props",
-   "height": 1.40593,
-   "width": 0.26466,
-   "base_z": -0.62297,
+   "height": 0.61824,
+   "width": 0.26051,
+   "base_z": -0.61832,
    "centre": [
-    7.2,
-    -6.6,
-    0.08
+    1.95,
+    2.1,
+    -0.3092
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_Reed_5_3",
    "collection": "ENV_Props",
-   "height": 1.40623,
-   "width": 0.39643,
-   "base_z": -0.62311,
+   "height": 0.69246,
+   "width": 0.19395,
+   "base_z": -0.62213,
    "centre": [
-    7.4,
-    -6.44,
-    0.08
+    2.07,
+    2.21,
+    -0.2759
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_5_4",
+   "collection": "ENV_Props",
+   "height": 0.75377,
+   "width": 0.25858,
+   "base_z": -0.61948,
+   "centre": [
+    2.19,
+    2.1,
+    -0.2426
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Reed_6_0",
+   "collection": "ENV_Props",
+   "height": 0.41483,
+   "width": 0.13901,
+   "base_z": -0.62282,
+   "centre": [
+    -4.84,
+    7.3,
+    -0.4154
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Reed_6_1",
+   "collection": "ENV_Props",
+   "height": 0.46842,
+   "width": 0.18057,
+   "base_z": -0.62171,
+   "centre": [
+    -4.72,
+    7.41,
+    -0.3875
+   ],
+   "tris": 20,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_6_2",
+   "collection": "ENV_Props",
+   "height": 0.51798,
+   "width": 0.22397,
+   "base_z": -0.61859,
+   "centre": [
+    -4.6,
+    7.3,
+    -0.3596
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Reed_6_3",
+   "collection": "ENV_Props",
+   "height": 0.58017,
+   "width": 0.16435,
+   "base_z": -0.62178,
+   "centre": [
+    -4.48,
+    7.41,
+    -0.3317
+   ],
+   "tris": 20,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_6_4",
+   "collection": "ENV_Props",
+   "height": 0.63153,
+   "width": 0.20726,
+   "base_z": -0.61957,
+   "centre": [
+    -4.36,
+    7.3,
+    -0.3038
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Reed_7_0",
+   "collection": "ENV_Props",
+   "height": 0.38807,
+   "width": 0.12381,
+   "base_z": -0.62263,
+   "centre": [
+    4.86,
+    6.9,
+    -0.4286
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Reed_7_1",
+   "collection": "ENV_Props",
+   "height": 0.4382,
+   "width": 0.16886,
+   "base_z": -0.6216,
+   "centre": [
+    4.98,
+    7.01,
+    -0.4025
+   ],
+   "tris": 20,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_7_2",
+   "collection": "ENV_Props",
+   "height": 0.48457,
+   "width": 0.18692,
+   "base_z": -0.61868,
+   "centre": [
+    5.1,
+    6.9,
+    -0.3764
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_Reed_7_3",
+   "collection": "ENV_Props",
+   "height": 0.54274,
+   "width": 0.15732,
+   "base_z": -0.62167,
+   "centre": [
+    5.22,
+    7.01,
+    -0.3503
+   ],
+   "tris": 20,
+   "material": "ENV_Leaf"
+  },
+  {
+   "name": "ENV_Reed_7_4",
+   "collection": "ENV_Props",
+   "height": 0.59079,
+   "width": 0.19963,
+   "base_z": -0.61959,
+   "centre": [
+    5.34,
+    6.9,
+    -0.3242
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_0_2",
+   "collection": "ENV_Props",
+   "height": 0.17901,
+   "width": 0.07353,
+   "base_z": -0.09368,
+   "centre": [
+    -2.28429,
+    -1.29129,
+    -0.00418
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_0_4",
+   "collection": "ENV_Props",
+   "height": 0.17901,
+   "width": 0.07353,
+   "base_z": 0.04489,
+   "centre": [
+    -2.19181,
+    -1.34077,
+    0.1344
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_1_2",
+   "collection": "ENV_Props",
+   "height": 0.16524,
+   "width": 0.06788,
+   "base_z": -0.13417,
+   "centre": [
+    2.44525,
+    -1.0688,
+    -0.05155
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_1_4",
+   "collection": "ENV_Props",
+   "height": 0.16524,
+   "width": 0.06788,
+   "base_z": -0.00625,
+   "centre": [
+    2.63638,
+    -1.20385,
+    0.07637
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_2_2",
+   "collection": "ENV_Props",
+   "height": 0.19737,
+   "width": 0.08107,
+   "base_z": -0.0397,
+   "centre": [
+    -2.8795,
+    0.50585,
+    0.05898
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_2_4",
+   "collection": "ENV_Props",
+   "height": 0.19737,
+   "width": 0.08107,
+   "base_z": 0.11309,
+   "centre": [
+    -2.54942,
+    0.35985,
+    0.21177
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_3_2",
+   "collection": "ENV_Props",
+   "height": 0.21114,
+   "width": 0.08673,
+   "base_z": 0.00078,
+   "centre": [
+    2.75033,
+    0.27052,
+    0.10635
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_3_4",
+   "collection": "ENV_Props",
+   "height": 0.21114,
+   "width": 0.08673,
+   "base_z": 0.16423,
+   "centre": [
+    3.17258,
+    0.24892,
+    0.2698
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_4_2",
+   "collection": "ENV_Props",
+   "height": 0.15606,
+   "width": 0.06411,
+   "base_z": -0.16116,
+   "centre": [
+    -1.87872,
+    1.97875,
+    -0.08313
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_4_4",
+   "collection": "ENV_Props",
+   "height": 0.15606,
+   "width": 0.06411,
+   "base_z": -0.04035,
+   "centre": [
+    -1.54248,
+    2.07434,
+    0.03768
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_5_2",
+   "collection": "ENV_Props",
+   "height": 0.16983,
+   "width": 0.06976,
+   "base_z": -0.12067,
+   "centre": [
+    1.99131,
+    2.02732,
+    -0.03576
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_5_4",
+   "collection": "ENV_Props",
+   "height": 0.16983,
+   "width": 0.06976,
+   "base_z": 0.01079,
+   "centre": [
+    2.21492,
+    2.17402,
+    0.09571
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_6_2",
+   "collection": "ENV_Props",
+   "height": 0.14229,
+   "width": 0.05845,
+   "base_z": -0.20164,
+   "centre": [
+    -4.53079,
+    7.28926,
+    -0.1305
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_6_4",
+   "collection": "ENV_Props",
+   "height": 0.14229,
+   "width": 0.05845,
+   "base_z": -0.0915,
+   "centre": [
+    -4.3956,
+    7.35491,
+    -0.02035
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_7_2",
+   "collection": "ENV_Props",
+   "height": 0.13311,
+   "width": 0.05468,
+   "base_z": -0.22864,
+   "centre": [
+    5.14812,
+    6.94447,
+    -0.16208
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
+  },
+  {
+   "name": "ENV_ReedHead_7_4",
+   "collection": "ENV_Props",
+   "height": 0.13311,
+   "width": 0.05468,
+   "base_z": -0.12559,
+   "centre": [
+    5.27906,
+    6.90584,
+    -0.05904
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RimStone_00",
@@ -5517,676 +7015,788 @@
    "material": "ENV_Rock"
   },
   {
-   "name": "ENV_RingFlower_0_0",
-   "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
-   "centre": [
-    -2.145,
-    0.35,
-    -0.01
-   ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
-  },
-  {
-   "name": "ENV_RingFlower_0_1",
-   "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
-   "centre": [
-    -2.21755,
-    0.44986,
-    -0.01
-   ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
-  },
-  {
-   "name": "ENV_RingFlower_0_2",
-   "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
-   "centre": [
-    -2.33495,
-    0.41172,
-    -0.01
-   ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
-  },
-  {
-   "name": "ENV_RingFlower_0_3",
-   "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
-   "centre": [
-    -2.33495,
-    0.28828,
-    -0.01
-   ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
-  },
-  {
-   "name": "ENV_RingFlower_0_4",
-   "collection": "ENV_Props",
-   "height": 0.14,
-   "width": 0.14,
-   "base_z": -0.08,
-   "centre": [
-    -2.21755,
-    0.25014,
-    -0.01
-   ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
-  },
-  {
    "name": "ENV_RingFlower_0_Core",
    "collection": "ENV_Props",
-   "height": 0.098,
-   "width": 0.098,
-   "base_z": -0.039,
+   "height": 0.1054,
+   "width": 0.11091,
+   "base_z": 0.23487,
    "centre": [
-    -2.25,
-    0.35,
-    0.01
+    -1.98,
+    0.3,
+    0.28757
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_1_0",
+   "name": "ENV_RingFlower_0_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.124,
-   "width": 0.124,
-   "base_z": -0.072,
+   "height": 0.26401,
+   "width": 0.20129,
+   "base_z": 0.13386,
    "centre": [
-    2.393,
-    0.55,
-    -0.01
+    -1.92176,
+    0.32126,
+    0.26587
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_1_1",
+   "name": "ENV_RingFlower_0_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.124,
-   "width": 0.124,
-   "base_z": -0.072,
+   "height": 0.26401,
+   "width": 0.19679,
+   "base_z": 0.13386,
    "centre": [
-    2.32874,
-    0.63845,
-    -0.01
+    -1.98222,
+    0.36196,
+    0.26587
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_1_2",
+   "name": "ENV_RingFlower_0_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.124,
-   "width": 0.124,
-   "base_z": -0.072,
+   "height": 0.26401,
+   "width": 0.20201,
+   "base_z": 0.13386,
    "centre": [
-    2.22476,
-    0.60466,
-    -0.01
+    -2.03961,
+    0.31703,
+    0.26587
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_1_3",
+   "name": "ENV_RingFlower_0_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.124,
-   "width": 0.124,
-   "base_z": -0.072,
+   "height": 0.26401,
+   "width": 0.19124,
+   "base_z": 0.13386,
    "centre": [
-    2.22476,
-    0.49534,
-    -0.01
+    -2.01462,
+    0.24857,
+    0.26587
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_1_4",
+   "name": "ENV_RingFlower_0_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.124,
-   "width": 0.124,
-   "base_z": -0.072,
+   "height": 0.26401,
+   "width": 0.18608,
+   "base_z": 0.13386,
    "centre": [
-    2.32874,
-    0.46155,
-    -0.01
+    -1.94178,
+    0.25118,
+    0.26587
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_RingFlower_0_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1736,
+   "width": 0.0341,
+   "base_z": 0.10777,
+   "centre": [
+    -1.98,
+    0.3,
+    0.19457
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_1_Core",
    "collection": "ENV_Props",
-   "height": 0.0868,
-   "width": 0.0868,
-   "base_z": -0.0334,
+   "height": 0.0986,
+   "width": 0.10375,
+   "base_z": 0.21697,
    "centre": [
-    2.3,
-    0.55,
-    0.01
+    1.96,
+    0.48,
+    0.26627
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_2_0",
+   "name": "ENV_RingFlower_1_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.24698,
+   "width": 0.18869,
+   "base_z": 0.12248,
    "centre": [
-    -1.263,
-    1.95,
-    -0.01
+    1.97829,
+    0.53504,
+    0.24597
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_2_1",
+   "name": "ENV_RingFlower_1_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.24698,
+   "width": 0.17615,
+   "base_z": 0.12248,
    "centre": [
-    -1.32312,
-    2.03274,
-    -0.01
+    1.9133,
+    0.5144,
+    0.24597
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_2_2",
+   "name": "ENV_RingFlower_1_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.24698,
+   "width": 0.17704,
+   "base_z": 0.12248,
    "centre": [
-    -1.42038,
-    2.00114,
-    -0.01
+    1.91285,
+    0.44622,
+    0.24597
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_2_3",
+   "name": "ENV_RingFlower_1_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.24698,
+   "width": 0.18882,
+   "base_z": 0.12248,
    "centre": [
-    -1.42038,
-    1.89886,
-    -0.01
+    1.97756,
+    0.42472,
+    0.24597
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_2_4",
+   "name": "ENV_RingFlower_1_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.24698,
+   "width": 0.18277,
+   "base_z": 0.12248,
    "centre": [
-    -1.32312,
-    1.86726,
-    -0.01
+    2.018,
+    0.47962,
+    0.24597
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_1_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1624,
+   "width": 0.0319,
+   "base_z": 0.09807,
+   "centre": [
+    1.96,
+    0.48,
+    0.17927
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_2_Core",
    "collection": "ENV_Props",
-   "height": 0.0812,
-   "width": 0.0812,
-   "base_z": -0.0306,
+   "height": 0.102,
+   "width": 0.10733,
+   "base_z": 0.20586,
    "centre": [
-    -1.35,
-    1.95,
-    0.01
+    -1.24,
+    1.62,
+    0.25686
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_3_0",
+   "name": "ENV_RingFlower_2_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.132,
-   "width": 0.132,
-   "base_z": -0.076,
+   "height": 0.25549,
+   "width": 0.18589,
+   "base_z": 0.10812,
    "centre": [
-    1.649,
-    1.85,
-    -0.01
+    -1.27284,
+    1.67021,
+    0.23586
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_3_1",
+   "name": "ENV_RingFlower_2_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.132,
-   "width": 0.132,
-   "base_z": -0.076,
+   "height": 0.25549,
+   "width": 0.19551,
+   "base_z": 0.10812,
    "centre": [
-    1.58059,
-    1.94415,
-    -0.01
+    -1.2979,
+    1.60428,
+    0.23586
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_3_2",
+   "name": "ENV_RingFlower_2_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.132,
-   "width": 0.132,
-   "base_z": -0.076,
+   "height": 0.25549,
+   "width": 0.19101,
+   "base_z": 0.10812,
    "centre": [
-    1.46991,
-    1.90819,
-    -0.01
+    -1.24295,
+    1.56007,
+    0.23586
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_3_3",
+   "name": "ENV_RingFlower_2_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.132,
-   "width": 0.132,
-   "base_z": -0.076,
+   "height": 0.25549,
+   "width": 0.19455,
+   "base_z": 0.10812,
    "centre": [
-    1.46991,
-    1.79181,
-    -0.01
+    -1.18392,
+    1.59868,
+    0.23586
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_3_4",
+   "name": "ENV_RingFlower_2_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.132,
-   "width": 0.132,
-   "base_z": -0.076,
+   "height": 0.25549,
+   "width": 0.17905,
+   "base_z": 0.10812,
    "centre": [
-    1.58059,
-    1.75585,
-    -0.01
+    -1.20239,
+    1.66675,
+    0.23586
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_RingFlower_2_Stem",
+   "collection": "ENV_Props",
+   "height": 0.168,
+   "width": 0.033,
+   "base_z": 0.08286,
+   "centre": [
+    -1.24,
+    1.62,
+    0.16686
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_3_Core",
    "collection": "ENV_Props",
-   "height": 0.0924,
-   "width": 0.0924,
-   "base_z": -0.0362,
+   "height": 0.1088,
+   "width": 0.11449,
+   "base_z": 0.19442,
    "centre": [
-    1.55,
-    1.85,
-    0.01
+    1.42,
+    1.5,
+    0.24882
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_4_0",
+   "name": "ENV_RingFlower_3_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.12,
-   "width": 0.12,
-   "base_z": -0.07,
+   "height": 0.27252,
+   "width": 0.20545,
+   "base_z": 0.09016,
    "centre": [
-    -1.96,
-    -1.35,
-    -0.01
+    1.35627,
+    1.50585,
+    0.22642
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_4_1",
+   "name": "ENV_RingFlower_3_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.12,
-   "width": 0.12,
-   "base_z": -0.07,
+   "height": 0.27252,
+   "width": 0.20646,
+   "base_z": 0.09016,
    "centre": [
-    -2.02219,
-    -1.2644,
-    -0.01
+    1.39474,
+    1.4412,
+    0.22642
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_4_2",
+   "name": "ENV_RingFlower_3_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.12,
-   "width": 0.12,
-   "base_z": -0.07,
+   "height": 0.27252,
+   "width": 0.18726,
+   "base_z": 0.09016,
    "centre": [
-    -2.12281,
-    -1.2971,
-    -0.01
+    1.46812,
+    1.4578,
+    0.22642
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_4_3",
+   "name": "ENV_RingFlower_3_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.12,
-   "width": 0.12,
-   "base_z": -0.07,
+   "height": 0.27252,
+   "width": 0.20085,
+   "base_z": 0.09016,
    "centre": [
-    -2.12281,
-    -1.4029,
-    -0.01
+    1.475,
+    1.53272,
+    0.22642
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_4_4",
+   "name": "ENV_RingFlower_3_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.12,
-   "width": 0.12,
-   "base_z": -0.07,
+   "height": 0.27252,
+   "width": 0.20837,
+   "base_z": 0.09016,
    "centre": [
-    -2.02219,
-    -1.4356,
-    -0.01
+    1.40587,
+    1.56242,
+    0.22642
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_RingFlower_3_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1792,
+   "width": 0.0352,
+   "base_z": 0.06322,
+   "centre": [
+    1.42,
+    1.5,
+    0.15282
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_4_Core",
    "collection": "ENV_Props",
-   "height": 0.084,
-   "width": 0.084,
-   "base_z": -0.032,
+   "height": 0.102,
+   "width": 0.10733,
+   "base_z": 0.19915,
    "centre": [
-    -2.05,
-    -1.35,
-    0.01
+    -1.86,
+    -0.86,
+    0.25015
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_5_0",
+   "name": "ENV_RingFlower_4_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.11,
-   "width": 0.11,
-   "base_z": -0.065,
+   "height": 0.25549,
+   "width": 0.17174,
+   "base_z": 0.1014,
    "centre": [
-    2.1825,
-    -1.45,
-    -0.01
+    -1.90144,
+    -0.90339,
+    0.22915
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_5_1",
+   "name": "ENV_RingFlower_4_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.11,
-   "width": 0.11,
-   "base_z": -0.065,
+   "height": 0.25549,
+   "width": 0.19036,
+   "base_z": 0.1014,
    "centre": [
-    2.12549,
-    -1.37154,
-    -0.01
+    -1.83154,
+    -0.91282,
+    0.22915
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_5_2",
+   "name": "ENV_RingFlower_4_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.11,
-   "width": 0.11,
-   "base_z": -0.065,
+   "height": 0.25549,
+   "width": 0.19482,
+   "base_z": 0.1014,
    "centre": [
-    2.03326,
-    -1.40151,
-    -0.01
+    -1.80097,
+    -0.84925,
+    0.22915
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_5_3",
+   "name": "ENV_RingFlower_4_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.11,
-   "width": 0.11,
-   "base_z": -0.065,
+   "height": 0.25549,
+   "width": 0.19386,
+   "base_z": 0.1014,
    "centre": [
-    2.03326,
-    -1.49849,
-    -0.01
+    -1.85198,
+    -0.80054,
+    0.22915
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
   },
   {
-   "name": "ENV_RingFlower_5_4",
+   "name": "ENV_RingFlower_4_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.11,
-   "width": 0.11,
-   "base_z": -0.065,
+   "height": 0.25549,
+   "width": 0.19221,
+   "base_z": 0.1014,
    "centre": [
-    2.12549,
-    -1.52846,
-    -0.01
+    -1.91407,
+    -0.834,
+    0.22915
    ],
-   "tris": 80,
-   "material": "ENV_PetalGold"
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_4_Stem",
+   "collection": "ENV_Props",
+   "height": 0.168,
+   "width": 0.033,
+   "base_z": 0.07615,
+   "centre": [
+    -1.86,
+    -0.86,
+    0.16015
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_5_Core",
    "collection": "ENV_Props",
-   "height": 0.077,
-   "width": 0.077,
-   "base_z": -0.0285,
+   "height": 0.1054,
+   "width": 0.11091,
+   "base_z": 0.21682,
    "centre": [
-    2.1,
-    -1.45,
-    0.01
+    1.82,
+    -0.9,
+    0.26952
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_6_0",
+   "name": "ENV_RingFlower_5_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.128,
-   "width": 0.128,
-   "base_z": -0.074,
+   "height": 0.26401,
+   "width": 0.20042,
+   "base_z": 0.11582,
    "centre": [
-    0.246,
-    2.25,
-    -0.01
+    1.82851,
+    -0.96141,
+    0.24782
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_6_1",
+   "name": "ENV_RingFlower_5_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.128,
-   "width": 0.128,
-   "base_z": -0.074,
+   "height": 0.26401,
+   "width": 0.20126,
+   "base_z": 0.11582,
    "centre": [
-    0.17967,
-    2.3413,
-    -0.01
+    1.88104,
+    -0.91089,
+    0.24782
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_6_2",
+   "name": "ENV_RingFlower_5_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.128,
-   "width": 0.128,
-   "base_z": -0.074,
+   "height": 0.26401,
+   "width": 0.19687,
+   "base_z": 0.11582,
    "centre": [
-    0.07233,
-    2.30643,
-    -0.01
+    1.84922,
+    -0.84532,
+    0.24782
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_6_3",
+   "name": "ENV_RingFlower_5_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.128,
-   "width": 0.128,
-   "base_z": -0.074,
+   "height": 0.26401,
+   "width": 0.17712,
+   "base_z": 0.11582,
    "centre": [
-    0.07233,
-    2.19357,
-    -0.01
+    1.77702,
+    -0.85531,
+    0.24782
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_6_4",
+   "name": "ENV_RingFlower_5_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.128,
-   "width": 0.128,
-   "base_z": -0.074,
+   "height": 0.26401,
+   "width": 0.19848,
+   "base_z": 0.11582,
    "centre": [
-    0.17967,
-    2.1587,
-    -0.01
+    1.76422,
+    -0.92707,
+    0.24782
    ],
-   "tris": 80,
-   "material": "ENV_PetalWhite"
+   "tris": 20,
+   "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_RingFlower_5_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1736,
+   "width": 0.0341,
+   "base_z": 0.08972,
+   "centre": [
+    1.82,
+    -0.9,
+    0.17652
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_6_Core",
    "collection": "ENV_Props",
-   "height": 0.0896,
-   "width": 0.0896,
-   "base_z": -0.0348,
+   "height": 0.1122,
+   "width": 0.11806,
+   "base_z": 0.25357,
    "centre": [
-    0.15,
-    2.25,
-    0.01
+    0.14,
+    1.98,
+    0.30967
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
   },
   {
-   "name": "ENV_RingFlower_7_0",
+   "name": "ENV_RingFlower_6_Petal_0",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.28104,
+   "width": 0.20733,
+   "base_z": 0.14605,
    "centre": [
-    -0.263,
-    -2.15,
-    -0.01
+    0.19684,
+    1.94645,
+    0.28657
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_7_1",
+   "name": "ENV_RingFlower_6_Petal_1",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.28104,
+   "width": 0.19277,
+   "base_z": 0.14605,
    "centre": [
-    -0.32312,
-    -2.06726,
-    -0.01
+    0.18947,
+    2.02369,
+    0.28657
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_7_2",
+   "name": "ENV_RingFlower_6_Petal_2",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.28104,
+   "width": 0.2128,
+   "base_z": 0.14605,
    "centre": [
-    -0.42038,
-    -2.09886,
-    -0.01
+    0.11373,
+    2.04055,
+    0.28657
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_7_3",
+   "name": "ENV_RingFlower_6_Petal_3",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.28104,
+   "width": 0.212,
+   "base_z": 0.14605,
    "centre": [
-    -0.42038,
-    -2.20114,
-    -0.01
+    0.0743,
+    1.97373,
+    0.28657
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
   },
   {
-   "name": "ENV_RingFlower_7_4",
+   "name": "ENV_RingFlower_6_Petal_4",
    "collection": "ENV_Props",
-   "height": 0.116,
-   "width": 0.116,
-   "base_z": -0.068,
+   "height": 0.28104,
+   "width": 0.21485,
+   "base_z": 0.14605,
    "centre": [
-    -0.32312,
-    -2.23274,
-    -0.01
+    0.12566,
+    1.91558,
+    0.28657
    ],
-   "tris": 80,
-   "material": "ENV_PetalViolet"
+   "tris": 20,
+   "material": "ENV_PetalWhite"
+  },
+  {
+   "name": "ENV_RingFlower_6_Stem",
+   "collection": "ENV_Props",
+   "height": 0.1848,
+   "width": 0.0363,
+   "base_z": 0.11827,
+   "centre": [
+    0.14,
+    1.98,
+    0.21067
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RingFlower_7_Core",
    "collection": "ENV_Props",
-   "height": 0.0812,
-   "width": 0.0812,
-   "base_z": -0.0306,
+   "height": 0.102,
+   "width": 0.10733,
+   "base_z": 0.25174,
    "centre": [
-    -0.35,
-    -2.15,
-    0.01
+    -0.32,
+    -1.94,
+    0.30274
    ],
-   "tris": 80,
+   "tris": 20,
    "material": "ENV_PetalGold"
+  },
+  {
+   "name": "ENV_RingFlower_7_Petal_0",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.19448,
+   "base_z": 0.154,
+   "centre": [
+    -0.26399,
+    -1.91848,
+    0.28174
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_7_Petal_1",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.19116,
+   "base_z": 0.154,
+   "centre": [
+    -0.32316,
+    -1.88008,
+    0.28174
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_7_Petal_2",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.19551,
+   "base_z": 0.154,
+   "centre": [
+    -0.37796,
+    -1.92449,
+    0.28174
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_7_Petal_3",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.1861,
+   "base_z": 0.154,
+   "centre": [
+    -0.35266,
+    -1.99033,
+    0.28174
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_7_Petal_4",
+   "collection": "ENV_Props",
+   "height": 0.25549,
+   "width": 0.17877,
+   "base_z": 0.154,
+   "centre": [
+    -0.28223,
+    -1.98662,
+    0.28174
+   ],
+   "tris": 20,
+   "material": "ENV_PetalViolet"
+  },
+  {
+   "name": "ENV_RingFlower_7_Stem",
+   "collection": "ENV_Props",
+   "height": 0.168,
+   "width": 0.033,
+   "base_z": 0.12874,
+   "centre": [
+    -0.32,
+    -1.94,
+    0.21274
+   ],
+   "tris": 20,
+   "material": "ENV_GrassShade"
   },
   {
    "name": "ENV_RiverBed",
@@ -6229,6 +7839,76 @@
    ],
    "tris": 768,
    "material": "ENV_WaterShallow"
+  },
+  {
+   "name": "ENV_SmallRock_0",
+   "collection": "ENV_Props",
+   "height": 0.198,
+   "width": 0.375,
+   "base_z": 0.04606,
+   "centre": [
+    -1.62,
+    0.92,
+    0.14506
+   ],
+   "tris": 168,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_SmallRock_1",
+   "collection": "ENV_Props",
+   "height": 0.1584,
+   "width": 0.3,
+   "base_z": 0.06702,
+   "centre": [
+    1.78,
+    -0.62,
+    0.14622
+   ],
+   "tris": 168,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_SmallRock_2",
+   "collection": "ENV_Props",
+   "height": 0.132,
+   "width": 0.25,
+   "base_z": 0.13173,
+   "centre": [
+    0.42,
+    1.72,
+    0.19773
+   ],
+   "tris": 168,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_SmallRock_3",
+   "collection": "ENV_Props",
+   "height": 0.1716,
+   "width": 0.325,
+   "base_z": 0.03608,
+   "centre": [
+    -0.95,
+    -1.68,
+    0.12188
+   ],
+   "tris": 168,
+   "material": "ENV_Rock"
+  },
+  {
+   "name": "ENV_SmallRock_4",
+   "collection": "ENV_Props",
+   "height": 0.1452,
+   "width": 0.275,
+   "base_z": -0.00185,
+   "centre": [
+    0.86,
+    -1.84,
+    0.07075
+   ],
+   "tris": 168,
+   "material": "ENV_Rock"
   },
   {
    "name": "ENV_SteppingStone_0",
@@ -6289,69 +7969,83 @@
   {
    "name": "ENV_TreeBankFarL_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.65583,
-   "width": 0.49979,
-   "base_z": 1.23209,
+   "height": 0.97695,
+   "width": 0.84264,
+   "base_z": 2.97848,
    "centre": [
-    -12.204,
-    8.56,
-    1.56
+    -12.05909,
+    8.95482,
+    3.46696
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarL_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.66288,
-   "width": 0.48671,
-   "base_z": 1.22856,
+   "height": 0.97695,
+   "width": 0.78512,
+   "base_z": 2.97848,
    "centre": [
-    -11.808,
-    8.428,
-    1.56
+    -12.36434,
+    8.22142,
+    3.46696
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_TreeBankFarL_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 0.97695,
+   "width": 0.84221,
+   "base_z": 2.97848,
+   "centre": [
+    -11.57657,
+    8.32377,
+    3.46696
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarL_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.3104,
-   "width": 1.54412,
-   "base_z": 1.1448,
+   "height": 2.016,
+   "width": 2.49435,
+   "base_z": 2.884,
    "centre": [
-    -12.42,
-    8.2,
-    1.8
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_TreeBankFarL_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.2432,
-   "width": 1.46494,
-   "base_z": 1.2584,
-   "centre": [
-    -11.7,
-    8.76,
-    1.88
+    -11.96875,
+    8.53931,
+    3.892
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_TreeBankFarL_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.49184,
+   "width": 1.84582,
+   "base_z": 2.64208,
+   "centre": [
+    -12.72475,
+    8.13611,
+    3.388
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_TreeBankFarL_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.176,
-   "width": 1.38575,
-   "base_z": 1.552,
+   "height": 1.57248,
+   "width": 1.94559,
+   "base_z": 3.35776,
    "centre": [
-    -11.659,
-    8.8276,
-    2.14
+    -11.33875,
+    9.01811,
+    4.144
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -6359,13 +8053,13 @@
   {
    "name": "ENV_TreeBankFarL_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.9744,
-   "width": 1.14819,
-   "base_z": 1.7328,
+   "height": 1.16928,
+   "width": 1.44672,
+   "base_z": 3.76936,
    "centre": [
-    -12.2,
-    8.94,
-    2.22
+    -12.37195,
+    9.16931,
+    4.354
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -6373,13 +8067,13 @@
   {
    "name": "ENV_TreeBankFarL_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.9408,
-   "width": 1.1086,
-   "base_z": 1.5896,
+   "height": 1.2096,
+   "width": 1.49661,
+   "base_z": 3.0352,
    "centre": [
-    -11.54,
-    8.16,
-    2.06
+    -11.26315,
+    7.98491,
+    3.64
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -6387,13 +8081,13 @@
   {
    "name": "ENV_TreeBankFarL_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.7728,
-   "width": 0.91063,
-   "base_z": 2.0736,
+   "height": 0.92736,
+   "width": 1.1474,
+   "base_z": 4.10032,
    "centre": [
-    -11.7892,
-    8.734,
-    2.46
+    -11.69155,
+    8.86691,
+    4.564
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -6401,195 +8095,223 @@
   {
    "name": "ENV_TreeBankFarL_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.84,
-   "width": 0.98982,
-   "base_z": 1.16,
+   "height": 1.008,
+   "width": 1.24718,
+   "base_z": 2.632,
    "centre": [
-    -12.52,
-    8.64,
-    1.58
+    -12.80035,
+    8.74091,
+    3.136
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_TreeBankFarL_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.04832,
+   "width": 1.29706,
+   "base_z": 3.45184,
+   "centre": [
+    -11.91835,
+    7.78331,
+    3.976
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_TreeBankFarL_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.48,
-   "width": 0.46797,
-   "base_z": 1.87379,
+   "height": 0.52416,
+   "width": 0.6552,
+   "base_z": 3.4031,
    "centre": [
-    -11.26315,
-    8.7648,
-    2.11379
+    -12.55397,
+    9.41987,
+    3.66518
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankFarL_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.48,
-   "width": 0.46797,
-   "base_z": 1.87415,
+   "height": 0.52416,
+   "width": 0.6552,
+   "base_z": 3.19127,
    "centre": [
-    -11.90137,
-    9.17481,
-    2.11415
+    -13.12793,
+    8.5336,
+    3.45335
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankFarL_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.48,
-   "width": 0.46797,
-   "base_z": 1.35716,
+   "height": 0.52416,
+   "width": 0.6552,
+   "base_z": 4.03914,
    "centre": [
-    -12.63822,
-    8.91001,
-    1.59716
+    -12.54272,
+    7.65304,
+    4.30122
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankFarL_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.48,
-   "width": 0.46797,
-   "base_z": 1.57178,
+   "height": 0.52416,
+   "width": 0.6552,
+   "base_z": 3.8984,
    "centre": [
-    -12.73685,
-    8.2352,
-    1.81178
+    -11.38353,
+    7.65876,
+    4.16048
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankFarL_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.48,
-   "width": 0.46797,
-   "base_z": 1.99952,
+   "height": 0.52416,
+   "width": 0.6552,
+   "base_z": 3.10906,
    "centre": [
-    -12.09863,
-    7.82519,
-    2.23952
+    -10.80957,
+    8.54503,
+    3.37114
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankFarL_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.48,
-   "width": 0.46797,
-   "base_z": 1.60704,
+   "height": 0.52416,
+   "width": 0.6552,
+   "base_z": 3.57802,
    "centre": [
-    -11.36178,
-    8.08999,
-    1.84704
+    -11.39479,
+    9.42559,
+    3.8401
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankFarL_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.34,
-   "width": 0.8,
-   "base_z": 0.26,
+   "height": 0.462,
+   "width": 0.8232,
+   "base_z": 0.28,
    "centre": [
     -12.0,
     8.5,
-    0.43
+    0.511
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarL_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.35,
-   "width": 0.52,
-   "base_z": 0.265,
+   "height": 4.2,
+   "width": 0.4704,
+   "base_z": 0.28,
    "centre": [
     -12.0,
     8.5,
-    0.94
+    2.38
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarR_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.72141,
-   "width": 0.54977,
-   "base_z": 1.32729,
+   "height": 1.05837,
+   "width": 0.91997,
+   "base_z": 3.20336,
    "centre": [
-    12.1756,
-    9.266,
-    1.688
+    12.87467,
+    9.34683,
+    3.73254
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarR_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.72917,
-   "width": 0.53538,
-   "base_z": 1.32342,
+   "height": 1.05837,
+   "width": 0.81354,
+   "base_z": 3.20336,
    "centre": [
-    12.6112,
-    9.1208,
-    1.688
+    12.03551,
+    9.53766,
+    3.73254
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_TreeBankFarR_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.05837,
+   "width": 0.9201,
+   "base_z": 3.20336,
+   "centre": [
+    12.28983,
+    8.71551,
+    3.73254
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarR_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.44144,
-   "width": 1.69853,
-   "base_z": 1.23128,
+   "height": 2.184,
+   "width": 2.70221,
+   "base_z": 3.101,
    "centre": [
-    11.938,
-    8.87,
-    1.952
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_TreeBankFarR_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.36752,
-   "width": 1.61143,
-   "base_z": 1.35624,
-   "centre": [
-    12.73,
-    9.486,
-    2.04
+    12.43385,
+    9.24259,
+    4.193
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_TreeBankFarR_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.61616,
+   "width": 1.99964,
+   "base_z": 2.83892,
+   "centre": [
+    11.61485,
+    8.80579,
+    3.647
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_TreeBankFarR_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.2936,
-   "width": 1.52432,
-   "base_z": 1.6792,
+   "height": 1.70352,
+   "width": 2.10773,
+   "base_z": 3.61424,
    "centre": [
-    12.7751,
-    9.56036,
-    2.326
+    13.11635,
+    9.76129,
+    4.466
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -6597,13 +8319,13 @@
   {
    "name": "ENV_TreeBankFarR_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 1.07184,
-   "width": 1.26301,
-   "base_z": 1.87808,
+   "height": 1.26672,
+   "width": 1.56728,
+   "base_z": 4.06014,
    "centre": [
-    12.18,
-    9.684,
-    2.414
+    11.99705,
+    9.92509,
+    4.6935
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -6611,13 +8333,13 @@
   {
    "name": "ENV_TreeBankFarR_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 1.03488,
-   "width": 1.21946,
-   "base_z": 1.72056,
+   "height": 1.3104,
+   "width": 1.62133,
+   "base_z": 3.2648,
    "centre": [
-    12.906,
-    8.826,
-    2.238
+    13.19825,
+    8.64199,
+    3.92
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -6625,13 +8347,13 @@
   {
    "name": "ENV_TreeBankFarR_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.85008,
-   "width": 1.0017,
-   "base_z": 2.25296,
+   "height": 1.00464,
+   "width": 1.24302,
+   "base_z": 4.41868,
    "centre": [
-    12.63188,
-    9.4574,
-    2.678
+    12.73415,
+    9.59749,
+    4.921
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -6639,349 +8361,377 @@
   {
    "name": "ENV_TreeBankFarR_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.924,
-   "width": 1.0888,
-   "base_z": 1.248,
+   "height": 1.092,
+   "width": 1.35111,
+   "base_z": 2.828,
    "centre": [
-    11.828,
-    9.354,
-    1.71
+    11.53295,
+    9.46099,
+    3.374
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_TreeBankFarR_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.13568,
+   "width": 1.40515,
+   "base_z": 3.71616,
+   "centre": [
+    12.48845,
+    8.42359,
+    4.284
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_TreeBankFarR_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.528,
-   "width": 0.51476,
-   "base_z": 2.03317,
+   "height": 0.56784,
+   "width": 0.7098,
+   "base_z": 4.45821,
    "centre": [
-    13.21053,
-    9.49129,
-    2.29717
+    13.39434,
+    9.95452,
+    4.74213
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankFarR_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.528,
-   "width": 0.51476,
-   "base_z": 2.03356,
+   "height": 0.56784,
+   "width": 0.7098,
+   "base_z": 4.00994,
    "centre": [
-    12.50849,
-    9.94229,
-    2.29756
+    12.21347,
+    10.33054,
+    4.29386
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankFarR_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.528,
-   "width": 0.51476,
-   "base_z": 1.46488,
+   "height": 0.56784,
+   "width": 0.7098,
+   "base_z": 3.31801,
    "centre": [
-    11.69796,
-    9.65101,
-    1.72888
+    11.25299,
+    9.61862,
+    3.60193
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankFarR_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.528,
-   "width": 0.51476,
-   "base_z": 1.70096,
+   "height": 0.56784,
+   "width": 0.7098,
+   "base_z": 4.054,
    "centre": [
-    11.58947,
-    8.90871,
-    1.96496
+    11.47336,
+    8.53066,
+    4.33792
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankFarR_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.528,
-   "width": 0.51476,
-   "base_z": 2.17147,
+   "height": 0.56784,
+   "width": 0.7098,
+   "base_z": 4.43989,
    "centre": [
-    12.29151,
-    8.45771,
-    2.43547
+    12.65423,
+    8.15463,
+    4.72381
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankFarR_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.528,
-   "width": 0.51476,
-   "base_z": 1.73974,
+   "height": 0.56784,
+   "width": 0.7098,
+   "base_z": 3.54344,
    "centre": [
-    13.10204,
-    8.74899,
-    2.00374
+    13.61472,
+    8.86656,
+    3.82736
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankFarR_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.374,
-   "width": 0.88,
-   "base_z": 0.258,
+   "height": 0.5005,
+   "width": 0.8918,
+   "base_z": 0.28,
    "centre": [
     12.4,
     9.2,
-    0.445
+    0.53025
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankFarR_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.485,
-   "width": 0.572,
-   "base_z": 0.2635,
+   "height": 4.55,
+   "width": 0.5096,
+   "base_z": 0.28,
    "centre": [
     12.4,
     9.2,
-    1.006
+    2.555
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankL_Blossom_0",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 1.97375,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 4.31061,
    "centre": [
-    -7.2,
-    5.005,
-    2.08
+    -7.14324,
+    5.64098,
+    4.40842
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankL_Blossom_1",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 2.40897,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 4.02082,
    "centre": [
-    -7.35875,
-    5.47806,
-    2.51522
+    -7.70186,
+    6.04577,
+    4.11863
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_10",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 2.21704,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 4.28244,
    "centre": [
-    -7.35875,
-    4.53194,
-    2.32329
+    -6.92013,
+    5.03269,
+    4.38026
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_2",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 2.19503,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 3.39001,
    "centre": [
-    -7.78458,
-    5.80093,
-    2.30128
+    -8.41864,
+    6.11853,
+    3.48783
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_3",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 1.65104,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 3.35908,
    "centre": [
-    -8.34232,
-    5.8711,
-    1.75729
+    -9.066,
+    5.83616,
+    3.45689
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankL_Blossom_4",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 1.58839,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 3.97415,
    "centre": [
-    -8.85486,
-    5.66628,
-    1.69464
+    -9.43841,
+    5.28832,
+    4.07196
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_5",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 2.10053,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 4.31782,
    "centre": [
-    -9.15949,
-    5.25152,
-    2.20678
+    -9.41764,
+    4.64894,
+    4.41563
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_6",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 2.42357,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 3.87747,
    "centre": [
-    -9.15949,
-    4.75849,
-    2.52982
+    -9.01027,
+    4.12102,
+    3.97529
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankL_Blossom_7",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 2.07567,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 3.30992,
    "centre": [
-    -8.85486,
-    4.34372,
-    2.18192
+    -8.34565,
+    3.87217,
+    3.40773
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_8",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 1.57576,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 3.4617,
    "centre": [
-    -8.34232,
-    4.13891,
-    1.68201
+    -7.63478,
+    3.98139,
+    3.55951
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankL_Blossom_9",
    "collection": "ENV_Foliage",
-   "height": 0.2125,
-   "width": 0.19703,
-   "base_z": 1.66947,
+   "height": 0.19562,
+   "width": 0.22432,
+   "base_z": 4.10642,
    "centre": [
-    -7.78458,
-    4.20908,
-    1.77572
+    -7.10337,
+    4.41402,
+    4.20423
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankL_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.81979,
-   "width": 0.62474,
-   "base_z": 1.12011,
+   "height": 1.02348,
+   "width": 0.83936,
+   "base_z": 2.75698,
    "centre": [
-    -8.455,
-    5.075,
-    1.53
+    -7.80344,
+    5.2713,
+    3.26872
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankL_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.8286,
-   "width": 0.60839,
-   "base_z": 1.1157,
+   "height": 1.02348,
+   "width": 0.87479,
+   "base_z": 2.75698,
    "centre": [
-    -7.96,
-    4.91,
-    1.53
+    -8.63323,
+    5.20778,
+    3.26872
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_TreeBankL_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.02348,
+   "width": 0.87541,
+   "base_z": 2.75698,
+   "centre": [
+    -8.16333,
+    4.52092,
+    3.26872
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankL_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.638,
-   "width": 1.93015,
-   "base_z": 1.011,
+   "height": 2.112,
+   "width": 2.61313,
+   "base_z": 2.658,
    "centre": [
-    -8.725,
-    4.625,
-    1.83
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_TreeBankL_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.554,
-   "width": 1.83117,
-   "base_z": 1.153,
-   "centre": [
-    -7.825,
-    5.325,
-    1.93
+    -8.16726,
+    5.04118,
+    3.714
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_TreeBankL_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.56288,
+   "width": 1.93371,
+   "base_z": 2.40456,
+   "centre": [
+    -8.95926,
+    4.61878,
+    3.186
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_TreeBankL_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.47,
-   "width": 1.73219,
-   "base_z": 1.52,
+   "height": 1.64736,
+   "width": 2.03824,
+   "base_z": 3.15432,
    "centre": [
-    -7.77375,
-    5.4095,
-    2.255
+    -7.50726,
+    5.54278,
+    3.978
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -6989,13 +8739,13 @@
   {
    "name": "ENV_TreeBankL_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 1.218,
-   "width": 1.43524,
-   "base_z": 1.746,
+   "height": 1.22496,
+   "width": 1.51561,
+   "base_z": 3.58552,
    "centre": [
-    -8.45,
-    5.55,
-    2.355
+    -8.58966,
+    5.70118,
+    4.198
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -7003,13 +8753,13 @@
   {
    "name": "ENV_TreeBankL_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 1.176,
-   "width": 1.38575,
-   "base_z": 1.567,
+   "height": 1.2672,
+   "width": 1.56788,
+   "base_z": 2.8164,
    "centre": [
-    -7.625,
-    4.575,
-    2.155
+    -7.42806,
+    4.46038,
+    3.45
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -7017,13 +8767,13 @@
   {
    "name": "ENV_TreeBankL_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.966,
-   "width": 1.13829,
-   "base_z": 2.172,
+   "height": 0.97152,
+   "width": 1.20204,
+   "base_z": 3.93224,
    "centre": [
-    -7.9365,
-    5.2925,
-    2.655
+    -7.87686,
+    5.38438,
+    4.418
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -7031,349 +8781,377 @@
   {
    "name": "ENV_TreeBankL_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 1.05,
-   "width": 1.23728,
-   "base_z": 1.03,
+   "height": 1.056,
+   "width": 1.30656,
+   "base_z": 2.394,
    "centre": [
-    -8.85,
-    5.175,
-    1.555
+    -9.03846,
+    5.25238,
+    2.922
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_TreeBankL_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.09824,
+   "width": 1.35883,
+   "base_z": 3.25288,
+   "centre": [
+    -8.11446,
+    4.24918,
+    3.802
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_TreeBankL_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.6,
-   "width": 0.58496,
-   "base_z": 1.92224,
+   "height": 0.54912,
+   "width": 0.6864,
+   "base_z": 4.00667,
    "centre": [
-    -7.27894,
-    5.33101,
-    2.22224
+    -7.51112,
+    5.94044,
+    4.28123
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankL_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.6,
-   "width": 0.58496,
-   "base_z": 1.92269,
+   "height": 0.54912,
+   "width": 0.6864,
+   "base_z": 3.24942,
    "centre": [
-    -8.07672,
-    5.84352,
-    2.22269
+    -8.72417,
+    5.99086,
+    3.52398
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankL_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.6,
-   "width": 0.58496,
-   "base_z": 1.27645,
+   "height": 0.54912,
+   "width": 0.6864,
+   "base_z": 2.95122,
    "centre": [
-    -8.99778,
-    5.51251,
-    1.57645
+    -9.38031,
+    5.0916,
+    3.22578
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankL_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.6,
-   "width": 0.58496,
-   "base_z": 1.54472,
+   "height": 0.54912,
+   "width": 0.6864,
+   "base_z": 3.83247,
    "centre": [
-    -9.12106,
-    4.66899,
-    1.84472
+    -8.82341,
+    4.14193,
+    4.10703
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankL_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.6,
-   "width": 0.58496,
-   "base_z": 2.0794,
+   "height": 0.54912,
+   "width": 0.6864,
+   "base_z": 3.76422,
    "centre": [
-    -8.32329,
-    4.15648,
-    2.3794
+    -7.61036,
+    4.09151,
+    4.03878
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankL_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.6,
-   "width": 0.58496,
-   "base_z": 1.5888,
+   "height": 0.54912,
+   "width": 0.6864,
+   "base_z": 2.91135,
    "centre": [
-    -7.40222,
-    4.48749,
-    1.8888
+    -6.95422,
+    4.99076,
+    3.18591
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankL_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.425,
-   "width": 1.0,
-   "base_z": -0.095,
+   "height": 0.484,
+   "width": 0.8624,
+   "base_z": -0.07,
    "centre": [
     -8.2,
     5.0,
-    0.1175
+    0.172
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankL_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.6875,
-   "width": 0.65,
-   "base_z": -0.08875,
+   "height": 4.4,
+   "width": 0.4928,
+   "base_z": -0.07,
    "centre": [
     -8.2,
     5.0,
-    0.755
+    2.13
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankR_Blossom_0",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.13725,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 3.487,
    "centre": [
-    9.68,
-    4.2054,
-    2.252
+    7.80367,
+    5.16995,
+    3.59037
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankR_Blossom_1",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.60728,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 4.0621,
    "centre": [
-    9.50855,
-    4.71631,
-    2.72203
+    7.33861,
+    4.63427,
+    4.16547
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_10",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.4,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 3.67305,
    "centre": [
-    9.50855,
-    3.6945,
-    2.51475
+    8.52155,
+    5.39768,
+    3.77642
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_2",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.37623,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 4.56192,
    "centre": [
-    9.04865,
-    5.06501,
-    2.49098
+    7.27404,
+    3.96071,
+    4.66529
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_3",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 1.78872,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 4.24095,
    "centre": [
-    8.4463,
-    5.14079,
-    1.90347
+    7.63045,
+    3.36312,
+    4.34432
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankR_Blossom_4",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 1.72106,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 3.57794,
    "centre": [
-    7.89275,
-    4.91959,
-    1.83581
+    8.29468,
+    3.03124,
+    3.68131
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_5",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.27417,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 3.56181,
    "centre": [
-    7.56375,
-    4.47164,
-    2.38892
+    9.05585,
+    3.07043,
+    3.66518
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_6",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.62305,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 4.21662,
    "centre": [
-    7.56375,
-    3.93917,
-    2.7378
+    9.67229,
+    3.46825,
+    4.31999
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankR_Blossom_7",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 2.24733,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 4.56568,
    "centre": [
-    7.89275,
-    3.49122,
-    2.36208
+    9.94829,
+    4.09839,
+    4.66904
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_8",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 1.70742,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 4.08834,
    "centre": [
-    8.4463,
-    3.27002,
-    1.82217
+    9.79621,
+    4.7608,
+    4.19171
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeBankR_Blossom_9",
    "collection": "ENV_Foliage",
-   "height": 0.2295,
-   "width": 0.2128,
-   "base_z": 1.80863,
+   "height": 0.20674,
+   "width": 0.23707,
+   "base_z": 3.49659,
    "centre": [
-    9.04865,
-    3.3458,
-    1.92338
+    9.26435,
+    5.24516,
+    3.59996
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeBankR_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.88537,
-   "width": 0.67472,
-   "base_z": 1.21532,
+   "height": 1.08163,
+   "width": 0.8775,
+   "base_z": 2.91761,
    "centre": [
-    8.3246,
-    4.281,
-    1.658
+    8.30117,
+    4.61054,
+    3.45842
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankR_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.89489,
-   "width": 0.65706,
-   "base_z": 1.21056,
+   "height": 1.08163,
+   "width": 0.92921,
+   "base_z": 2.91761,
    "centre": [
-    8.8592,
-    4.1028,
-    1.658
+    8.39388,
+    3.73594,
+    3.45842
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_TreeBankR_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 1.08163,
+   "width": 0.92977,
+   "base_z": 2.91761,
+   "centre": [
+    9.10495,
+    4.25352,
+    3.45842
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankR_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 1.76904,
-   "width": 2.08456,
-   "base_z": 1.09748,
+   "height": 2.232,
+   "width": 2.7616,
+   "base_z": 2.813,
    "centre": [
-    8.033,
-    3.795,
-    1.982
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_TreeBankR_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 1.67832,
-   "width": 1.97766,
-   "base_z": 1.25084,
-   "centre": [
-    9.005,
-    4.551,
-    2.09
+    8.6346,
+    4.24352,
+    3.929
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_TreeBankR_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.65168,
+   "width": 2.04359,
+   "base_z": 2.54516,
+   "centre": [
+    7.7976,
+    3.79712,
+    3.371
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_TreeBankR_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 1.5876,
-   "width": 1.87076,
-   "base_z": 1.6472,
+   "height": 1.74096,
+   "width": 2.15405,
+   "base_z": 3.33752,
    "centre": [
-    9.06035,
-    4.64226,
-    2.441
+    9.3321,
+    4.77362,
+    4.208
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -7381,13 +9159,13 @@
   {
    "name": "ENV_TreeBankR_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 1.31544,
-   "width": 1.55006,
-   "base_z": 1.89128,
+   "height": 1.29456,
+   "width": 1.60173,
+   "base_z": 3.79322,
    "centre": [
-    8.33,
-    4.794,
-    2.549
+    8.1882,
+    4.94102,
+    4.4405
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -7395,13 +9173,13 @@
   {
    "name": "ENV_TreeBankR_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 1.27008,
-   "width": 1.49661,
-   "base_z": 1.69796,
+   "height": 1.3392,
+   "width": 1.65696,
+   "base_z": 2.9804,
    "centre": [
-    9.221,
-    3.741,
-    2.333
+    9.4158,
+    3.62972,
+    3.65
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -7409,13 +9187,13 @@
   {
    "name": "ENV_TreeBankR_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 1.04328,
-   "width": 1.22936,
-   "base_z": 2.35136,
+   "height": 1.02672,
+   "width": 1.27034,
+   "base_z": 4.15964,
    "centre": [
-    8.88458,
-    4.5159,
-    2.873
+    8.9415,
+    4.60622,
+    4.673
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -7423,349 +9201,377 @@
   {
    "name": "ENV_TreeBankR_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 1.134,
-   "width": 1.33626,
-   "base_z": 1.118,
+   "height": 1.116,
+   "width": 1.3808,
+   "base_z": 2.534,
    "centre": [
-    7.898,
-    4.389,
-    1.685
+    7.7139,
+    4.46672,
+    3.092
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_TreeBankR_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 1.16064,
+   "width": 1.43603,
+   "base_z": 3.44168,
+   "centre": [
+    8.6904,
+    3.40652,
+    4.022
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_TreeBankR_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.648,
-   "width": 0.63175,
-   "base_z": 2.08162,
+   "height": 0.58032,
+   "width": 0.7254,
+   "base_z": 3.06,
    "centre": [
-    9.59475,
-    4.55749,
-    2.40562
+    7.53486,
+    4.82573,
+    3.35016
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankR_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.648,
-   "width": 0.63175,
-   "base_z": 2.0821,
+   "height": 0.58032,
+   "width": 0.7254,
+   "base_z": 3.58875,
    "centre": [
-    8.73315,
-    5.111,
-    2.4061
+    7.51177,
+    3.69652,
+    3.87891
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankR_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.648,
-   "width": 0.63175,
-   "base_z": 1.38417,
+   "height": 0.58032,
+   "width": 0.7254,
+   "base_z": 4.23851,
    "centre": [
-    7.7384,
-    4.75351,
-    1.70817
+    8.6115,
+    3.11431,
+    4.52867
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankR_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.648,
-   "width": 0.63175,
-   "base_z": 1.6739,
+   "height": 0.58032,
+   "width": 0.7254,
+   "base_z": 3.43957,
    "centre": [
-    7.60525,
-    3.84251,
-    1.9979
+    9.73433,
+    3.66132,
+    3.72973
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankR_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.648,
-   "width": 0.63175,
-   "base_z": 2.25135,
+   "height": 0.58032,
+   "width": 0.7254,
+   "base_z": 3.12203,
    "centre": [
-    8.46685,
-    3.289,
-    2.57535
+    9.75742,
+    4.79053,
+    3.41219
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeBankR_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.648,
-   "width": 0.63175,
-   "base_z": 1.7215,
+   "height": 0.58032,
+   "width": 0.7254,
+   "base_z": 4.05301,
    "centre": [
-    9.4616,
-    3.64649,
-    2.0455
+    8.65769,
+    5.37273,
+    4.34317
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeBankR_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.459,
-   "width": 1.08,
-   "base_z": -0.097,
+   "height": 0.5115,
+   "width": 0.9114,
+   "base_z": -0.07,
    "centre": [
     8.6,
     4.2,
-    0.1325
+    0.18575
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeBankR_Trunk",
    "collection": "ENV_Foliage",
-   "height": 1.8225,
-   "width": 0.702,
-   "base_z": -0.09025,
+   "height": 4.65,
+   "width": 0.5208,
+   "base_z": -0.07,
    "centre": [
     8.6,
     4.2,
-    0.821
+    2.255
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_0",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.0672,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.65427,
    "centre": [
-    -1.474,
-    1.35288,
-    1.1284
+    -0.53895,
+    1.2,
+    3.73379
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_1",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.31788,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 4.1243,
    "centre": [
-    -1.56544,
-    1.62537,
-    1.37908
+    -0.70421,
+    1.69901,
+    4.20383
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_10",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.20733,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.91702,
    "centre": [
-    -1.56544,
-    1.0804,
-    1.26853
+    -0.70421,
+    0.70099,
+    3.99655
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_2",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.19466,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.89325,
    "centre": [
-    -1.81072,
-    1.81134,
-    1.25586
+    -1.14753,
+    2.03959,
+    3.97278
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_3",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 0.88132,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.30574,
    "centre": [
-    -2.13197,
-    1.85175,
-    0.94252
+    -1.72816,
+    2.1136,
+    3.38527
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_4",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 0.84523,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.23808,
    "centre": [
-    -2.4272,
-    1.73378,
-    0.90643
+    -2.26174,
+    1.89755,
+    3.31761
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_5",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.14023,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.79119,
    "centre": [
-    -2.60267,
-    1.49488,
-    1.20143
+    -2.57888,
+    1.46004,
+    3.87072
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_6",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.32629,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 4.14007,
    "centre": [
-    -2.60267,
-    1.21089,
-    1.38749
+    -2.57888,
+    0.93996,
+    4.2196
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_7",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 1.12591,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.76434,
    "centre": [
-    -2.4272,
-    0.97198,
-    1.18711
+    -2.26174,
+    0.50245,
+    3.84387
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_8",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 0.83795,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.22443,
    "centre": [
-    -2.13197,
-    0.85401,
-    0.89916
+    -1.72816,
+    0.2864,
+    3.30396
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandL_Blossom_9",
    "collection": "ENV_Foliage",
-   "height": 0.1224,
-   "width": 0.11349,
-   "base_z": 0.89194,
+   "height": 0.15906,
+   "width": 0.18239,
+   "base_z": 3.32565,
    "centre": [
-    -1.81072,
-    0.89443,
-    0.95314
+    -1.14753,
+    0.36041,
+    3.40517
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandL_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.4722,
-   "width": 0.35985,
-   "base_z": 0.5755,
+   "height": 0.94206,
+   "width": 0.79201,
+   "base_z": 2.7476,
    "centre": [
-    -2.19688,
-    1.3932,
-    0.8116
+    -1.13774,
+    1.2,
+    3.21863
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandL_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.47727,
-   "width": 0.35043,
-   "base_z": 0.57296,
+   "height": 0.94206,
+   "width": 0.7912,
+   "base_z": 2.7476,
    "centre": [
-    -1.91176,
-    1.29816,
-    0.8116
+    -1.80113,
+    1.58301,
+    3.21863
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_TreeIslandL_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 0.94206,
+   "width": 0.7912,
+   "base_z": 2.7476,
+   "centre": [
+    -1.80113,
+    0.81699,
+    3.21863
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandL_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 0.94349,
-   "width": 1.11177,
-   "base_z": 0.51266,
+   "height": 1.7172,
+   "width": 2.12465,
+   "base_z": 2.71319,
    "centre": [
-    -2.3524,
-    1.134,
-    0.9844
-   ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
-  },
-  {
-   "name": "ENV_TreeIslandL_Canopy_1",
-   "collection": "ENV_Foliage",
-   "height": 0.8951,
-   "width": 1.05475,
-   "base_z": 0.59445,
-   "centre": [
-    -1.834,
-    1.5372,
-    1.042
+    -1.55338,
+    1.23349,
+    3.57179
    ],
    "tris": 360,
    "material": "ENV_Leaf"
   },
   {
+   "name": "ENV_TreeIslandL_Canopy_1",
+   "collection": "ENV_Foliage",
+   "height": 1.27073,
+   "width": 1.57224,
+   "base_z": 2.45043,
+   "centre": [
+    -2.19733,
+    0.89005,
+    3.08579
+   ],
+   "tris": 360,
+   "material": "ENV_LeafDark"
+  },
+  {
    "name": "ENV_TreeIslandL_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 0.84672,
-   "width": 0.99774,
-   "base_z": 0.80584,
+   "height": 1.33942,
+   "width": 1.65723,
+   "base_z": 3.14509,
    "centre": [
-    -1.80448,
-    1.58587,
-    1.2292
+    -1.01676,
+    1.64132,
+    3.81479
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -7773,13 +9579,13 @@
   {
    "name": "ENV_TreeIslandL_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.70157,
-   "width": 0.8267,
-   "base_z": 0.93602,
+   "height": 0.99598,
+   "width": 1.2323,
+   "base_z": 3.51931,
    "centre": [
-    -2.194,
-    1.6668,
-    1.2868
+    -1.89682,
+    1.77011,
+    4.01729
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -7787,13 +9593,13 @@
   {
    "name": "ENV_TreeIslandL_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.67738,
-   "width": 0.79819,
-   "base_z": 0.83291,
+   "height": 1.03032,
+   "width": 1.27479,
+   "base_z": 2.81363,
    "centre": [
-    -1.7188,
-    1.1052,
-    1.1716
+    -0.95236,
+    0.76126,
+    3.32879
    ],
    "tris": 360,
    "material": "ENV_Leaf"
@@ -7801,13 +9607,13 @@
   {
    "name": "ENV_TreeIslandL_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.55642,
-   "width": 0.65566,
-   "base_z": 1.18139,
+   "height": 0.78991,
+   "width": 0.97734,
+   "base_z": 3.82484,
    "centre": [
-    -1.89822,
-    1.51848,
-    1.4596
+    -1.31727,
+    1.51253,
+    4.21979
    ],
    "tris": 360,
    "material": "ENV_LeafLit"
@@ -7815,519 +9621,561 @@
   {
    "name": "ENV_TreeIslandL_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.6048,
-   "width": 0.71267,
-   "base_z": 0.5236,
+   "height": 0.8586,
+   "width": 1.06233,
+   "base_z": 2.41349,
    "centre": [
-    -2.4244,
-    1.4508,
-    0.826
+    -2.26173,
+    1.40521,
+    2.84279
    ],
    "tris": 360,
    "material": "ENV_LeafDark"
   },
   {
+   "name": "ENV_TreeIslandL_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 0.89294,
+   "width": 1.10482,
+   "base_z": 3.20632,
+   "centre": [
+    -1.51045,
+    0.58954,
+    3.65279
+   ],
+   "tris": 360,
+   "material": "ENV_Leaf"
+  },
+  {
    "name": "ENV_TreeIslandL_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.3456,
-   "width": 0.33694,
-   "base_z": 1.03753,
+   "height": 0.44647,
+   "width": 0.55809,
+   "base_z": 3.67962,
    "centre": [
-    -1.51947,
-    1.54066,
-    1.21033
+    -0.64394,
+    1.57185,
+    3.90285
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandL_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.3456,
-   "width": 0.33694,
-   "base_z": 1.03779,
+   "height": 0.44647,
+   "width": 0.55809,
+   "base_z": 3.68017,
    "centre": [
-    -1.97899,
-    1.83587,
-    1.21059
+    -1.43165,
+    2.09576,
+    3.90341
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandL_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.3456,
-   "width": 0.33694,
-   "base_z": 0.66556,
+   "height": 0.44647,
+   "width": 0.55809,
+   "base_z": 2.87961,
    "centre": [
-    -2.50952,
-    1.64521,
-    0.83836
+    -2.3411,
+    1.75739,
+    3.10284
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandL_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.3456,
-   "width": 0.33694,
-   "base_z": 0.82008,
+   "height": 0.44647,
+   "width": 0.55809,
+   "base_z": 3.21195,
    "centre": [
-    -2.58053,
-    1.15934,
-    0.99288
+    -2.46283,
+    0.89512,
+    3.43518
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandL_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.3456,
-   "width": 0.33694,
-   "base_z": 1.12806,
+   "height": 0.44647,
+   "width": 0.55809,
+   "base_z": 3.87432,
    "centre": [
-    -2.12101,
-    0.86413,
-    1.30086
+    -1.67511,
+    0.37121,
+    4.09755
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandL_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.3456,
-   "width": 0.33694,
-   "base_z": 0.84547,
+   "height": 0.44647,
+   "width": 0.55809,
+   "base_z": 3.26655,
    "centre": [
-    -1.59048,
-    1.05479,
-    1.01827
+    -0.76567,
+    0.70958,
+    3.48978
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandL_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.2448,
-   "width": 0.576,
-   "base_z": -0.1244,
+   "height": 0.4455,
+   "width": 0.7938,
+   "base_z": 0.08879,
    "centre": [
-    -2.05,
-    1.35,
-    -0.002
+    -1.58,
+    1.2,
+    0.31154
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandL_Trunk",
    "collection": "ENV_Foliage",
-   "height": 0.972,
-   "width": 0.3744,
-   "base_z": -0.1208,
+   "height": 4.05,
+   "width": 0.4536,
+   "base_z": 0.08879,
    "centre": [
-    -2.05,
-    1.35,
-    0.3652
+    -1.58,
+    1.2,
+    2.11379
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_0",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.9037,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.85662,
    "centre": [
-    2.646,
-    1.05248,
-    0.9564
+    2.18056,
+    1.72227,
+    3.93418
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_1",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 1.11957,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.27832,
    "centre": [
-    2.56726,
-    1.28712,
-    1.17227
+    1.61823,
+    1.81567,
+    3.35588
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_10",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 1.02437,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.6036,
    "centre": [
-    2.56726,
-    0.81784,
-    1.07707
+    2.59666,
+    1.37415,
+    3.68117
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_2",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 1.01345,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.15665,
    "centre": [
-    2.35605,
-    1.44726,
-    1.06615
+    1.08821,
+    1.6247,
+    3.23421
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_3",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.74364,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.67309,
    "centre": [
-    2.07941,
-    1.48206,
-    0.79634
+    0.75878,
+    1.21,
+    3.75065
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_4",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.71256,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 4.05733,
    "centre": [
-    1.82519,
-    1.38048,
-    0.76526
+    0.73453,
+    0.70322,
+    4.1349
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_5",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.96658,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.73626,
    "centre": [
-    1.67409,
-    1.17475,
-    1.01928
+    1.02316,
+    0.26527,
+    3.81382
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_6",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 1.12681,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.18877,
    "centre": [
-    1.67409,
-    0.93021,
-    1.17951
+    1.53303,
+    0.03519,
+    3.26633
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_7",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.95425,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.23148,
    "centre": [
-    1.82519,
-    0.72449,
-    1.00695
+    2.10227,
+    0.08603,
+    3.30904
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_8",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.70629,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 3.80068,
    "centre": [
-    2.07941,
-    0.6229,
-    0.75899
+    2.55013,
+    0.40165,
+    3.87825
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_Blossom"
   },
   {
    "name": "ENV_TreeIslandR_Blossom_9",
    "collection": "ENV_Foliage",
-   "height": 0.1054,
-   "width": 0.09773,
-   "base_z": 0.75278,
+   "height": 0.15513,
+   "width": 0.17789,
+   "base_z": 4.04738,
    "centre": [
-    2.35605,
-    0.6577,
-    0.80548
+    2.73444,
+    0.88185,
+    4.12494
    ],
-   "tris": 56,
+   "tris": 20,
    "material": "ENV_PetalWhite"
   },
   {
    "name": "ENV_TreeIslandR_Branch_0",
    "collection": "ENV_Foliage",
-   "height": 0.40661,
-   "width": 0.30987,
-   "base_z": 0.48029,
+   "height": 0.9188,
+   "width": 0.78159,
+   "base_z": 2.70018,
    "centre": [
-    2.02352,
-    1.0872,
-    0.6836
+    1.91565,
+    1.30441,
+    3.15958
    ],
-   "tris": 28,
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandR_Branch_1",
    "collection": "ENV_Foliage",
-   "height": 0.41098,
-   "width": 0.30176,
-   "base_z": 0.47811,
+   "height": 0.9188,
+   "width": 0.78222,
+   "base_z": 2.70018,
    "centre": [
-    2.26904,
-    1.00536,
-    0.6836
+    1.28926,
+    0.89723,
+    3.15958
    ],
-   "tris": 28,
+   "tris": 20,
+   "material": "ENV_Bark"
+  },
+  {
+   "name": "ENV_TreeIslandR_Branch_2",
+   "collection": "ENV_Foliage",
+   "height": 0.9188,
+   "width": 0.7596,
+   "base_z": 2.70018,
+   "centre": [
+    1.95508,
+    0.55835,
+    3.15958
+   ],
+   "tris": 20,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_0",
    "collection": "ENV_Foliage",
-   "height": 0.81245,
-   "width": 0.95736,
-   "base_z": 0.42618,
+   "height": 1.6748,
+   "width": 2.06169,
+   "base_z": 2.66662,
    "centre": [
-    1.8896,
-    0.864,
-    0.8324
+    1.74596,
+    0.95266,
+    3.50402
    ],
-   "tris": 360,
-   "material": "ENV_LeafDark"
+   "tris": 224,
+   "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_1",
    "collection": "ENV_Foliage",
-   "height": 0.77078,
-   "width": 0.90826,
-   "base_z": 0.49661,
+   "height": 1.23935,
+   "width": 1.52565,
+   "base_z": 2.41035,
    "centre": [
-    2.336,
-    1.2112,
-    0.882
+    1.11791,
+    0.6177,
+    3.03002
    ],
-   "tris": 360,
-   "material": "ENV_Leaf"
+   "tris": 224,
+   "material": "ENV_LeafDark"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_2",
    "collection": "ENV_Foliage",
-   "height": 0.72912,
-   "width": 0.85916,
-   "base_z": 0.67864,
+   "height": 1.30634,
+   "width": 1.60812,
+   "base_z": 3.08785,
    "centre": [
-    2.36142,
-    1.25311,
-    1.0432
+    2.26933,
+    1.35042,
+    3.74102
    ],
-   "tris": 360,
+   "tris": 224,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_3",
    "collection": "ENV_Foliage",
-   "height": 0.60413,
-   "width": 0.71188,
-   "base_z": 0.79074,
+   "height": 0.97138,
+   "width": 1.19578,
+   "base_z": 3.45283,
    "centre": [
-    2.026,
-    1.3228,
-    1.0928
+    1.411,
+    1.47603,
+    3.93852
    ],
-   "tris": 360,
+   "tris": 224,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_4",
    "collection": "ENV_Foliage",
-   "height": 0.5833,
-   "width": 0.68733,
-   "base_z": 0.70195,
+   "height": 1.00488,
+   "width": 1.23702,
+   "base_z": 2.76458,
    "centre": [
-    2.4352,
-    0.8392,
-    0.9936
+    2.33214,
+    0.49209,
+    3.26702
    ],
-   "tris": 360,
+   "tris": 224,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_5",
    "collection": "ENV_Foliage",
-   "height": 0.47914,
-   "width": 0.56459,
-   "base_z": 1.00203,
+   "height": 0.77041,
+   "width": 0.94838,
+   "base_z": 3.75082,
    "centre": [
-    2.2807,
-    1.19508,
-    1.2416
+    1.97624,
+    1.22481,
+    4.13602
    ],
-   "tris": 360,
+   "tris": 224,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandR_Canopy_6",
    "collection": "ENV_Foliage",
-   "height": 0.5208,
-   "width": 0.61369,
-   "base_z": 0.4356,
+   "height": 0.8374,
+   "width": 1.03085,
+   "base_z": 2.37432,
    "centre": [
-    1.8276,
-    1.1368,
-    0.696
+    1.0551,
+    1.12014,
+    2.79302
    ],
-   "tris": 360,
+   "tris": 224,
    "material": "ENV_LeafDark"
+  },
+  {
+   "name": "ENV_TreeIslandR_Canopy_7",
+   "collection": "ENV_Foliage",
+   "height": 0.8709,
+   "width": 1.07208,
+   "base_z": 3.14758,
+   "centre": [
+    1.78783,
+    0.32461,
+    3.58302
+   ],
+   "tris": 224,
+   "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Clump_0",
    "collection": "ENV_Foliage",
-   "height": 0.2976,
-   "width": 0.29014,
-   "base_z": 0.87815,
+   "height": 0.43545,
+   "width": 0.54431,
+   "base_z": 3.57267,
    "centre": [
-    2.60685,
-    1.21418,
-    1.02695
+    1.81408,
+    1.79798,
+    3.79039
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Clump_1",
    "collection": "ENV_Foliage",
-   "height": 0.2976,
-   "width": 0.29014,
-   "base_z": 0.87837,
+   "height": 0.43545,
+   "width": 0.54431,
+   "base_z": 2.80984,
    "centre": [
-    2.21115,
-    1.46838,
-    1.02717
+    0.94812,
+    1.42724,
+    3.02757
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandR_Clump_2",
    "collection": "ENV_Foliage",
-   "height": 0.2976,
-   "width": 0.29014,
-   "base_z": 0.55784,
+   "height": 0.43545,
+   "width": 0.54431,
+   "base_z": 3.19805,
    "centre": [
-    1.7543,
-    1.3042,
-    0.70664
+    0.88,
+    0.58191,
+    3.41578
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Clump_3",
    "collection": "ENV_Foliage",
-   "height": 0.2976,
-   "width": 0.29014,
-   "base_z": 0.6909,
+   "height": 0.43545,
+   "width": 0.54431,
+   "base_z": 3.79945,
    "centre": [
-    1.69315,
-    0.88582,
-    0.8397
+    1.67784,
+    0.10733,
+    4.01718
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandR_Clump_4",
    "collection": "ENV_Foliage",
-   "height": 0.2976,
-   "width": 0.29014,
-   "base_z": 0.9561,
+   "height": 0.43545,
+   "width": 0.54431,
+   "base_z": 3.16117,
    "centre": [
-    2.08885,
-    0.63162,
-    1.1049
+    2.5438,
+    0.47808,
+    3.37889
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_Leaf"
   },
   {
    "name": "ENV_TreeIslandR_Clump_5",
    "collection": "ENV_Foliage",
-   "height": 0.2976,
-   "width": 0.29014,
-   "base_z": 0.71276,
+   "height": 0.43545,
+   "width": 0.54431,
+   "base_z": 2.82518,
    "centre": [
-    2.5457,
-    0.7958,
-    0.86156
+    2.61192,
+    1.32341,
+    3.0429
    ],
-   "tris": 120,
+   "tris": 100,
    "material": "ENV_LeafLit"
   },
   {
    "name": "ENV_TreeIslandR_RootFlare",
    "collection": "ENV_Foliage",
-   "height": 0.2108,
-   "width": 0.496,
-   "base_z": -0.1224,
+   "height": 0.4345,
+   "width": 0.7742,
+   "base_z": 0.10702,
    "centre": [
-    2.15,
-    1.05,
-    -0.017
+    1.72,
+    0.92,
+    0.32427
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   },
   {
    "name": "ENV_TreeIslandR_Trunk",
    "collection": "ENV_Foliage",
-   "height": 0.837,
-   "width": 0.3224,
-   "base_z": -0.1193,
+   "height": 3.95,
+   "width": 0.4424,
+   "base_z": 0.10702,
    "centre": [
-    2.15,
-    1.05,
-    0.2992
+    1.72,
+    0.92,
+    2.08202
    ],
-   "tris": 52,
+   "tris": 44,
    "material": "ENV_Bark"
   }
  ],
@@ -8435,5 +10283,5 @@
   "ENV_WaterDeep",
   "ENV_WaterShallow"
  ],
- "tris": 85864
+ "tris": 85132
 }
