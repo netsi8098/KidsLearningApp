@@ -66,6 +66,7 @@ rest-position, morph-neutral scene the assembler has at stage 3d.
 import os
 
 import bpy
+from mathutils import Vector
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TEX_DIR = os.path.join(REPO, "art", "blender", "textures")
@@ -92,13 +93,24 @@ TEX_DIR = os.path.join(REPO, "art", "blender", "textures")
 # fur, not visible pile. So the expensive surface is the one with least to
 # gain, and the cheap surface is the one with most.
 #
-# Set LION_BODY_NRM=1 to map the body too, and expect roughly 900 KB.
+# THAT WAS TRUE OF A BAKED ATLAS AND IS NO LONGER TRUE. The body now gets a
+# generated, seamless, TILED nap over a cylinder projection instead, which
+# costs +35 KB of morph deltas rather than +640 and a 256 image rather than a
+# 512 atlas. It is on by default. See `nap_map` and `_tiling_nap`.
 # 512, not 1024. The relief is a matter of SLOPE, not resolution — at 1024
 # the PNG was 1.27 MB of incompressible noise and took the GLB to 6.10 MB
 # against a 6.00 MB contract, for detail that reads identically at 512.
-MANE_RES = int(os.environ.get("LION_MANE_NRM_RES", "512"))
-BODY_RES = int(os.environ.get("LION_BODY_NRM_RES", "512"))
-BODY_ENABLED = os.environ.get("LION_BODY_NRM", "0") != "0"
+MANE_RES = int(os.environ.get("LION_MANE_NRM_RES", "384"))
+BODY_RES = int(os.environ.get("LION_BODY_NRM_RES", "128"))
+BODY_ENABLED = os.environ.get("LION_BODY_NRM", "1") != "0"
+# How many times the nap repeats across the cylinder, and how wide a
+# feature is in map pixels. Together these set the real-world grain.
+BODY_TILES = float(os.environ.get("LION_BODY_TILES", "9.0"))
+BODY_FEATURE_PX = float(os.environ.get("LION_BODY_FEATURE_PX", "4.0"))
+# The eye centres, from `lion_skeleton`'s own eye bones, and how far the
+# nap is held off them. See the mask in `nap_map`.
+EYE_X, EYE_Y, EYE_Z = 0.095, 0.580, 0.6564
+EYE_MASK_R = float(os.environ.get("LION_EYE_MASK_R", "0.058"))
 BAKE_SAMPLES = int(os.environ.get("LION_NRM_SAMPLES", "4"))
 
 # Detail strength, in Bump-node units before baking. The mane's is far stronger
@@ -113,7 +125,7 @@ BODY_BUMP = float(os.environ.get("LION_BODY_BUMP", "4.0"))
 # How much the normal map is applied at render time, 0..1+. Separate from the
 # bake strength so the look can be tuned without a rebake.
 MANE_SCALE = float(os.environ.get("LION_MANE_NRM_SCALE", "1.0"))
-BODY_SCALE = float(os.environ.get("LION_BODY_NRM_SCALE", "0.7"))
+BODY_SCALE = float(os.environ.get("LION_BODY_NRM_SCALE", "0.12"))
 
 
 def unwrap(obj, margin=0.006):
@@ -316,6 +328,163 @@ def bake_normal(obj, name, res, stretch, bump, detail_scale, nrm_scale):
     return path
 
 
+def _tiling_nap(res, feature_px, strength):
+    """A SEAMLESS band-limited noise normal map, generated rather than baked.
+
+    The body does not need a baked atlas and should not have one. Its nap is
+    ISOTROPIC AND SCALE-FREE — the reference's body is smooth stylised fur, a
+    fine even pile with no direction and no relationship to the form — so there
+    is nothing for a surface bake to capture that a tiling map does not already
+    say. The mane is the opposite and keeps its unique bake, because its strands
+    have to follow the locks.
+
+    Periodic by construction. The field is built in the FREQUENCY domain: white
+    noise, a radial band-pass around `feature_px`, inverse FFT. An inverse FFT
+    is periodic in both axes by definition, so the map tiles with no seam — the
+    thing a spatial-domain noise cannot promise. The gradient is then taken with
+    `np.roll`, which wraps, so even the normals match across the join.
+    """
+    import numpy as np
+
+    rng = np.random.default_rng(20260904)
+    w = rng.standard_normal((res, res))
+    fy = np.fft.fftfreq(res)[:, None] * res
+    fx = np.fft.fftfreq(res)[None, :] * res
+    r = np.hypot(fx, fy)
+    peak = res / max(2.0, feature_px)
+    band = np.exp(-((r - peak) ** 2) / (2.0 * (peak * 0.55) ** 2))
+    band[0, 0] = 0.0
+    h = np.real(np.fft.ifft2(np.fft.fft2(w) * band))
+    h /= (h.std() or 1.0)
+
+    gx = (np.roll(h, -1, axis=1) - np.roll(h, 1, axis=1)) * 0.5
+    gy = (np.roll(h, -1, axis=0) - np.roll(h, 1, axis=0)) * 0.5
+    nx, ny = -gx * strength, -gy * strength
+    nz = np.ones_like(nx)
+    ln = np.sqrt(nx * nx + ny * ny + nz * nz)
+    out = np.empty((res, res, 4), dtype=np.float32)
+    out[..., 0] = nx / ln * 0.5 + 0.5
+    out[..., 1] = ny / ln * 0.5 + 0.5
+    out[..., 2] = nz / ln * 0.5 + 0.5
+    out[..., 3] = 1.0
+    return out
+
+
+def nap_map(obj, name, res, tiles, feature_px, strength, nrm_scale):
+    """Cylinder-project `obj`, tile a generated nap over it, wire it in.
+
+    CYLINDER, NOT SMART-PROJECT, and the difference is the whole reason the
+    body was skipped last pass. Seams split vertices and every split vertex is
+    multiplied by the mesh's 16 morph targets:
+
+        smart_project   +3,414 export verts   +640 KB of morph deltas
+        cylinder        +  187 export verts   + 35 KB
+
+    Eighteen times cheaper, because a cylinder cuts one seam where an atlas cuts
+    hundreds. Its distortion is irrelevant to a field with no direction in it.
+
+    The UVs are then multiplied by `tiles` so a small map repeats instead of
+    being stretched. glTF's default sampler wrap is REPEAT, so this needs no
+    extra declaration — and a 256 map tiled eight times carries the detail of a
+    2048 atlas for a fortieth of the bytes.
+    """
+    import numpy as np
+
+    me = obj.data
+    if not me.materials:
+        return None
+    mat = me.materials[0]
+    nt = mat.node_tree
+    bsdf = nt.nodes.get("Principled BSDF")
+    if bsdf is None:
+        return None
+
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    # CUBE, NOT CYLINDER, and this cost a rebuild to learn.
+    #
+    # A cylinder is eighteen times cheaper in seams (+187 export verts against
+    # +3,256) and unusable. It has POLES: where the surface faces the
+    # projection axis the UVs converge and the map smears radially. Measured,
+    # the stretch ratio's 99th percentile is 5.6x its median against 1.0x for a
+    # cube. On this asset the poles land on the muzzle and the eye whites —
+    # both of which are `Face_Matte` decals joined into `LionCage` — and the
+    # nap rendered as radial scratch marks across the face. It was still
+    # obviously wrong at a strength of 0.20, because a projection defect does
+    # not fade with strength.
+    #
+    # A cube has no poles. It costs the seams, and the maps were shrunk to pay
+    # for them.
+    bpy.ops.uv.cube_project()
+    bpy.ops.object.mode_set(mode="OBJECT")
+    uv = me.uv_layers.active
+    for d in uv.data:
+        d.uv = (d.uv.x * tiles, d.uv.y * tiles)
+
+    # THE EYE WHITES MUST STAY SMOOTH, and they are on this mesh.
+    #
+    # After `join_by_material` the sclera is part of `LionCage` — 280 verts
+    # within 55 mm of the eye centre carry `Face_Matte` — so it inherits the
+    # coat's nap and rendered as pebbled leather. An eye white is the one
+    # surface on this character that must be glossy and clean, and a whole
+    # earlier pass went into making the irises readable at all.
+    #
+    # glTF has a single `normalTexture` scale per material, so the nap cannot
+    # be masked by strength. It CAN be masked by UV: pixel (0, 0) of the map is
+    # forced to exactly flat, and every loop near an eye is snapped to the
+    # centre of that pixel. Those faces then sample a perfectly flat normal and
+    # are untouched, at no cost in geometry, materials or draw calls.
+    #
+    # Keyed on the eye bones' own measured positions rather than on colour: the
+    # coat has cream regions that SHOULD have fur — the paws, the tail tuft —
+    # so a luminance mask would strip the nap from exactly the wrong places.
+    flat_uv = (0.5 / res, 0.5 / res)
+    masked = 0
+    for lp, d in zip(me.loops, uv.data):
+        co = obj.matrix_world @ me.vertices[lp.vertex_index].co
+        for ex in (EYE_X, -EYE_X):
+            if (co - Vector((ex, EYE_Y, EYE_Z))).length < EYE_MASK_R:
+                d.uv = flat_uv
+                masked += 1
+                break
+
+    px = _tiling_nap(res, feature_px, strength)
+    # The flat pixel the mask above points at. Exactly (0.5, 0.5, 1.0).
+    px[0, 0, 0] = 0.5
+    px[0, 0, 1] = 0.5
+    px[0, 0, 2] = 1.0
+    img = bpy.data.images.new(name, res, res, alpha=False, float_buffer=False)
+    img.colorspace_settings.name = "Non-Color"
+    img.pixels = px.ravel().tolist()
+
+    os.makedirs(TEX_DIR, exist_ok=True)
+    path = os.path.join(TEX_DIR, f"{name}.png")
+    img.filepath_raw = path
+    img.file_format = "PNG"
+    img.save()
+
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    tex.location = (-1100, 320)
+    nrm = nt.nodes.new("ShaderNodeNormalMap")
+    nrm.location = (-780, 320)
+    nrm.inputs["Strength"].default_value = nrm_scale
+    nt.links.new(tex.outputs["Color"], nrm.inputs["Color"])
+    nt.links.new(nrm.outputs["Normal"], bsdf.inputs["Normal"])
+
+    sd_r = float(px[..., 0].std())
+    print(f"[nrm] {obj.name}: {masked} loops masked flat around the eyes")
+    print(f"[nrm] {obj.name}: nap {res}x{res} tiled {tiles}x -> "
+          f"{os.path.relpath(path, REPO)}  normal sd R {sd_r:.4f}, "
+          f"strength {nrm_scale}")
+    if sd_r < 0.02:
+        print(f"[nrm] WARNING {obj.name}: nap map is FLAT (sd {sd_r:.4f})")
+    return path
+
+
 def split_mane_material(mane):
     """Give the mane its own material so it can carry its own normal map.
 
@@ -354,10 +523,9 @@ def build(meshes):
             written.append(p)
 
     if cage is not None and BODY_ENABLED:
-        unwrap(cage)
-        # Near-isotropic and much finer: a velvet nap, not hair.
-        p = bake_normal(cage, "lion_body_normal", BODY_RES,
-                        (1.0, 1.0, 0.75), BODY_BUMP, 54.0, BODY_SCALE)
+        # A tiled, generated nap rather than a baked atlas — see `nap_map`.
+        p = nap_map(cage, "lion_body_nap", BODY_RES, BODY_TILES,
+                    BODY_FEATURE_PX, BODY_BUMP, BODY_SCALE)
         if p:
             written.append(p)
 
