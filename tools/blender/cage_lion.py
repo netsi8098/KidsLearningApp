@@ -468,7 +468,39 @@ def rear_limb(sx):
         # Stifle (knee) — points FORWARD.
         ("knee_up",  (sx * 0.128, -0.244, 0.176), (0, 0.20, -1), 0.090),
         ("knee",     (sx * 0.128, -0.236, 0.159), (0, 0.05, -1), 0.088),
-        ("knee_lo",  (sx * 0.128, -0.242, 0.142), (0, -0.14, -1), 0.084),
+        # THE HAUNCH, and ONE ELLIPSE IS ALL THIS LOFT WILL TAKE.
+        #
+        # The rear leg read as a thin crumpled stick beside the front one, and
+        # the side view says why — its own run, per height:
+        #
+        #     z        reference   model    deficit
+        #     0.090      0.204     0.144    -0.060
+        #     0.120      0.223     0.160    -0.063
+        #     0.150      0.262     0.152    -0.110    42% short
+        #
+        # Circular rings cannot carry fore-aft depth, which is the same fault
+        # the foot had one level below. But the obvious fix — ellipses down the
+        # whole chain — costs 32 slivers, a flipped face and 0.0085 of side
+        # IoU, and the reason is structural. `grow` places each ring by
+        # re-projecting the PREVIOUS ring's vertex directions, so an elliptical
+        # ring hands on an already-stretched distribution and the next stretch
+        # compounds it. Measured, the damage scales with the COUNT of
+        # elliptical stations and not with their aspect or their adjacency:
+        #
+        #     elliptical stations   1     2     3     4
+        #     sliver faces          0     4     6     8
+        #
+        # A single 15% ellipse anywhere in the chain is clean; two anywhere are
+        # not. So the haunch gets exactly one station, placed at the worst row,
+        # and `r_r` goes UP with it: an ellipse pulls its own short axis in as
+        # the eight vertices bunch toward the long one, which cost the FRONT
+        # view 0.0024 until it was compensated.
+        #
+        # That halves the deficit — 0.150 goes -0.110 to -0.054, 0.120 goes
+        # -0.063 to -0.023 — and the rest is not reachable by ring radius here.
+        # The real fix for the remainder is the haunch as body mass rather than
+        # limb mass, in the BODY table, which is a bigger change than a station.
+        ("knee_lo",  (sx * 0.128, -0.242, 0.142), (0, -0.14, -1), 0.090, 0.144),
         ("shin",     (sx * 0.128, -0.268, 0.113), (0, -0.26, -1), 0.078),
         # Hock — points BACKWARD. This reversal is the whole reason a rear leg
         # does not behave like a human leg, and it also gives the chain the reach

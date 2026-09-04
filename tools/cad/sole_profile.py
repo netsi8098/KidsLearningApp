@@ -59,6 +59,18 @@ HPX, GROUND_ROW = 520, 620
 # where a rounded cap differs from a flat one, and the interesting range is the
 # bottom 6% of a 1.0-tall character.
 ROWS = [0.004, 0.008, 0.012, 0.016, 0.020, 0.028, 0.036, 0.048, 0.060, 0.080]
+
+# Any band of heights, not just the sole's.
+#
+# The run-splitting is the useful part of this file and it is not specific to a
+# paw: at leg heights a side view's runs are the front leg, the body and the
+# rear leg, which is exactly the separation the band tables cannot give. The
+# rear legs needed measuring and the tool already knew how — it only had its
+# rows nailed down.
+#
+#   LION_ROWS=0.10,0.15,0.20,0.25,0.30,0.35 python3 tools/cad/sole_profile.py
+if os.environ.get("LION_ROWS"):
+    ROWS = [float(v) for v in os.environ["LION_ROWS"].split(",") if v.strip()]
 # Runs shorter than this are noise — an antialiased edge or a stray pixel — not a
 # paw. 0.02 H is 10 px at this resolution.
 MIN_RUN = 0.02
